@@ -61,6 +61,7 @@ _SCHEMAS = [
         spd             INT          NOT NULL DEFAULT 0 COMMENT '速度',
         trait_name      VARCHAR(50)  NOT NULL DEFAULT '' COMMENT '特性名称',
         trait_desc      TEXT                  COMMENT '特性描述',
+        obtain_method   VARCHAR(255) NOT NULL DEFAULT '' COMMENT '宠物获取方式',
         strong_against  JSON                  COMMENT '克制的属性列表',
         weak_against    JSON                  COMMENT '被克制的属性列表',
         resist          JSON                  COMMENT '抵抗的属性列表',

@@ -7,7 +7,7 @@ app = FastAPI(title="洛克王国精灵图鉴 API", version="1.0.0")
 # 允许本地 Vue 开发服务器跨域访问
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["*"],
     allow_methods=["GET"],
     allow_headers=["*"],
 )
