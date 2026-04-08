@@ -1,0 +1,50 @@
+/* base.css 不引入，使用完整自定义变量体系 */
+
+/* ── CSS 变量（暗色主题） ─────────────────────────────── */
+:root {
+  --color-bg: #0f1117;
+  --color-surface: #1a1d27;
+  --color-border: #2d3148;
+  --color-text: #e2e8f0;
+  --color-muted: #6b7280;
+  --color-accent: #6366f1;
+  --color-img-bg: #12151f;
+  --color-tag-bg: rgba(99, 102, 241, 0.12);
+}
+
+/* ── 全局重置 ─────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 让 #app 撑满全屏，取消默认居中布局 */
+#app {
+  min-height: 100vh;
+}
+
+button {
+  font-family: inherit;
+}
+
+input {
+  font-family: inherit;
+}
+
+img {
+  display: block;
+}
