@@ -1,0 +1,15 @@
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+DB_CONFIG = {
+    "host": os.getenv("MYSQL_HOST", "localhost"),
+    "port": int(os.getenv("MYSQL_PORT", 3306)),
+    "database": os.getenv("MYSQL_DATABASE", "zlkwg_gui"),
+    "user": os.getenv("MYSQL_USER", "root"),
+    "password": os.getenv("MYSQL_PASSWORD", ""),
+    "charset": "utf8mb4",
+}
+
+BASE_URL = "https://rocom.game-walkthrough.com"
