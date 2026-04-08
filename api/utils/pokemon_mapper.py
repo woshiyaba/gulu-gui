@@ -68,6 +68,7 @@ def to_pokemon_detail(base: dict, detail: dict, skills_raw: list[dict]) -> dict:
         "form": base["form"],
         "form_name": base["form_name"],
         "attributes": build_attributes(base.get("attr_names"), base.get("attr_images")),
+        "obtain_method": detail.get("obtain_method", ""),
         "stats": {
             "hp": detail.get("hp", 0),
             "atk": detail.get("atk", 0),

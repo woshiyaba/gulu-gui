@@ -3,6 +3,7 @@ import { ref, watch, onMounted } from 'vue'
 import AttributeFilter from '@/components/AttributeFilter.vue'
 import PokemonCard from '@/components/PokemonCard.vue'
 import { fetchAttributes, fetchPokemon } from '@/api/pokemon'
+import { useTheme } from '@/composables/useTheme'
 import type { Attribute, Pokemon } from '@/types'
 
 // ── 状态 ─────────────────────────────────────────────────
@@ -16,6 +17,7 @@ const searchName = ref('')
 const selectedAttr = ref('')
 const currentPage = ref(1)
 const pageSize = 30
+const { isDark, toggleTheme } = useTheme()
 
 // ── 计算总页数 ────────────────────────────────────────────
 const totalPages = () => Math.max(1, Math.ceil(total.value / pageSize))
@@ -85,6 +87,10 @@ onMounted(async () => {
         />
         <span class="search-icon">🔍</span>
       </div>
+
+      <button class="theme-btn" @click="toggleTheme">
+        {{ isDark ? '切换浅色' : '夜间模式' }}
+      </button>
     </header>
 
     <main class="app-main">
@@ -165,6 +171,24 @@ onMounted(async () => {
   flex: 1;
   position: relative;
   max-width: 400px;
+}
+
+.theme-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.theme-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-hover);
 }
 
 .search-input {
@@ -285,5 +309,18 @@ onMounted(async () => {
   color: var(--color-text);
   min-width: 80px;
   text-align: center;
+}
+
+@media (max-width: 720px) {
+  .app-header {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .search-wrap {
+    order: 3;
+    max-width: none;
+    width: 100%;
+  }
 }
 </style>

@@ -53,6 +53,7 @@ export interface Skill {
 }
 
 export interface PokemonDetail extends Pokemon {
+  obtain_method: string
   stats: Stats
   trait: Trait
   restrain: Restrain

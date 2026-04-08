@@ -56,6 +56,7 @@ class PokemonSkill(BaseModel):
 
 
 class PokemonDetailResponse(PokemonListItem):
+    obtain_method: str = ""
     stats: PokemonStats = Field(default_factory=PokemonStats)
     trait: PokemonTrait = Field(default_factory=PokemonTrait)
     restrain: PokemonRestrain = Field(default_factory=PokemonRestrain)

@@ -2,10 +2,12 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchPokemonDetail } from '@/api/pokemon'
+import { useTheme } from '@/composables/useTheme'
 import type { PokemonDetail } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
+const { isDark, toggleTheme } = useTheme()
 
 const pokemon = ref<PokemonDetail | null>(null)
 const loading = ref(true)
@@ -47,6 +49,9 @@ watch(() => route.params.name, (n) => n && load(n as string))
     <header class="detail-header">
       <button class="back-btn" @click="router.back()">← 返回图鉴</button>
       <h1 class="header-title" v-if="pokemon">{{ pokemon.name }}</h1>
+      <button class="theme-btn" @click="toggleTheme">
+        {{ isDark ? '切换浅色' : '夜间模式' }}
+      </button>
     </header>
 
     <!-- 加载中 -->
@@ -76,6 +81,10 @@ watch(() => route.params.name, (n) => n && load(n as string))
           <div class="info-tags">
             <span v-if="pokemon.type_name" class="badge badge-type">{{ pokemon.type_name }}</span>
             <span v-if="pokemon.form_name" class="badge badge-form">{{ pokemon.form_name }}</span>
+          </div>
+          <div class="obtain-method">
+            <span class="obtain-label">获取方式</span>
+            <span class="obtain-value">{{ pokemon.obtain_method || '暂无数据' }}</span>
           </div>
         </div>
       </section>
@@ -225,6 +234,25 @@ watch(() => route.params.name, (n) => n && load(n as string))
   margin: 0;
 }
 
+.theme-btn {
+  margin-left: auto;
+  padding: 7px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.theme-btn:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: var(--color-hover);
+}
+
 /* 主体 */
 .detail-main {
   max-width: 860px;
@@ -343,6 +371,23 @@ watch(() => route.params.name, (n) => n && load(n as string))
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+.obtain-method {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.obtain-label {
+  color: var(--color-muted);
+}
+
+.obtain-value {
+  color: var(--color-text);
 }
 
 .badge {
@@ -470,7 +515,7 @@ watch(() => route.params.name, (n) => n && load(n as string))
 
 .skill-table td {
   padding: 8px 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid var(--color-table-divider);
   color: var(--color-text);
   vertical-align: top;
 }
@@ -480,7 +525,7 @@ watch(() => route.params.name, (n) => n && load(n as string))
 }
 
 .skill-table tr:hover td {
-  background: rgba(99, 102, 241, 0.06);
+  background: var(--color-hover);
 }
 
 .skill-name {
@@ -529,6 +574,14 @@ watch(() => route.params.name, (n) => n && load(n as string))
 }
 
 @media (max-width: 600px) {
+  .detail-header {
+    flex-wrap: wrap;
+  }
+
+  .theme-btn {
+    margin-left: 0;
+  }
+
   .info-card {
     flex-direction: column;
     align-items: flex-start;

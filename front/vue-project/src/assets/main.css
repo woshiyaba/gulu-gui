@@ -1,15 +1,32 @@
 /* base.css 不引入，使用完整自定义变量体系 */
 
-/* ── CSS 变量（暗色主题） ─────────────────────────────── */
+/* ── CSS 变量（默认浅色蓝白主题） ─────────────────────── */
 :root {
+  --color-bg: #eef6ff;
+  --color-surface: #ffffff;
+  --color-border: #cfe0ff;
+  --color-text: #1f2937;
+  --color-muted: #64748b;
+  --color-accent: #2563eb;
+  --color-img-bg: #f4f9ff;
+  --color-tag-bg: rgba(37, 99, 235, 0.1);
+  --color-hover: rgba(37, 99, 235, 0.08);
+  --color-shadow: 0 12px 32px rgba(37, 99, 235, 0.12);
+  --color-table-divider: rgba(148, 163, 184, 0.22);
+}
+
+:root[data-theme='dark'] {
   --color-bg: #0f1117;
   --color-surface: #1a1d27;
   --color-border: #2d3148;
   --color-text: #e2e8f0;
-  --color-muted: #6b7280;
-  --color-accent: #6366f1;
+  --color-muted: #94a3b8;
+  --color-accent: #7c93ff;
   --color-img-bg: #12151f;
-  --color-tag-bg: rgba(99, 102, 241, 0.12);
+  --color-tag-bg: rgba(124, 147, 255, 0.14);
+  --color-hover: rgba(124, 147, 255, 0.08);
+  --color-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+  --color-table-divider: rgba(255, 255, 255, 0.06);
 }
 
 /* ── 全局重置 ─────────────────────────────────────────── */
@@ -30,6 +47,7 @@ body {
   font-size: 14px;
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* 让 #app 撑满全屏，取消默认居中布局 */
