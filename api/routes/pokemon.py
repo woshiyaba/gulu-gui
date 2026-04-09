@@ -15,24 +15,24 @@ from api.services.pokemon_service import (
 router = APIRouter(prefix="/api")
 
 @router.get("/attributes", response_model=list[AttributeItem])
-def get_attributes():
+async def get_attributes():
     """返回所有不重复的属性列表，用于前端筛选栏。"""
-    return get_attributes_service()
+    return await get_attributes_service()
 
 
 @router.get("/pokemon/{pokemon_name}", response_model=PokemonDetailResponse)
-def get_pokemon_detail(pokemon_name: str):
+async def get_pokemon_detail(pokemon_name: str):
     """
     查询单只精灵的完整详情：基础信息、种族值、特性、属性克制、技能列表。
     """
     try:
-        return get_pokemon_detail_service(pokemon_name)
+        return await get_pokemon_detail_service(pokemon_name)
     except PokemonNotFoundError as exc:
         raise HTTPException(status_code=404, detail="精灵不存在") from exc
 
 
 @router.get("/pokemon", response_model=PokemonListResponse)
-def get_pokemon(
+async def get_pokemon(
     name: str = Query(default="", description="精灵名称关键词"),
     attr: str = Query(default="", description="属性名称精确筛选"),
     page: int = Query(default=1, ge=1),
@@ -42,4 +42,4 @@ def get_pokemon(
     分页查询精灵列表，支持按名称模糊搜索、属性精确筛选。
     返回 {total, page, page_size, items}。
     """
-    return get_pokemon_service(name=name, attr=attr, page=page, page_size=page_size)
+    return await get_pokemon_service(name=name, attr=attr, page=page, page_size=page_size)
