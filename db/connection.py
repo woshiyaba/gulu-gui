@@ -1,7 +1,22 @@
 import aiomysql
+import pymysql
 from config import DB_CONFIG
 
 _pool: aiomysql.Pool | None = None
+
+
+def get_conn() -> pymysql.connections.Connection:
+    """给脚本和初始化逻辑使用的同步连接。"""
+    return pymysql.connect(
+        host=DB_CONFIG["host"],
+        port=DB_CONFIG["port"],
+        database=DB_CONFIG["database"],
+        user=DB_CONFIG["user"],
+        password=DB_CONFIG["password"],
+        charset=DB_CONFIG["charset"],
+        cursorclass=pymysql.cursors.DictCursor,
+        autocommit=False,
+    )
 
 
 async def get_pool() -> aiomysql.Pool:

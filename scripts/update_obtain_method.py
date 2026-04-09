@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from db.connection import get_conn
 
 TXT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                        "docs", "宠物地址_1.txt")
+                        "docs", "获取方式.txt")
 
 
 def _add_column_if_missing(cur) -> None:

@@ -15,7 +15,6 @@ _SCHEMAS = [
         form_name   VARCHAR(20)  NOT NULL DEFAULT '' COMMENT '原始形态/地区形态 等',
         detail_url  VARCHAR(255) NOT NULL DEFAULT '' COMMENT '外部详情链接',
         PRIMARY KEY (id),
-        UNIQUE KEY uk_no (no),
         KEY idx_name (name)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='精灵基础图鉴';
     """,
@@ -24,11 +23,11 @@ _SCHEMAS = [
     """
     CREATE TABLE IF NOT EXISTS pokemon_attribute (
         id          INT          NOT NULL AUTO_INCREMENT,
-        pokemon_no  VARCHAR(20)  NOT NULL COMMENT '关联 pokemon.no',
+        pokemon_name VARCHAR(50) NOT NULL COMMENT '关联 pokemon.name',
         attr_name   VARCHAR(20)  NOT NULL COMMENT '属性名，如 草/火/水',
         attr_image  VARCHAR(255) NOT NULL DEFAULT '' COMMENT '属性图标路径',
         PRIMARY KEY (id),
-        KEY idx_pokemon_no (pokemon_no)
+        KEY idx_pokemon_name (pokemon_name)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='精灵属性';
     """,
 

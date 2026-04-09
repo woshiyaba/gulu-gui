@@ -13,7 +13,7 @@ def _build_filters(name: str = "", attr: str = "") -> tuple[str, list]:
     if attr:
         conditions.append(
             "EXISTS (SELECT 1 FROM pokemon_attribute pa2 "
-            "WHERE pa2.pokemon_no = p.no AND pa2.attr_name = %s)"
+            "WHERE pa2.pokemon_name = p.name AND pa2.attr_name = %s)"
         )
         params.append(attr)
 
@@ -39,7 +39,7 @@ async def count_pokemon(name: str = "", attr: str = "") -> int:
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
-                f"SELECT COUNT(DISTINCT p.no) AS cnt FROM pokemon p {where_clause}",
+                f"SELECT COUNT(*) AS cnt FROM pokemon p {where_clause}",
                 params,
             )
             row = await cur.fetchone() or {}
@@ -66,10 +66,10 @@ async def list_pokemon(
                     GROUP_CONCAT(pa.attr_name ORDER BY pa.id SEPARATOR ',') AS attr_names,
                     GROUP_CONCAT(pa.attr_image ORDER BY pa.id SEPARATOR '|||') AS attr_images
                 FROM pokemon p
-                LEFT JOIN pokemon_attribute pa ON pa.pokemon_no = p.no
+                LEFT JOIN pokemon_attribute pa ON pa.pokemon_name = p.name
                 {where_clause}
-                GROUP BY p.no
-                ORDER BY p.no
+                GROUP BY p.id, p.no, p.name, p.image, p.type, p.type_name, p.form, p.form_name
+                ORDER BY p.no, p.id
                 LIMIT %s OFFSET %s
                 """,
                 params + [page_size, offset],
@@ -88,9 +88,9 @@ async def get_pokemon_base(name: str) -> dict | None:
                        GROUP_CONCAT(pa.attr_name ORDER BY pa.id SEPARATOR ',') AS attr_names,
                        GROUP_CONCAT(pa.attr_image ORDER BY pa.id SEPARATOR '|||') AS attr_images
                 FROM pokemon p
-                LEFT JOIN pokemon_attribute pa ON pa.pokemon_no = p.no
+                LEFT JOIN pokemon_attribute pa ON pa.pokemon_name = p.name
                 WHERE p.name = %s
-                GROUP BY p.no
+                GROUP BY p.id, p.no, p.name, p.image, p.type, p.type_name, p.form, p.form_name
                 """,
                 (name,),
             )

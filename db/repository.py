@@ -22,14 +22,6 @@ def upsert_pokemon(pokemon_list: list[dict]) -> None:
         INSERT INTO pokemon (no, name, image, type, type_name, form, form_name, detail_url)
         VALUES (%(no)s, %(name)s, %(image)s, %(type)s, %(type_name)s,
                 %(form)s, %(form_name)s, %(detail_url)s)
-        ON DUPLICATE KEY UPDATE
-            name       = VALUES(name),
-            image      = VALUES(image),
-            type       = VALUES(type),
-            type_name  = VALUES(type_name),
-            form       = VALUES(form),
-            form_name  = VALUES(form_name),
-            detail_url = VALUES(detail_url)
     """
 
     rows_pokemon = [
@@ -53,7 +45,7 @@ def upsert_pokemon(pokemon_list: list[dict]) -> None:
         names  = p.get("attrNames", [])
         for img, name in zip(attrs, names):
             rows_attr.append({
-                "pokemon_no": p["no"],
+                "pokemon_name": p["name"],
                 "attr_name":  name,
                 "attr_image": img,
             })
@@ -61,20 +53,26 @@ def upsert_pokemon(pokemon_list: list[dict]) -> None:
     conn = get_conn()
     try:
         with conn.cursor() as cur:
-            _executemany(cur, sql_pokemon, rows_pokemon)
-
-            # 属性先清后写，保证数据干净
-            nos = [p["no"] for p in pokemon_list]
-            if nos:
-                placeholders = ",".join(["%s"] * len(nos))
+            # 先删后插，避免共享图鉴编号时被 no 唯一约束思路误伤。
+            pokemon_names = list(dict.fromkeys(p["name"] for p in pokemon_list))
+            if pokemon_names:
+                placeholders = ",".join(["%s"] * len(pokemon_names))
                 cur.execute(
-                    f"DELETE FROM pokemon_attribute WHERE pokemon_no IN ({placeholders})",
-                    nos,
+                    f"DELETE FROM pokemon_attribute WHERE pokemon_name IN ({placeholders})",
+                    pokemon_names,
                 )
+                cur.execute(
+                    f"DELETE FROM pokemon WHERE name IN ({placeholders})",
+                    pokemon_names,
+                )
+
+            if rows_pokemon:
+                _executemany(cur, sql_pokemon, rows_pokemon)
+
             if rows_attr:
                 sql_attr = """
-                    INSERT INTO pokemon_attribute (pokemon_no, attr_name, attr_image)
-                    VALUES (%(pokemon_no)s, %(attr_name)s, %(attr_image)s)
+                    INSERT INTO pokemon_attribute (pokemon_name, attr_name, attr_image)
+                    VALUES (%(pokemon_name)s, %(attr_name)s, %(attr_image)s)
                 """
                 _executemany(cur, sql_attr, rows_attr)
 
@@ -188,6 +186,13 @@ def upsert_details(details_dict: dict) -> None:
     try:
         with conn.cursor() as cur:
             _executemany(cur, sql_detail, rows_detail)
+            pokemon_names = list(dict.fromkeys(row["pokemon_name"] for row in rows_detail))
+            if pokemon_names:
+                placeholders = ",".join(["%s"] * len(pokemon_names))
+                cur.execute(
+                    f"DELETE FROM pokemon_skill WHERE pokemon_name IN ({placeholders})",
+                    pokemon_names,
+                )
             if rows_skill_rel:
                 _executemany(cur, sql_skill_rel, rows_skill_rel)
         conn.commit()
