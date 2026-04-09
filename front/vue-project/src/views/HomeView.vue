@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onMounted } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import AttributeFilter from '@/components/AttributeFilter.vue'
 import PokemonCard from '@/components/PokemonCard.vue'
 import { fetchAttributes, fetchPokemon } from '@/api/pokemon'
@@ -18,12 +18,45 @@ const selectedAttr = ref('')
 const currentPage = ref(1)
 const pageSize = 30
 const { isDark, toggleTheme } = useTheme()
+const loadMoreRef = ref<HTMLElement | null>(null)
+let searchTimer: ReturnType<typeof setTimeout> | undefined
+let loadMoreObserver: IntersectionObserver | null = null
 
-// ── 计算总页数 ────────────────────────────────────────────
-const totalPages = () => Math.max(1, Math.ceil(total.value / pageSize))
+const isInitialLoading = computed(() => loading.value && pokemons.value.length === 0)
+const hasMore = computed(() => pokemons.value.length < total.value)
+
+function disconnectLoadMoreObserver() {
+  loadMoreObserver?.disconnect()
+  loadMoreObserver = null
+}
+
+function setupLoadMoreObserver() {
+  disconnectLoadMoreObserver()
+  if (!loadMoreRef.value) return
+
+  // 提前一点触发下一页，滚动到底前就开始预加载。
+  loadMoreObserver = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting) {
+        void loadNextPage()
+      }
+    },
+    { rootMargin: '240px 0px' },
+  )
+
+  loadMoreObserver.observe(loadMoreRef.value)
+}
 
 // ── 请求精灵列表 ──────────────────────────────────────────
-async function loadPokemon() {
+async function loadPokemon(reset = false) {
+  if (loading.value) return
+
+  if (reset) {
+    currentPage.value = 1
+    pokemons.value = []
+    total.value = 0
+  }
+
   loading.value = true
   error.value = ''
   try {
@@ -33,7 +66,10 @@ async function loadPokemon() {
       page: currentPage.value,
       page_size: pageSize,
     })
-    pokemons.value = res.items
+
+    pokemons.value = reset
+      ? res.items
+      : [...pokemons.value, ...res.items]
     total.value = res.total
   } catch {
     error.value = '加载失败，请确认后端服务已启动（uvicorn api.main:app --port 8000）'
@@ -42,32 +78,60 @@ async function loadPokemon() {
   }
 }
 
+async function resetAndLoadPokemon() {
+  await loadPokemon(true)
+  await nextTick()
+  setupLoadMoreObserver()
+}
+
+async function loadNextPage() {
+  if (loading.value || !hasMore.value || !!error.value) return
+
+  currentPage.value += 1
+  await loadPokemon()
+  if (error.value) {
+    currentPage.value -= 1
+  }
+}
+
 // ── 筛选条件变化时重置到第一页 ────────────────────────────
 function onAttrChange(attr: string) {
   selectedAttr.value = attr
-  currentPage.value = 1
 }
 
 function onSearch() {
-  currentPage.value = 1
+  void resetAndLoadPokemon()
 }
 
 // 搜索框防抖：300ms 后触发请求
-let searchTimer: ReturnType<typeof setTimeout>
 watch(searchName, () => {
-  clearTimeout(searchTimer)
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+  }
   searchTimer = setTimeout(() => {
-    currentPage.value = 1
-    loadPokemon()
+    void resetAndLoadPokemon()
   }, 300)
 })
 
-watch([selectedAttr, currentPage], loadPokemon)
+watch(selectedAttr, () => {
+  void resetAndLoadPokemon()
+})
+
+watch(loadMoreRef, () => {
+  setupLoadMoreObserver()
+})
 
 // ── 初始化 ────────────────────────────────────────────────
 onMounted(async () => {
   attributes.value = await fetchAttributes().catch(() => [])
-  loadPokemon()
+  await resetAndLoadPokemon()
+})
+
+onBeforeUnmount(() => {
+  if (searchTimer) {
+    clearTimeout(searchTimer)
+  }
+  disconnectLoadMoreObserver()
 })
 </script>
 
@@ -103,15 +167,16 @@ onMounted(async () => {
 
       <!-- 结果统计 -->
       <div class="result-info">
-        <span v-if="!loading">共 {{ total }} 只精灵</span>
-        <span v-else>加载中...</span>
+        <span v-if="total > 0">已展示 {{ pokemons.length }} / {{ total }} 只精灵</span>
+        <span v-else-if="loading">加载中...</span>
+        <span v-else>共 0 只精灵</span>
       </div>
 
       <!-- 错误提示 -->
       <div v-if="error" class="error-msg">{{ error }}</div>
 
       <!-- 精灵卡片 Grid -->
-      <div v-if="loading" class="skeleton-grid">
+      <div v-if="isInitialLoading" class="skeleton-grid">
         <div v-for="n in 12" :key="n" class="skeleton-card"></div>
       </div>
       <div v-else-if="pokemons.length === 0 && !error" class="empty-msg">
@@ -121,21 +186,11 @@ onMounted(async () => {
         <PokemonCard v-for="p in pokemons" :key="p.no" :pokemon="p" />
       </div>
 
-      <!-- 分页 -->
-      <div v-if="totalPages() > 1" class="pagination">
-        <button
-          class="page-btn"
-          :disabled="currentPage === 1"
-          @click="currentPage--"
-        >上一页</button>
-
-        <span class="page-info">{{ currentPage }} / {{ totalPages() }}</span>
-
-        <button
-          class="page-btn"
-          :disabled="currentPage >= totalPages()"
-          @click="currentPage++"
-        >下一页</button>
+      <!-- 瀑布流加载提示 -->
+      <div v-if="pokemons.length > 0 && !error" ref="loadMoreRef" class="load-more-anchor">
+        <span v-if="loading" class="load-more-text">正在加载更多...</span>
+        <span v-else-if="hasMore" class="load-more-text">继续下滑加载更多</span>
+        <span v-else class="load-more-text">已经到底啦</span>
       </div>
     </main>
   </div>
@@ -273,42 +328,16 @@ onMounted(async () => {
   100% { opacity: 0.6; }
 }
 
-/* 分页 */
-.pagination {
+/* 瀑布流加载提示 */
+.load-more-anchor {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin-top: 32px;
+  padding: 28px 0 12px;
 }
 
-.page-btn {
-  padding: 8px 20px;
-  border: 2px solid var(--color-accent);
-  border-radius: 20px;
-  background: transparent;
-  color: var(--color-accent);
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.page-btn:hover:not(:disabled) {
-  background: var(--color-accent);
-  color: #fff;
-}
-
-.page-btn:disabled {
-  border-color: var(--color-border);
+.load-more-text {
+  font-size: 13px;
   color: var(--color-muted);
-  cursor: not-allowed;
-}
-
-.page-info {
-  font-size: 14px;
-  color: var(--color-text);
-  min-width: 80px;
-  text-align: center;
 }
 
 @media (max-width: 720px) {
