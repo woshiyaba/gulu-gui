@@ -31,6 +31,24 @@ async def get_pokemon(name: str = "", attr: str = "", page: int = 1, page_size: 
     }
 
 
+async def get_pokemon_by_body_metrics(height_m: float, weight_kg: float) -> dict:
+    # 单位换算统一放在后端，避免前端和后端口径不一致。
+    height_cm = round(height_m * 100)
+    weight_g = round(weight_kg * 1000)
+    rows = await pokemon_repository.list_pokemon_by_body_metrics(
+        height_cm=height_cm,
+        weight_g=weight_g,
+    )
+    return {
+        "height_m": height_m,
+        "weight_kg": weight_kg,
+        "height_cm": height_cm,
+        "weight_g": weight_g,
+        "total": len(rows),
+        "items": rows,
+    }
+
+
 async def get_pokemon_detail(name: str) -> dict:
     base = await pokemon_repository.get_pokemon_base(name)
     if not base:

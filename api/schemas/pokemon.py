@@ -24,6 +24,19 @@ class PokemonListResponse(BaseModel):
     items: list[PokemonListItem] = Field(default_factory=list)
 
 
+class PokemonBodyMatchItem(BaseModel):
+    pet_name: str
+
+
+class PokemonBodyMatchResponse(BaseModel):
+    height_m: float
+    weight_kg: float
+    height_cm: int
+    weight_g: int
+    total: int
+    items: list[PokemonBodyMatchItem] = Field(default_factory=list)
+
+
 class PokemonStats(BaseModel):
     hp: int = 0
     atk: int = 0

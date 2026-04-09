@@ -21,6 +21,19 @@ export interface PokemonListResponse {
   items: Pokemon[]
 }
 
+export interface PokemonBodyMatchItem {
+  pet_name: string
+}
+
+export interface PokemonBodyMatchResponse {
+  height_m: number
+  weight_kg: number
+  height_cm: number
+  weight_g: number
+  total: number
+  items: PokemonBodyMatchItem[]
+}
+
 export interface Stats {
   hp: number
   atk: number

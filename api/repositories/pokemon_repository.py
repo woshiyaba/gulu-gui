@@ -77,6 +77,26 @@ async def list_pokemon(
             return await cur.fetchall()
 
 
+async def list_pokemon_by_body_metrics(height_cm: int, weight_g: int) -> list[dict]:
+    """按身高和体重区间匹配可命中的宠物名称。"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT DISTINCT pet_name
+                FROM egg_hatch_pet
+                WHERE height_low <= %s
+                  AND height_high >= %s
+                  AND weight_low <= %s
+                  AND weight_high >= %s
+                ORDER BY pet_name
+                """,
+                (height_cm, height_cm, weight_g, weight_g),
+            )
+            return await cur.fetchall()
+
+
 async def get_pokemon_base(name: str) -> dict | None:
     """查询单只精灵的基础信息与属性。"""
     pool = await get_pool()

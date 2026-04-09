@@ -152,6 +152,8 @@ onBeforeUnmount(() => {
         <span class="search-icon">🔍</span>
       </div>
 
+      <RouterLink class="nav-link-btn" to="/body-match">量体查宠</RouterLink>
+
       <button class="theme-btn" @click="toggleTheme">
         {{ isDark ? '切换浅色' : '夜间模式' }}
       </button>
@@ -238,6 +240,22 @@ onBeforeUnmount(() => {
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
+}
+
+.nav-link-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--color-accent);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--color-accent);
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.nav-link-btn:hover {
+  background: var(--color-hover);
 }
 
 .theme-btn:hover {

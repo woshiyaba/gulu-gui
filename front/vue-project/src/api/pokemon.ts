@@ -1,5 +1,10 @@
 import axios from 'axios'
-import type { Attribute, PokemonListResponse, PokemonDetail } from '@/types'
+import type {
+  Attribute,
+  PokemonBodyMatchResponse,
+  PokemonDetail,
+  PokemonListResponse,
+} from '@/types'
 
 const DEFAULT_API_BASE_URL = import.meta.env.PROD
   ? 'http://101.126.137.23:8000'
@@ -20,6 +25,11 @@ export interface PokemonQuery {
   page_size?: number
 }
 
+export interface PokemonBodyMatchQuery {
+  height_m: number
+  weight_kg: number
+}
+
 export function fetchAttributes(): Promise<Attribute[]> {
   return http.get<Attribute[]>('/api/attributes').then((r) => r.data)
 }
@@ -30,4 +40,10 @@ export function fetchPokemon(query: PokemonQuery = {}): Promise<PokemonListRespo
 
 export function fetchPokemonDetail(name: string): Promise<PokemonDetail> {
   return http.get<PokemonDetail>(`/api/pokemon/${encodeURIComponent(name)}`).then((r) => r.data)
+}
+
+export function fetchPokemonBodyMatch(
+  query: PokemonBodyMatchQuery,
+): Promise<PokemonBodyMatchResponse> {
+  return http.get<PokemonBodyMatchResponse>('/api/pokemon/body-match', { params: query }).then((r) => r.data)
 }
