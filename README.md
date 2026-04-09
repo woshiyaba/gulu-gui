@@ -160,11 +160,15 @@ npm run dev
 
 - `http://localhost:5173`
 
-前端当前默认请求：
+前端请求地址按环境区分：
 
-- `http://localhost:8000`
+- 开发环境：`http://localhost:8000`
+- 生产打包：`http://101.126.137.23:8000`
 
-所以本地开发时，前后端端口需要同时保持这个配置。
+如果你后面要切换接口地址，可以修改前端目录下的环境变量文件：
+
+- `front/vue-project/.env.development`
+- `front/vue-project/.env.production`
 
 ## 常用开发命令
 
@@ -183,6 +187,10 @@ npm install
 npm run dev
 npm run build
 ```
+
+打包后会自动读取 `front/vue-project/.env.production`，也就是默认请求：
+
+- `http://101.126.137.23:8000`
 
 ## 数据表概览
 
