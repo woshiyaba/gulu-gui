@@ -22,6 +22,7 @@ function onTap(name: string) {
         class="pokemon-image"
         :src="pokemon.image_url"
         mode="aspectFit"
+        lazy-load
       />
       <view v-else class="image-placeholder">?</view>
     </view>
@@ -58,9 +59,9 @@ function onTap(name: string) {
 .card {
   display: flex;
   flex-direction: column;
-  gap: 18rpx;
-  padding: 24rpx;
-  border-radius: 28rpx;
+  gap: 12rpx;
+  padding: 18rpx;
+  border-radius: 24rpx;
   background: #ffffff;
   box-shadow: 0 10rpx 28rpx rgba(64, 125, 255, 0.08);
 }
@@ -69,48 +70,54 @@ function onTap(name: string) {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 220rpx;
-  border-radius: 22rpx;
+  height: 148rpx;
+  border-radius: 18rpx;
   background: linear-gradient(180deg, #edf5ff 0%, #f8fbff 100%);
 }
 
 .pokemon-image {
-  width: 180rpx;
-  height: 180rpx;
+  width: 116rpx;
+  height: 116rpx;
 }
 
 .image-placeholder {
-  font-size: 72rpx;
+  font-size: 54rpx;
   color: #b6c7e7;
 }
 
 .meta {
   display: flex;
   flex-direction: column;
-  gap: 12rpx;
+  gap: 8rpx;
 }
 
 .pokemon-no {
-  font-size: 22rpx;
+  font-size: 18rpx;
   color: #89a0c7;
 }
 
 .pokemon-name {
-  font-size: 32rpx;
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 24rpx;
+  line-height: 1.4;
   font-weight: 700;
   color: #1e3557;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  min-height: 68rpx;
 }
 
 .tag-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10rpx;
+  gap: 6rpx;
 }
 
 .meta-tag {
-  padding: 6rpx 14rpx;
+  padding: 4rpx 10rpx;
   border-radius: 999rpx;
-  font-size: 22rpx;
+  font-size: 18rpx;
 }
 
 .type-tag {
@@ -126,25 +133,26 @@ function onTap(name: string) {
 .attr-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10rpx;
+  gap: 6rpx;
 }
 
 .attr-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6rpx;
-  padding: 6rpx 14rpx;
+  gap: 4rpx;
+  padding: 4rpx 10rpx;
   border-radius: 999rpx;
   background: #eff5ff;
+  max-width: 100%;
 }
 
 .attr-icon {
-  width: 26rpx;
-  height: 26rpx;
+  width: 20rpx;
+  height: 20rpx;
 }
 
 .attr-text {
-  font-size: 22rpx;
+  font-size: 18rpx;
   color: #45638e;
 }
 </style>

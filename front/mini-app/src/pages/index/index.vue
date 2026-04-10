@@ -406,19 +406,19 @@ onUnload(() => {
 
 .pokemon-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20rpx;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16rpx;
 }
 
 .skeleton-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20rpx;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16rpx;
 }
 
 .skeleton-card {
-  height: 380rpx;
-  border-radius: 28rpx;
+  height: 280rpx;
+  border-radius: 24rpx;
   background: linear-gradient(135deg, #edf4ff 0%, #ffffff 100%);
 }
 
