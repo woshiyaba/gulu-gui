@@ -15,7 +15,9 @@ async def get_attributes() -> list[dict]:
     return [to_attribute_item(row) for row in rows]
 
 
-async def get_pokemon(name: str = "", attr: str = "", page: int = 1, page_size: int = 30) -> dict:
+async def get_pokemon(
+    name: str = "", attr: str = "", page: int = 1, page_size: int = 30
+) -> dict:
     total = await pokemon_repository.count_pokemon(name=name, attr=attr)
     rows = await pokemon_repository.list_pokemon(
         name=name,
@@ -45,7 +47,7 @@ async def get_pokemon_by_body_metrics(height_m: float, weight_kg: float) -> dict
         "height_cm": height_cm,
         "weight_g": weight_g,
         "total": len(rows),
-        "items": rows,
+        "items": [{"pet_name": r["pokemon_name"]} for r in rows],
     }
 
 

@@ -78,19 +78,20 @@ async def list_pokemon(
 
 
 async def list_pokemon_by_body_metrics(height_cm: int, weight_g: int) -> list[dict]:
-    """按身高和体重区间匹配可命中的宠物名称。"""
+    """按身高和体重区间匹配可命中的宠物名称，跳过首领形态。"""
     pool = await get_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
-                SELECT DISTINCT pet_name
+                SELECT DISTINCT pokemon_name
                 FROM egg_hatch_pet
-                WHERE height_low <= %s
+                WHERE is_leader_form = 0
+                  AND height_low <= %s
                   AND height_high >= %s
                   AND weight_low <= %s
                   AND weight_high >= %s
-                ORDER BY pet_name
+                ORDER BY pokemon_name
                 """,
                 (height_cm, height_cm, weight_g, weight_g),
             )
