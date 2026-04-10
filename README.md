@@ -20,7 +20,7 @@ lkwg_gui/
 │  └─ utils/               # 通用转换逻辑
 ├─ db/                     # 数据库建表和写库逻辑
 ├─ scraper/                # 外部站点数据抓取
-├─ front/vue-project/      # Vue 3 前端
+├─ front/pc-front/      # Vue 3 前端
 ├─ config.py               # 环境变量和基础配置
 ├─ main.py                 # 爬取并写库的入口脚本
 └─ pyproject.toml          # Python 依赖
@@ -141,7 +141,7 @@ uv run uvicorn api.main:app --reload --port 8000
 进入前端目录：
 
 ```bash
-cd front/vue-project
+cd front/pc-front
 ```
 
 安装依赖：
@@ -167,8 +167,8 @@ npm run dev
 
 如果你后面要切换接口地址，可以修改前端目录下的环境变量文件：
 
-- `front/vue-project/.env.development`
-- `front/vue-project/.env.production`
+- `front/pc-front/.env.development`
+- `front/pc-front/.env.production`
 
 ## 常用开发命令
 
@@ -188,7 +188,7 @@ npm run dev
 npm run build
 ```
 
-打包后会自动读取 `front/vue-project/.env.production`，也就是默认请求：
+打包后会自动读取 `front/pc-front/.env.production`，也就是默认请求：
 
 - `http://101.126.137.23:8000`
 
@@ -210,7 +210,7 @@ npm run build
 2. 执行 `uv sync`
 3. 执行 `uv run python main.py`
 4. 执行 `uv run uvicorn api.main:app --reload --port 8000`
-5. 进入 `front/vue-project`
+5. 进入 `front/pc-front`
 6. 执行 `npm install`
 7. 执行 `npm run dev`
 8. 打开 `http://localhost:5173`
