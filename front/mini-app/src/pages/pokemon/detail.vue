@@ -58,8 +58,10 @@ async function loadDetail(name: string) {
 }
 
 onLoad((options) => {
+  // 量体查宠传 pet_name；图鉴列表传 name，二者取其一
+  const rawPetName = typeof options?.pet_name === 'string' ? options.pet_name : ''
   const rawName = typeof options?.name === 'string' ? options.name : ''
-  const pokemonName = decodeURIComponent(rawName)
+  const pokemonName = decodeURIComponent(rawPetName || rawName)
 
   if (!pokemonName) {
     error.value = '缺少宠物名称，暂时无法加载详情。'

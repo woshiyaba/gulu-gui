@@ -30,9 +30,12 @@ function goBack() {
   })
 }
 
-function openDetail(name: string) {
+/** 量体结果项：用 pet_name 作为详情查询名（与图鉴列表的 name 参数区分） */
+function openDetail(item: { pet_name: string }) {
+  const petName = item.pet_name?.trim()
+  if (!petName) return
   uni.navigateTo({
-    url: `/pages/pokemon/detail?name=${encodeURIComponent(name)}`,
+    url: `/pages/pokemon/detail?pet_name=${encodeURIComponent(petName)}`,
   })
 }
 
@@ -123,7 +126,7 @@ async function onSubmit() {
           v-for="item in result.items"
           :key="item.pet_name"
           class="result-item"
-          @tap="openDetail(item.pet_name)"
+          @tap="openDetail(item)"
         >
           <text class="result-name">{{ item.pet_name }}</text>
           <text class="result-link">查看详情</text>
