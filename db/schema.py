@@ -1,5 +1,14 @@
 from db.connection import get_conn
 
+# 删表顺序：先删关联表，避免日后加外键时出错
+_DROP_ORDER = (
+    "pokemon_skill",
+    "pokemon_detail",
+    "pokemon_attribute",
+    "pokemon",
+    "skill",
+)
+
 # 按依赖顺序排列，先建被引用的表
 _SCHEMAS = [
     # 精灵基础信息
@@ -85,14 +94,29 @@ _SCHEMAS = [
     """,
 ]
 
+# 将接口中的立绘路径 /pokemon/... 转为前端蛋组精灵目录 /eggs/sprites/...
+SQL_NORMALIZE_POKEMON_IMAGES = """
+UPDATE pokemon
+SET image = CONCAT('/eggs/sprites/', SUBSTRING(image, LENGTH('/pokemon/') + 1))
+WHERE image LIKE '/pokemon/%'
+"""
+
+
+def normalize_pokemon_image_paths(cur) -> None:
+    """将 image 中 `/pokemon/` 前缀替换为 `/eggs/sprites/`（与建表后迁移逻辑一致）。"""
+    cur.execute(SQL_NORMALIZE_POKEMON_IMAGES)
+
 
 def init_db() -> None:
-    """建表（IF NOT EXISTS，幂等）。"""
+    """先删表再建表：会清空上述表的全部数据，结构以当前 DDL 为准。"""
     conn = get_conn()
     try:
         with conn.cursor() as cur:
+            for name in _DROP_ORDER:
+                cur.execute(f"DROP TABLE IF EXISTS `{name}`")
             for ddl in _SCHEMAS:
                 cur.execute(ddl)
+            normalize_pokemon_image_paths(cur)
         conn.commit()
         print("[schema] 数据库表初始化完成")
     finally:

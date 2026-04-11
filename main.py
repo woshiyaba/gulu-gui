@@ -1,5 +1,7 @@
+import subprocess
 import sys
 import time
+from pathlib import Path
 
 from db.schema import init_db
 from scraper.api_client import fetch_pokemon, fetch_details, fetch_skills
@@ -15,6 +17,13 @@ def _done(start: float, count: int = 0) -> None:
     elapsed = time.time() - start
     suffix = f"（共 {count} 条）" if count else ""
     print(f"    [ok] 完成{suffix}，耗时 {elapsed:.1f}s", flush=True)
+
+
+_ROOT = Path(__file__).resolve().parent
+
+
+def _run_py(path: str) -> None:
+    subprocess.run([sys.executable, str(_ROOT / path)], cwd=str(_ROOT), check=True)
 
 
 def main() -> None:
@@ -53,6 +62,14 @@ def main() -> None:
     t = _step("写入 pokemon_detail + pokemon_skill")
     upsert_details(details_dict)
     _done(t, len(details_dict))
+
+    t = _step("导入蛋孵化数据")
+    _run_py("scripts/import_egg_hatch.py")
+    _done(t)
+
+    t = _step("更新获取方式")
+    _run_py("scripts/update_obtain_method.py")
+    _done(t)
 
     total = time.time() - total_start
     print(f"\n{'=' * 50}")
