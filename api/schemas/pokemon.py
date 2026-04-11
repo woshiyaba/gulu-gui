@@ -26,6 +26,7 @@ class PokemonListResponse(BaseModel):
 
 class PokemonBodyMatchItem(BaseModel):
     pet_name: str
+    image_url: str
 
 
 class PokemonBodyMatchResponse(BaseModel):

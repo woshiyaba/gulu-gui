@@ -121,7 +121,17 @@ async function onSubmit() {
             class="result-item"
             :to="`/pokemon/${encodeURIComponent(item.pet_name)}`"
           >
-            {{ item.pet_name }}
+            <div class="result-img-wrap">
+              <img
+                v-if="item.image_url"
+                :src="item.image_url"
+                :alt="item.pet_name"
+                class="result-img"
+                loading="lazy"
+              />
+              <div v-else class="result-img-placeholder">?</div>
+            </div>
+            <div class="result-name">{{ item.pet_name }}</div>
           </RouterLink>
         </div>
       </section>
@@ -295,6 +305,10 @@ async function onSubmit() {
 }
 
 .result-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
   padding: 14px 16px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
@@ -307,6 +321,37 @@ async function onSubmit() {
 .result-item:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
+  transform: translateY(-2px);
+}
+
+.result-img-wrap {
+  width: 100%;
+  height: 120px;
+  border-radius: 10px;
+  background: var(--color-img-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.result-img {
+  max-width: 100%;
+  max-height: 110px;
+  object-fit: contain;
+}
+
+.result-img-placeholder {
+  font-size: 40px;
+  color: var(--color-muted);
+}
+
+.result-name {
+  width: 100%;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
 }
 
 .tip-list {

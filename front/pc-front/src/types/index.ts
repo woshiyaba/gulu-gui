@@ -23,6 +23,7 @@ export interface PokemonListResponse {
 
 export interface PokemonBodyMatchItem {
   pet_name: string
+  image_url: string
 }
 
 export interface PokemonBodyMatchResponse {

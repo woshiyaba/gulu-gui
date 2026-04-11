@@ -1,4 +1,5 @@
 from api.repositories import pokemon_repository
+from api.utils.media import build_image_url
 from api.utils.pokemon_mapper import (
     to_attribute_item,
     to_pokemon_detail,
@@ -47,7 +48,13 @@ async def get_pokemon_by_body_metrics(height_m: float, weight_kg: float) -> dict
         "height_cm": height_cm,
         "weight_g": weight_g,
         "total": len(rows),
-        "items": [{"pet_name": r["pokemon_name"]} for r in rows],
+        "items": [
+            {
+                "pet_name": r["pokemon_name"],
+                "image_url": build_image_url(r.get("image", "")),
+            }
+            for r in rows
+        ],
     }
 
 

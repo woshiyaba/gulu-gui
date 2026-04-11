@@ -41,7 +41,10 @@ def _dedupe_body_metric_rows(rows: list[dict]) -> list[dict]:
             (row for row in non_regional_rows if _is_original_form(row)),
             non_regional_rows[0],
         )
-        deduped_rows.append({"pokemon_name": chosen_row["pokemon_name"]})
+        deduped_rows.append({
+            "pokemon_name": chosen_row["pokemon_name"],
+            "image": chosen_row.get("image", ""),
+        })
 
     return deduped_rows
 
@@ -131,6 +134,7 @@ async def list_pokemon_by_body_metrics(height_cm: int, weight_g: int) -> list[di
                 """
                 SELECT
                     e.pokemon_name,
+                    p.image,
                     p.no,
                     p.form,
                     p.form_name,
