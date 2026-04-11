@@ -12060,7 +12060,7 @@
         "preferred_attack_style": "Physical",
         "localized": {
             "zh": {
-                "name": "迷嶂布莱克"
+                "name": "迷障布莱克"
             }
         },
         "base_hp": 125,
@@ -41133,7 +41133,7 @@
         "preferred_attack_style": "Physical",
         "localized": {
             "zh": {
-                "name": "权杖-II"
+                "name": "权杖-Ⅱ"
             }
         },
         "base_hp": 82,
@@ -41171,7 +41171,7 @@
         "preferred_attack_style": "Physical",
         "localized": {
             "zh": {
-                "name": "权杖-V"
+                "name": "权杖-Ⅴ"
             }
         },
         "base_hp": 103,
