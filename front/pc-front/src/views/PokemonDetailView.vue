@@ -416,10 +416,7 @@ watch(() => route.params.name, (n) => n && load(n as string))
   min-width: 0;
 }
 
-.evolution-card {
-  position: sticky;
-  top: 86px;
-}
+.evolution-card {}
 
 .evolution-stages {
   display: flex;
@@ -427,19 +424,23 @@ watch(() => route.params.name, (n) => n && load(n as string))
   gap: 14px;
 }
 
+/* flex wrap：每行固定3个，最后一行不足时自动居中 */
 .evolution-items {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
-  gap: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
 }
 
 .evolution-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 10px 8px 12px;
+  gap: 6px;
+  /* 固定占 1/3 宽度（减去 gap）*/
+  flex: 0 0 calc(33.33% - 6px);
+  max-width: calc(33.33% - 6px);
+  padding: 8px 6px 10px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
   background: var(--color-bg);
@@ -459,9 +460,9 @@ watch(() => route.params.name, (n) => n && load(n as string))
 }
 
 .evolution-item-image-wrap {
-  width: 72px;
-  height: 72px;
-  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
   background: var(--color-img-bg);
   display: flex;
   align-items: center;
@@ -469,8 +470,8 @@ watch(() => route.params.name, (n) => n && load(n as string))
 }
 
 .evolution-item-image {
-  max-width: 64px;
-  max-height: 64px;
+  max-width: 44px;
+  max-height: 44px;
   object-fit: contain;
 }
 
@@ -1118,10 +1119,6 @@ watch(() => route.params.name, (n) => n && load(n as string))
   .detail-main {
     max-width: 860px;
     grid-template-columns: 1fr;
-  }
-
-  .evolution-card {
-    position: static;
   }
 }
 </style>
