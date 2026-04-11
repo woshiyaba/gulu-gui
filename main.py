@@ -37,31 +37,31 @@ def main() -> None:
     init_db()
     _done(t)
 
-    # 2. 拉取数据
-    t = _step("拉取精灵列表 /api/pokemon")
-    pokemon_list = fetch_pokemon()
-    _done(t, len(pokemon_list))
+    # # 2. 拉取数据
+    # t = _step("拉取精灵列表 /api/pokemon")
+    # pokemon_list = fetch_pokemon()
+    # _done(t, len(pokemon_list))
 
-    t = _step("拉取精灵详情 /api/details")
-    details_dict = fetch_details()
-    _done(t, len(details_dict))
+    # t = _step("拉取精灵详情 /api/details")
+    # details_dict = fetch_details()
+    # _done(t, len(details_dict))
 
-    t = _step("拉取技能库 /api/skills")
-    skills_dict = fetch_skills()
-    _done(t, len(skills_dict))
+    # t = _step("拉取技能库 /api/skills")
+    # skills_dict = fetch_skills()
+    # _done(t, len(skills_dict))
 
-    # 3. 写库
-    t = _step("写入 pokemon + pokemon_attribute")
-    upsert_pokemon(pokemon_list)
-    _done(t, len(pokemon_list))
+    # # 3. 写库
+    # t = _step("写入 pokemon + pokemon_attribute")
+    # upsert_pokemon(pokemon_list)
+    # _done(t, len(pokemon_list))
 
-    t = _step("写入 skill（技能库）")
-    upsert_skills(skills_dict)
-    _done(t, len(skills_dict))
+    # t = _step("写入 skill（技能库）")
+    # upsert_skills(skills_dict)
+    # _done(t, len(skills_dict))
 
-    t = _step("写入 pokemon_detail + pokemon_skill")
-    upsert_details(details_dict)
-    _done(t, len(details_dict))
+    # t = _step("写入 pokemon_detail + pokemon_skill")
+    # upsert_details(details_dict)
+    # _done(t, len(details_dict))
 
     t = _step("导入蛋孵化数据")
     _run_py("scripts/import_egg_hatch.py")

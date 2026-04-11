@@ -6,6 +6,7 @@ _DROP_ORDER = (
     "pokemon_detail",
     "pokemon_attribute",
     "pokemon_egg_group",
+    "evolution_chain",
     "pokemon",
     "skill",
     "attribute_matchup",
@@ -92,11 +93,26 @@ _SCHEMAS = [
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='技能库';
     """,
 
+    # 进化链（一条链的所有成员，chain_id 相同，sort_order 区分顺序）
+    """
+    CREATE TABLE IF NOT EXISTS evolution_chain (
+        id           INT          NOT NULL AUTO_INCREMENT,
+        chain_id     INT          NOT NULL COMMENT '进化链编号，同一链所有成员共享同一值',
+        sort_order   TINYINT      NOT NULL COMMENT '在链中的顺序，从 1 开始',
+        pokemon_name VARCHAR(50)  NOT NULL COMMENT '基础名，如 板板壳（不含形态后缀）',
+        condition    VARCHAR(255) NOT NULL DEFAULT '' COMMENT '进化条件描述',
+        PRIMARY KEY (id),
+        UNIQUE KEY uk_chain_step (chain_id, sort_order),
+        KEY idx_pokemon_name (pokemon_name)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='进化链成员表';
+    """,
+
     # 精灵详情（与 pokemon 一对一，以 pokemon_name 关联）
     """
     CREATE TABLE IF NOT EXISTS pokemon_detail (
         id              INT          NOT NULL AUTO_INCREMENT,
         pokemon_name    VARCHAR(50)  NOT NULL COMMENT '关联 pokemon.name',
+        chain_id        INT                   DEFAULT NULL COMMENT '关联 evolution_chain.chain_id',
         hp              INT          NOT NULL DEFAULT 0,
         atk             INT          NOT NULL DEFAULT 0 COMMENT '物攻',
         matk            INT          NOT NULL DEFAULT 0 COMMENT '魔攻',
