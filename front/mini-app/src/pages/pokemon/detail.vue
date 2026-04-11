@@ -159,6 +159,31 @@ onLoad((options) => {
         <text class="trait-desc">{{ pokemon.trait.desc || '暂无描述' }}</text>
       </view>
 
+      <view v-if="pokemon.defensive_type_chart?.cells?.length" class="section-card">
+        <text class="section-title">受击倍率</text>
+        <text class="type-chart-tip">
+          进攻招式属性与受击倍率。
+        </text>
+        <view class="type-chart-mobile-box">
+          <view class="type-chart-mobile-def">
+            <text class="type-chart-mobile-def-label">本方属性</text>
+            <text class="type-chart-mobile-def-val">{{
+              pokemon.defensive_type_chart.defender_attrs.join(' + ')
+            }}</text>
+          </view>
+          <view class="type-chart-mobile-grid">
+            <view
+              v-for="c in pokemon.defensive_type_chart.cells"
+              :key="'mg-' + c.attacker_attr"
+              class="type-chart-mobile-cell"
+            >
+              <text class="type-chart-mobile-attr">{{ c.attacker_attr }}</text>
+              <text class="type-chart-mobile-val" :class="'bucket-' + c.bucket">{{ c.label }}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
       <view class="section-card">
         <text class="section-title">属性克制</text>
 
@@ -499,6 +524,95 @@ onLoad((options) => {
   font-size: 24rpx;
   line-height: 1.8;
   color: #6f89b2;
+}
+
+.type-chart-tip {
+  display: block;
+  margin-top: 12rpx;
+  margin-bottom: 16rpx;
+  font-size: 22rpx;
+  line-height: 1.6;
+  color: #6f89b2;
+}
+
+.type-chart-mobile-box {
+  border: 1rpx solid #dbe4f3;
+  border-radius: 16rpx;
+  padding: 20rpx 16rpx 22rpx;
+  background: #fff;
+}
+
+.type-chart-mobile-def {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10rpx 16rpx;
+  margin-bottom: 18rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #e7eefb;
+}
+
+.type-chart-mobile-def-label {
+  font-size: 22rpx;
+  color: #6f89b2;
+  font-weight: 700;
+}
+
+.type-chart-mobile-def-val {
+  font-size: 24rpx;
+  color: #1f3760;
+  font-weight: 700;
+}
+
+.type-chart-mobile-grid {
+  display: grid;
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 10rpx 6rpx;
+}
+
+.type-chart-mobile-cell {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx 4rpx 14rpx;
+  border: 1rpx solid #dbe4f3;
+  border-radius: 12rpx;
+  background: #f8faff;
+  box-sizing: border-box;
+}
+
+.type-chart-mobile-attr {
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #23406c;
+  line-height: 1.25;
+  text-align: center;
+  word-break: keep-all;
+}
+
+.type-chart-mobile-val {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.bucket-super {
+  color: #ef4444;
+}
+
+.bucket-neutral {
+  color: #22c55e;
+}
+
+.bucket-resist {
+  color: #3b82f6;
+}
+
+.bucket-immune {
+  color: #1f3760;
 }
 
 .restrain-group {

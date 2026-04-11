@@ -70,9 +70,24 @@ class PokemonSkill(BaseModel):
     icon: str = ""
 
 
+class DefensiveTypeChartCell(BaseModel):
+    attacker_attr: str
+    multiplier: float
+    label: str
+    bucket: str = "neutral"
+
+
+class DefensiveTypeChart(BaseModel):
+    """精灵受各「进攻招式属性」技能时的伤害倍率（双属性为单方倍率相乘）。"""
+
+    defender_attrs: list[str] = Field(default_factory=list)
+    cells: list[DefensiveTypeChartCell] = Field(default_factory=list)
+
+
 class PokemonDetailResponse(PokemonListItem):
     obtain_method: str = ""
     stats: PokemonStats = Field(default_factory=PokemonStats)
     trait: PokemonTrait = Field(default_factory=PokemonTrait)
     restrain: PokemonRestrain = Field(default_factory=PokemonRestrain)
     skills: list[PokemonSkill] = Field(default_factory=list)
+    defensive_type_chart: DefensiveTypeChart | None = None

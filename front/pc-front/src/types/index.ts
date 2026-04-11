@@ -67,10 +67,25 @@ export interface Skill {
   icon: string
 }
 
+/** 受某一进攻招式属性技能时的伤害倍率（双属性为单方倍率相乘） */
+export interface DefensiveTypeChartCell {
+  attacker_attr: string
+  multiplier: number
+  label: string
+  /** super | neutral | resist | immune — 用于配色 */
+  bucket: string
+}
+
+export interface DefensiveTypeChart {
+  defender_attrs: string[]
+  cells: DefensiveTypeChartCell[]
+}
+
 export interface PokemonDetail extends Pokemon {
   obtain_method: string
   stats: Stats
   trait: Trait
   restrain: Restrain
   skills: Skill[]
+  defensive_type_chart?: DefensiveTypeChart | null
 }

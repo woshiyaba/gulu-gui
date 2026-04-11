@@ -75,6 +75,10 @@ def main() -> None:
     _run_py("scripts/update_obtain_method.py")
     _done(t)
 
+    t = _step("导入属性受击倍率矩阵（属性.json）")
+    _run_py("scripts/import_attribute_matchups.py")
+    _done(t)
+
     total = time.time() - total_start
     print(f"\n{'=' * 50}")
     print(f"  全部完成！总耗时 {total:.1f}s")

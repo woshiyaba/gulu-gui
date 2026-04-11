@@ -130,7 +130,74 @@ watch(() => route.params.name, (n) => n && load(n as string))
         <div class="trait-desc">{{ pokemon.trait.desc || '暂无描述' }}</div>
       </section>
 
-      <!-- ④ 属性克制关系 -->
+      <!-- ④ 受击倍率表（按属性.json 矩阵，双属性相乘） -->
+      <section v-if="pokemon.defensive_type_chart?.cells?.length" class="card">
+        <h2 class="section-title">受击倍率</h2>
+        <p class="type-chart-hint">
+          精灵
+          <span class="type-chart-def">{{ pokemon.defensive_type_chart.defender_attrs.join(' + ') }}</span>
+          受到各「进攻招式属性」技能时的伤害倍率；
+        </p>
+        <!-- 宽屏：横向表格；窄屏：两排网格，无需左右滑动 -->
+        <div class="type-chart-scroll type-chart--desktop">
+          <table class="type-chart-table">
+            <thead>
+              <tr>
+                <th class="tc-corner">进攻招式属性</th>
+                <th
+                  v-for="c in pokemon.defensive_type_chart.cells"
+                  :key="c.attacker_attr"
+                  class="tc-head"
+                >
+                  {{ c.attacker_attr }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="tc-def-cell">
+                  <div
+                    v-for="d in pokemon.defensive_type_chart.defender_attrs"
+                    :key="d"
+                    class="tc-def-name"
+                  >
+                    {{ d }}
+                  </div>
+                </td>
+                <td
+                  v-for="c in pokemon.defensive_type_chart.cells"
+                  :key="'m-' + c.attacker_attr"
+                  class="tc-mult"
+                  :class="'tc-' + c.bucket"
+                >
+                  {{ c.label }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="type-chart-mobile type-chart--mobile" aria-label="受击倍率（手机布局）">
+          <div class="type-chart-mobile-def">
+            <span class="type-chart-mobile-def-label">本方属性</span>
+            <span class="type-chart-mobile-def-val">{{
+              pokemon.defensive_type_chart.defender_attrs.join(' + ')
+            }}</span>
+          </div>
+          <div class="type-chart-mobile-grid">
+            <div
+              v-for="c in pokemon.defensive_type_chart.cells"
+              :key="'mob-' + c.attacker_attr"
+              class="type-chart-mobile-cell"
+            >
+              <div class="type-chart-mobile-attr">{{ c.attacker_attr }}</div>
+              <div class="type-chart-mobile-mult" :class="'tc-' + c.bucket">{{ c.label }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ⑤ 属性克制关系（详情库内文案） -->
       <section class="card">
         <h2 class="section-title">属性克制</h2>
         <div class="restrain-grid">
@@ -166,7 +233,7 @@ watch(() => route.params.name, (n) => n && load(n as string))
         </div>
       </section>
 
-      <!-- ⑤ 技能列表 -->
+      <!-- ⑥ 技能列表 -->
       <section class="card skills-card">
         <h2 class="section-title">技能（{{ pokemon.skills.length }} 个）</h2>
         <div v-if="pokemon.skills.length === 0" class="no-data">暂无技能数据</div>
@@ -316,6 +383,182 @@ watch(() => route.params.name, (n) => n && load(n as string))
   color: var(--color-muted);
   font-size: 13px;
   padding: 8px 0;
+}
+
+/* 受击倍率表 */
+.type-chart-hint {
+  font-size: 13px;
+  color: var(--color-muted);
+  line-height: 1.5;
+  margin: -6px 0 14px;
+}
+
+.type-chart-def {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.type-chart-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.type-chart-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.type-chart-table th,
+.type-chart-table td {
+  border: 1px solid var(--color-border);
+  padding: 8px 10px;
+  text-align: center;
+  white-space: nowrap;
+  background: var(--color-surface);
+}
+
+.type-chart-table thead th {
+  font-weight: 700;
+  color: var(--color-text);
+  background: var(--color-hover);
+}
+
+.tc-corner {
+  min-width: 96px;
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  box-shadow: 1px 0 0 var(--color-border);
+}
+
+.tc-def-cell {
+  min-width: 88px;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  font-weight: 600;
+  text-align: left;
+  vertical-align: middle;
+  box-shadow: 1px 0 0 var(--color-border);
+}
+
+.tc-def-name + .tc-def-name {
+  margin-top: 4px;
+}
+
+.tc-mult {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tc-super {
+  color: #ef4444;
+}
+
+.tc-neutral {
+  color: #22c55e;
+}
+
+.tc-resist {
+  color: #3b82f6;
+}
+
+.tc-immune {
+  color: var(--color-text);
+}
+
+.type-chart--mobile {
+  display: none;
+}
+
+.type-chart-mobile {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 12px 10px 14px;
+  background: var(--color-surface);
+}
+
+.type-chart-mobile-def {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 12px;
+}
+
+.type-chart-mobile-def-label {
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.type-chart-mobile-def-val {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.type-chart-mobile-grid {
+  display: grid;
+  /* 18 个属性：默认两排各 9 列 */
+  grid-template-columns: repeat(9, minmax(0, 1fr));
+  gap: 6px 4px;
+}
+
+.type-chart-mobile-cell {
+  min-width: 0;
+  text-align: center;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 6px 2px 7px;
+  background: var(--color-bg);
+}
+
+.type-chart-mobile-attr {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.25;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.type-chart-mobile-mult {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+@media (max-width: 360px) {
+  .type-chart-mobile-grid {
+    /* 极窄屏三排各 6 列，仍不横向滚动 */
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+
+  .type-chart-mobile-attr {
+    font-size: 10px;
+  }
+
+  .type-chart-mobile-mult {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 720px) {
+  .type-chart--desktop {
+    display: none !important;
+  }
+
+  .type-chart--mobile {
+    display: block;
+  }
 }
 
 /* ① 基础信息 */

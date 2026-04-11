@@ -1,10 +1,11 @@
-from api.repositories import pokemon_repository
+from api.repositories import attribute_matchup_repository, pokemon_repository
 from api.utils.media import build_image_url
 from api.utils.pokemon_mapper import (
     to_attribute_item,
     to_pokemon_detail,
     to_pokemon_list_item,
 )
+from api.utils.type_chart import build_defensive_type_chart_payload
 
 
 class PokemonNotFoundError(Exception):
@@ -75,4 +76,14 @@ async def get_pokemon_detail(name: str) -> dict:
 
     detail = await pokemon_repository.get_pokemon_detail(name)
     skills = await pokemon_repository.get_pokemon_skills(name)
-    return to_pokemon_detail(base=base, detail=detail, skills_raw=skills)
+    payload = to_pokemon_detail(base=base, detail=detail, skills_raw=skills)
+
+    axis = await attribute_matchup_repository.list_attr_axis_order()
+    defender_names = [a["attr_name"] for a in payload.get("attributes") or []]
+    rows = await attribute_matchup_repository.list_matchups_for_defenders(defender_names)
+    payload["defensive_type_chart"] = build_defensive_type_chart_payload(
+        defender_attrs=defender_names,
+        axis=axis,
+        matchup_rows=rows,
+    )
+    return payload

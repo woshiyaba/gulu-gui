@@ -8,10 +8,32 @@ _DROP_ORDER = (
     "pokemon_egg_group",
     "pokemon",
     "skill",
+    "attribute_matchup",
+    "attribute_axis",
 )
 
 # 按依赖顺序排列，先建被引用的表
 _SCHEMAS = [
+    # 属性克制矩阵：表头顺序 + 单方「防守属性 × 进攻属性 → 倍率」（双属性在接口层相乘）
+    """
+    CREATE TABLE IF NOT EXISTS attribute_axis (
+        attr_name  VARCHAR(20) NOT NULL COMMENT '属性名，与 pokemon_attribute.attr_name 对齐',
+        sort_order INT          NOT NULL COMMENT '表头从左到右顺序，从 1 开始',
+        PRIMARY KEY (attr_name),
+        UNIQUE KEY uk_attr_axis_sort (sort_order)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='属性表头顺序（与 docs/pets/属性.json 键顺序一致）';
+    """,
+    """
+    CREATE TABLE IF NOT EXISTS attribute_matchup (
+        defender_attr VARCHAR(20) NOT NULL COMMENT '受击方（精灵）的某一属性',
+        attacker_attr VARCHAR(20) NOT NULL COMMENT '进攻招式属性',
+        multiplier      DECIMAL(10, 8) NOT NULL COMMENT '该单方属性下受击倍率：2 / 1 / 0.5',
+        PRIMARY KEY (defender_attr, attacker_attr),
+        KEY idx_matchup_defender (defender_attr),
+        KEY idx_matchup_attacker (attacker_attr)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='单方属性受击倍率（由属性.json 生成）';
+    """,
+
     # 精灵基础信息
     """
     CREATE TABLE IF NOT EXISTS pokemon (

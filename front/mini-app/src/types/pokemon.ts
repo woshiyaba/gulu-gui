@@ -65,10 +65,23 @@ export interface Skill {
   icon: string
 }
 
+export interface DefensiveTypeChartCell {
+  attacker_attr: string
+  multiplier: number
+  label: string
+  bucket: string
+}
+
+export interface DefensiveTypeChart {
+  defender_attrs: string[]
+  cells: DefensiveTypeChartCell[]
+}
+
 export interface PokemonDetail extends Pokemon {
   obtain_method: string
   stats: Stats
   trait: Trait
   restrain: Restrain
   skills: Skill[]
+  defensive_type_chart?: DefensiveTypeChart | null
 }
