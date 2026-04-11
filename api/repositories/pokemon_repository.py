@@ -112,12 +112,6 @@ async def count_pokemon(name: str = "", attr: str = "", egg_group: str = "") -> 
             return row.get("cnt", 0)
 
 
-_EGG_GROUP_SUBQUERY = (
-    "(SELECT GROUP_CONCAT(peg.group_name ORDER BY peg.id SEPARATOR ',') "
-    "FROM pokemon_egg_group peg WHERE peg.pokemon_id = p.id) AS egg_group_names"
-)
-
-
 async def list_pokemon(
     name: str = "",
     attr: str = "",
@@ -138,9 +132,15 @@ async def list_pokemon(
                     p.no, p.name, p.image, p.type, p.type_name, p.form, p.form_name,
                     GROUP_CONCAT(pa.attr_name ORDER BY pa.id SEPARATOR ',') AS attr_names,
                     GROUP_CONCAT(pa.attr_image ORDER BY pa.id SEPARATOR '|||') AS attr_images,
-                    {_EGG_GROUP_SUBQUERY}
+                    MAX(peg_agg.egg_group_names) AS egg_group_names
                 FROM pokemon p
                 LEFT JOIN pokemon_attribute pa ON pa.pokemon_name = p.name
+                LEFT JOIN (
+                    SELECT pokemon_id,
+                           GROUP_CONCAT(group_name ORDER BY id SEPARATOR ',') AS egg_group_names
+                    FROM pokemon_egg_group
+                    GROUP BY pokemon_id
+                ) peg_agg ON peg_agg.pokemon_id = p.id
                 {where_clause}
                 GROUP BY p.id, p.no, p.name, p.image, p.type, p.type_name, p.form, p.form_name
                 ORDER BY p.no, p.id
@@ -186,13 +186,19 @@ async def get_pokemon_base(name: str) -> dict | None:
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
-                f"""
+                """
                 SELECT p.no, p.name, p.image, p.type, p.type_name, p.form, p.form_name,
                        GROUP_CONCAT(pa.attr_name ORDER BY pa.id SEPARATOR ',') AS attr_names,
                        GROUP_CONCAT(pa.attr_image ORDER BY pa.id SEPARATOR '|||') AS attr_images,
-                       {_EGG_GROUP_SUBQUERY}
+                       MAX(peg_agg.egg_group_names) AS egg_group_names
                 FROM pokemon p
                 LEFT JOIN pokemon_attribute pa ON pa.pokemon_name = p.name
+                LEFT JOIN (
+                    SELECT pokemon_id,
+                           GROUP_CONCAT(group_name ORDER BY id SEPARATOR ',') AS egg_group_names
+                    FROM pokemon_egg_group
+                    GROUP BY pokemon_id
+                ) peg_agg ON peg_agg.pokemon_id = p.id
                 WHERE p.name = %s
                 GROUP BY p.id, p.no, p.name, p.image, p.type, p.type_name, p.form, p.form_name
                 """,
