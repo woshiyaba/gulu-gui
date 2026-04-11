@@ -586,9 +586,39 @@ watch(() => route.params.name, (n) => n && load(n as string))
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .detail-main {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .card {
+    padding: 14px 14px;
+  }
+
+  .section-title {
+    margin-bottom: 10px;
+  }
+
   .skill-table th:nth-child(6),
   .skill-table td:nth-child(6) {
     display: none;
+  }
+
+  .skill-table {
+    font-size: 11px;
+  }
+
+  .skill-table th,
+  .skill-table td {
+    padding: 5px 6px;
+  }
+
+  .skill-attr,
+  .skill-type {
+    font-size: 10px;
+    padding: 1px 4px;
+    white-space: nowrap;
   }
 }
 </style>
