@@ -1,4 +1,49 @@
+import re
+
 from db.connection import get_pool
+
+_PAREN_SUFFIX_PATTERN = re.compile(r"（[^）]*）")
+
+
+def _strip_variant_suffix(name: str) -> str:
+    """去掉名称中的括号后缀，用于聚合同一只宠物的不同命名。"""
+    return _PAREN_SUFFIX_PATTERN.sub("", name).strip()
+
+
+def _is_original_form(row: dict) -> bool:
+    """判断是否为原始形态。"""
+    return row.get("form") == "original" or row.get("form_name") == "原始形态"
+
+
+def _is_regional_form(row: dict) -> bool:
+    """判断是否为地区形态。"""
+    return row.get("form") == "regional" or row.get("form_name") == "地区形态"
+
+
+def _dedupe_body_metric_rows(rows: list[dict]) -> list[dict]:
+    """
+    先排除地区形态，再按去括号后的名字去重。
+    同一组里优先保留第一个原始形态；若没有原始形态，则退回第一个非地区形态。
+    """
+    grouped_rows: dict[str, list[dict]] = {}
+
+    for row in rows:
+        base_name = _strip_variant_suffix(row["pokemon_name"])
+        grouped_rows.setdefault(base_name, []).append(row)
+
+    deduped_rows: list[dict] = []
+    for grouped in grouped_rows.values():
+        non_regional_rows = [row for row in grouped if not _is_regional_form(row)]
+        if not non_regional_rows:
+            continue
+
+        chosen_row = next(
+            (row for row in non_regional_rows if _is_original_form(row)),
+            non_regional_rows[0],
+        )
+        deduped_rows.append({"pokemon_name": chosen_row["pokemon_name"]})
+
+    return deduped_rows
 
 
 def _build_filters(name: str = "", attr: str = "") -> tuple[str, list]:
@@ -78,24 +123,31 @@ async def list_pokemon(
 
 
 async def list_pokemon_by_body_metrics(height_cm: int, weight_g: int) -> list[dict]:
-    """按身高和体重区间匹配可命中的宠物名称，跳过首领形态。"""
+    """按身高和体重区间匹配宠物，并合并同名变种结果。"""
     pool = await get_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
-                SELECT DISTINCT pokemon_name
-                FROM egg_hatch_pet
-                WHERE is_leader_form = 0
-                  AND height_low <= %s
-                  AND height_high >= %s
-                  AND weight_low <= %s
-                  AND weight_high >= %s
-                ORDER BY pokemon_name
+                SELECT
+                    e.pokemon_name,
+                    p.no,
+                    p.form,
+                    p.form_name,
+                    p.id
+                FROM egg_hatch_pet e
+                JOIN pokemon p ON p.name = e.pokemon_name
+                WHERE e.is_leader_form = 0
+                  AND e.height_low <= %s
+                  AND e.height_high >= %s
+                  AND e.weight_low <= %s
+                  AND e.weight_high >= %s
+                ORDER BY p.no, p.id, e.pokemon_name
                 """,
                 (height_cm, height_cm, weight_g, weight_g),
             )
-            return await cur.fetchall()
+            rows = await cur.fetchall()
+            return _dedupe_body_metric_rows(rows)
 
 
 async def get_pokemon_base(name: str) -> dict | None:
