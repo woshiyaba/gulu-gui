@@ -1,6 +1,7 @@
 import json
 import pymysql
 from db.connection import get_conn
+from db.schema import normalize_pokemon_image_paths
 
 # ── 批量大小 ────────────────────────────────────────────────
 _BATCH = 200
@@ -75,6 +76,8 @@ def upsert_pokemon(pokemon_list: list[dict]) -> None:
                     VALUES (%(pokemon_name)s, %(attr_name)s, %(attr_image)s)
                 """
                 _executemany(cur, sql_attr, rows_attr)
+
+            normalize_pokemon_image_paths(cur)
 
         conn.commit()
     finally:
