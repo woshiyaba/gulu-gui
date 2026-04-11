@@ -88,6 +88,10 @@ watch(() => route.params.name, (n) => n && load(n as string))
             <span v-if="pokemon.type_name" class="badge badge-type">{{ pokemon.type_name }}</span>
             <span v-if="pokemon.form_name" class="badge badge-form">{{ pokemon.form_name }}</span>
           </div>
+          <div v-if="pokemon.egg_groups?.length" class="egg-groups">
+            <span class="egg-label">蛋组</span>
+            <span v-for="g in pokemon.egg_groups" :key="g" class="badge badge-egg">{{ g }}</span>
+          </div>
           <div class="obtain-method">
             <span class="obtain-label">获取方式</span>
             <span class="obtain-value">{{ pokemon.obtain_method || '暂无数据' }}</span>
@@ -417,6 +421,25 @@ watch(() => route.params.name, (n) => n && load(n as string))
 .badge-form {
   background: rgba(16, 185, 129, 0.15);
   color: #34d399;
+}
+
+.egg-groups {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.egg-label {
+  font-size: 12px;
+  color: var(--color-muted);
+  margin-right: 2px;
+}
+
+.badge-egg {
+  background: rgba(251, 191, 36, 0.18);
+  color: #d97706;
 }
 
 /* ② 种族值 */

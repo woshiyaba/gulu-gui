@@ -15,6 +15,7 @@ class PokemonListItem(BaseModel):
     form: str
     form_name: str
     attributes: list[AttributeItem] = Field(default_factory=list)
+    egg_groups: list[str] = Field(default_factory=list)
 
 
 class PokemonListResponse(BaseModel):

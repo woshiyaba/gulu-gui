@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import AttributeFilter from '@/components/AttributeFilter.vue'
+import EggGroupFilter from '@/components/EggGroupFilter.vue'
 import PokemonCard from '@/components/PokemonCard.vue'
-import { fetchAttributes, fetchPokemon } from '@/api/pokemon'
+import { fetchAttributes, fetchEggGroups, fetchPokemon } from '@/api/pokemon'
 import { useTheme } from '@/composables/useTheme'
 import type { Attribute, Pokemon } from '@/types'
 
 // ── 状态 ─────────────────────────────────────────────────
 const attributes = ref<Attribute[]>([])
+const eggGroups = ref<string[]>([])
 const pokemons = ref<Pokemon[]>([])
 const total = ref(0)
 const loading = ref(false)
@@ -15,6 +17,7 @@ const error = ref('')
 
 const searchName = ref('')
 const selectedAttr = ref('')
+const selectedEggGroup = ref('')
 const currentPage = ref(1)
 const pageSize = 30
 const { isDark, toggleTheme } = useTheme()
@@ -63,6 +66,7 @@ async function loadPokemon(reset = false) {
     const res = await fetchPokemon({
       name: searchName.value || undefined,
       attr: selectedAttr.value || undefined,
+      egg_group: selectedEggGroup.value || undefined,
       page: currentPage.value,
       page_size: pageSize,
     })
@@ -99,6 +103,10 @@ function onAttrChange(attr: string) {
   selectedAttr.value = attr
 }
 
+function onEggGroupChange(group: string) {
+  selectedEggGroup.value = group
+}
+
 function onSearch() {
   void resetAndLoadPokemon()
 }
@@ -117,13 +125,22 @@ watch(selectedAttr, () => {
   void resetAndLoadPokemon()
 })
 
+watch(selectedEggGroup, () => {
+  void resetAndLoadPokemon()
+})
+
 watch(loadMoreRef, () => {
   setupLoadMoreObserver()
 })
 
 // ── 初始化 ────────────────────────────────────────────────
 onMounted(async () => {
-  attributes.value = await fetchAttributes().catch(() => [])
+  const [attrs, eggs] = await Promise.all([
+    fetchAttributes().catch(() => []),
+    fetchEggGroups().catch(() => []),
+  ])
+  attributes.value = attrs
+  eggGroups.value = eggs
   await resetAndLoadPokemon()
 })
 
@@ -161,6 +178,11 @@ onBeforeUnmount(() => {
 
     <main class="app-main">
       <!-- 属性筛选栏 -->
+      <EggGroupFilter
+        :groups="eggGroups"
+        :selected="selectedEggGroup"
+        @change="onEggGroupChange"
+      />
       <AttributeFilter
         :attributes="attributes"
         :selected="selectedAttr"

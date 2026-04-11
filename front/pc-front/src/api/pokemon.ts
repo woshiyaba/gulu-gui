@@ -21,6 +21,7 @@ const http = axios.create({
 export interface PokemonQuery {
   name?: string
   attr?: string
+  egg_group?: string
   page?: number
   page_size?: number
 }
@@ -32,6 +33,10 @@ export interface PokemonBodyMatchQuery {
 
 export function fetchAttributes(): Promise<Attribute[]> {
   return http.get<Attribute[]>('/api/attributes').then((r) => r.data)
+}
+
+export function fetchEggGroups(): Promise<string[]> {
+  return http.get<string[]>('/api/egg-groups').then((r) => r.data)
 }
 
 export function fetchPokemon(query: PokemonQuery = {}): Promise<PokemonListResponse> {

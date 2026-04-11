@@ -5,6 +5,7 @@ _DROP_ORDER = (
     "pokemon_skill",
     "pokemon_detail",
     "pokemon_attribute",
+    "pokemon_egg_group",
     "pokemon",
     "skill",
 )
@@ -26,6 +27,19 @@ _SCHEMAS = [
         PRIMARY KEY (id),
         KEY idx_name (name)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='精灵基础图鉴';
+    """,
+
+    # 精灵蛋组（一只精灵多个蛋组，关联 pokemon.id）
+    """
+    CREATE TABLE IF NOT EXISTS pokemon_egg_group (
+        id           INT          NOT NULL AUTO_INCREMENT,
+        pokemon_id INT          NOT NULL COMMENT '关联 pokemon.id',
+        group_name   VARCHAR(50)  NOT NULL COMMENT '蛋组名称',
+        PRIMARY KEY (id),
+        UNIQUE KEY uk_pokemon_group (pokemon_id, group_name),
+        KEY idx_group_name (group_name),
+        CONSTRAINT fk_peg_pokemon FOREIGN KEY (pokemon_id) REFERENCES pokemon (id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='精灵蛋组';
     """,
 
     # 精灵属性（一个精灵可有多个属性）

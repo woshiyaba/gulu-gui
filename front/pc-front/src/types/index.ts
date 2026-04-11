@@ -12,6 +12,7 @@ export interface Pokemon {
   form: string
   form_name: string
   attributes: Attribute[]
+  egg_groups: string[]
 }
 
 export interface PokemonListResponse {

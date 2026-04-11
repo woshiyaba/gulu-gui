@@ -15,6 +15,13 @@ def parse_json_list(value) -> list:
         return []
 
 
+def parse_egg_groups(egg_group_names: str | None) -> list[str]:
+    """把标量子查询 GROUP_CONCAT 的蛋组字段还原成列表。"""
+    if not egg_group_names:
+        return []
+    return [x.strip() for x in egg_group_names.split(",") if x.strip()]
+
+
 def build_attributes(attr_names: str | None, attr_images: str | None) -> list[dict]:
     """把 GROUP_CONCAT 的属性字段还原成前端可直接消费的结构。"""
     names = attr_names.split(",") if attr_names else []
@@ -42,6 +49,7 @@ def to_pokemon_list_item(row: dict) -> dict:
         "form": row["form"],
         "form_name": row["form_name"],
         "attributes": build_attributes(row.get("attr_names"), row.get("attr_images")),
+        "egg_groups": parse_egg_groups(row.get("egg_group_names")),
     }
 
 
@@ -68,6 +76,7 @@ def to_pokemon_detail(base: dict, detail: dict, skills_raw: list[dict]) -> dict:
         "form": base["form"],
         "form_name": base["form_name"],
         "attributes": build_attributes(base.get("attr_names"), base.get("attr_images")),
+        "egg_groups": parse_egg_groups(base.get("egg_group_names")),
         "obtain_method": detail.get("obtain_method", ""),
         "stats": {
             "hp": detail.get("hp", 0),

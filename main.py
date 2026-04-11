@@ -67,6 +67,10 @@ def main() -> None:
     _run_py("scripts/import_egg_hatch.py")
     _done(t)
 
+    t = _step("导入蛋组（按 name 解析 pokemon.id）")
+    _run_py("scripts/import_egg_groups.py")
+    _done(t)
+
     t = _step("更新获取方式")
     _run_py("scripts/update_obtain_method.py")
     _done(t)

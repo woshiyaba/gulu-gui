@@ -16,13 +16,23 @@ async def get_attributes() -> list[dict]:
     return [to_attribute_item(row) for row in rows]
 
 
+async def get_egg_group_names() -> list[str]:
+    rows = await pokemon_repository.list_egg_groups()
+    return [row["group_name"] for row in rows]
+
+
 async def get_pokemon(
-    name: str = "", attr: str = "", page: int = 1, page_size: int = 30
+    name: str = "",
+    attr: str = "",
+    egg_group: str = "",
+    page: int = 1,
+    page_size: int = 30,
 ) -> dict:
-    total = await pokemon_repository.count_pokemon(name=name, attr=attr)
+    total = await pokemon_repository.count_pokemon(name=name, attr=attr, egg_group=egg_group)
     rows = await pokemon_repository.list_pokemon(
         name=name,
         attr=attr,
+        egg_group=egg_group,
         page=page,
         page_size=page_size,
     )

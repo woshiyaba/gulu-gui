@@ -49,7 +49,7 @@ def _dedupe_body_metric_rows(rows: list[dict]) -> list[dict]:
     return deduped_rows
 
 
-def _build_filters(name: str = "", attr: str = "") -> tuple[str, list]:
+def _build_filters(name: str = "", attr: str = "", egg_group: str = "") -> tuple[str, list]:
     """构建列表查询的 WHERE 条件与参数。"""
     conditions: list[str] = []
     params: list = []
@@ -64,6 +64,13 @@ def _build_filters(name: str = "", attr: str = "") -> tuple[str, list]:
             "WHERE pa2.pokemon_name = p.name AND pa2.attr_name = %s)"
         )
         params.append(attr)
+
+    if egg_group:
+        conditions.append(
+            "EXISTS (SELECT 1 FROM pokemon_egg_group peg "
+            "WHERE peg.pokemon_id = p.id AND peg.group_name = %s)"
+        )
+        params.append(egg_group)
 
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
     return where_clause, params
@@ -80,9 +87,20 @@ async def list_attributes() -> list[dict]:
             return await cur.fetchall()
 
 
-async def count_pokemon(name: str = "", attr: str = "") -> int:
+async def list_egg_groups() -> list[dict]:
+    """查询所有不重复的蛋组名称（用于筛选）。"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT DISTINCT group_name FROM pokemon_egg_group ORDER BY group_name"
+            )
+            return await cur.fetchall()
+
+
+async def count_pokemon(name: str = "", attr: str = "", egg_group: str = "") -> int:
     """查询符合条件的精灵总数。"""
-    where_clause, params = _build_filters(name=name, attr=attr)
+    where_clause, params = _build_filters(name=name, attr=attr, egg_group=egg_group)
     pool = await get_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
@@ -94,14 +112,21 @@ async def count_pokemon(name: str = "", attr: str = "") -> int:
             return row.get("cnt", 0)
 
 
+_EGG_GROUP_SUBQUERY = (
+    "(SELECT GROUP_CONCAT(peg.group_name ORDER BY peg.id SEPARATOR ',') "
+    "FROM pokemon_egg_group peg WHERE peg.pokemon_id = p.id) AS egg_group_names"
+)
+
+
 async def list_pokemon(
     name: str = "",
     attr: str = "",
+    egg_group: str = "",
     page: int = 1,
     page_size: int = 30,
 ) -> list[dict]:
     """分页查询精灵基础信息与属性。"""
-    where_clause, params = _build_filters(name=name, attr=attr)
+    where_clause, params = _build_filters(name=name, attr=attr, egg_group=egg_group)
     offset = (page - 1) * page_size
 
     pool = await get_pool()
@@ -112,7 +137,8 @@ async def list_pokemon(
                 SELECT
                     p.no, p.name, p.image, p.type, p.type_name, p.form, p.form_name,
                     GROUP_CONCAT(pa.attr_name ORDER BY pa.id SEPARATOR ',') AS attr_names,
-                    GROUP_CONCAT(pa.attr_image ORDER BY pa.id SEPARATOR '|||') AS attr_images
+                    GROUP_CONCAT(pa.attr_image ORDER BY pa.id SEPARATOR '|||') AS attr_images,
+                    {_EGG_GROUP_SUBQUERY}
                 FROM pokemon p
                 LEFT JOIN pokemon_attribute pa ON pa.pokemon_name = p.name
                 {where_clause}
@@ -160,10 +186,11 @@ async def get_pokemon_base(name: str) -> dict | None:
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
-                """
+                f"""
                 SELECT p.no, p.name, p.image, p.type, p.type_name, p.form, p.form_name,
                        GROUP_CONCAT(pa.attr_name ORDER BY pa.id SEPARATOR ',') AS attr_names,
-                       GROUP_CONCAT(pa.attr_image ORDER BY pa.id SEPARATOR '|||') AS attr_images
+                       GROUP_CONCAT(pa.attr_image ORDER BY pa.id SEPARATOR '|||') AS attr_images,
+                       {_EGG_GROUP_SUBQUERY}
                 FROM pokemon p
                 LEFT JOIN pokemon_attribute pa ON pa.pokemon_name = p.name
                 WHERE p.name = %s
