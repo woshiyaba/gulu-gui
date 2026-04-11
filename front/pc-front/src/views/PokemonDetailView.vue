@@ -27,6 +27,12 @@ function statPercent(val: number, max: number) {
   return Math.min(100, Math.round((val / max) * 100))
 }
 
+/** 部分浏览器点击 table 单元格不会自动 focus，显式 focus 才能让 :focus::after 浮层出现 */
+function focusSkillCell(ev: MouseEvent) {
+  const el = ev.currentTarget
+  if (el instanceof HTMLElement) el.focus()
+}
+
 async function load(name: string) {
   loading.value = true
   error.value = ''
@@ -176,6 +182,9 @@ watch(() => route.params.name, (n) => n && load(n as string))
               <td
                 class="skill-name"
                 tabindex="0"
+                role="button"
+                :aria-label="`${sk.name}，描述：${(sk.desc && String(sk.desc).trim()) || '暂无描述'}`"
+                @click="focusSkillCell"
                 :data-skill-desc="(sk.desc && String(sk.desc).trim()) ? String(sk.desc).trim() : '暂无描述'"
               >
                 <img v-if="sk.icon" :src="sk.icon" :alt="sk.name" class="skill-icon" />
@@ -533,11 +542,57 @@ watch(() => route.params.name, (n) => n && load(n as string))
 }
 
 .skill-name {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
   font-weight: 600;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+/* 点击/聚焦技能名显示说明（原样式写在 max-width:600px 内，宽屏网页没有任何浮层规则） */
+.skills-card {
+  overflow: visible;
+}
+
+.skill-table,
+.skill-table tbody,
+.skill-table tr,
+.skill-table td {
+  overflow: visible;
+}
+
+.skill-name:focus {
+  outline: none;
+}
+
+.skill-name:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.skill-name:focus::after,
+.skill-name:focus-visible::after {
+  content: attr(data-skill-desc);
+  position: absolute;
+  left: 0;
+  top: 100%;
+  z-index: 50;
+  margin-top: 4px;
+  min-width: min(280px, calc(100vw - 24px));
+  max-width: min(480px, calc(100vw - 16px));
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: normal;
+  word-break: break-word;
+  color: #fff;
+  background: #141414;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
 }
 
 .skill-icon {
@@ -623,55 +678,6 @@ watch(() => route.params.name, (n) => n && load(n as string))
     font-size: 10px;
     padding: 1px 4px;
     white-space: nowrap;
-  }
-
-  /* 窄屏隐藏描述列时：聚焦技能名显示黑底白字说明（纯 CSS，data-skill-desc） */
-  .skills-card {
-    overflow: visible;
-  }
-
-  .skill-table,
-  .skill-table tbody,
-  .skill-table tr,
-  .skill-table td {
-    overflow: visible;
-  }
-
-  .skill-name {
-    position: relative;
-    cursor: default;
-  }
-
-  .skill-name:focus {
-    outline: none;
-  }
-
-  .skill-name:focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 2px;
-  }
-
-  .skill-name:focus::after,
-  .skill-name:focus-visible::after {
-    content: attr(data-skill-desc);
-    position: absolute;
-    left: 0;
-    top: 100%;
-    z-index: 50;
-    margin-top: 4px;
-    min-width: min(280px, calc(100vw - 24px));
-    max-width: min(480px, calc(100vw - 16px));
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 1.5;
-    white-space: normal;
-    word-break: break-word;
-    color: #fff;
-    background: #141414;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-    pointer-events: none;
   }
 }
 </style>
