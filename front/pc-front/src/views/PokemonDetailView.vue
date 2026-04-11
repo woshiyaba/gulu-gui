@@ -157,7 +157,7 @@ watch(() => route.params.name, (n) => n && load(n as string))
       </section>
 
       <!-- ⑤ 技能列表 -->
-      <section class="card">
+      <section class="card skills-card">
         <h2 class="section-title">技能（{{ pokemon.skills.length }} 个）</h2>
         <div v-if="pokemon.skills.length === 0" class="no-data">暂无技能数据</div>
         <table v-else class="skill-table">
@@ -173,14 +173,18 @@ watch(() => route.params.name, (n) => n && load(n as string))
           </thead>
           <tbody>
             <tr v-for="sk in pokemon.skills" :key="sk.name">
-              <td class="skill-name">
+              <td
+                class="skill-name"
+                tabindex="0"
+                :data-skill-desc="(sk.desc && String(sk.desc).trim()) ? String(sk.desc).trim() : '暂无描述'"
+              >
                 <img v-if="sk.icon" :src="sk.icon" :alt="sk.name" class="skill-icon" />
                 {{ sk.name }}
               </td>
               <td><span class="skill-attr">{{ sk.attr || '—' }}</span></td>
               <td><span class="skill-type" :class="'type-' + sk.type">{{ sk.type || '—' }}</span></td>
-              <td class="skill-num">{{ sk.power || '—' }}</td>
-              <td class="skill-num">{{ sk.consume || '—' }}</td>
+              <td class="skill-num">{{ sk.power ?? '—' }}</td>
+              <td class="skill-num">{{ sk.consume ?? '—' }}</td>
               <td class="skill-desc">{{ sk.desc || '—' }}</td>
             </tr>
           </tbody>
@@ -619,6 +623,55 @@ watch(() => route.params.name, (n) => n && load(n as string))
     font-size: 10px;
     padding: 1px 4px;
     white-space: nowrap;
+  }
+
+  /* 窄屏隐藏描述列时：聚焦技能名显示黑底白字说明（纯 CSS，data-skill-desc） */
+  .skills-card {
+    overflow: visible;
+  }
+
+  .skill-table,
+  .skill-table tbody,
+  .skill-table tr,
+  .skill-table td {
+    overflow: visible;
+  }
+
+  .skill-name {
+    position: relative;
+    cursor: default;
+  }
+
+  .skill-name:focus {
+    outline: none;
+  }
+
+  .skill-name:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  .skill-name:focus::after,
+  .skill-name:focus-visible::after {
+    content: attr(data-skill-desc);
+    position: absolute;
+    left: 0;
+    top: 100%;
+    z-index: 50;
+    margin-top: 4px;
+    min-width: min(280px, calc(100vw - 24px));
+    max-width: min(480px, calc(100vw - 16px));
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5;
+    white-space: normal;
+    word-break: break-word;
+    color: #fff;
+    background: #141414;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
   }
 }
 </style>
