@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from api.schemas.pokemon import (
     AttributeItem,
+    PokemonEvolutionChainResponse,
     PokemonBodyMatchResponse,
     PokemonDetailResponse,
     PokemonListResponse,
@@ -13,6 +14,7 @@ from api.services.pokemon_service import (
     get_pokemon_by_body_metrics as get_pokemon_by_body_metrics_service,
     get_pokemon as get_pokemon_service,
     get_pokemon_detail as get_pokemon_detail_service,
+    get_pokemon_evolution_chain as get_pokemon_evolution_chain_service,
 )
 
 router = APIRouter(prefix="/api")
@@ -59,6 +61,17 @@ async def get_pokemon_by_body_metrics(
     根据用户输入的身高和体重，查询区间内可命中的精灵名称列表。
     """
     return await get_pokemon_by_body_metrics_service(height_m=height_m, weight_kg=weight_kg)
+
+
+@router.get("/pokemon/evolution-chain/{pokemon_name}", response_model=PokemonEvolutionChainResponse)
+async def get_pokemon_evolution_chain(pokemon_name: str):
+    """
+    查询某只精灵所在的完整进化链，并按阶段返回每层的所有形态图片与名称。
+    """
+    try:
+        return await get_pokemon_evolution_chain_service(pokemon_name)
+    except PokemonNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="精灵不存在") from exc
 
 
 @router.get("/pokemon/{pokemon_name}", response_model=PokemonDetailResponse)

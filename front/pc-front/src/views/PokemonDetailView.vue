@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchPokemonDetail } from '@/api/pokemon'
+import { fetchPokemonDetail, fetchPokemonEvolutionChain } from '@/api/pokemon'
 import { useTheme } from '@/composables/useTheme'
-import type { PokemonDetail } from '@/types'
+import type { PokemonDetail, PokemonEvolutionChain } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
 const { isDark, toggleTheme } = useTheme()
 
 const pokemon = ref<PokemonDetail | null>(null)
+const evolutionChain = ref<PokemonEvolutionChain | null>(null)
 const loading = ref(true)
 const error = ref('')
 
@@ -33,12 +34,28 @@ function focusSkillCell(ev: MouseEvent) {
   if (el instanceof HTMLElement) el.focus()
 }
 
+function isCurrentEvolutionItem(name: string) {
+  return pokemon.value?.name === name
+}
+
+async function goToEvolution(name: string) {
+  if (String(route.params.name || '') === name) return
+  await router.push(`/pokemon/${encodeURIComponent(name)}`)
+}
+
 async function load(name: string) {
   loading.value = true
   error.value = ''
   try {
-    pokemon.value = await fetchPokemonDetail(name)
+    const [detail, chain] = await Promise.all([
+      fetchPokemonDetail(name),
+      fetchPokemonEvolutionChain(name),
+    ])
+    pokemon.value = detail
+    evolutionChain.value = chain
   } catch {
+    pokemon.value = null
+    evolutionChain.value = null
     error.value = '加载失败，精灵不存在或后端未启动'
   } finally {
     loading.value = false
@@ -68,7 +85,7 @@ watch(() => route.params.name, (n) => n && load(n as string))
 
     <!-- 详情内容 -->
     <main v-else-if="pokemon" class="detail-main">
-
+      <div class="detail-content">
       <!-- ① 基础信息卡 -->
       <section class="card info-card">
         <div class="pokemon-avatar">
@@ -270,7 +287,48 @@ watch(() => route.params.name, (n) => n && load(n as string))
           </tbody>
         </table>
       </section>
+      </div>
 
+      <aside class="detail-side">
+        <section class="card evolution-card">
+          <h2 class="section-title">进化链</h2>
+          <div v-if="!evolutionChain?.stages?.length" class="no-data">暂无进化链数据</div>
+          <div v-else class="evolution-stages">
+            <template v-for="(stage, index) in evolutionChain.stages" :key="stage.sort_order">
+              <div class="evolution-stage">
+                <div class="evolution-items">
+                  <button
+                    v-for="item in stage.items"
+                    :key="item.name"
+                    type="button"
+                    class="evolution-item"
+                    :class="{ 'is-active': isCurrentEvolutionItem(item.name) }"
+                    @click="goToEvolution(item.name)"
+                  >
+                    <div class="evolution-item-image-wrap">
+                      <img
+                        v-if="item.image_url"
+                        :src="item.image_url"
+                        :alt="item.name"
+                        class="evolution-item-image"
+                      />
+                      <div v-else class="evolution-item-placeholder">?</div>
+                    </div>
+                    <div class="evolution-item-name">{{ item.name }}</div>
+                  </button>
+                </div>
+              </div>
+
+              <div v-if="index < evolutionChain.stages.length - 1" class="evolution-arrow-block">
+                <div class="evolution-arrow">↓</div>
+                <div v-if="stage.next_condition" class="evolution-condition">
+                  {{ stage.next_condition }}
+                </div>
+              </div>
+            </template>
+          </div>
+        </section>
+      </aside>
     </main>
   </div>
 </template>
@@ -339,12 +397,121 @@ watch(() => route.params.name, (n) => n && load(n as string))
 
 /* 主体 */
 .detail-main {
-  max-width: 860px;
+  max-width: 1240px;
   margin: 0 auto;
   padding: 24px 20px 60px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 20px;
+}
+
+.detail-content {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.detail-side {
+  min-width: 0;
+}
+
+.evolution-card {
+  position: sticky;
+  top: 86px;
+}
+
+.evolution-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.evolution-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 12px;
+}
+
+.evolution-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-bg);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.evolution-item:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.evolution-item.is-active {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.14);
+}
+
+.evolution-item-image-wrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 12px;
+  background: var(--color-img-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.evolution-item-image {
+  max-width: 64px;
+  max-height: 64px;
+  object-fit: contain;
+}
+
+.evolution-item-placeholder {
+  font-size: 30px;
+  color: var(--color-muted);
+}
+
+.evolution-item-name {
+  width: 100%;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  word-break: break-word;
+}
+
+.evolution-arrow-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.evolution-arrow {
+  font-size: 26px;
+  line-height: 1;
+  color: var(--color-muted);
+}
+
+.evolution-condition {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--color-hover);
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.4;
+  text-align: center;
 }
 
 .center-msg {
@@ -944,6 +1111,17 @@ watch(() => route.params.name, (n) => n && load(n as string))
     font-size: 10px;
     padding: 1px 4px;
     white-space: nowrap;
+  }
+}
+
+@media (max-width: 1024px) {
+  .detail-main {
+    max-width: 860px;
+    grid-template-columns: 1fr;
+  }
+
+  .evolution-card {
+    position: static;
   }
 }
 </style>

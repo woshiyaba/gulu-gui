@@ -39,6 +39,22 @@ class PokemonBodyMatchResponse(BaseModel):
     items: list[PokemonBodyMatchItem] = Field(default_factory=list)
 
 
+class EvolutionChainItem(BaseModel):
+    name: str
+    image_url: str = ""
+
+
+class EvolutionChainStage(BaseModel):
+    sort_order: int
+    next_condition: str = ""
+    items: list[EvolutionChainItem] = Field(default_factory=list)
+
+
+class PokemonEvolutionChainResponse(BaseModel):
+    chain_id: int | None = None
+    stages: list[EvolutionChainStage] = Field(default_factory=list)
+
+
 class PokemonStats(BaseModel):
     hp: int = 0
     atk: int = 0

@@ -96,11 +96,11 @@ _SCHEMAS = [
     # 进化链（一条链的所有成员，chain_id 相同，sort_order 区分顺序）
     """
     CREATE TABLE IF NOT EXISTS evolution_chain (
-        id           INT          NOT NULL AUTO_INCREMENT,
-        chain_id     INT          NOT NULL COMMENT '进化链编号，同一链所有成员共享同一值',
-        sort_order   TINYINT      NOT NULL COMMENT '在链中的顺序，从 1 开始',
-        pokemon_name VARCHAR(50)  NOT NULL COMMENT '基础名，如 板板壳（不含形态后缀）',
-        condition    VARCHAR(255) NOT NULL DEFAULT '' COMMENT '进化条件描述',
+        id                  INT          NOT NULL AUTO_INCREMENT,
+        chain_id            INT          NOT NULL COMMENT '进化链编号，同一链所有成员共享同一值',
+        sort_order          TINYINT      NOT NULL COMMENT '在链中的顺序，从 1 开始',
+        pokemon_name        VARCHAR(50)  NOT NULL COMMENT '基础名，如 板板壳（不含形态后缀）',
+        evolution_condition VARCHAR(255) NOT NULL DEFAULT '' COMMENT '进化条件描述',
         PRIMARY KEY (id),
         UNIQUE KEY uk_chain_step (chain_id, sort_order),
         KEY idx_pokemon_name (pokemon_name)

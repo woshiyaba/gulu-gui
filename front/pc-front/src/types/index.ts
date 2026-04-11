@@ -36,6 +36,22 @@ export interface PokemonBodyMatchResponse {
   items: PokemonBodyMatchItem[]
 }
 
+export interface EvolutionChainItem {
+  name: string
+  image_url: string
+}
+
+export interface EvolutionChainStage {
+  sort_order: number
+  next_condition: string
+  items: EvolutionChainItem[]
+}
+
+export interface PokemonEvolutionChain {
+  chain_id: number | null
+  stages: EvolutionChainStage[]
+}
+
 export interface Stats {
   hp: number
   atk: number

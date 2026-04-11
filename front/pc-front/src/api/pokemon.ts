@@ -3,6 +3,7 @@ import type {
   Attribute,
   PokemonBodyMatchResponse,
   PokemonDetail,
+  PokemonEvolutionChain,
   PokemonListResponse,
 } from '@/types'
 
@@ -45,6 +46,12 @@ export function fetchPokemon(query: PokemonQuery = {}): Promise<PokemonListRespo
 
 export function fetchPokemonDetail(name: string): Promise<PokemonDetail> {
   return http.get<PokemonDetail>(`/api/pokemon/${encodeURIComponent(name)}`).then((r) => r.data)
+}
+
+export function fetchPokemonEvolutionChain(name: string): Promise<PokemonEvolutionChain> {
+  return http
+    .get<PokemonEvolutionChain>(`/api/pokemon/evolution-chain/${encodeURIComponent(name)}`)
+    .then((r) => r.data)
 }
 
 export function fetchPokemonBodyMatch(

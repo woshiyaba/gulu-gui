@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS evolution_chain (
     chain_id     INT          NOT NULL COMMENT '进化链编号，同一链所有成员共享同一值',
     sort_order   TINYINT      NOT NULL COMMENT '在链中的顺序，从 1 开始',
     pokemon_name VARCHAR(50)  NOT NULL COMMENT '基础名，如 板板壳（不含形态后缀）',
-    `condition`  VARCHAR(255) NOT NULL DEFAULT '' COMMENT '进化条件描述',
+    evolution_condition VARCHAR(255) NOT NULL DEFAULT '' COMMENT '进化条件描述',
     PRIMARY KEY (id),
     UNIQUE KEY uk_chain_step (chain_id, sort_order),
     KEY idx_pokemon_name (pokemon_name)
@@ -62,6 +62,38 @@ def _ensure_chain_id_column(cur) -> None:
         )
 
 
+def _ensure_evolution_condition_column(cur) -> None:
+    """兼容旧表中的 `condition` 列，统一迁移成 evolution_condition。"""
+    cur.execute(
+        """
+        SELECT COLUMN_NAME
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'evolution_chain'
+          AND COLUMN_NAME IN ('condition', 'evolution_condition')
+        """
+    )
+    column_names = {row["COLUMN_NAME"] for row in cur.fetchall()}
+    if "evolution_condition" in column_names:
+        return
+    if "condition" in column_names:
+        cur.execute(
+            """
+            ALTER TABLE evolution_chain
+            CHANGE COLUMN `condition` evolution_condition VARCHAR(255) NOT NULL DEFAULT ''
+            COMMENT '进化条件描述'
+            """
+        )
+        return
+    cur.execute(
+        """
+        ALTER TABLE evolution_chain
+        ADD COLUMN evolution_condition VARCHAR(255) NOT NULL DEFAULT ''
+        COMMENT '进化条件描述'
+        """
+    )
+
+
 def _load_chain_rows(entries: list[dict]) -> list[dict]:
     """将 JSON entries 展开为 evolution_chain 行列表，chain_id 从 1 自增。"""
     rows = []
@@ -72,7 +104,7 @@ def _load_chain_rows(entries: list[dict]) -> list[dict]:
                     "chain_id": chain_id,
                     "sort_order": sort_order,
                     "pokemon_name": (member.get("name") or "").strip(),
-                    "condition": (member.get("condition") or "").strip(),
+                    "evolution_condition": (member.get("condition") or "").strip(),
                 }
             )
     return rows
@@ -81,8 +113,8 @@ def _load_chain_rows(entries: list[dict]) -> list[dict]:
 def _insert_chains(cur, rows: list[dict]) -> None:
     """批量插入 evolution_chain 表。"""
     sql = """
-        INSERT INTO evolution_chain (chain_id, sort_order, pokemon_name, `condition`)
-        VALUES (%(chain_id)s, %(sort_order)s, %(pokemon_name)s, %(condition)s)
+        INSERT INTO evolution_chain (chain_id, sort_order, pokemon_name, evolution_condition)
+        VALUES (%(chain_id)s, %(sort_order)s, %(pokemon_name)s, %(evolution_condition)s)
     """
     for i in range(0, len(rows), _BATCH):
         cur.executemany(sql, rows[i : i + _BATCH])
@@ -133,6 +165,7 @@ def main() -> None:
     try:
         with conn.cursor() as cur:
             cur.execute(_DDL_EVOLUTION_CHAIN)
+            _ensure_evolution_condition_column(cur)
             _ensure_chain_id_column(cur)
 
             # 清空后重新导入，保证幂等

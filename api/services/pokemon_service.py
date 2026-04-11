@@ -12,6 +12,51 @@ class PokemonNotFoundError(Exception):
     """精灵不存在。"""
 
 
+def _strip_variant_suffix(name: str) -> str:
+    """去掉形态括号后缀，便于把同阶段的多个样子归到一起。"""
+    return name.split("（", 1)[0].strip()
+
+
+def _build_fallback_evolution_chain(base: dict) -> dict:
+    """当数据库还没有进化链数据时，至少返回当前形态自己。"""
+    return {
+        "chain_id": None,
+        "stages": [
+            {
+                "sort_order": 1,
+                "next_condition": "",
+                "items": [
+                    {
+                        "name": base["name"],
+                        "image_url": build_image_url(base.get("image", "")),
+                    }
+                ],
+            }
+        ],
+    }
+
+
+def _group_variants_by_base_name(variant_rows: list[dict]) -> dict[str, list[dict]]:
+    """把所有具体形态按基础名分组，并去重。"""
+    grouped: dict[str, list[dict]] = {}
+    seen_names: set[str] = set()
+
+    for row in variant_rows:
+        name = row["name"]
+        if name in seen_names:
+            continue
+        seen_names.add(name)
+        base_name = _strip_variant_suffix(name)
+        grouped.setdefault(base_name, []).append(
+            {
+                "name": name,
+                "image_url": build_image_url(row.get("image", "")),
+            }
+        )
+
+    return grouped
+
+
 async def get_attributes() -> list[dict]:
     rows = await pokemon_repository.list_attributes()
     return [to_attribute_item(row) for row in rows]
@@ -87,3 +132,44 @@ async def get_pokemon_detail(name: str) -> dict:
         matchup_rows=rows,
     )
     return payload
+
+
+async def get_pokemon_evolution_chain(name: str) -> dict:
+    """查询精灵所属的整条进化链，并展开每一阶段的所有具体形态。"""
+    base = await pokemon_repository.get_pokemon_base(name)
+    if not base:
+        raise PokemonNotFoundError(name)
+
+    chain_id = await pokemon_repository.get_pokemon_chain_id(name)
+    if chain_id is None:
+        return _build_fallback_evolution_chain(base)
+
+    chain_members = await pokemon_repository.list_evolution_chain_members(chain_id)
+    if not chain_members:
+        return _build_fallback_evolution_chain(base)
+
+    base_names = [member["pokemon_name"] for member in chain_members]
+    variant_rows = await pokemon_repository.list_pokemon_variants_by_base_names(base_names)
+    grouped_variants = _group_variants_by_base_name(variant_rows)
+
+    stages: list[dict] = []
+    for member in chain_members:
+        base_name = member["pokemon_name"]
+        items = grouped_variants.get(base_name) or [
+            {
+                "name": base_name,
+                "image_url": "",
+            }
+        ]
+        stages.append(
+            {
+                "sort_order": member["sort_order"],
+                "next_condition": member.get("evolution_condition", ""),
+                "items": items,
+            }
+        )
+
+    return {
+        "chain_id": chain_id,
+        "stages": stages,
+    }

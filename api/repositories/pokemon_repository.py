@@ -206,6 +206,62 @@ async def get_pokemon_detail(name: str) -> dict:
             return await cur.fetchone() or {}
 
 
+async def get_pokemon_chain_id(name: str) -> int | None:
+    """查询某个具体形态所属的进化链编号。"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT chain_id FROM pokemon_detail WHERE pokemon_name = %s",
+                (name,),
+            )
+            row = await cur.fetchone() or {}
+            return row.get("chain_id")
+
+
+async def list_evolution_chain_members(chain_id: int) -> list[dict]:
+    """按顺序查询一条进化链的基础阶段数据。"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT chain_id, sort_order, pokemon_name, evolution_condition
+                FROM evolution_chain
+                WHERE chain_id = %s
+                ORDER BY sort_order
+                """,
+                (chain_id,),
+            )
+            return await cur.fetchall()
+
+
+async def list_pokemon_variants_by_base_names(base_names: list[str]) -> list[dict]:
+    """按基础名查出所有具体形态，用于组装进化链图片与名称。"""
+    if not base_names:
+        return []
+
+    conditions: list[str] = []
+    params: list[str] = []
+    for base_name in dict.fromkeys(base_names):
+        conditions.append("(p.name = %s OR p.name LIKE CONCAT(%s, '（', '%%'))")
+        params.extend([base_name, base_name])
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT p.no, p.id, p.name, p.image
+                FROM pokemon p
+                WHERE {' OR '.join(conditions)}
+                ORDER BY p.no, p.id, p.name
+                """,
+                params,
+            )
+            return await cur.fetchall()
+
+
 async def get_pokemon_skills(name: str) -> list[dict]:
     """查询单只精灵的技能列表。"""
     pool = await get_pool()
