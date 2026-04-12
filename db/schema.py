@@ -47,6 +47,7 @@ _SCHEMAS = [
         form        VARCHAR(20)  NOT NULL DEFAULT '' COMMENT 'original/regional/boss',
         form_name   VARCHAR(20)  NOT NULL DEFAULT '' COMMENT '原始形态/地区形态 等',
         detail_url  VARCHAR(255) NOT NULL DEFAULT '' COMMENT '外部详情链接',
+        image_lc    VARCHAR(255) NOT NULL DEFAULT '' COMMENT '洛克素材侧图片文件名，如 JL_xxx.webp',
         PRIMARY KEY (id),
         KEY idx_name (name)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='精灵基础图鉴';

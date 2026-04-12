@@ -1,6 +1,6 @@
 import json
 
-from api.utils.media import build_image_url
+from api.utils.media import build_friend_image_url, build_image_url
 
 
 def parse_json_list(value) -> list:
@@ -43,7 +43,7 @@ def to_pokemon_list_item(row: dict) -> dict:
     return {
         "no": row["no"],
         "name": row["name"],
-        "image_url": build_image_url(row["image"]),
+        "image_url": build_friend_image_url(row.get("image_lc", ""), row.get("image", "")),
         "type": row["type"],
         "type_name": row["type_name"],
         "form": row["form"],
@@ -70,7 +70,7 @@ def to_pokemon_detail(base: dict, detail: dict, skills_raw: list[dict]) -> dict:
     return {
         "no": base["no"],
         "name": base["name"],
-        "image_url": build_image_url(base["image"]),
+        "image_url": build_friend_image_url(base.get("image_lc", ""), base.get("image", "")),
         "type": base["type"],
         "type_name": base["type_name"],
         "form": base["form"],
