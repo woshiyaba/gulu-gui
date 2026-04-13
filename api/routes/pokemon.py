@@ -34,8 +34,10 @@ async def get_egg_groups():
 @router.get("/pokemon", response_model=PokemonListResponse)
 async def get_pokemon(
     name: str = Query(default="", description="精灵名称关键词"),
-    attr: list[str] | None = Query(default=None, description="属性多选筛选（同类 OR）"),
-    egg_group: list[str] | None = Query(default=None, description="蛋组多选筛选（同类 OR）"),
+    attr: list[str] | None = Query(default=None, description="属性多选筛选（同类 AND，需同时命中）"),
+    egg_group: list[str] | None = Query(default=None, description="蛋组多选筛选（同类 AND，需同时命中）"),
+    order_by: str = Query(default="no", description="排序字段：no/total_stats/hp/atk/matk/def_val/mdef/spd"),
+    order_dir: str = Query(default="asc", description="排序方向：asc/desc"),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=30, ge=1, le=100),
 ):
@@ -47,6 +49,8 @@ async def get_pokemon(
         name=name,
         attrs=attr,
         egg_groups=egg_group,
+        order_by=order_by,
+        order_dir=order_dir,
         page=page,
         page_size=page_size,
     )

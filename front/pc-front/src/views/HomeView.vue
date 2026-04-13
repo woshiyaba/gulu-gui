@@ -18,6 +18,8 @@ const error = ref('')
 const searchName = ref('')
 const selectedAttrs = ref<string[]>([])
 const selectedEggGroups = ref<string[]>([])
+const selectedSortBy = ref<'no' | 'total_stats' | 'hp' | 'atk' | 'matk' | 'def_val' | 'mdef' | 'spd'>('no')
+const selectedSortDir = ref<'asc' | 'desc'>('asc')
 const currentPage = ref(1)
 const pageSize = 30
 const { isDark, toggleTheme } = useTheme()
@@ -27,6 +29,16 @@ let loadMoreObserver: IntersectionObserver | null = null
 
 const isInitialLoading = computed(() => loading.value && pokemons.value.length === 0)
 const hasMore = computed(() => pokemons.value.length < total.value)
+const SORT_OPTIONS = [
+  { value: 'no', label: '图鉴编号' },
+  { value: 'total_stats', label: '总种族值' },
+  { value: 'spd', label: '速度' },
+  { value: 'atk', label: '物攻' },
+  { value: 'matk', label: '魔攻' },
+  { value: 'def_val', label: '物防' },
+  { value: 'mdef', label: '魔防' },
+  { value: 'hp', label: 'HP' },
+] as const
 
 function disconnectLoadMoreObserver() {
   loadMoreObserver?.disconnect()
@@ -67,6 +79,8 @@ async function loadPokemon(reset = false) {
       name: searchName.value || undefined,
       attr: selectedAttrs.value.length ? selectedAttrs.value : undefined,
       egg_group: selectedEggGroups.value.length ? selectedEggGroups.value : undefined,
+      order_by: selectedSortBy.value,
+      order_dir: selectedSortDir.value,
       page: currentPage.value,
       page_size: pageSize,
     })
@@ -126,6 +140,10 @@ watch(selectedAttrs, () => {
 })
 
 watch(selectedEggGroups, () => {
+  void resetAndLoadPokemon()
+})
+
+watch([selectedSortBy, selectedSortDir], () => {
   void resetAndLoadPokemon()
 })
 
@@ -194,6 +212,16 @@ onBeforeUnmount(() => {
         <span v-if="total > 0">已展示 {{ pokemons.length }} / {{ total }} 只精灵</span>
         <span v-else-if="loading">加载中...</span>
         <span v-else>共 0 只精灵</span>
+        <div class="sort-controls">
+          <label class="sort-label" for="sort-by">排序</label>
+          <select id="sort-by" v-model="selectedSortBy" class="sort-select">
+            <option v-for="opt in SORT_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+          </select>
+          <select v-model="selectedSortDir" class="sort-select">
+            <option value="asc">升序</option>
+            <option value="desc">降序</option>
+          </select>
+        </div>
       </div>
 
       <!-- 错误提示 -->
@@ -319,9 +347,34 @@ onBeforeUnmount(() => {
 }
 
 .result-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
   font-size: 13px;
   color: var(--color-muted);
   margin-bottom: 16px;
+}
+
+.sort-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-label {
+  color: var(--color-muted);
+}
+
+.sort-select {
+  height: 30px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 12px;
+  padding: 0 8px;
 }
 
 .error-msg {

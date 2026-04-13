@@ -96,6 +96,24 @@ def _build_filters(
     return where_clause, params
 
 
+def _build_order_clause(order_by: str = "no", order_dir: str = "asc") -> str:
+    """构建安全排序子句，仅允许白名单字段。"""
+    order_field_map = {
+        "no": "p.no",
+        "total_stats": "(pd.hp + pd.atk + pd.matk + pd.def_val + pd.mdef + pd.spd)",
+        "hp": "pd.hp",
+        "atk": "pd.atk",
+        "matk": "pd.matk",
+        "def_val": "pd.def_val",
+        "mdef": "pd.mdef",
+        "spd": "pd.spd",
+    }
+    sql_field = order_field_map.get(order_by, "p.no")
+    sql_dir = "DESC" if order_dir.lower() == "desc" else "ASC"
+    # 同值时按编号和主键稳定排序，避免翻页抖动
+    return f"ORDER BY {sql_field} {sql_dir}, p.no ASC, p.id ASC"
+
+
 async def list_attributes() -> list[dict]:
     """查询所有不重复的属性。"""
     pool = await get_pool()
@@ -140,11 +158,14 @@ async def list_pokemon(
     name: str = "",
     attrs: list[str] | None = None,
     egg_groups: list[str] | None = None,
+    order_by: str = "no",
+    order_dir: str = "asc",
     page: int = 1,
     page_size: int = 30,
 ) -> list[dict]:
     """分页查询精灵基础信息与属性。"""
     where_clause, params = _build_filters(name=name, attrs=attrs, egg_groups=egg_groups)
+    order_clause = _build_order_clause(order_by=order_by, order_dir=order_dir)
     offset = (page - 1) * page_size
 
     pool = await get_pool()
@@ -160,9 +181,11 @@ async def list_pokemon(
                      FROM pokemon_egg_group peg WHERE peg.pokemon_id = p.id) AS egg_group_names
                 FROM pokemon p
                 LEFT JOIN pokemon_attribute pa ON pa.pokemon_name = p.name
+                LEFT JOIN pokemon_detail pd ON pd.pokemon_name = p.name
                 {where_clause}
-                GROUP BY p.id, p.no, p.name, p.image, p.image_lc, p.type, p.type_name, p.form, p.form_name
-                ORDER BY p.no, p.id
+                GROUP BY p.id, p.no, p.name, p.image, p.image_lc, p.type, p.type_name, p.form, p.form_name,
+                         pd.hp, pd.atk, pd.matk, pd.def_val, pd.mdef, pd.spd
+                {order_clause}
                 LIMIT %s OFFSET %s
                 """,
                 params + [page_size, offset],

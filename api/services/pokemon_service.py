@@ -71,6 +71,8 @@ async def get_pokemon(
     name: str = "",
     attrs: list[str] | None = None,
     egg_groups: list[str] | None = None,
+    order_by: str = "no",
+    order_dir: str = "asc",
     page: int = 1,
     page_size: int = 30,
 ) -> dict:
@@ -85,6 +87,8 @@ async def get_pokemon(
         name=name,
         attrs=attrs,
         egg_groups=egg_groups,
+        order_by=order_by,
+        order_dir=order_dir,
         page=page,
         page_size=page_size,
     )
