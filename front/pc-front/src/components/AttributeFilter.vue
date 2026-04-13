@@ -3,29 +3,32 @@ import type { Attribute } from '@/types'
 
 const props = defineProps<{
   attributes: Attribute[]
-  selected: string
+  selected: string[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'change', attr: string): void
+  (e: 'change', attrs: string[]): void
 }>()
+
+function toggleAttr(attr: string) {
+  const selectedSet = new Set(props.selected)
+  if (selectedSet.has(attr)) {
+    selectedSet.delete(attr)
+  } else {
+    selectedSet.add(attr)
+  }
+  emit('change', Array.from(selectedSet))
+}
 </script>
 
 <template>
   <div class="attr-filter">
     <button
-      class="attr-btn"
-      :class="{ active: selected === '' }"
-      @click="emit('change', '')"
-    >
-      全部
-    </button>
-    <button
       v-for="a in attributes"
       :key="a.attr_name"
       class="attr-btn"
-      :class="{ active: selected === a.attr_name }"
-      @click="emit('change', a.attr_name)"
+      :class="{ active: selected.includes(a.attr_name) }"
+      @click="toggleAttr(a.attr_name)"
     >
       <img v-if="a.attr_image" :src="a.attr_image" :alt="a.attr_name" class="attr-icon" />
       {{ a.attr_name }}

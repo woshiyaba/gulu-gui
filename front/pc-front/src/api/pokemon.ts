@@ -21,8 +21,8 @@ const http = axios.create({
 
 export interface PokemonQuery {
   name?: string
-  attr?: string
-  egg_group?: string
+  attr?: string[]
+  egg_group?: string[]
   page?: number
   page_size?: number
 }
@@ -41,7 +41,17 @@ export function fetchEggGroups(): Promise<string[]> {
 }
 
 export function fetchPokemon(query: PokemonQuery = {}): Promise<PokemonListResponse> {
-  return http.get<PokemonListResponse>('/api/pokemon', { params: query }).then((r) => r.data)
+  const params = new URLSearchParams()
+  if (query.name) params.append('name', query.name)
+  if (query.page !== undefined) params.append('page', String(query.page))
+  if (query.page_size !== undefined) params.append('page_size', String(query.page_size))
+  for (const attr of query.attr || []) {
+    params.append('attr', attr)
+  }
+  for (const group of query.egg_group || []) {
+    params.append('egg_group', group)
+  }
+  return http.get<PokemonListResponse>('/api/pokemon', { params }).then((r) => r.data)
 }
 
 export function fetchPokemonDetail(name: string): Promise<PokemonDetail> {

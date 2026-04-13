@@ -69,16 +69,22 @@ async def get_egg_group_names() -> list[str]:
 
 async def get_pokemon(
     name: str = "",
-    attr: str = "",
-    egg_group: str = "",
+    attrs: list[str] | None = None,
+    egg_groups: list[str] | None = None,
     page: int = 1,
     page_size: int = 30,
 ) -> dict:
-    total = await pokemon_repository.count_pokemon(name=name, attr=attr, egg_group=egg_group)
+    attrs = _normalize_multi_filter(attrs)
+    egg_groups = _normalize_multi_filter(egg_groups)
+    total = await pokemon_repository.count_pokemon(
+        name=name,
+        attrs=attrs,
+        egg_groups=egg_groups,
+    )
     rows = await pokemon_repository.list_pokemon(
         name=name,
-        attr=attr,
-        egg_group=egg_group,
+        attrs=attrs,
+        egg_groups=egg_groups,
         page=page,
         page_size=page_size,
     )
@@ -88,6 +94,23 @@ async def get_pokemon(
         "page_size": page_size,
         "items": [to_pokemon_list_item(row) for row in rows],
     }
+
+
+def _normalize_multi_filter(values: list[str] | None) -> list[str]:
+    """
+    仅按“集合语义”处理：attr=火&attr=恶。
+    不做逗号拆分，避免把合法值误切分。
+    """
+    if not values:
+        return []
+    result: list[str] = []
+    seen: set[str] = set()
+    for raw in values:
+        v = raw.strip()
+        if v and v not in seen:
+            seen.add(v)
+            result.append(v)
+    return result
 
 
 async def get_pokemon_by_body_metrics(height_m: float, weight_kg: float) -> dict:

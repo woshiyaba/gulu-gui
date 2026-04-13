@@ -49,28 +49,48 @@ def _dedupe_body_metric_rows(rows: list[dict]) -> list[dict]:
     return deduped_rows
 
 
-def _build_filters(name: str = "", attr: str = "", egg_group: str = "") -> tuple[str, list]:
+def _build_filters(
+    name: str = "",
+    attrs: list[str] | None = None,
+    egg_groups: list[str] | None = None,
+) -> tuple[str, list]:
     """构建列表查询的 WHERE 条件与参数。"""
     conditions: list[str] = []
     params: list = []
+    attrs = attrs or []
+    egg_groups = egg_groups or []
 
     if name:
         conditions.append("p.name LIKE %s")
         params.append(f"%{name}%")
 
-    if attr:
+    if attrs:
+        attr_placeholders = ", ".join(["%s"] * len(attrs))
+        # 属性多选按交集处理：必须同时拥有所选全部属性（适配双属性精灵检索）
         conditions.append(
-            "EXISTS (SELECT 1 FROM pokemon_attribute pa2 "
-            "WHERE pa2.pokemon_name = p.name AND pa2.attr_name = %s)"
+            "EXISTS ("
+            "SELECT 1 FROM pokemon_attribute pa2 "
+            "WHERE pa2.pokemon_name = p.name "
+            f"AND pa2.attr_name IN ({attr_placeholders}) "
+            "GROUP BY pa2.pokemon_name "
+            f"HAVING COUNT(DISTINCT pa2.attr_name) = {len(attrs)}"
+            ")"
         )
-        params.append(attr)
+        params.extend(attrs)
 
-    if egg_group:
+    if egg_groups:
+        egg_placeholders = ", ".join(["%s"] * len(egg_groups))
+        # 蛋组多选按交集处理：必须同时属于所选全部蛋组
         conditions.append(
-            "EXISTS (SELECT 1 FROM pokemon_egg_group peg "
-            "WHERE peg.pokemon_id = p.id AND peg.group_name = %s)"
+            "EXISTS ("
+            "SELECT 1 FROM pokemon_egg_group peg "
+            "WHERE peg.pokemon_id = p.id "
+            f"AND peg.group_name IN ({egg_placeholders}) "
+            "GROUP BY peg.pokemon_id "
+            f"HAVING COUNT(DISTINCT peg.group_name) = {len(egg_groups)}"
+            ")"
         )
-        params.append(egg_group)
+        params.extend(egg_groups)
 
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
     return where_clause, params
@@ -98,9 +118,13 @@ async def list_egg_groups() -> list[dict]:
             return await cur.fetchall()
 
 
-async def count_pokemon(name: str = "", attr: str = "", egg_group: str = "") -> int:
+async def count_pokemon(
+    name: str = "",
+    attrs: list[str] | None = None,
+    egg_groups: list[str] | None = None,
+) -> int:
     """查询符合条件的精灵总数。"""
-    where_clause, params = _build_filters(name=name, attr=attr, egg_group=egg_group)
+    where_clause, params = _build_filters(name=name, attrs=attrs, egg_groups=egg_groups)
     pool = await get_pool()
     async with pool.acquire() as conn:
         async with conn.cursor() as cur:
@@ -114,13 +138,13 @@ async def count_pokemon(name: str = "", attr: str = "", egg_group: str = "") -> 
 
 async def list_pokemon(
     name: str = "",
-    attr: str = "",
-    egg_group: str = "",
+    attrs: list[str] | None = None,
+    egg_groups: list[str] | None = None,
     page: int = 1,
     page_size: int = 30,
 ) -> list[dict]:
     """分页查询精灵基础信息与属性。"""
-    where_clause, params = _build_filters(name=name, attr=attr, egg_group=egg_group)
+    where_clause, params = _build_filters(name=name, attrs=attrs, egg_groups=egg_groups)
     offset = (page - 1) * page_size
 
     pool = await get_pool()

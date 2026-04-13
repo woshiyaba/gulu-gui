@@ -16,8 +16,8 @@ const loading = ref(false)
 const error = ref('')
 
 const searchName = ref('')
-const selectedAttr = ref('')
-const selectedEggGroup = ref('')
+const selectedAttrs = ref<string[]>([])
+const selectedEggGroups = ref<string[]>([])
 const currentPage = ref(1)
 const pageSize = 30
 const { isDark, toggleTheme } = useTheme()
@@ -65,8 +65,8 @@ async function loadPokemon(reset = false) {
   try {
     const res = await fetchPokemon({
       name: searchName.value || undefined,
-      attr: selectedAttr.value || undefined,
-      egg_group: selectedEggGroup.value || undefined,
+      attr: selectedAttrs.value.length ? selectedAttrs.value : undefined,
+      egg_group: selectedEggGroups.value.length ? selectedEggGroups.value : undefined,
       page: currentPage.value,
       page_size: pageSize,
     })
@@ -99,12 +99,12 @@ async function loadNextPage() {
 }
 
 // ── 筛选条件变化时重置到第一页 ────────────────────────────
-function onAttrChange(attr: string) {
-  selectedAttr.value = attr
+function onAttrChange(attrs: string[]) {
+  selectedAttrs.value = attrs
 }
 
-function onEggGroupChange(group: string) {
-  selectedEggGroup.value = group
+function onEggGroupChange(groups: string[]) {
+  selectedEggGroups.value = groups
 }
 
 function onSearch() {
@@ -121,11 +121,11 @@ watch(searchName, () => {
   }, 300)
 })
 
-watch(selectedAttr, () => {
+watch(selectedAttrs, () => {
   void resetAndLoadPokemon()
 })
 
-watch(selectedEggGroup, () => {
+watch(selectedEggGroups, () => {
   void resetAndLoadPokemon()
 })
 
@@ -180,12 +180,12 @@ onBeforeUnmount(() => {
       <!-- 属性筛选栏 -->
       <EggGroupFilter
         :groups="eggGroups"
-        :selected="selectedEggGroup"
+        :selected="selectedEggGroups"
         @change="onEggGroupChange"
       />
       <AttributeFilter
         :attributes="attributes"
-        :selected="selectedAttr"
+        :selected="selectedAttrs"
         @change="onAttrChange"
       />
 

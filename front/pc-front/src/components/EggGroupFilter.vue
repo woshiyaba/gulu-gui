@@ -1,30 +1,33 @@
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   groups: string[]
-  selected: string
+  selected: string[]
 }>()
 
 const emit = defineEmits<{
-  (e: 'change', group: string): void
+  (e: 'change', groups: string[]): void
 }>()
+
+function toggleGroup(group: string) {
+  const selectedSet = new Set(props.selected)
+  if (selectedSet.has(group)) {
+    selectedSet.delete(group)
+  } else {
+    selectedSet.add(group)
+  }
+  emit('change', Array.from(selectedSet))
+}
 </script>
 
 <template>
   <div class="egg-filter">
     <span class="egg-filter-label">蛋组</span>
     <button
-      class="egg-btn"
-      :class="{ active: selected === '' }"
-      @click="emit('change', '')"
-    >
-      全部
-    </button>
-    <button
       v-for="g in groups"
       :key="g"
       class="egg-btn"
-      :class="{ active: selected === g }"
-      @click="emit('change', g)"
+      :class="{ active: selected.includes(g) }"
+      @click="toggleGroup(g)"
     >
       {{ g }}
     </button>
