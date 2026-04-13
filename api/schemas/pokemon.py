@@ -25,6 +25,17 @@ class PokemonListResponse(BaseModel):
     items: list[PokemonListItem] = Field(default_factory=list)
 
 
+class SkillStoneItem(BaseModel):
+    skill_name: str
+    obtain_method: str = ""
+    icon: str = ""
+
+
+class SkillStoneListResponse(BaseModel):
+    total: int
+    items: list[SkillStoneItem] = Field(default_factory=list)
+
+
 class PokemonBodyMatchItem(BaseModel):
     pet_name: str
     image_url: str

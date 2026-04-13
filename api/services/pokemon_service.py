@@ -67,6 +67,21 @@ async def get_egg_group_names() -> list[str]:
     return [row["group_name"] for row in rows]
 
 
+async def get_skill_stones(skill_name: str = "") -> dict:
+    rows = await pokemon_repository.list_skill_stones(skill_name=skill_name.strip())
+    return {
+        "total": len(rows),
+        "items": [
+            {
+                "skill_name": row["skill_name"],
+                "obtain_method": row["obtain_method"],
+                "icon": build_image_url(row.get("icon", "")),
+            }
+            for row in rows
+        ],
+    }
+
+
 async def get_pokemon(
     name: str = "",
     attrs: list[str] | None = None,

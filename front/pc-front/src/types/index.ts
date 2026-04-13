@@ -22,6 +22,17 @@ export interface PokemonListResponse {
   items: Pokemon[]
 }
 
+export interface SkillStone {
+  skill_name: string
+  obtain_method: string
+  icon: string
+}
+
+export interface SkillStoneListResponse {
+  total: number
+  items: SkillStone[]
+}
+
 export interface PokemonBodyMatchItem {
   pet_name: string
   image_url: string

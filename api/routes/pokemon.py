@@ -6,6 +6,7 @@ from api.schemas.pokemon import (
     PokemonBodyMatchResponse,
     PokemonDetailResponse,
     PokemonListResponse,
+    SkillStoneListResponse,
 )
 from api.services.pokemon_service import (
     PokemonNotFoundError,
@@ -15,6 +16,7 @@ from api.services.pokemon_service import (
     get_pokemon as get_pokemon_service,
     get_pokemon_detail as get_pokemon_detail_service,
     get_pokemon_evolution_chain as get_pokemon_evolution_chain_service,
+    get_skill_stones as get_skill_stones_service,
 )
 
 router = APIRouter(prefix="/api")
@@ -29,6 +31,14 @@ async def get_attributes():
 async def get_egg_groups():
     """返回所有不重复的蛋组名称，用于前端筛选。"""
     return await get_egg_group_names_service()
+
+
+@router.get("/skill-stones", response_model=SkillStoneListResponse)
+async def get_skill_stones(
+    skill_name: str = Query(default="", description="技能名关键词；为空时返回全部技能石"),
+):
+    """按技能名查询技能石；不传 skill_name 时返回全部。"""
+    return await get_skill_stones_service(skill_name=skill_name)
 
 
 @router.get("/pokemon", response_model=PokemonListResponse)

@@ -136,6 +136,30 @@ async def list_egg_groups() -> list[dict]:
             return await cur.fetchall()
 
 
+async def list_skill_stones(skill_name: str = "") -> list[dict]:
+    """查询技能石列表；skill_name 为空时返回全部。"""
+    params: list[str] = []
+    where_clause = ""
+    if skill_name:
+        where_clause = "WHERE ss.skill_name LIKE %s"
+        params.append(f"%{skill_name}%")
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT ss.skill_name, ss.obtain_method, s.icon
+                FROM skill_stone ss
+                LEFT JOIN skill s ON s.name = ss.skill_name
+                {where_clause}
+                ORDER BY ss.skill_name
+                """,
+                params,
+            )
+            return await cur.fetchall()
+
+
 async def count_pokemon(
     name: str = "",
     attrs: list[str] | None = None,
