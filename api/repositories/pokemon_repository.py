@@ -136,6 +136,54 @@ async def list_egg_groups() -> list[dict]:
             return await cur.fetchall()
 
 
+async def list_skill_types() -> list[str]:
+    """查询所有不重复的技能类型（物攻/魔攻/状态/防御），供前端筛选。"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT DISTINCT type FROM skill WHERE type != '' ORDER BY type"
+            )
+            rows = await cur.fetchall()
+            return [row["type"] for row in rows]
+
+
+async def list_skills(
+    name: str = "",
+    skill_type: str = "",
+    attr: str = "",
+) -> list[dict]:
+    """查询技能列表，三个筛选条件均可选。"""
+    conditions: list[str] = []
+    params: list[str] = []
+
+    if name:
+        conditions.append("name LIKE %s")
+        params.append(f"%{name}%")
+    if skill_type:
+        conditions.append("type = %s")
+        params.append(skill_type)
+    if attr:
+        conditions.append("attr = %s")
+        params.append(attr)
+
+    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT name, attr, power, type, consume, skill_desc, icon
+                FROM skill
+                {where_clause}
+                ORDER BY name
+                """,
+                params,
+            )
+            return await cur.fetchall()
+
+
 async def list_skill_stones(skill_name: str = "") -> list[dict]:
     """查询技能石列表；skill_name 为空时返回全部。"""
     params: list[str] = []

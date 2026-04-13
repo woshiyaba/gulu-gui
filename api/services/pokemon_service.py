@@ -4,6 +4,7 @@ from api.utils.pokemon_mapper import (
     to_attribute_item,
     to_pokemon_detail,
     to_pokemon_list_item,
+    to_skill_item,
 )
 from api.utils.type_chart import build_defensive_type_chart_payload
 
@@ -65,6 +66,26 @@ async def get_attributes() -> list[dict]:
 async def get_egg_group_names() -> list[str]:
     rows = await pokemon_repository.list_egg_groups()
     return [row["group_name"] for row in rows]
+
+
+async def get_skill_types() -> list[str]:
+    return await pokemon_repository.list_skill_types()
+
+
+async def get_skills(
+    name: str = "",
+    skill_type: str = "",
+    attr: str = "",
+) -> dict:
+    rows = await pokemon_repository.list_skills(
+        name=name.strip(),
+        skill_type=skill_type.strip(),
+        attr=attr.strip(),
+    )
+    return {
+        "total": len(rows),
+        "items": [to_skill_item(row) for row in rows],
+    }
 
 
 async def get_skill_stones(skill_name: str = "") -> dict:

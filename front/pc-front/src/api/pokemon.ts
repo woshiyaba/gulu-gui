@@ -5,6 +5,7 @@ import type {
   PokemonDetail,
   PokemonEvolutionChain,
   PokemonListResponse,
+  SkillListResponse,
   SkillStoneListResponse,
 } from '@/types'
 
@@ -37,6 +38,12 @@ export interface PokemonBodyMatchQuery {
 
 export interface SkillStoneQuery {
   skill_name?: string
+}
+
+export interface SkillQuery {
+  name?: string
+  skill_type?: string
+  attr?: string
 }
 
 export function fetchAttributes(): Promise<Attribute[]> {
@@ -77,6 +84,18 @@ export function fetchPokemonBodyMatch(
   query: PokemonBodyMatchQuery,
 ): Promise<PokemonBodyMatchResponse> {
   return http.get<PokemonBodyMatchResponse>('/api/pokemon/body-match', { params: query }).then((r) => r.data)
+}
+
+export function fetchSkillTypes(): Promise<string[]> {
+  return http.get<string[]>('/api/skill-types').then((r) => r.data)
+}
+
+export function fetchSkills(query: SkillQuery = {}): Promise<SkillListResponse> {
+  const params = new URLSearchParams()
+  if (query.name?.trim()) params.append('name', query.name.trim())
+  if (query.skill_type?.trim()) params.append('skill_type', query.skill_type.trim())
+  if (query.attr?.trim()) params.append('attr', query.attr.trim())
+  return http.get<SkillListResponse>('/api/skills', { params }).then((r) => r.data)
 }
 
 export function fetchSkillStones(query: SkillStoneQuery = {}): Promise<SkillStoneListResponse> {

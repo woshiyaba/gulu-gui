@@ -6,6 +6,7 @@ from api.schemas.pokemon import (
     PokemonBodyMatchResponse,
     PokemonDetailResponse,
     PokemonListResponse,
+    SkillListResponse,
     SkillStoneListResponse,
 )
 from api.services.pokemon_service import (
@@ -17,6 +18,8 @@ from api.services.pokemon_service import (
     get_pokemon_detail as get_pokemon_detail_service,
     get_pokemon_evolution_chain as get_pokemon_evolution_chain_service,
     get_skill_stones as get_skill_stones_service,
+    get_skill_types as get_skill_types_service,
+    get_skills as get_skills_service,
 )
 
 router = APIRouter(prefix="/api")
@@ -39,6 +42,22 @@ async def get_skill_stones(
 ):
     """按技能名查询技能石；不传 skill_name 时返回全部。"""
     return await get_skill_stones_service(skill_name=skill_name)
+
+
+@router.get("/skill-types", response_model=list[str])
+async def get_skill_types():
+    """返回所有不重复的技能类型（物攻/魔攻/状态/防御），用于前端筛选。"""
+    return await get_skill_types_service()
+
+
+@router.get("/skills", response_model=SkillListResponse)
+async def get_skills(
+    name: str = Query(default="", description="技能名关键词"),
+    skill_type: str = Query(default="", description="技能类型：物攻/魔攻/状态/防御"),
+    attr: str = Query(default="", description="技能属性：草/火/水 等"),
+):
+    """查询技能列表，支持按名称模糊搜索、按类型和属性筛选。"""
+    return await get_skills_service(name=name, skill_type=skill_type, attr=attr)
 
 
 @router.get("/pokemon", response_model=PokemonListResponse)

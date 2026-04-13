@@ -97,6 +97,11 @@ class PokemonSkill(BaseModel):
     icon: str = ""
 
 
+class SkillListResponse(BaseModel):
+    total: int
+    items: list[PokemonSkill] = Field(default_factory=list)
+
+
 class DefensiveTypeChartCell(BaseModel):
     attacker_attr: str
     multiplier: float

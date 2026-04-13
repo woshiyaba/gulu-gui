@@ -94,6 +94,11 @@ export interface Skill {
   icon: string
 }
 
+export interface SkillListResponse {
+  total: number
+  items: Skill[]
+}
+
 /** 受某一进攻招式属性技能时的伤害倍率（双属性为单方倍率相乘） */
 export interface DefensiveTypeChartCell {
   attacker_attr: string
