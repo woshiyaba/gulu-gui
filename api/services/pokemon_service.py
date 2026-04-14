@@ -70,6 +70,11 @@ async def get_egg_group_names() -> list[str]:
     return [row["group_name"] for row in rows]
 
 
+async def get_categories() -> list[dict]:
+    """返回 category 表的全量映射数据。"""
+    return await pokemon_repository.list_categories()
+
+
 async def get_skill_types() -> list[str]:
     return await pokemon_repository.list_skill_types()
 

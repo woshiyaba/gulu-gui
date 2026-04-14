@@ -136,6 +136,21 @@ async def list_egg_groups() -> list[dict]:
             return await cur.fetchall()
 
 
+async def list_categories() -> list[dict]:
+    """查询 category 表的全部映射数据。"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT id, category_id, description, type
+                FROM category
+                ORDER BY category_id, id
+                """
+            )
+            return await cur.fetchall()
+
+
 async def list_skill_types() -> list[str]:
     """查询所有不重复的技能类型（物攻/魔攻/状态/防御），供前端筛选。"""
     pool = await get_pool()

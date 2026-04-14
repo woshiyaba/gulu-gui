@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Query
 
 from api.schemas.pokemon import (
     AttributeItem,
+    CategoryItem,
     PetMapPointItem,
     PokemonEvolutionChainResponse,
     PokemonBodyMatchResponse,
@@ -13,6 +14,7 @@ from api.schemas.pokemon import (
 from api.services.pokemon_service import (
     PokemonNotFoundError,
     get_attributes as get_attributes_service,
+    get_categories as get_categories_service,
     get_egg_group_names as get_egg_group_names_service,
     get_pet_map_points as get_pet_map_points_service,
     get_pokemon_by_body_metrics as get_pokemon_by_body_metrics_service,
@@ -36,6 +38,12 @@ async def get_attributes():
 async def get_egg_groups():
     """返回所有不重复的蛋组名称，用于前端筛选。"""
     return await get_egg_group_names_service()
+
+
+@router.get("/pokemon/categories", response_model=list[CategoryItem])
+async def get_categories():
+    """全量返回 category 表中的 category_id 映射数据。"""
+    return await get_categories_service()
 
 
 @router.get("/pokemon/map-points", response_model=list[PetMapPointItem])

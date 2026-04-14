@@ -6,6 +6,13 @@ class AttributeItem(BaseModel):
     attr_image: str
 
 
+class CategoryItem(BaseModel):
+    id: int
+    category_id: int
+    description: str | None = None
+    type: str | None = None
+
+
 class PokemonListItem(BaseModel):
     no: str
     name: str
