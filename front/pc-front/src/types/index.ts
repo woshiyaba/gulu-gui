@@ -99,6 +99,25 @@ export interface SkillListResponse {
   items: Skill[]
 }
 
+export interface Category {
+  id: number
+  category_id: number
+  description: string
+  type: string
+  category_image_url: string
+}
+
+export interface MapPoint {
+  id: number
+  source_id: number
+  map_id: number
+  title: string
+  latitude: number
+  longitude: number
+  category_id: number
+  category_image_url: string
+}
+
 /** 受某一进攻招式属性技能时的伤害倍率（双属性为单方倍率相乘） */
 export interface DefensiveTypeChartCell {
   attacker_attr: string

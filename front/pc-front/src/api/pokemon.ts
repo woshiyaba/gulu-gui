@@ -1,6 +1,8 @@
 import axios from 'axios'
 import type {
   Attribute,
+  Category,
+  MapPoint,
   PokemonBodyMatchResponse,
   PokemonDetail,
   PokemonEvolutionChain,
@@ -102,4 +104,12 @@ export function fetchSkillStones(query: SkillStoneQuery = {}): Promise<SkillSton
   const skillName = query.skill_name?.trim()
   const params = skillName ? { skill_name: skillName } : undefined
   return http.get<SkillStoneListResponse>('/api/skill-stones', { params }).then((r) => r.data)
+}
+
+export function fetchCategories(): Promise<Category[]> {
+  return http.get<Category[]>('/api/pokemon/categories').then((r) => r.data)
+}
+
+export function fetchMapPoints(): Promise<MapPoint[]> {
+  return http.get<MapPoint[]>('/api/pokemon/map-points').then((r) => r.data)
 }

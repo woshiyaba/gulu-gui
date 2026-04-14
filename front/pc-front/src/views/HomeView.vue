@@ -187,6 +187,7 @@ onBeforeUnmount(() => {
         <span class="search-icon">🔍</span>
       </div>
 
+      <RouterLink class="nav-link-btn" to="/map">世界地图</RouterLink>
       <RouterLink class="nav-link-btn" to="/body-match">量体查宠</RouterLink>
       <RouterLink class="nav-link-btn" to="/skill-stones">技能石查询</RouterLink>
       <RouterLink class="nav-link-btn" to="/skills">技能图鉴</RouterLink>
