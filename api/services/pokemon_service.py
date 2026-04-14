@@ -8,6 +8,8 @@ from api.utils.pokemon_mapper import (
 )
 from api.utils.type_chart import build_defensive_type_chart_payload
 
+_CATEGORY_ICON_BASE_URL = "http://101.126.137.23/images/icon"
+
 
 class PokemonNotFoundError(Exception):
     """精灵不存在。"""
@@ -175,6 +177,24 @@ async def get_pokemon_by_body_metrics(height_m: float, weight_kg: float) -> dict
             for r in rows
         ],
     }
+
+
+async def get_pet_map_points() -> list[dict]:
+    """返回 pet_map_point 表全量点位，并补 category_id 对应图标地址。"""
+    rows = await pokemon_repository.list_pet_map_points()
+    return [
+        {
+            "id": row["id"],
+            "source_id": row["source_id"],
+            "map_id": row["map_id"],
+            "title": row.get("title", ""),
+            "latitude": float(row["latitude"]),
+            "longitude": float(row["longitude"]),
+            "category_id": row["category_id"],
+            "category_image_url": f"{_CATEGORY_ICON_BASE_URL}/{row['category_id']}.png",
+        }
+        for row in rows
+    ]
 
 
 async def get_pokemon_detail(name: str) -> dict:

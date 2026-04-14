@@ -294,6 +294,21 @@ async def list_pokemon_by_body_metrics(height_cm: int, weight_g: int) -> list[di
             return _dedupe_body_metric_rows(rows)
 
 
+async def list_pet_map_points() -> list[dict]:
+    """查询地图点位表的全部数据。"""
+    pool = await get_pool()
+    async with pool.acquire() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT id, source_id, map_id, title, latitude, longitude, category_id
+                FROM pet_map_point
+                ORDER BY id
+                """
+            )
+            return await cur.fetchall()
+
+
 async def get_pokemon_base(name: str) -> dict | None:
     """查询单只精灵的基础信息与属性。"""
     pool = await get_pool()

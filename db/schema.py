@@ -2,6 +2,7 @@ from db.connection import get_conn
 
 # 删表顺序：先删关联表，避免日后加外键时出错
 _DROP_ORDER = (
+    "pet_map_point",
     "pokemon_skill",
     "pokemon_detail",
     "pokemon_attribute",
@@ -15,6 +16,24 @@ _DROP_ORDER = (
 
 # 按依赖顺序排列，先建被引用的表
 _SCHEMAS = [
+    # 地图点位：由 docs/pets/maps.json 导入，source_id 对应来源原始 id
+    """
+    CREATE TABLE IF NOT EXISTS pet_map_point (
+        id          INT             NOT NULL AUTO_INCREMENT,
+        source_id   BIGINT          NOT NULL COMMENT 'maps.json 原始 id，避免占用数据库自增主键',
+        map_id      INT             NOT NULL COMMENT '地图 id，优先取 mapId，兼容 map_id',
+        title       VARCHAR(100)    NOT NULL DEFAULT '' COMMENT '点位标题',
+        latitude    DECIMAL(18, 15) NOT NULL COMMENT '纬度',
+        longitude   DECIMAL(18, 15) NOT NULL COMMENT '经度',
+        category_id BIGINT          NOT NULL COMMENT '分类 id',
+        PRIMARY KEY (id),
+        UNIQUE KEY uk_source_id (source_id),
+        KEY idx_map_id (map_id),
+        KEY idx_category_id (category_id),
+        KEY idx_map_category (map_id, category_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='地图点位数据';
+    """,
+
     # 属性克制矩阵：表头顺序 + 单方「防守属性 × 进攻属性 → 倍率」（双属性在接口层相乘）
     """
     CREATE TABLE IF NOT EXISTS attribute_axis (

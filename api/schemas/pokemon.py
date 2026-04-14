@@ -50,6 +50,17 @@ class PokemonBodyMatchResponse(BaseModel):
     items: list[PokemonBodyMatchItem] = Field(default_factory=list)
 
 
+class PetMapPointItem(BaseModel):
+    id: int
+    source_id: int
+    map_id: int
+    title: str = ""
+    latitude: float
+    longitude: float
+    category_id: int
+    category_image_url: str
+
+
 class EvolutionChainItem(BaseModel):
     name: str
     image_url: str = ""
