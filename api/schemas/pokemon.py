@@ -11,6 +11,7 @@ class CategoryItem(BaseModel):
     category_id: int
     description: str | None = None
     type: str | None = None
+    category_image_url: str
 
 
 class PokemonListItem(BaseModel):

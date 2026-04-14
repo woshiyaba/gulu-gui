@@ -1,82 +1,470 @@
-任务	支线任务	17310030027	https://ue.17173cdn.com/a/terra/icon/rocom/17310030027.png
-任务	未分类任务	17310030028	https://ue.17173cdn.com/a/terra/icon/rocom/17310030028.png
-其他	挑战小游戏	17310030029	https://ue.17173cdn.com/a/terra/icon/rocom/17310030029.png
-其他	未分类内容	17310030030	https://ue.17173cdn.com/a/terra/icon/rocom/17310030030.png
-地点	BOSS（精灵首领）	17310030024	https://ue.17173cdn.com/a/terra/icon/rocom/17310030024.png
-地点	副本	17310030025	https://ue.17173cdn.com/a/terra/icon/rocom/17310030025.png
-地点	露天对战	17310030026	https://ue.17173cdn.com/a/terra/icon/rocom/17310030026.png
-地点	魔力之源（传送点）	17310030038	https://ue.17173cdn.com/a/terra/icon/rocom/17310030038.png
-地点	眠枭庇护所	17310030039	https://ue.17173cdn.com/a/terra/icon/rocom/17310030039.png
-地点	稀兽花种	17310030040	https://ue.17173cdn.com/a/terra/icon/rocom/17310030040.png
-地点	炼金台	17310030041	https://ue.17173cdn.com/a/terra/icon/rocom/17310030041.png
-地点	未分类地点	17310030042	https://ue.17173cdn.com/a/terra/icon/rocom/17310030042.png
-收集	宝箱	17310030001	https://ue.17173cdn.com/a/terra/icon/rocom/17310030001.png
-收集	植物（果树）	17310030002	https://ue.17173cdn.com/a/terra/icon/rocom/17310030002.png
-收集	矿石	17310030003	https://ue.17173cdn.com/a/terra/icon/rocom/17310030003.png
-收集	未分类材料	17310030004	https://ue.17173cdn.com/a/terra/icon/rocom/17310030004.png
-收集	精灵的宝藏	17310030031	https://ue.17173cdn.com/a/terra/icon/rocom/17310030031.png
-收集	精灵好感度植物	17310030032	https://ue.17173cdn.com/a/terra/icon/rocom/17310030032.png
-收集	魔法石	17310030033	https://ue.17173cdn.com/a/terra/icon/rocom/17310030033.png
-收集	魔法	17310030034	https://ue.17173cdn.com/a/terra/icon/rocom/17310030034.png
-收集	眠枭之星（蓝）	17310030035	https://ue.17173cdn.com/a/terra/icon/rocom/17310030035.png
-收集	崭新乐章	17310030036	https://ue.17173cdn.com/a/terra/icon/rocom/17310030036.png
-收集	眠枭之星（黄）	17310030047	https://ue.17173cdn.com/a/terra/icon/rocom/17310030047.png
-果树	可可果	17310030080	https://ue.17173cdn.com/a/terra/icon/rocom/17310030080.png
-果树	魔力果	17310030081	https://ue.17173cdn.com/a/terra/icon/rocom/17310030081.png
-果树	无花果	17310030082	https://ue.17173cdn.com/a/terra/icon/rocom/17310030082.png
-矿石	黄石榴石	17310030043	https://ue.17173cdn.com/a/terra/icon/rocom/17310030043.png
-矿石	黑晶琉璃	17310030044	https://ue.17173cdn.com/a/terra/icon/rocom/17310030044.png
-矿石	紫莲刚玉	17310030045	https://ue.17173cdn.com/a/terra/icon/rocom/17310030045.png
-矿石	蓝晶碧玺	17310030046	https://ue.17173cdn.com/a/terra/icon/rocom/17310030046.png
-精灵	草系	17310030005	https://ue.17173cdn.com/a/terra/icon/rocom/17310030005.png
-精灵	萌系	17310030006	https://ue.17173cdn.com/a/terra/icon/rocom/17310030006.png
-精灵	火系	17310030007	https://ue.17173cdn.com/a/terra/icon/rocom/17310030007.png
-精灵	虫系	17310030008	https://ue.17173cdn.com/a/terra/icon/rocom/17310030008.png
-精灵	水系	17310030009	https://ue.17173cdn.com/a/terra/icon/rocom/17310030009.png
-精灵	翼系	17310030010	https://ue.17173cdn.com/a/terra/icon/rocom/17310030010.png
-精灵	幽系	17310030011	https://ue.17173cdn.com/a/terra/icon/rocom/17310030011.png
-精灵	电系	17310030012	https://ue.17173cdn.com/a/terra/icon/rocom/17310030012.png
-精灵	光系	17310030013	https://ue.17173cdn.com/a/terra/icon/rocom/17310030013.png
-精灵	地系	17310030014	https://ue.17173cdn.com/a/terra/icon/rocom/17310030014.png
-精灵	龙系	17310030015	https://ue.17173cdn.com/a/terra/icon/rocom/17310030015.png
-精灵	毒系	17310030016	https://ue.17173cdn.com/a/terra/icon/rocom/17310030016.png
-精灵	武系	17310030017	https://ue.17173cdn.com/a/terra/icon/rocom/17310030017.png
-精灵	恶系	17310030018	https://ue.17173cdn.com/a/terra/icon/rocom/17310030018.png
-精灵	幻系	17310030019	https://ue.17173cdn.com/a/terra/icon/rocom/17310030019.png
-精灵	冰系	17310030020	https://ue.17173cdn.com/a/terra/icon/rocom/17310030020.png
-精灵	普通系	17310030021	https://ue.17173cdn.com/a/terra/icon/rocom/17310030021.png
-精灵	机械系	17310030022	https://ue.17173cdn.com/a/terra/icon/rocom/17310030022.png
-精灵	未分类精灵	17310030023	https://ue.17173cdn.com/a/terra/icon/rocom/17310030023.png
-精灵	稀有精灵	17310030037	https://ue.17173cdn.com/a/terra/icon/rocom/17310030037.png
-花草	幽幽鬼火	17310030048	https://ue.17173cdn.com/a/terra/icon/rocom/17310030048.png
-花草	恶魔雪茄	17310030049	https://ue.17173cdn.com/a/terra/icon/rocom/17310030049.png
-花草	彩玉花	17310030050	https://ue.17173cdn.com/a/terra/icon/rocom/17310030050.png
-花草	大嘴花	17310030051	https://ue.17173cdn.com/a/terra/icon/rocom/17310030051.png
-花草	短木莲	17310030052	https://ue.17173cdn.com/a/terra/icon/rocom/17310030052.png
-花草	藻羽花	17310030053	https://ue.17173cdn.com/a/terra/icon/rocom/17310030053.png
-花草	风卷草	17310030054	https://ue.17173cdn.com/a/terra/icon/rocom/17310030054.png
-花草	凤眼莲	17310030055	https://ue.17173cdn.com/a/terra/icon/rocom/17310030055.png
-花草	海桑花	17310030056	https://ue.17173cdn.com/a/terra/icon/rocom/17310030056.png
-花草	海神花	17310030057	https://ue.17173cdn.com/a/terra/icon/rocom/17310030057.png
-花草	花星角	17310030058	https://ue.17173cdn.com/a/terra/icon/rocom/17310030058.png
-花草	火焰花	17310030059	https://ue.17173cdn.com/a/terra/icon/rocom/17310030059.png
-花草	流星兰	17310030060	https://ue.17173cdn.com/a/terra/icon/rocom/17310030060.png
-花草	幽幽草	17310030061	https://ue.17173cdn.com/a/terra/icon/rocom/17310030061.png
-花草	密黄菌	17310030062	https://ue.17173cdn.com/a/terra/icon/rocom/17310030062.png
-花草	喵喵草	17310030063	https://ue.17173cdn.com/a/terra/icon/rocom/17310030063.png
-花草	喷气菇	17310030064	https://ue.17173cdn.com/a/terra/icon/rocom/17310030064.png
-花草	伞伞菇	17310030065	https://ue.17173cdn.com/a/terra/icon/rocom/17310030065.png
-花草	紫晶菇	17310030066	https://ue.17173cdn.com/a/terra/icon/rocom/17310030066.png
-花草	紫雀花	17310030067	https://ue.17173cdn.com/a/terra/icon/rocom/17310030067.png
-花草	天使草	17310030068	https://ue.17173cdn.com/a/terra/icon/rocom/17310030068.png
-花草	向阳花	17310030069	https://ue.17173cdn.com/a/terra/icon/rocom/17310030069.png
-花草	象牙花	17310030070	https://ue.17173cdn.com/a/terra/icon/rocom/17310030070.png
-花草	星霜花	17310030071	https://ue.17173cdn.com/a/terra/icon/rocom/17310030071.png
-花草	杏黄贝	17310030072	https://ue.17173cdn.com/a/terra/icon/rocom/17310030072.png
-花草	荧光兰	17310030073	https://ue.17173cdn.com/a/terra/icon/rocom/17310030073.png
-花草	雪菇	17310030074	https://ue.17173cdn.com/a/terra/icon/rocom/17310030074.png
-花草	蓝掌	17310030075	https://ue.17173cdn.com/a/terra/icon/rocom/17310030075.png
-花草	蜂窝	17310030076	https://ue.17173cdn.com/a/terra/icon/rocom/17310030076.png
-花草	骨片	17310030077	https://ue.17173cdn.com/a/terra/icon/rocom/17310030077.png
-花草	石耳	17310030078	https://ue.17173cdn.com/a/terra/icon/rocom/17310030078.png
-花草	睡铃	17310030079	https://ue.17173cdn.com/a/terra/icon/rocom/17310030079.png
+[
+    {
+        "id": 1,
+        "category_id": 17310030001,
+        "description": "宝箱",
+        "type": "收集"
+    },
+    {
+        "id": 2,
+        "category_id": 17310030002,
+        "description": "植物（果树）",
+        "type": "收集"
+    },
+    {
+        "id": 3,
+        "category_id": 17310030004,
+        "description": "未分类材料",
+        "type": "收集"
+    },
+    {
+        "id": 4,
+        "category_id": 17310030005,
+        "description": "草系",
+        "type": "精灵"
+    },
+    {
+        "id": 5,
+        "category_id": 17310030006,
+        "description": "萌系",
+        "type": "精灵"
+    },
+    {
+        "id": 6,
+        "category_id": 17310030007,
+        "description": "火系",
+        "type": "精灵"
+    },
+    {
+        "id": 7,
+        "category_id": 17310030008,
+        "description": "虫系",
+        "type": "精灵"
+    },
+    {
+        "id": 8,
+        "category_id": 17310030009,
+        "description": "水系",
+        "type": "精灵"
+    },
+    {
+        "id": 9,
+        "category_id": 17310030010,
+        "description": "翼系",
+        "type": "精灵"
+    },
+    {
+        "id": 10,
+        "category_id": 17310030011,
+        "description": "幽系",
+        "type": "精灵"
+    },
+    {
+        "id": 11,
+        "category_id": 17310030012,
+        "description": "电系",
+        "type": "精灵"
+    },
+    {
+        "id": 12,
+        "category_id": 17310030013,
+        "description": "光系",
+        "type": "精灵"
+    },
+    {
+        "id": 13,
+        "category_id": 17310030014,
+        "description": "地系",
+        "type": "精灵"
+    },
+    {
+        "id": 14,
+        "category_id": 17310030015,
+        "description": "龙系",
+        "type": "精灵"
+    },
+    {
+        "id": 15,
+        "category_id": 17310030016,
+        "description": "毒系",
+        "type": "精灵"
+    },
+    {
+        "id": 16,
+        "category_id": 17310030018,
+        "description": "恶系",
+        "type": "精灵"
+    },
+    {
+        "id": 17,
+        "category_id": 17310030019,
+        "description": "幻系",
+        "type": "精灵"
+    },
+    {
+        "id": 18,
+        "category_id": 17310030020,
+        "description": "冰系",
+        "type": "精灵"
+    },
+    {
+        "id": 19,
+        "category_id": 17310030021,
+        "description": "普通系",
+        "type": "精灵"
+    },
+    {
+        "id": 20,
+        "category_id": 17310030022,
+        "description": "机械系",
+        "type": "精灵"
+    },
+    {
+        "id": 21,
+        "category_id": 17310030023,
+        "description": "未分类精灵",
+        "type": "精灵"
+    },
+    {
+        "id": 22,
+        "category_id": 17310030024,
+        "description": "BOSS（精灵首领）",
+        "type": "地点"
+    },
+    {
+        "id": 23,
+        "category_id": 17310030025,
+        "description": "副本",
+        "type": "地点"
+    },
+    {
+        "id": 24,
+        "category_id": 17310030026,
+        "description": "露天对战",
+        "type": "地点"
+    },
+    {
+        "id": 25,
+        "category_id": 17310030027,
+        "description": "支线任务",
+        "type": "任务"
+    },
+    {
+        "id": 26,
+        "category_id": 17310030028,
+        "description": "未分类任务",
+        "type": "任务"
+    },
+    {
+        "id": 27,
+        "category_id": 17310030029,
+        "description": "挑战小游戏",
+        "type": "其他"
+    },
+    {
+        "id": 28,
+        "category_id": 17310030030,
+        "description": "未分类内容",
+        "type": "其他"
+    },
+    {
+        "id": 29,
+        "category_id": 17310030031,
+        "description": "精灵的宝藏",
+        "type": "收集"
+    },
+    {
+        "id": 30,
+        "category_id": 17310030032,
+        "description": "精灵好感度植物",
+        "type": "收集"
+    },
+    {
+        "id": 31,
+        "category_id": 17310030033,
+        "description": "魔法石",
+        "type": "收集"
+    },
+    {
+        "id": 32,
+        "category_id": 17310030034,
+        "description": "魔法",
+        "type": "收集"
+    },
+    {
+        "id": 33,
+        "category_id": 17310030035,
+        "description": "眠枭之星（蓝）",
+        "type": "收集"
+    },
+    {
+        "id": 34,
+        "category_id": 17310030036,
+        "description": "崭新乐章",
+        "type": "收集"
+    },
+    {
+        "id": 35,
+        "category_id": 17310030037,
+        "description": "稀有精灵",
+        "type": "精灵"
+    },
+    {
+        "id": 36,
+        "category_id": 17310030038,
+        "description": "魔力之源（传送点）",
+        "type": "地点"
+    },
+    {
+        "id": 37,
+        "category_id": 17310030039,
+        "description": "眠枭庇护所",
+        "type": "地点"
+    },
+    {
+        "id": 38,
+        "category_id": 17310030040,
+        "description": "稀兽花种",
+        "type": "地点"
+    },
+    {
+        "id": 39,
+        "category_id": 17310030041,
+        "description": "炼金台",
+        "type": "地点"
+    },
+    {
+        "id": 40,
+        "category_id": 17310030042,
+        "description": "未分类地点",
+        "type": "地点"
+    },
+    {
+        "id": 41,
+        "category_id": 17310030043,
+        "description": "黄石榴石",
+        "type": "矿石"
+    },
+    {
+        "id": 42,
+        "category_id": 17310030044,
+        "description": "黑晶琉璃",
+        "type": "矿石"
+    },
+    {
+        "id": 43,
+        "category_id": 17310030045,
+        "description": "紫莲刚玉",
+        "type": "矿石"
+    },
+    {
+        "id": 44,
+        "category_id": 17310030046,
+        "description": "蓝晶碧玺",
+        "type": "矿石"
+    },
+    {
+        "id": 45,
+        "category_id": 17310030047,
+        "description": "眠枭之星（黄）",
+        "type": "收集"
+    },
+    {
+        "id": 46,
+        "category_id": 17310030049,
+        "description": "恶魔雪茄",
+        "type": "花草"
+    },
+    {
+        "id": 47,
+        "category_id": 17310030050,
+        "description": "彩玉花",
+        "type": "花草"
+    },
+    {
+        "id": 48,
+        "category_id": 17310030051,
+        "description": "大嘴花",
+        "type": "花草"
+    },
+    {
+        "id": 49,
+        "category_id": 17310030052,
+        "description": "短木莲",
+        "type": "花草"
+    },
+    {
+        "id": 50,
+        "category_id": 17310030053,
+        "description": "藻羽花",
+        "type": "花草"
+    },
+    {
+        "id": 51,
+        "category_id": 17310030054,
+        "description": "风卷草",
+        "type": "花草"
+    },
+    {
+        "id": 52,
+        "category_id": 17310030055,
+        "description": "凤眼莲",
+        "type": "花草"
+    },
+    {
+        "id": 53,
+        "category_id": 17310030056,
+        "description": "海桑花",
+        "type": "花草"
+    },
+    {
+        "id": 54,
+        "category_id": 17310030057,
+        "description": "海神花",
+        "type": "花草"
+    },
+    {
+        "id": 55,
+        "category_id": 17310030058,
+        "description": "花星角",
+        "type": "花草"
+    },
+    {
+        "id": 56,
+        "category_id": 17310030059,
+        "description": "火焰花",
+        "type": "花草"
+    },
+    {
+        "id": 57,
+        "category_id": 17310030060,
+        "description": "流星兰",
+        "type": "花草"
+    },
+    {
+        "id": 58,
+        "category_id": 17310030061,
+        "description": "幽幽草",
+        "type": "花草"
+    },
+    {
+        "id": 59,
+        "category_id": 17310030062,
+        "description": "密黄菌",
+        "type": "花草"
+    },
+    {
+        "id": 60,
+        "category_id": 17310030063,
+        "description": "喵喵草",
+        "type": "花草"
+    },
+    {
+        "id": 61,
+        "category_id": 17310030064,
+        "description": "喷气菇",
+        "type": "花草"
+    },
+    {
+        "id": 62,
+        "category_id": 17310030065,
+        "description": "伞伞菇",
+        "type": "花草"
+    },
+    {
+        "id": 63,
+        "category_id": 17310030066,
+        "description": "紫晶菇",
+        "type": "花草"
+    },
+    {
+        "id": 64,
+        "category_id": 17310030067,
+        "description": "紫雀花",
+        "type": "花草"
+    },
+    {
+        "id": 65,
+        "category_id": 17310030068,
+        "description": "天使草",
+        "type": "花草"
+    },
+    {
+        "id": 66,
+        "category_id": 17310030069,
+        "description": "向阳花",
+        "type": "花草"
+    },
+    {
+        "id": 67,
+        "category_id": 17310030070,
+        "description": "象牙花",
+        "type": "花草"
+    },
+    {
+        "id": 68,
+        "category_id": 17310030071,
+        "description": "星霜花",
+        "type": "花草"
+    },
+    {
+        "id": 69,
+        "category_id": 17310030072,
+        "description": "杏黄贝",
+        "type": "花草"
+    },
+    {
+        "id": 70,
+        "category_id": 17310030073,
+        "description": "荧光兰",
+        "type": "花草"
+    },
+    {
+        "id": 71,
+        "category_id": 17310030074,
+        "description": "雪菇",
+        "type": "花草"
+    },
+    {
+        "id": 72,
+        "category_id": 17310030075,
+        "description": "蓝掌",
+        "type": "花草"
+    },
+    {
+        "id": 73,
+        "category_id": 17310030077,
+        "description": "骨片",
+        "type": "花草"
+    },
+    {
+        "id": 74,
+        "category_id": 17310030078,
+        "description": "石耳",
+        "type": "花草"
+    },
+    {
+        "id": 75,
+        "category_id": 17310030079,
+        "description": "睡铃",
+        "type": "花草"
+    },
+    {
+        "id": 76,
+        "category_id": 17310030080,
+        "description": "可可果",
+        "type": "果树"
+    },
+    {
+        "id": 77,
+        "category_id": 17310030081,
+        "description": "魔力果",
+        "type": "果树"
+    },
+    {
+        "id": 78,
+        "category_id": 17310030082,
+        "description": "无花果",
+        "type": "果树"
+    }
+]

@@ -71,8 +71,12 @@ async def get_egg_group_names() -> list[str]:
 
 
 async def get_categories() -> list[dict]:
-    """返回 category 表的全量映射数据。"""
-    return await pokemon_repository.list_categories()
+    """返回 category 表的全量映射数据，并补 category_id 对应图标地址。"""
+    rows = await pokemon_repository.list_categories()
+    return [
+        {**row, "category_image_url": f"{_CATEGORY_ICON_BASE_URL}/{row['category_id']}.png"}
+        for row in rows
+    ]
 
 
 async def get_skill_types() -> list[str]:
