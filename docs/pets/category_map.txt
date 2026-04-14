@@ -3,468 +3,546 @@
         "id": 1,
         "category_id": 17310030001,
         "description": "宝箱",
-        "type": "收集"
+        "type": "收集",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030001.png"
     },
     {
         "id": 2,
         "category_id": 17310030002,
         "description": "植物（果树）",
-        "type": "收集"
+        "type": "收集",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030002.png"
     },
     {
         "id": 3,
         "category_id": 17310030004,
         "description": "未分类材料",
-        "type": "收集"
+        "type": "收集",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030004.png"
     },
     {
         "id": 4,
         "category_id": 17310030005,
         "description": "草系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030005.png"
     },
     {
         "id": 5,
         "category_id": 17310030006,
         "description": "萌系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030006.png"
     },
     {
         "id": 6,
         "category_id": 17310030007,
         "description": "火系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030007.png"
     },
     {
         "id": 7,
         "category_id": 17310030008,
         "description": "虫系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030008.png"
     },
     {
         "id": 8,
         "category_id": 17310030009,
         "description": "水系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030009.png"
     },
     {
         "id": 9,
         "category_id": 17310030010,
         "description": "翼系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030010.png"
     },
     {
         "id": 10,
         "category_id": 17310030011,
         "description": "幽系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030011.png"
     },
     {
         "id": 11,
         "category_id": 17310030012,
         "description": "电系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030012.png"
     },
     {
         "id": 12,
         "category_id": 17310030013,
         "description": "光系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030013.png"
     },
     {
         "id": 13,
         "category_id": 17310030014,
         "description": "地系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030014.png"
     },
     {
         "id": 14,
         "category_id": 17310030015,
         "description": "龙系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030015.png"
     },
     {
         "id": 15,
         "category_id": 17310030016,
         "description": "毒系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030016.png"
     },
     {
         "id": 16,
         "category_id": 17310030018,
         "description": "恶系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030018.png"
     },
     {
         "id": 17,
         "category_id": 17310030019,
         "description": "幻系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030019.png"
     },
     {
         "id": 18,
         "category_id": 17310030020,
         "description": "冰系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030020.png"
     },
     {
         "id": 19,
         "category_id": 17310030021,
         "description": "普通系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030021.png"
     },
     {
         "id": 20,
         "category_id": 17310030022,
         "description": "机械系",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030022.png"
     },
     {
         "id": 21,
         "category_id": 17310030023,
         "description": "未分类精灵",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030023.png"
     },
     {
         "id": 22,
         "category_id": 17310030024,
         "description": "BOSS（精灵首领）",
-        "type": "地点"
+        "type": "地点",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030024.png"
     },
     {
         "id": 23,
         "category_id": 17310030025,
         "description": "副本",
-        "type": "地点"
+        "type": "地点",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030025.png"
     },
     {
         "id": 24,
         "category_id": 17310030026,
         "description": "露天对战",
-        "type": "地点"
+        "type": "地点",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030026.png"
     },
     {
         "id": 25,
         "category_id": 17310030027,
         "description": "支线任务",
-        "type": "任务"
+        "type": "任务",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030027.png"
     },
     {
         "id": 26,
         "category_id": 17310030028,
         "description": "未分类任务",
-        "type": "任务"
+        "type": "任务",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030028.png"
     },
     {
         "id": 27,
         "category_id": 17310030029,
         "description": "挑战小游戏",
-        "type": "其他"
+        "type": "其他",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030029.png"
     },
     {
         "id": 28,
         "category_id": 17310030030,
         "description": "未分类内容",
-        "type": "其他"
+        "type": "其他",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030030.png"
     },
     {
         "id": 29,
         "category_id": 17310030031,
         "description": "精灵的宝藏",
-        "type": "收集"
+        "type": "收集",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030031.png"
     },
     {
         "id": 30,
         "category_id": 17310030032,
         "description": "精灵好感度植物",
-        "type": "收集"
+        "type": "收集",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030032.png"
     },
     {
         "id": 31,
         "category_id": 17310030033,
         "description": "魔法石",
-        "type": "收集"
+        "type": "收集",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030033.png"
     },
     {
         "id": 32,
         "category_id": 17310030034,
         "description": "魔法",
-        "type": "收集"
+        "type": "收集",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030034.png"
     },
     {
         "id": 33,
         "category_id": 17310030035,
         "description": "眠枭之星（蓝）",
-        "type": "收集"
+        "type": "收集",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030035.png"
     },
     {
         "id": 34,
         "category_id": 17310030036,
         "description": "崭新乐章",
-        "type": "收集"
+        "type": "收集",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030036.png"
     },
     {
         "id": 35,
         "category_id": 17310030037,
         "description": "稀有精灵",
-        "type": "精灵"
+        "type": "精灵",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030037.png"
     },
     {
         "id": 36,
         "category_id": 17310030038,
         "description": "魔力之源（传送点）",
-        "type": "地点"
+        "type": "地点",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030038.png"
     },
     {
         "id": 37,
         "category_id": 17310030039,
         "description": "眠枭庇护所",
-        "type": "地点"
+        "type": "地点",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030039.png"
     },
     {
         "id": 38,
         "category_id": 17310030040,
         "description": "稀兽花种",
-        "type": "地点"
+        "type": "地点",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030040.png"
     },
     {
         "id": 39,
         "category_id": 17310030041,
         "description": "炼金台",
-        "type": "地点"
+        "type": "地点",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030041.png"
     },
     {
         "id": 40,
         "category_id": 17310030042,
         "description": "未分类地点",
-        "type": "地点"
+        "type": "地点",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030042.png"
     },
     {
         "id": 41,
         "category_id": 17310030043,
         "description": "黄石榴石",
-        "type": "矿石"
+        "type": "矿石",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030043.png"
     },
     {
         "id": 42,
         "category_id": 17310030044,
         "description": "黑晶琉璃",
-        "type": "矿石"
+        "type": "矿石",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030044.png"
     },
     {
         "id": 43,
         "category_id": 17310030045,
         "description": "紫莲刚玉",
-        "type": "矿石"
+        "type": "矿石",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030045.png"
     },
     {
         "id": 44,
         "category_id": 17310030046,
         "description": "蓝晶碧玺",
-        "type": "矿石"
+        "type": "矿石",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030046.png"
     },
     {
         "id": 45,
         "category_id": 17310030047,
         "description": "眠枭之星（黄）",
-        "type": "收集"
+        "type": "收集",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030047.png"
     },
     {
         "id": 46,
         "category_id": 17310030049,
         "description": "恶魔雪茄",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030049.png"
     },
     {
         "id": 47,
         "category_id": 17310030050,
         "description": "彩玉花",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030050.png"
     },
     {
         "id": 48,
         "category_id": 17310030051,
         "description": "大嘴花",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030051.png"
     },
     {
         "id": 49,
         "category_id": 17310030052,
         "description": "短木莲",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030052.png"
     },
     {
         "id": 50,
         "category_id": 17310030053,
         "description": "藻羽花",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030053.png"
     },
     {
         "id": 51,
         "category_id": 17310030054,
         "description": "风卷草",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030054.png"
     },
     {
         "id": 52,
         "category_id": 17310030055,
         "description": "凤眼莲",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030055.png"
     },
     {
         "id": 53,
         "category_id": 17310030056,
         "description": "海桑花",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030056.png"
     },
     {
         "id": 54,
         "category_id": 17310030057,
         "description": "海神花",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030057.png"
     },
     {
         "id": 55,
         "category_id": 17310030058,
         "description": "花星角",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030058.png"
     },
     {
         "id": 56,
         "category_id": 17310030059,
         "description": "火焰花",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030059.png"
     },
     {
         "id": 57,
         "category_id": 17310030060,
         "description": "流星兰",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030060.png"
     },
     {
         "id": 58,
         "category_id": 17310030061,
         "description": "幽幽草",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030061.png"
     },
     {
         "id": 59,
         "category_id": 17310030062,
         "description": "密黄菌",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030062.png"
     },
     {
         "id": 60,
         "category_id": 17310030063,
         "description": "喵喵草",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030063.png"
     },
     {
         "id": 61,
         "category_id": 17310030064,
         "description": "喷气菇",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030064.png"
     },
     {
         "id": 62,
         "category_id": 17310030065,
         "description": "伞伞菇",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030065.png"
     },
     {
         "id": 63,
         "category_id": 17310030066,
         "description": "紫晶菇",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030066.png"
     },
     {
         "id": 64,
         "category_id": 17310030067,
         "description": "紫雀花",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030067.png"
     },
     {
         "id": 65,
         "category_id": 17310030068,
         "description": "天使草",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030068.png"
     },
     {
         "id": 66,
         "category_id": 17310030069,
         "description": "向阳花",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030069.png"
     },
     {
         "id": 67,
         "category_id": 17310030070,
         "description": "象牙花",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030070.png"
     },
     {
         "id": 68,
         "category_id": 17310030071,
         "description": "星霜花",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030071.png"
     },
     {
         "id": 69,
         "category_id": 17310030072,
         "description": "杏黄贝",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030072.png"
     },
     {
         "id": 70,
         "category_id": 17310030073,
         "description": "荧光兰",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030073.png"
     },
     {
         "id": 71,
         "category_id": 17310030074,
         "description": "雪菇",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030074.png"
     },
     {
         "id": 72,
         "category_id": 17310030075,
         "description": "蓝掌",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030075.png"
     },
     {
         "id": 73,
         "category_id": 17310030077,
         "description": "骨片",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030077.png"
     },
     {
         "id": 74,
         "category_id": 17310030078,
         "description": "石耳",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030078.png"
     },
     {
         "id": 75,
         "category_id": 17310030079,
         "description": "睡铃",
-        "type": "花草"
+        "type": "花草",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030079.png"
     },
     {
         "id": 76,
         "category_id": 17310030080,
         "description": "可可果",
-        "type": "果树"
+        "type": "果树",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030080.png"
     },
     {
         "id": 77,
         "category_id": 17310030081,
         "description": "魔力果",
-        "type": "果树"
+        "type": "果树",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030081.png"
     },
     {
         "id": 78,
         "category_id": 17310030082,
         "description": "无花果",
-        "type": "果树"
+        "type": "果树",
+        "category_image_url": "http://101.126.137.23/images/icon/17310030082.png"
     }
 ]

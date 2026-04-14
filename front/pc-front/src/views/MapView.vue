@@ -39,7 +39,7 @@ const groupedCategories = computed(() => {
 const typeColorMap = computed(() => {
   const result: Record<string, string> = {}
   groupedCategories.value.forEach(({ type }, i) => {
-    result[type] = COLOR_PALETTE[i % COLOR_PALETTE.length]
+    result[type] = COLOR_PALETTE[i % COLOR_PALETTE.length]!
   })
   return result
 })
