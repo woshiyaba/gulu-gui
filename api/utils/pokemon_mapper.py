@@ -1,18 +1,4 @@
-import json
-
 from api.utils.media import build_friend_image_url, build_image_url
-
-
-def parse_json_list(value) -> list:
-    """把数据库里的 JSON 字段安全转成列表。"""
-    if not value:
-        return []
-    if isinstance(value, list):
-        return value
-    try:
-        return json.loads(value)
-    except Exception:
-        return []
 
 
 def parse_egg_groups(egg_group_names: str | None) -> list[str]:
@@ -91,10 +77,10 @@ def to_pokemon_detail(base: dict, detail: dict, skills_raw: list[dict]) -> dict:
             "desc": detail.get("trait_desc", ""),
         },
         "restrain": {
-            "strong_against": parse_json_list(detail.get("strong_against")),
-            "weak_against": parse_json_list(detail.get("weak_against")),
-            "resist": parse_json_list(detail.get("resist")),
-            "resisted": parse_json_list(detail.get("resisted")),
+            "strong_against": [],
+            "weak_against": [],
+            "resist": [],
+            "resisted": [],
         },
         "skills": [to_skill_item(skill) for skill in skills_raw],
     }

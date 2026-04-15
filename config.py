@@ -12,4 +12,12 @@ DB_CONFIG = {
     "charset": "utf8mb4",
 }
 
+PG_CONFIG = {
+    "host": os.getenv("PG_HOST", "localhost"),
+    "port": int(os.getenv("PG_PORT", 5432)),
+    "dbname": os.getenv("PG_DATABASE", "wikiroco"),
+    "user": os.getenv("PG_USER", "wikiroco"),
+    "password": os.getenv("PG_PASSWORD", ""),
+}
+
 BASE_URL = "https://rocom.game-walkthrough.com"

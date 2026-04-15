@@ -2,6 +2,8 @@
 -- ============================================================
 -- 迁移重建：先删表（子表 -> 父表）
 -- ============================================================
+DROP TABLE IF EXISTS attribute_matchup CASCADE;
+DROP TABLE IF EXISTS pokemon_egg_group CASCADE;
 DROP TABLE IF EXISTS skill_stone CASCADE;
 DROP TABLE IF EXISTS egg_hatch_pet CASCADE;
 DROP TABLE IF EXISTS pokemon_skill CASCADE;
@@ -176,3 +178,25 @@ CREATE TABLE pet_map_point (
 CREATE INDEX idx_pmp_map_id       ON pet_map_point (map_id);
 CREATE INDEX idx_pmp_category_id  ON pet_map_point (category_id);
 CREATE INDEX idx_pmp_map_category ON pet_map_point (map_id, category_id);
+
+-- 精灵蛋组（一只精灵可属于多个蛋组）
+CREATE TABLE pokemon_egg_group (
+    id           SERIAL      PRIMARY KEY,
+    pokemon_id   INT         NOT NULL,
+    group_name   VARCHAR(50) NOT NULL,
+    CONSTRAINT uk_peg_pokemon_group UNIQUE (pokemon_id, group_name),
+    CONSTRAINT fk_peg_pokemon FOREIGN KEY (pokemon_id)
+        REFERENCES pokemon (id) ON DELETE CASCADE
+);
+
+-- 属性克制矩阵（防守属性 × 进攻属性 → 倍率）
+CREATE TABLE attribute_matchup (
+    defender_attr_id INT            NOT NULL,
+    attacker_attr_id INT            NOT NULL,
+    multiplier       NUMERIC(10, 8) NOT NULL,
+    PRIMARY KEY (defender_attr_id, attacker_attr_id),
+    CONSTRAINT fk_am_defender FOREIGN KEY (defender_attr_id)
+        REFERENCES attribute (id) ON DELETE CASCADE,
+    CONSTRAINT fk_am_attacker FOREIGN KEY (attacker_attr_id)
+        REFERENCES attribute (id) ON DELETE CASCADE
+);

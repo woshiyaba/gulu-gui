@@ -70,10 +70,11 @@ def _build_filters(
         conditions.append(
             "EXISTS ("
             "SELECT 1 FROM pokemon_attribute pa2 "
-            "WHERE pa2.pokemon_name = p.name "
-            f"AND pa2.attr_name IN ({attr_placeholders}) "
-            "GROUP BY pa2.pokemon_name "
-            f"HAVING COUNT(DISTINCT pa2.attr_name) = {len(attrs)}"
+            "JOIN attribute a2 ON a2.id = pa2.attr_id "
+            "WHERE pa2.pokemon_id = p.id "
+            f"AND a2.name IN ({attr_placeholders}) "
+            "GROUP BY pa2.pokemon_id "
+            f"HAVING COUNT(DISTINCT a2.name) = {len(attrs)}"
             ")"
         )
         params.extend(attrs)
@@ -100,13 +101,13 @@ def _build_order_clause(order_by: str = "no", order_dir: str = "asc") -> str:
     """构建安全排序子句，仅允许白名单字段。"""
     order_field_map = {
         "no": "p.no",
-        "total_stats": "(pd.hp + pd.atk + pd.matk + pd.def_val + pd.mdef + pd.spd)",
-        "hp": "pd.hp",
-        "atk": "pd.atk",
-        "matk": "pd.matk",
-        "def_val": "pd.def_val",
-        "mdef": "pd.mdef",
-        "spd": "pd.spd",
+        "total_stats": "(p.hp + p.atk + p.matk + p.def_val + p.mdef + p.spd)",
+        "hp": "p.hp",
+        "atk": "p.atk",
+        "matk": "p.matk",
+        "def_val": "p.def_val",
+        "mdef": "p.mdef",
+        "spd": "p.spd",
     }
     sql_field = order_field_map.get(order_by, "p.no")
     sql_dir = "DESC" if order_dir.lower() == "desc" else "ASC"
@@ -115,12 +116,12 @@ def _build_order_clause(order_by: str = "no", order_dir: str = "asc") -> str:
 
 
 async def list_attributes() -> list[dict]:
-    """查询所有不重复的属性。"""
+    """查询所有属性。"""
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
-                "SELECT DISTINCT attr_name, attr_image FROM pokemon_attribute ORDER BY attr_name"
+                "SELECT name AS attr_name, image AS attr_image FROM attribute ORDER BY sort_order"
             )
             return await cur.fetchall()
 
@@ -128,7 +129,7 @@ async def list_attributes() -> list[dict]:
 async def list_egg_groups() -> list[dict]:
     """查询所有不重复的蛋组名称（用于筛选）。"""
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 "SELECT DISTINCT group_name FROM pokemon_egg_group ORDER BY group_name"
@@ -139,7 +140,7 @@ async def list_egg_groups() -> list[dict]:
 async def list_categories() -> list[dict]:
     """查询 category 表的全部映射数据。"""
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
@@ -154,7 +155,7 @@ async def list_categories() -> list[dict]:
 async def list_skill_types() -> list[str]:
     """查询所有不重复的技能类型（物攻/魔攻/状态/防御），供前端筛选。"""
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 "SELECT DISTINCT type FROM skill WHERE type != '' ORDER BY type"
@@ -173,26 +174,28 @@ async def list_skills(
     params: list[str] = []
 
     if name:
-        conditions.append("name LIKE %s")
+        conditions.append("s.name LIKE %s")
         params.append(f"%{name}%")
     if skill_type:
-        conditions.append("type = %s")
+        conditions.append("s.type = %s")
         params.append(skill_type)
     if attr:
-        conditions.append("attr = %s")
+        conditions.append("a.name = %s")
         params.append(attr)
 
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 f"""
-                SELECT name, attr, power, type, consume, skill_desc, icon
-                FROM skill
+                SELECT s.name, COALESCE(a.name, '') AS attr,
+                       s.power, s.type, s.consume, s.skill_desc, s.icon
+                FROM skill s
+                LEFT JOIN attribute a ON a.id = s.attr_id
                 {where_clause}
-                ORDER BY name
+                ORDER BY s.name
                 """,
                 params,
             )
@@ -204,19 +207,19 @@ async def list_skill_stones(skill_name: str = "") -> list[dict]:
     params: list[str] = []
     where_clause = ""
     if skill_name:
-        where_clause = "WHERE ss.skill_name LIKE %s"
+        where_clause = "WHERE s.name LIKE %s"
         params.append(f"%{skill_name}%")
 
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 f"""
-                SELECT ss.skill_name, ss.obtain_method, s.icon
+                SELECT s.name AS skill_name, ss.obtain_method, s.icon
                 FROM skill_stone ss
-                LEFT JOIN skill s ON s.name = ss.skill_name
+                JOIN skill s ON s.id = ss.skill_id
                 {where_clause}
-                ORDER BY ss.skill_name
+                ORDER BY s.name
                 """,
                 params,
             )
@@ -231,7 +234,7 @@ async def count_pokemon(
     """查询符合条件的精灵总数。"""
     where_clause, params = _build_filters(name=name, attrs=attrs, egg_groups=egg_groups)
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 f"SELECT COUNT(*) AS cnt FROM pokemon p {where_clause}",
@@ -256,22 +259,22 @@ async def list_pokemon(
     offset = (page - 1) * page_size
 
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 f"""
                 SELECT
                     p.no, p.name, p.image, p.image_lc, p.type, p.type_name, p.form, p.form_name,
-                    GROUP_CONCAT(pa.attr_name ORDER BY pa.id SEPARATOR ',') AS attr_names,
-                    GROUP_CONCAT(pa.attr_image ORDER BY pa.id SEPARATOR '|||') AS attr_images,
-                    (SELECT GROUP_CONCAT(peg.group_name ORDER BY peg.id SEPARATOR ',')
+                    string_agg(a.name, ',' ORDER BY pa.id) AS attr_names,
+                    string_agg(a.image, '|||' ORDER BY pa.id) AS attr_images,
+                    (SELECT string_agg(peg.group_name, ',' ORDER BY peg.id)
                      FROM pokemon_egg_group peg WHERE peg.pokemon_id = p.id) AS egg_group_names
                 FROM pokemon p
-                LEFT JOIN pokemon_attribute pa ON pa.pokemon_name = p.name
-                LEFT JOIN pokemon_detail pd ON pd.pokemon_name = p.name
+                LEFT JOIN pokemon_attribute pa ON pa.pokemon_id = p.id
+                LEFT JOIN attribute a ON a.id = pa.attr_id
                 {where_clause}
                 GROUP BY p.id, p.no, p.name, p.image, p.image_lc, p.type, p.type_name, p.form, p.form_name,
-                         pd.hp, pd.atk, pd.matk, pd.def_val, pd.mdef, pd.spd
+                         p.hp, p.atk, p.matk, p.def_val, p.mdef, p.spd
                 {order_clause}
                 LIMIT %s OFFSET %s
                 """,
@@ -283,25 +286,25 @@ async def list_pokemon(
 async def list_pokemon_by_body_metrics(height_cm: int, weight_g: int) -> list[dict]:
     """按身高和体重区间匹配宠物，并合并同名变种结果。"""
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
                 SELECT
-                    e.pokemon_name,
+                    p.name AS pokemon_name,
                     p.image,
                     p.no,
                     p.form,
                     p.form_name,
                     p.id
                 FROM egg_hatch_pet e
-                JOIN pokemon p ON p.name = e.pokemon_name
-                WHERE e.is_leader_form = 0
+                JOIN pokemon p ON p.id = e.pokemon_id
+                WHERE e.is_leader_form = FALSE
                   AND e.height_low <= %s
                   AND e.height_high >= %s
                   AND e.weight_low <= %s
                   AND e.weight_high >= %s
-                ORDER BY p.no, p.id, e.pokemon_name
+                ORDER BY p.no, p.id, p.name
                 """,
                 (height_cm, height_cm, weight_g, weight_g),
             )
@@ -312,7 +315,7 @@ async def list_pokemon_by_body_metrics(height_cm: int, weight_g: int) -> list[di
 async def list_pet_map_points() -> list[dict]:
     """查询地图点位表的全部数据。"""
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
@@ -327,17 +330,18 @@ async def list_pet_map_points() -> list[dict]:
 async def get_pokemon_base(name: str) -> dict | None:
     """查询单只精灵的基础信息与属性。"""
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
                 SELECT p.no, p.name, p.image, p.image_lc, p.type, p.type_name, p.form, p.form_name,
-                       GROUP_CONCAT(pa.attr_name ORDER BY pa.id SEPARATOR ',') AS attr_names,
-                       GROUP_CONCAT(pa.attr_image ORDER BY pa.id SEPARATOR '|||') AS attr_images,
-                       (SELECT GROUP_CONCAT(peg.group_name ORDER BY peg.id SEPARATOR ',')
+                       string_agg(a.name, ',' ORDER BY pa.id) AS attr_names,
+                       string_agg(a.image, '|||' ORDER BY pa.id) AS attr_images,
+                       (SELECT string_agg(peg.group_name, ',' ORDER BY peg.id)
                         FROM pokemon_egg_group peg WHERE peg.pokemon_id = p.id) AS egg_group_names
                 FROM pokemon p
-                LEFT JOIN pokemon_attribute pa ON pa.pokemon_name = p.name
+                LEFT JOIN pokemon_attribute pa ON pa.pokemon_id = p.id
+                LEFT JOIN attribute a ON a.id = pa.attr_id
                 WHERE p.name = %s
                 GROUP BY p.id, p.no, p.name, p.image, p.image_lc, p.type, p.type_name, p.form, p.form_name
                 """,
@@ -347,21 +351,31 @@ async def get_pokemon_base(name: str) -> dict | None:
 
 
 async def get_pokemon_detail(name: str) -> dict:
-    """查询单只精灵的详情行。"""
+    """查询单只精灵的详情行（种族值、特性、获取方式）。"""
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
-            await cur.execute("SELECT * FROM pokemon_detail WHERE pokemon_name = %s", (name,))
+            await cur.execute(
+                """
+                SELECT p.hp, p.atk, p.matk, p.def_val, p.mdef, p.spd,
+                       p.obtain_method,
+                       pt.name AS trait_name, pt.description AS trait_desc
+                FROM pokemon p
+                JOIN pokemon_trait pt ON pt.id = p.trait_id
+                WHERE p.name = %s
+                """,
+                (name,),
+            )
             return await cur.fetchone() or {}
 
 
 async def get_pokemon_chain_id(name: str) -> int | None:
     """查询某个具体形态所属的进化链编号。"""
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
-                "SELECT chain_id FROM pokemon_detail WHERE pokemon_name = %s",
+                "SELECT chain_id FROM pokemon WHERE name = %s",
                 (name,),
             )
             row = await cur.fetchone() or {}
@@ -371,7 +385,7 @@ async def get_pokemon_chain_id(name: str) -> int | None:
 async def list_evolution_chain_members(chain_id: int) -> list[dict]:
     """按顺序查询一条进化链的基础阶段数据。"""
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
@@ -393,11 +407,11 @@ async def list_pokemon_variants_by_base_names(base_names: list[str]) -> list[dic
     conditions: list[str] = []
     params: list[str] = []
     for base_name in dict.fromkeys(base_names):
-        conditions.append("(p.name = %s OR p.name LIKE CONCAT(%s, '（', '%%'))")
-        params.extend([base_name, base_name])
+        conditions.append("(p.name = %s OR p.name LIKE %s)")
+        params.extend([base_name, f"{base_name}（%"])
 
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 f"""
@@ -414,14 +428,16 @@ async def list_pokemon_variants_by_base_names(base_names: list[str]) -> list[dic
 async def get_pokemon_skills(name: str) -> list[dict]:
     """查询单只精灵的技能列表。"""
     pool = await get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
-                SELECT s.name, s.attr, s.power, s.type, s.consume, s.skill_desc, s.icon
+                SELECT s.name, COALESCE(a.name, '') AS attr,
+                       s.power, s.type, s.consume, s.skill_desc, s.icon
                 FROM pokemon_skill ps
-                JOIN skill s ON s.name = ps.skill_name
-                WHERE ps.pokemon_name = %s
+                JOIN skill s ON s.id = ps.skill_id
+                LEFT JOIN attribute a ON a.id = s.attr_id
+                WHERE ps.pokemon_id = (SELECT id FROM pokemon WHERE name = %s)
                 ORDER BY ps.sort_order
                 """,
                 (name,),

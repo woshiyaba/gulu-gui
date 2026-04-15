@@ -1,3 +1,6 @@
+from decimal import Decimal
+from fractions import Fraction
+
 from api.repositories import attribute_matchup_repository, pokemon_repository
 from api.utils.media import build_image_url
 from api.utils.pokemon_mapper import (
@@ -58,6 +61,63 @@ def _group_variants_by_base_name(variant_rows: list[dict]) -> dict[str, list[dic
         )
 
     return grouped
+
+
+def _fraction_from_db(value) -> Fraction:
+    """把 PG NUMERIC / Decimal / str / float 安全转为 Fraction。"""
+    if value is None:
+        return Fraction(1, 1)
+    if isinstance(value, Fraction):
+        return value
+    if isinstance(value, Decimal):
+        return Fraction(str(value))
+    return Fraction(str(value)).limit_denominator(10_000)
+
+
+def _compute_restrain(
+    defender_attrs: list[str],
+    defensive_rows: list[dict],
+    offensive_rows: list[dict],
+) -> dict:
+    """
+    从属性克制矩阵计算 restrain 四个列表：
+    - weak_against：进攻方对该精灵倍率 > 1 的属性（被克制）
+    - resist：进攻方对该精灵倍率 < 1 的属性（抵抗）
+    - strong_against：该精灵进攻对方倍率 > 1 的属性（克制）
+    - resisted：该精灵进攻对方倍率 < 1 的属性（被抵抗）
+    """
+    # 防守侧：合并多属性倍率
+    def_combined: dict[str, Fraction] = {}
+    for row in defensive_rows:
+        attacker = row.get("attacker_attr")
+        if not attacker:
+            continue
+        mul = _fraction_from_db(row.get("multiplier"))
+        def_combined[attacker] = def_combined.get(attacker, Fraction(1, 1)) * mul
+
+    weak_against = [a for a, m in def_combined.items() if m > 1]
+    resist = [a for a, m in def_combined.items() if 0 < m < 1]
+
+    # 进攻侧：合并多属性倍率（取最优）
+    off_by_defender: dict[str, Fraction] = {}
+    for row in offensive_rows:
+        defender = row.get("defender_attr")
+        if not defender:
+            continue
+        mul = _fraction_from_db(row.get("multiplier"))
+        # 多进攻属性对同一防守属性取最大倍率
+        if defender not in off_by_defender or mul > off_by_defender[defender]:
+            off_by_defender[defender] = mul
+
+    strong_against = [d for d, m in off_by_defender.items() if m > 1]
+    resisted = [d for d, m in off_by_defender.items() if 0 < m < 1]
+
+    return {
+        "strong_against": strong_against,
+        "weak_against": weak_against,
+        "resist": resist,
+        "resisted": resisted,
+    }
 
 
 async def get_attributes() -> list[dict]:
@@ -149,7 +209,7 @@ async def get_pokemon(
 
 def _normalize_multi_filter(values: list[str] | None) -> list[str]:
     """
-    仅按“集合语义”处理：attr=火&attr=恶。
+    仅按"集合语义"处理：attr=火&attr=恶。
     不做逗号拆分，避免把合法值误切分。
     """
     if not values:
@@ -217,11 +277,18 @@ async def get_pokemon_detail(name: str) -> dict:
 
     axis = await attribute_matchup_repository.list_attr_axis_order()
     defender_names = [a["attr_name"] for a in payload.get("attributes") or []]
-    rows = await attribute_matchup_repository.list_matchups_for_defenders(defender_names)
+    defensive_rows = await attribute_matchup_repository.list_matchups_for_defenders(defender_names)
+    offensive_rows = await attribute_matchup_repository.list_matchups_for_attackers(defender_names)
+
     payload["defensive_type_chart"] = build_defensive_type_chart_payload(
         defender_attrs=defender_names,
         axis=axis,
-        matchup_rows=rows,
+        matchup_rows=defensive_rows,
+    )
+    payload["restrain"] = _compute_restrain(
+        defender_attrs=defender_names,
+        defensive_rows=defensive_rows,
+        offensive_rows=offensive_rows,
     )
     return payload
 
