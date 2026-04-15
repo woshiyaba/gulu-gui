@@ -52,9 +52,11 @@ CREATE TABLE pokemon (
     no            VARCHAR(20)  NOT NULL, -- 编号，如 NO.003
     name          VARCHAR(50)  NOT NULL, -- 名称
     image         VARCHAR(255) NOT NULL DEFAULT '',
-    type_id       INT          DEFAULT NULL,    -- 阶段，关联 sys_dict.id（dict_type=pokemon_type）
-    form_id       INT          DEFAULT NULL,    -- 形态，关联 sys_dict.id（dict_type=pokemon_form）
-    egg_group_id  INT          DEFAULT NULL,    -- 蛋组，关联 sys_dict.id（dict_type=egg_group）
+    type          VARCHAR(30)  NOT NULL DEFAULT '', -- 阶段编码，如 stage1/stage2/final
+    type_name     VARCHAR(30)  NOT NULL DEFAULT '', -- 阶段显示，如 Ⅰ阶/最终形态
+    form          VARCHAR(30)  NOT NULL DEFAULT '', -- 形态编码，如 original/regional/boss
+    form_name     VARCHAR(30)  NOT NULL DEFAULT '', -- 形态显示，如 原始形态/地区形态
+    egg_group     VARCHAR(30)  NOT NULL DEFAULT '', -- 蛋组（冗余存储，供业务直接查询）
     trait_id      INT          NOT NULL,        -- 特性，关联 pokemon_trait.id
     detail_url    VARCHAR(255) NOT NULL DEFAULT '',
     image_lc      VARCHAR(255) NOT NULL DEFAULT '',
@@ -67,10 +69,7 @@ CREATE TABLE pokemon (
     spd           INT          NOT NULL DEFAULT 0,
     total_race    INT          NOT NULL DEFAULT 0,
     obtain_method VARCHAR(255) NOT NULL DEFAULT '',
-    -- 外键约束
-    CONSTRAINT fk_pokemon_type FOREIGN KEY (type_id) REFERENCES sys_dict(id),
-    CONSTRAINT fk_pokemon_form FOREIGN KEY (form_id) REFERENCES sys_dict(id),
-    CONSTRAINT fk_pokemon_egg_group FOREIGN KEY (egg_group_id) REFERENCES sys_dict(id),
+    -- 外键约束（type/form/egg_group 不再走字典外键，仅冗余存值）
     CONSTRAINT fk_pokemon_trait FOREIGN KEY (trait_id) REFERENCES pokemon_trait(id)
 );
 
@@ -93,15 +92,13 @@ CREATE TABLE skill (
     name          VARCHAR(50)  NOT NULL,
     attr_id       INT          DEFAULT NULL,   -- 关联 attribute.id
     power         INT          NOT NULL DEFAULT 0,
-    skill_type_id  INT          DEFAULT NULL,  -- 关联 sys_dict.id（dict_type=skill_type）
+    type          VARCHAR(30)  NOT NULL DEFAULT '', -- 技能类型（物攻/魔攻/状态/防御）
     consume       INT          NOT NULL DEFAULT 0,
     skill_desc    TEXT,
     icon          VARCHAR(255) NOT NULL DEFAULT '',
     CONSTRAINT uk_skill_name UNIQUE (name),
     CONSTRAINT fk_skill_attr FOREIGN KEY (attr_id)
-        REFERENCES attribute (id),
-    CONSTRAINT fk_skill_type FOREIGN KEY (skill_type_id)
-        REFERENCES sys_dict (id)
+        REFERENCES attribute (id)
 );
 
 -- 进化链
@@ -120,7 +117,7 @@ CREATE TABLE pokemon_skill (
     id         SERIAL PRIMARY KEY,
     pokemon_id INT    NOT NULL,
     skill_id   INT    NOT NULL,
-    type       INT  NOT NULL DEFAULT 0, -- 技能学习类型：0=升级，1=技能机，2=蛋招式，3=教学
+    type       VARCHAR(20) NOT NULL DEFAULT '原生技能', -- 技能来源：原生技能/学习技能（字典冗余一份，业务表直接存）
     sort_order INT    NOT NULL DEFAULT 0,
     CONSTRAINT uk_pokemon_skill UNIQUE (pokemon_id, skill_id),
     CONSTRAINT fk_ps_pokemon FOREIGN KEY (pokemon_id)

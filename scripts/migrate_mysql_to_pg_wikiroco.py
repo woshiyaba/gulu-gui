@@ -138,6 +138,10 @@ def load_or_seed_sys_dict(my_cur, pg_cur) -> dict[tuple[str, str], int]:
     ):
         values.append(("skill_type", r["code"], r["code"], 0))
 
+    # pokemon_skill 来源类型（冗余字典，用于下拉）
+    values.append(("pokemon_skill_source", "原生技能", "原生技能", 0))
+    values.append(("pokemon_skill_source", "学习技能", "学习技能", 1))
+
     _bulk_insert(
         pg_cur,
         """INSERT INTO sys_dict (dict_type, code, label, sort_order)
@@ -248,7 +252,7 @@ def migrate_evolution_chain(my_cur, pg_cur) -> None:
     _done(len(values), t)
 
 
-def migrate_pokemon(my_cur, pg_cur, sys_map: dict, trait_map: dict) -> dict[str, int]:
+def migrate_pokemon(my_cur, pg_cur, trait_map: dict) -> dict[str, int]:
     t = _step("迁移 pokemon（合并旧 pokemon + pokemon_detail）")
 
     detail_rows = mysql_fetch(my_cur, "SELECT * FROM pokemon_detail")
@@ -265,11 +269,7 @@ def migrate_pokemon(my_cur, pg_cur, sys_map: dict, trait_map: dict) -> dict[str,
     name_id: dict[str, int] = {}
     for r in rows:
         d = detail_by_name.get(r["name"], {})
-        type_id = sys_map.get(("pokemon_type", r.get("type", ""))) if r.get("type") else None
-        form_id = sys_map.get(("pokemon_form", r.get("form", ""))) if r.get("form") else None
-        egg_group_id = None
-        if r["id"] in egg_group_by_pid:
-            egg_group_id = sys_map.get(("egg_group", egg_group_by_pid[r["id"]]))
+        egg_group = egg_group_by_pid.get(r["id"], "")
         trait_id = trait_map.get(d.get("trait_name", ""), None)
         if trait_id is None:
             # 没有特性时给一个兜底，避免 NOT NULL 失败
@@ -277,7 +277,9 @@ def migrate_pokemon(my_cur, pg_cur, sys_map: dict, trait_map: dict) -> dict[str,
         values.append(
             (
                 r["id"], r["no"], r["name"], r.get("image", ""),
-                type_id, form_id, egg_group_id, trait_id,
+                r.get("type", ""), r.get("type_name", ""),
+                r.get("form", ""), r.get("form_name", ""),
+                egg_group, trait_id,
                 r.get("detail_url", ""), r.get("image_lc", ""),
                 d.get("chain_id"),
                 d.get("hp", 0), d.get("atk", 0), d.get("matk", 0),
@@ -292,7 +294,7 @@ def migrate_pokemon(my_cur, pg_cur, sys_map: dict, trait_map: dict) -> dict[str,
     _bulk_insert(
         pg_cur,
         """INSERT INTO pokemon
-        (id, no, name, image, type_id, form_id, egg_group_id, trait_id, detail_url, image_lc,
+        (id, no, name, image, type, type_name, form, form_name, egg_group, trait_id, detail_url, image_lc,
          chain_id, hp, atk, matk, def_val, mdef, spd, total_race, obtain_method)
         VALUES %s ON CONFLICT DO NOTHING""",
         values,
@@ -320,22 +322,21 @@ def migrate_pokemon_attribute(my_cur, pg_cur, name_id: dict[str, int], attr_map:
     _done(len(values), t)
 
 
-def migrate_skill(my_cur, pg_cur, attr_map: dict[str, int], sys_map: dict) -> dict[str, int]:
+def migrate_skill(my_cur, pg_cur, attr_map: dict[str, int]) -> dict[str, int]:
     t = _step("迁移 skill")
     rows = mysql_fetch(my_cur, "SELECT * FROM skill ORDER BY id")
     values = []
     for r in rows:
         attr_id = attr_map.get(r.get("attr", "")) if r.get("attr") else None
-        stid = sys_map.get(("skill_type", r.get("type", ""))) if r.get("type") else None
         values.append(
             (
-                r["id"], r["name"], attr_id, r.get("power", 0), stid,
+                r["id"], r["name"], attr_id, r.get("power", 0), r.get("type", ""),
                 r.get("consume", 0), r.get("skill_desc"), r.get("icon", ""),
             )
         )
     _bulk_insert(
         pg_cur,
-        """INSERT INTO skill (id, name, attr_id, power, skill_type_id, consume, skill_desc, icon)
+        """INSERT INTO skill (id, name, attr_id, power, type, consume, skill_desc, icon)
            VALUES %s ON CONFLICT DO NOTHING""",
         values,
     )
@@ -352,7 +353,18 @@ def migrate_pokemon_skill(my_cur, pg_cur, name_id: dict[str, int], skill_name_id
         pid = name_id.get(r["pokemon_name"])
         sid = skill_name_id.get(r["skill_name"])
         if pid and sid:
-            values.append((pid, sid, 0, r.get("sort_order", 0)))
+            raw_type = r.get("type", 0)
+            if isinstance(raw_type, str):
+                skill_source = raw_type.strip() or "原生技能"
+                if skill_source in {"原生", "原生技能"}:
+                    skill_source = "原生技能"
+                elif skill_source in {"学习", "学习技能"}:
+                    skill_source = "学习技能"
+                else:
+                    skill_source = "学习技能"
+            else:
+                skill_source = "原生技能" if int(raw_type or 0) == 0 else "学习技能"
+            values.append((pid, sid, skill_source, r.get("sort_order", 0)))
     _bulk_insert(
         pg_cur,
         """INSERT INTO pokemon_skill (pokemon_id, skill_id, type, sort_order)
@@ -517,9 +529,9 @@ def main() -> None:
             trait_map = {r["name"]: r["id"] for r in pg_cur.fetchall()}
 
         migrate_evolution_chain(my_cur, pg_cur)
-        pokemon_name_id = migrate_pokemon(my_cur, pg_cur, sys_map, trait_map)
+        pokemon_name_id = migrate_pokemon(my_cur, pg_cur, trait_map)
         migrate_pokemon_attribute(my_cur, pg_cur, pokemon_name_id, attr_map)
-        skill_name_id = migrate_skill(my_cur, pg_cur, attr_map, sys_map)
+        skill_name_id = migrate_skill(my_cur, pg_cur, attr_map)
         migrate_pokemon_skill(my_cur, pg_cur, pokemon_name_id, skill_name_id)
         migrate_egg_hatch_pet(my_cur, pg_cur, pokemon_name_id)
         migrate_skill_stone(my_cur, pg_cur, skill_name_id)
