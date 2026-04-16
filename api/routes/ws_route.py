@@ -17,6 +17,7 @@ async def websocket_endpoint(websocket: WebSocket):
     try:
         while True:
             message = await websocket.receive_text()
-            logger.info("[ws] 收到消息: %s", message)
+            print(f"[ws] 收到消息: message")
+            # logger.info("[ws] 收到消息: %s", message)
     except WebSocketDisconnect:
         manager.disconnect("napcat-qq", websocket)
