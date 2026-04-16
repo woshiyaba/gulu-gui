@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes.ops import router as ops_router
 from api.routes.pokemon import router as pokemon_router
+from api.routes.ws_route import router as ws_router
 from api.services.ops_service import ensure_ops_bootstrap
 from db.connection import close_pool, get_pool
 
@@ -30,6 +31,7 @@ app.add_middleware(
 
 app.include_router(pokemon_router)
 app.include_router(ops_router)
+app.include_router(ws_router)
 
 
 @app.get("/")
