@@ -156,13 +156,14 @@ def ensure_role(user: dict, allowed_roles: set[str]) -> None:
 
 async def get_dicts(
     dict_type: str = "",
-    keyword: str = "",
+    code: str = "",
+    label: str = "",
     page: int | None = 1,
     page_size: int | None = 10,
 ) -> dict:
     # 仅按 dict_type 拉下拉时，允许不传分页，直接返回该类型全量字典。
     if page is None and page_size is None:
-        items = await ops_repository.list_dicts_all(dict_type=dict_type, keyword=keyword)
+        items = await ops_repository.list_dicts_all(dict_type=dict_type, code=code, label=label)
         total = len(items)
         return {"total": total, "page": 1, "page_size": total if total > 0 else 1, "items": items}
 
@@ -170,7 +171,8 @@ async def get_dicts(
     safe_page_size = max(1, min(page_size or 10, 100))
     total, items = await ops_repository.list_dicts(
         dict_type=dict_type,
-        keyword=keyword,
+        code=code,
+        label=label,
         page=safe_page,
         page_size=safe_page_size,
     )
@@ -358,6 +360,8 @@ async def list_pokemon_for_ops(
     keyword: str = "",
     no: str = "",
     name: str = "",
+    attr_id: int | None = None,
+    egg_group: str = "",
     type_code: str = "",
     form_code: str = "",
     trait_id: int | None = None,
@@ -371,6 +375,8 @@ async def list_pokemon_for_ops(
         keyword=keyword.strip(),
         no=no.strip(),
         name=name.strip(),
+        attr_id=attr_id,
+        egg_group=egg_group.strip(),
         type_code=type_code.strip(),
         form_code=form_code.strip(),
         trait_id=trait_id,

@@ -51,14 +51,16 @@ async def update_ops_me(
 @router.get("/dicts", response_model=OpsDictListResponse)
 async def get_dicts(
     dict_type: str = Query(default=""),
-    keyword: str = Query(default=""),
+    code: str = Query(default=""),
+    label: str = Query(default=""),
     page: int | None = Query(default=1, ge=1),
     page_size: int | None = Query(default=10, ge=1, le=100),
     _: dict = Depends(get_current_ops_user),
 ):
     return await ops_service.get_dicts(
         dict_type=dict_type,
-        keyword=keyword,
+        code=code,
+        label=label,
         page=page,
         page_size=page_size,
     )
@@ -126,6 +128,8 @@ async def list_ops_pokemon(
     keyword: str = Query(default=""),
     no: str = Query(default=""),
     name: str = Query(default=""),
+    attr_id: int | None = Query(default=None, ge=1),
+    egg_group: str = Query(default=""),
     type_code: str = Query(default=""),
     form_code: str = Query(default=""),
     trait_id: int | None = Query(default=None, ge=1),
@@ -138,6 +142,8 @@ async def list_ops_pokemon(
         keyword=keyword,
         no=no,
         name=name,
+        attr_id=attr_id,
+        egg_group=egg_group,
         type_code=type_code,
         form_code=form_code,
         trait_id=trait_id,

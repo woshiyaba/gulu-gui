@@ -213,7 +213,8 @@ export function updateOpsMe(payload: OpsProfileUpdatePayload): Promise<OpsUser> 
 
 export function fetchOpsDicts(params: {
   dict_type?: string
-  keyword?: string
+  code?: string
+  label?: string
   page?: number
   page_size?: number
 } = {}): Promise<OpsDictListResponse> {
@@ -252,6 +253,8 @@ export function fetchOpsPokemon(params: {
   keyword?: string
   no?: string
   name?: string
+  attr_id?: number
+  egg_group?: string
   type_code?: string
   form_code?: string
   trait_id?: number

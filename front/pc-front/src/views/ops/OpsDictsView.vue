@@ -14,8 +14,9 @@ import {
 const loading = ref(false)
 const saving = ref(false)
 const error = ref('')
-const keyword = ref('')
 const dictType = ref('')
+const dictCode = ref('')
+const dictLabel = ref('')
 const items = ref<OpsDictItem[]>([])
 const editingId = ref<number | null>(null)
 const drawerVisible = ref(false)
@@ -84,7 +85,8 @@ async function loadData() {
       fetchOpsMe(),
       fetchOpsDicts({
         dict_type: dictType.value.trim() || undefined,
-        keyword: keyword.value.trim() || undefined,
+        code: dictCode.value.trim() || undefined,
+        label: dictLabel.value.trim() || undefined,
         page: currentPage.value,
         page_size: pageSize,
       }),
@@ -112,7 +114,8 @@ async function search() {
 
 async function resetFilters() {
   dictType.value = ''
-  keyword.value = ''
+  dictCode.value = ''
+  dictLabel.value = ''
   currentPage.value = 1
   await loadData()
 }
@@ -174,8 +177,12 @@ onMounted(() => {
           <input v-model="dictType" type="text" placeholder="请输入字典类型" />
         </label>
         <label class="query-item">
-          <span class="query-label">关键词</span>
-          <input v-model="keyword" type="text" placeholder="请输入 code 或 label" />
+          <span class="query-label">字典编码</span>
+          <input v-model="dictCode" type="text" placeholder="请输入字典编码" />
+        </label>
+        <label class="query-item">
+          <span class="query-label">字典名称</span>
+          <input v-model="dictLabel" type="text" placeholder="请输入字典名称" />
         </label>
         <div class="query-actions">
           <button type="button" class="btn-primary" @click="search">搜索</button>

@@ -26,6 +26,8 @@ const saving = ref(false)
 const error = ref('')
 const filterNo = ref('')
 const filterName = ref('')
+const filterAttrId = ref<number | ''>('')
+const filterEggGroup = ref('')
 const filterTypeCode = ref('')
 const filterFormCode = ref('')
 const filterTraitId = ref<number | ''>('')
@@ -392,6 +394,8 @@ async function loadList() {
       fetchOpsPokemon({
         no: filterNo.value.trim() || undefined,
         name: filterName.value.trim() || undefined,
+        attr_id: typeof filterAttrId.value === 'number' ? filterAttrId.value : undefined,
+        egg_group: filterEggGroup.value || undefined,
         type_code: filterTypeCode.value || undefined,
         form_code: filterFormCode.value || undefined,
         trait_id: typeof filterTraitId.value === 'number' ? filterTraitId.value : undefined,
@@ -423,6 +427,8 @@ async function searchList() {
 async function resetFilters() {
   filterNo.value = ''
   filterName.value = ''
+  filterAttrId.value = ''
+  filterEggGroup.value = ''
   filterTypeCode.value = ''
   filterFormCode.value = ''
   filterTraitId.value = ''
@@ -572,6 +578,20 @@ onMounted(async () => {
         <label class="query-item">
           <span class="query-label">精灵名称</span>
           <input v-model="filterName" class="keyword-input" type="text" placeholder="请输入精灵名称" />
+        </label>
+        <label class="query-item">
+          <span class="query-label">属性</span>
+          <select v-model="filterAttrId" class="query-select">
+            <option value="">全部属性</option>
+            <option v-for="item in attributes" :key="item.id" :value="item.id">{{ item.name }}</option>
+          </select>
+        </label>
+        <label class="query-item">
+          <span class="query-label">蛋组</span>
+          <select v-model="filterEggGroup" class="query-select">
+            <option value="">全部蛋组</option>
+            <option v-for="item in eggGroupOptions" :key="item" :value="item">{{ item }}</option>
+          </select>
         </label>
         <label class="query-item">
           <span class="query-label">阶段</span>
@@ -946,11 +966,11 @@ onMounted(async () => {
 <style scoped>
 .ops-page { display: grid; gap: 16px; }
 .query-card, .table-card { background: #fff; border: 1px solid #ebeef5; border-radius: 4px; padding: 16px; }
-.query-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
-.query-item { display: grid; gap: 6px; min-width: 180px; }
-.query-label { font-size: 13px; color: #606266; line-height: 1; }
+.query-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.query-item { display: flex; align-items: center; gap: 8px; min-width: 220px; }
+.query-label { font-size: 13px; color: #606266; line-height: 1; white-space: nowrap; min-width: 56px; }
 .keyword-input, .query-select {
-  width: 220px;
+  width: 180px;
   height: 36px;
   border: 1px solid #dcdfe6;
   border-radius: 4px;
@@ -1187,6 +1207,7 @@ onMounted(async () => {
 @media (max-width: 960px) {
   .query-row { flex-direction: column; align-items: stretch; }
   .query-item { width: 100%; min-width: 0; }
+  .query-label { min-width: 0; }
   .keyword-input, .query-select { width: 100%; }
   .query-actions { width: 100%; }
   .section-grid, .stats-grid { grid-template-columns: 1fr; }

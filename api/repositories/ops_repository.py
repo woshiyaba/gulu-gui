@@ -219,7 +219,8 @@ async def update_ops_user_profile(
 
 async def list_dicts(
     dict_type: str = "",
-    keyword: str = "",
+    code: str = "",
+    label: str = "",
     page: int = 1,
     page_size: int = 10,
 ) -> tuple[int, list[dict]]:
@@ -229,9 +230,12 @@ async def list_dicts(
     if dict_type:
         conditions.append("dict_type = %s")
         params.append(dict_type)
-    if keyword:
-        conditions.append("(code LIKE %s OR label LIKE %s)")
-        params.extend([f"%{keyword}%", f"%{keyword}%"])
+    if code:
+        conditions.append("code LIKE %s")
+        params.append(f"%{code}%")
+    if label:
+        conditions.append("label LIKE %s")
+        params.append(f"%{label}%")
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
     offset = (page - 1) * page_size
     async with pool.connection() as conn:
@@ -261,16 +265,19 @@ async def list_dicts(
             return total, items
 
 
-async def list_dicts_all(dict_type: str = "", keyword: str = "") -> list[dict]:
+async def list_dicts_all(dict_type: str = "", code: str = "", label: str = "") -> list[dict]:
     pool = await get_pool()
     conditions: list[str] = []
     params: list[str] = []
     if dict_type:
         conditions.append("dict_type = %s")
         params.append(dict_type)
-    if keyword:
-        conditions.append("(code LIKE %s OR label LIKE %s)")
-        params.extend([f"%{keyword}%", f"%{keyword}%"])
+    if code:
+        conditions.append("code LIKE %s")
+        params.append(f"%{code}%")
+    if label:
+        conditions.append("label LIKE %s")
+        params.append(f"%{label}%")
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
     async with pool.connection() as conn:
         async with conn.cursor() as cur:
@@ -380,6 +387,8 @@ async def list_pokemon_for_ops(
     keyword: str = "",
     no: str = "",
     name: str = "",
+    attr_id: int | None = None,
+    egg_group: str = "",
     type_code: str = "",
     form_code: str = "",
     trait_id: int | None = None,
@@ -398,6 +407,26 @@ async def list_pokemon_for_ops(
     if name:
         conditions.append("p.name LIKE %s")
         params.append(f"%{name}%")
+    if attr_id:
+        conditions.append(
+            """
+            EXISTS (
+                SELECT 1 FROM pokemon_attribute pa2
+                WHERE pa2.pokemon_id = p.id AND pa2.attr_id = %s
+            )
+            """
+        )
+        params.append(attr_id)
+    if egg_group:
+        conditions.append(
+            """
+            EXISTS (
+                SELECT 1 FROM pokemon_egg_group peg2
+                WHERE peg2.pokemon_id = p.id AND peg2.group_name = %s
+            )
+            """
+        )
+        params.append(egg_group)
     if type_code:
         conditions.append("p.type = %s")
         params.append(type_code)
