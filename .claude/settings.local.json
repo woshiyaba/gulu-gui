@@ -7,7 +7,8 @@
       "Bash(uv sync *)",
       "Bash(curl -s http://localhost:8000/api/attributes)",
       "Bash(taskkill //F //IM python.exe)",
-      "Bash(taskkill //F //IM uvicorn.exe)"
+      "Bash(taskkill //F //IM uvicorn.exe)",
+      "Bash(npm run *)"
     ]
   }
 }

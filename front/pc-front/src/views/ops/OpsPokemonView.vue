@@ -16,6 +16,7 @@ import {
   updateOpsPokemon,
   type OpsEvolutionChainStep,
   type OpsPokemonDetail,
+  type OpsPokemonItem,
   type OpsPokemonOptionItem,
   type OpsPokemonSkillItem,
 } from '@/api/ops'
@@ -30,7 +31,7 @@ const filterFormCode = ref('')
 const filterTraitId = ref<number | ''>('')
 const filterTraitKeyword = ref('')
 const traitSuggestVisible = ref(false)
-const items = ref<OpsPokemonDetail[]>([])
+const items = ref<OpsPokemonItem[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = 10
@@ -252,10 +253,10 @@ function dropCurrentPokemon(targetIndex: number) {
     return
   }
   const existedIndex = evolutionSteps.value.findIndex((step) => (step.pokemon_name || '').trim() === ownName)
-  const ownStep: OpsEvolutionChainStep =
-    existedIndex >= 0
-      ? { ...evolutionSteps.value[existedIndex] }
-      : { sort_order: 1, pokemon_name: ownName, evolution_condition: '', image_url: '', matched: false }
+  const existing = existedIndex >= 0 ? evolutionSteps.value[existedIndex] : undefined
+  const ownStep: OpsEvolutionChainStep = existing
+    ? { ...existing }
+    : { sort_order: 1, pokemon_name: ownName, evolution_condition: '', image_url: '', matched: false }
   if (existedIndex >= 0) {
     evolutionSteps.value.splice(existedIndex, 1)
   }
@@ -401,28 +402,7 @@ async function loadList() {
     isAdmin.value = me.role === 'admin'
     total.value = data.total
     totalPages.value = Math.max(1, Math.ceil(data.total / pageSize))
-    items.value = data.items.map((x) => ({
-      ...x,
-      image: '',
-      type: '',
-      form: '',
-      egg_group: '',
-      trait_id: 0,
-      detail_url: '',
-      image_lc: '',
-      chain_id: null,
-      hp: 0,
-      atk: 0,
-      matk: 0,
-      def_val: 0,
-      mdef: 0,
-      spd: 0,
-      total_race: 0,
-      obtain_method: '',
-      attribute_ids: [],
-      egg_groups: x.egg_groups,
-      skills: [],
-    }))
+    items.value = data.items
     page.value = data.page
   } catch (err: any) {
     if (err?.response?.status === 401) {
