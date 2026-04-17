@@ -1,17 +1,13 @@
 """
-从 docs/pets/maps.json 读取地图点位数据，分析 data 内容后导入 pet_map_point 表。
+从 17173 地图 API 拉取点位数据，导入 PostgreSQL pet_map_point 表。
 
-写库字段：
-- map_id      <- mapId（兼容 map_id）
-- title       <- title
-- latitude    <- latitude
-- longitude   <- longitude
-- category_id <- category_id
-- source_id   <- id（改名，避免占用数据库自增主键）
+数据来源：https://map-api.17173.com/map/lkwg/map/4010/point/list
+目标表结构见 sql/wikiroco.sql 中的 pet_map_point。
 
 用法：
     uv run python scripts/import_map_points.py
     uv run python scripts/import_map_points.py --dry-run
+    uv run python scripts/import_map_points.py --from-file docs/pets/maps.json
 """
 
 import argparse
@@ -21,50 +17,68 @@ import sys
 from collections import Counter
 from decimal import Decimal
 
+
+import http.client
+import psycopg2
+import psycopg2.extras
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from db.connection import get_conn
+from config import PG_CONFIG
 
+API_HOST = "terra-api.17173.com"
+API_PATH = "/app/location/list?mapIds=4010"
 JSON_PATH = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-    "docs",
-    "pets",
-    "maps.json",
+    "docs", "pets", "maps.json",
 )
-
-DDL = """
-CREATE TABLE IF NOT EXISTS pet_map_point (
-    id          INT             NOT NULL AUTO_INCREMENT,
-    source_id   BIGINT          NOT NULL COMMENT 'maps.json 原始 id，避免占用数据库自增主键',
-    map_id      INT             NOT NULL COMMENT '地图 id，优先取 mapId，兼容 map_id',
-    title       VARCHAR(100)    NOT NULL DEFAULT '' COMMENT '点位标题',
-    latitude    DECIMAL(18, 15) NOT NULL COMMENT '纬度',
-    longitude   DECIMAL(18, 15) NOT NULL COMMENT '经度',
-    category_id BIGINT          NOT NULL COMMENT '分类 id',
-    PRIMARY KEY (id),
-    UNIQUE KEY uk_source_id (source_id),
-    KEY idx_map_id (map_id),
-    KEY idx_category_id (category_id),
-    KEY idx_map_category (map_id, category_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='地图点位数据';
-"""
 
 _BATCH = 500
 
 
-def _load_items() -> list[dict]:
-    """读取 maps.json 顶层 data 数组。"""
-    with open(JSON_PATH, encoding="utf-8") as f:
-        payload = json.load(f)
+def _fetch_from_api() -> list[dict]:
+    """从 17173 API 拉取数据。"""
+    headers = {
+        "pragma": "no-cache",
+        "priority": "u=1, i",
+        "User-Agent": "Apifox/1.0.0 (https://apifox.com)",
+        "Accept": "*/*",
+        "Host": API_HOST,
+        "Connection": "keep-alive",
+    }
+    conn = http.client.HTTPSConnection(API_HOST)
+    conn.request("GET", API_PATH, "", headers)
+    res = conn.getresponse()
+    payload = json.loads(res.read().decode("utf-8"))
+    conn.close()
 
     items = payload.get("data")
     if not isinstance(items, list):
-        raise ValueError("maps.json 顶层 data 不是数组，无法导入")
+        raise ValueError("API 返回的 data 不是数组")
+    print(f"[fetch] 从 API 获取到 {len(items)} 条数据")
     return items
 
 
+def _load_from_file() -> list[dict]:
+    """从本地 maps.json 读取数据。"""
+    with open(JSON_PATH, encoding="utf-8") as f:
+        payload = json.load(f)
+    items = payload.get("data")
+    if not isinstance(items, list):
+        raise ValueError("maps.json 顶层 data 不是数组")
+    print(f"[load] 从文件读取到 {len(items)} 条数据")
+    return items
+
+
+def _save_to_file(items: list[dict]) -> None:
+    """将拉取的数据保存到本地 maps.json 作为备份。"""
+    os.makedirs(os.path.dirname(JSON_PATH), exist_ok=True)
+    with open(JSON_PATH, "w", encoding="utf-8") as f:
+        json.dump({"code": 200, "message": "操作成功", "data": items}, f, ensure_ascii=False, indent=4)
+    print(f"[save] 已保存到 {JSON_PATH}")
+
+
 def _require_value(item: dict, field_name: str):
-    """校验字段存在且非空，避免脏数据悄悄入库。"""
     value = item.get(field_name)
     if value in (None, ""):
         raise ValueError(f"缺少必填字段: {field_name}")
@@ -72,7 +86,7 @@ def _require_value(item: dict, field_name: str):
 
 
 def _normalize_record(item: dict) -> dict:
-    """把来源 JSON 统一映射成数据库字段。"""
+    """将 API 返回的 JSON 映射为数据库字段。"""
     map_id = item.get("mapId")
     if map_id in (None, ""):
         map_id = _require_value(item, "map_id")
@@ -88,7 +102,6 @@ def _normalize_record(item: dict) -> dict:
 
 
 def _build_records(items: list[dict]) -> list[dict]:
-    """构建入库记录，并检查 source_id 是否重复。"""
     records: list[dict] = []
     source_ids: set[int] = set()
 
@@ -103,80 +116,68 @@ def _build_records(items: list[dict]) -> list[dict]:
     return records
 
 
-def _analyze_records(records: list[dict]) -> dict:
-    """生成导入前分析信息，方便确认数据整体情况。"""
+def _print_analysis(records: list[dict]) -> None:
     map_counter = Counter(row["map_id"] for row in records)
     category_counter = Counter(row["category_id"] for row in records)
-    title_counter = Counter((row["map_id"], row["title"]) for row in records)
-    duplicate_title_groups = sum(1 for count in title_counter.values() if count > 1)
-
-    return {
-        "total": len(records),
-        "map_count": len(map_counter),
-        "category_count": len(category_counter),
-        "top_maps": map_counter.most_common(10),
-        "top_categories": category_counter.most_common(10),
-        "duplicate_title_groups": duplicate_title_groups,
-    }
+    print(f"[analyze] 总记录数: {len(records)}")
+    print(f"[analyze] 地图数量: {len(map_counter)}")
+    print(f"[analyze] 分类数量: {len(category_counter)}")
+    print(f"[analyze] 地图分布 Top10: {map_counter.most_common(10)}")
+    print(f"[analyze] 分类分布 Top10: {category_counter.most_common(10)}")
 
 
-def _print_analysis(analysis: dict) -> None:
-    print(f"[analyze] 总记录数: {analysis['total']}")
-    print(f"[analyze] 地图数量: {analysis['map_count']}")
-    print(f"[analyze] 分类数量: {analysis['category_count']}")
-    print(f"[analyze] 重复标题组数（同 map_id + title）: {analysis['duplicate_title_groups']}")
-    print(f"[analyze] 地图分布 Top10: {analysis['top_maps']}")
-    print(f"[analyze] 分类分布 Top10: {analysis['top_categories']}")
+def _pg_conn() -> psycopg2.extensions.connection:
+    return psycopg2.connect(
+        host=PG_CONFIG["host"],
+        port=PG_CONFIG["port"],
+        dbname=PG_CONFIG["dbname"],
+        user=PG_CONFIG["user"],
+        password=PG_CONFIG["password"],
+    )
 
 
-def _recreate_table(cur) -> None:
-    """重建目标表，保证每次导入结果可重复。"""
-    cur.execute("DROP TABLE IF EXISTS pet_map_point")
-    cur.execute(DDL)
-    print("[migrate] pet_map_point 表已重建")
+def _truncate_and_insert(conn, records: list[dict]) -> int:
+    """清空表后批量插入。"""
+    with conn.cursor() as cur:
+        cur.execute("TRUNCATE TABLE pet_map_point RESTART IDENTITY CASCADE")
+        print("[migrate] pet_map_point 已清空")
 
+        sql = """
+            INSERT INTO pet_map_point (source_id, map_id, title, latitude, longitude, category_id)
+            VALUES %s
+        """
+        values = [
+            (r["source_id"], r["map_id"], r["title"], r["latitude"], r["longitude"], r["category_id"])
+            for r in records
+        ]
+        psycopg2.extras.execute_values(cur, sql, values, page_size=_BATCH)
 
-def _batch_insert(cur, records: list[dict]) -> int:
-    sql = """
-        INSERT INTO pet_map_point (
-            source_id, map_id, title, latitude, longitude, category_id
-        ) VALUES (
-            %(source_id)s, %(map_id)s, %(title)s, %(latitude)s, %(longitude)s, %(category_id)s
-        )
-    """
-
-    inserted = 0
-    for i in range(0, len(records), _BATCH):
-        batch = records[i : i + _BATCH]
-        cur.executemany(sql, batch)
-        inserted += len(batch)
-    return inserted
+    conn.commit()
+    return len(records)
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="导入 docs/pets/maps.json 到 pet_map_point 表")
-    parser.add_argument(
-        "--dry-run",
-        action="store_true",
-        help="只分析数据，不执行建表和入库",
-    )
+    parser = argparse.ArgumentParser(description="从 17173 API 拉取地图点位数据并导入 PostgreSQL")
+    parser.add_argument("--dry-run", action="store_true", help="只分析数据，不写库")
+    parser.add_argument("--from-file", action="store_true", help="从本地 maps.json 读取，不请求 API")
     args = parser.parse_args()
 
-    items = _load_items()
+    if args.from_file:
+        items = _load_from_file()
+    else:
+        items = _fetch_from_api()
+        _save_to_file(items)
+
     records = _build_records(items)
-    analysis = _analyze_records(records)
-    _print_analysis(analysis)
+    _print_analysis(records)
 
     if args.dry_run:
         print("[done] dry-run 模式，不执行数据库写入")
         return
 
-    conn = get_conn()
+    conn = _pg_conn()
     try:
-        with conn.cursor() as cur:
-            _recreate_table(cur)
-            inserted = _batch_insert(cur, records)
-        conn.commit()
+        inserted = _truncate_and_insert(conn, records)
         print(f"[done] 共导入 {inserted} 条记录到 pet_map_point")
     finally:
         conn.close()

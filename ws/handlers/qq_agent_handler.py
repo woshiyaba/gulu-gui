@@ -21,6 +21,9 @@ BOT_QQ = "3766543953"
 _agent = None
 _agent_lock = asyncio.Lock()
 
+# 群号 → thread_id 的映射，同一个群共享上下文
+_group_threads: dict[int, str] = {}
+
 
 async def _get_agent():
     global _agent
@@ -96,7 +99,10 @@ async def handle_qq_message(data: dict) -> None:
 
     try:
         agent = await _get_agent()
-        thread_id = uuid4().hex
+        # 同一个群复用 thread_id，保持群内上下文连续
+        if group_id not in _group_threads:
+            _group_threads[group_id] = uuid4().hex
+        thread_id = _group_threads[group_id]
         config = {"configurable": {"thread_id": thread_id}}
 
         # agent.invoke 是同步阻塞调用，放到线程池中避免阻塞事件循环

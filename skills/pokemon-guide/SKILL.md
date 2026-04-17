@@ -13,17 +13,23 @@ Agent 应根据用户问题，选择合适的端点，通过 **call_api** 工具
 
 ---
 
+## 名词解释
+- 首领化:对首领血脉的精灵使用，可以使该精灵在本场战斗中进化，部分精灵会激活远古血脉。
+- 愿力强化: 可以将精灵的第一个技能替换成愿力冲击，属性则是跟精灵血脉相同，如果敌人同时使用状态技能伤害翻倍
+
 ## 使用场景
 
 当用户：
 
-- 询问某只精灵的详情（"皮卡丘的种族值是多少？"）
+- 询问某只精灵的详情（"迪莫的种族值是多少？"）
 - 查询精灵的进化链或进化条件
 - 按属性、蛋组或种族值筛选/排序精灵
 - 查询某个技能的属性、威力、描述
 - 想知道某技能石的获取方式
-- 输入身高体重，想知道自己和哪只精灵体型相近
+- 输入身高体重，想知道自己和哪只精灵体型相近，如果用户发来两个毫无意义的float类型数据，优先考虑用户在查询相似精灵，数值小的通常为身高 单位m
 - 查询精灵出现在地图上的哪些点位
+- 当用户询问精灵强度相关的问题时 需要从种族值、技能打击面、属性克制关系和特性效果综合考虑
+- pvp配队的时候通常是六只宠物，需要考虑种族值、技能打击面、属性克制关系和特性效果以及可以切换宠物联防等方面
 
 ---
 
@@ -37,7 +43,7 @@ Agent 应根据用户问题，选择合适的端点，通过 **call_api** 工具
 
 调用示例：
 ```
-call_api(method="GET", path="/api/pokemon/皮卡丘")
+call_api(method="GET", path="/api/pokemon/迪莫")
 ```
 
 返回字段：
@@ -95,7 +101,7 @@ call_api(method="GET", path="/api/pokemon", params={"name": "皮卡", "order_by"
 
 调用示例：
 ```
-call_api(method="GET", path="/api/pokemon/evolution-chain/皮卡丘")
+call_api(method="GET", path="/api/pokemon/evolution-chain/迪莫")
 ```
 
 返回：`{chain_id, stages: [{sort_order, next_condition, items: [{name, image_url}]}]}`
@@ -108,7 +114,7 @@ call_api(method="GET", path="/api/pokemon/evolution-chain/皮卡丘")
 
 **`GET /api/pokemon/body-match`**
 
-根据身高（m）和体重（kg）查询体型相近的精灵。
+根据身高（m）和体重（kg）查询体型相近的精灵。如果用户未说明具体单位默认身高是m 体重是kg
 
 调用示例：
 ```
