@@ -1,6 +1,7 @@
 from psycopg import AsyncConnection
 
 from db.connection import get_pool
+from api.utils.media import build_friend_image_url, build_image_url
 
 
 OPS_TABLES_SQL = """
@@ -260,6 +261,31 @@ async def list_dicts(
             return total, items
 
 
+async def list_dicts_all(dict_type: str = "", keyword: str = "") -> list[dict]:
+    pool = await get_pool()
+    conditions: list[str] = []
+    params: list[str] = []
+    if dict_type:
+        conditions.append("dict_type = %s")
+        params.append(dict_type)
+    if keyword:
+        conditions.append("(code LIKE %s OR label LIKE %s)")
+        params.extend([f"%{keyword}%", f"%{keyword}%"])
+    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT id, dict_type, code, label, sort_order
+                FROM sys_dict
+                {where_clause}
+                ORDER BY dict_type, sort_order, id
+                """,
+                params,
+            )
+            return await cur.fetchall()
+
+
 async def get_dict_by_id(dict_id: int) -> dict | None:
     pool = await get_pool()
     async with pool.connection() as conn:
@@ -348,3 +374,390 @@ async def create_audit_log(
                 ),
             )
         await conn.commit()
+
+
+async def list_pokemon_for_ops(
+    keyword: str = "",
+    no: str = "",
+    name: str = "",
+    type_code: str = "",
+    form_code: str = "",
+    trait_id: int | None = None,
+    page: int = 1,
+    page_size: int = 10,
+) -> tuple[int, list[dict]]:
+    pool = await get_pool()
+    conditions: list[str] = []
+    params: list = []
+    if keyword:
+        conditions.append("(p.name LIKE %s OR p.no LIKE %s)")
+        params.extend([f"%{keyword}%", f"%{keyword}%"])
+    if no:
+        conditions.append("p.no = %s")
+        params.append(no)
+    if name:
+        conditions.append("p.name LIKE %s")
+        params.append(f"%{name}%")
+    if type_code:
+        conditions.append("p.type = %s")
+        params.append(type_code)
+    if form_code:
+        conditions.append("p.form = %s")
+        params.append(form_code)
+    if trait_id:
+        conditions.append("p.trait_id = %s")
+        params.append(trait_id)
+    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    offset = (page - 1) * page_size
+
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT COUNT(*) AS cnt
+                FROM pokemon p
+                {where_clause}
+                """,
+                params,
+            )
+            total_row = await cur.fetchone() or {}
+            total = int(total_row.get("cnt", 0))
+
+            await cur.execute(
+                f"""
+                SELECT
+                    p.id, p.no, p.name, p.type_name, p.form_name,
+                    COALESCE(pt.name, '') AS trait_name,
+                    COALESCE(string_agg(DISTINCT a.name, ','), '') AS attr_names,
+                    COALESCE(string_agg(DISTINCT peg.group_name, ','), '') AS egg_group_names
+                FROM pokemon p
+                LEFT JOIN pokemon_trait pt ON pt.id = p.trait_id
+                LEFT JOIN pokemon_attribute pa ON pa.pokemon_id = p.id
+                LEFT JOIN attribute a ON a.id = pa.attr_id
+                LEFT JOIN pokemon_egg_group peg ON peg.pokemon_id = p.id
+                {where_clause}
+                GROUP BY p.id, p.no, p.name, p.type_name, p.form_name, pt.name
+                ORDER BY p.no, p.id
+                LIMIT %s OFFSET %s
+                """,
+                [*params, page_size, offset],
+            )
+            rows = await cur.fetchall()
+            return total, rows
+
+
+async def get_pokemon_detail_for_ops(pokemon_id: int) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT
+                    id, no, name, image, type, type_name, form, form_name, egg_group, trait_id,
+                    detail_url, image_lc, chain_id,
+                    hp, atk, matk, def_val, mdef, spd, total_race, obtain_method
+                FROM pokemon
+                WHERE id = %s
+                """,
+                (pokemon_id,),
+            )
+            base = await cur.fetchone()
+            if not base:
+                return None
+
+            await cur.execute(
+                "SELECT attr_id FROM pokemon_attribute WHERE pokemon_id = %s ORDER BY id",
+                (pokemon_id,),
+            )
+            attr_rows = await cur.fetchall()
+
+            await cur.execute(
+                "SELECT group_name FROM pokemon_egg_group WHERE pokemon_id = %s ORDER BY id",
+                (pokemon_id,),
+            )
+            egg_rows = await cur.fetchall()
+
+            await cur.execute(
+                "SELECT skill_id, type, sort_order FROM pokemon_skill WHERE pokemon_id = %s ORDER BY sort_order, id",
+                (pokemon_id,),
+            )
+            skill_rows = await cur.fetchall()
+
+            return {
+                **base,
+                "attribute_ids": [row["attr_id"] for row in attr_rows],
+                "egg_groups": [row["group_name"] for row in egg_rows],
+                "skills": [
+                    {
+                        "skill_id": row["skill_id"],
+                        "type": row["type"],
+                        "sort_order": row["sort_order"],
+                    }
+                    for row in skill_rows
+                ],
+            }
+
+
+async def save_pokemon_for_ops(payload: dict, pokemon_id: int | None = None) -> dict:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            if pokemon_id is None:
+                await cur.execute(
+                    """
+                    INSERT INTO pokemon (
+                        no, name, image, type, type_name, form, form_name, egg_group, trait_id,
+                        detail_url, image_lc, chain_id,
+                        hp, atk, matk, def_val, mdef, spd, total_race, obtain_method
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    RETURNING id
+                    """,
+                    (
+                        payload["no"],
+                        payload["name"],
+                        payload.get("image", ""),
+                        payload.get("type", ""),
+                        payload.get("type_name", ""),
+                        payload.get("form", ""),
+                        payload.get("form_name", ""),
+                        payload.get("egg_group", ""),
+                        payload["trait_id"],
+                        payload.get("detail_url", ""),
+                        payload.get("image_lc", ""),
+                        payload.get("chain_id"),
+                        payload.get("hp", 0),
+                        payload.get("atk", 0),
+                        payload.get("matk", 0),
+                        payload.get("def_val", 0),
+                        payload.get("mdef", 0),
+                        payload.get("spd", 0),
+                        payload.get("total_race", 0),
+                        payload.get("obtain_method", ""),
+                    ),
+                )
+                row = await cur.fetchone()
+                pokemon_id = row["id"]
+            else:
+                await cur.execute(
+                    """
+                    UPDATE pokemon
+                    SET no = %s, name = %s, image = %s, type = %s, type_name = %s, form = %s, form_name = %s,
+                        egg_group = %s, trait_id = %s, detail_url = %s, image_lc = %s, chain_id = %s,
+                        hp = %s, atk = %s, matk = %s, def_val = %s, mdef = %s, spd = %s, total_race = %s, obtain_method = %s
+                    WHERE id = %s
+                    """,
+                    (
+                        payload["no"],
+                        payload["name"],
+                        payload.get("image", ""),
+                        payload.get("type", ""),
+                        payload.get("type_name", ""),
+                        payload.get("form", ""),
+                        payload.get("form_name", ""),
+                        payload.get("egg_group", ""),
+                        payload["trait_id"],
+                        payload.get("detail_url", ""),
+                        payload.get("image_lc", ""),
+                        payload.get("chain_id"),
+                        payload.get("hp", 0),
+                        payload.get("atk", 0),
+                        payload.get("matk", 0),
+                        payload.get("def_val", 0),
+                        payload.get("mdef", 0),
+                        payload.get("spd", 0),
+                        payload.get("total_race", 0),
+                        payload.get("obtain_method", ""),
+                        pokemon_id,
+                    ),
+                )
+
+            await cur.execute("DELETE FROM pokemon_attribute WHERE pokemon_id = %s", (pokemon_id,))
+            for attr_id in payload.get("attribute_ids", []):
+                await cur.execute(
+                    "INSERT INTO pokemon_attribute (pokemon_id, attr_id) VALUES (%s, %s)",
+                    (pokemon_id, attr_id),
+                )
+
+            await cur.execute("DELETE FROM pokemon_egg_group WHERE pokemon_id = %s", (pokemon_id,))
+            for group_name in payload.get("egg_groups", []):
+                await cur.execute(
+                    "INSERT INTO pokemon_egg_group (pokemon_id, group_name) VALUES (%s, %s)",
+                    (pokemon_id, group_name),
+                )
+
+            await cur.execute("DELETE FROM pokemon_skill WHERE pokemon_id = %s", (pokemon_id,))
+            for skill in payload.get("skills", []):
+                await cur.execute(
+                    """
+                    INSERT INTO pokemon_skill (pokemon_id, skill_id, type, sort_order)
+                    VALUES (%s, %s, %s, %s)
+                    """,
+                    (
+                        pokemon_id,
+                        skill["skill_id"],
+                        skill.get("type", "原生技能"),
+                        skill.get("sort_order", 0),
+                    ),
+                )
+        await conn.commit()
+    return await get_pokemon_detail_for_ops(pokemon_id)
+
+
+async def delete_pokemon_for_ops(pokemon_id: int) -> bool:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("DELETE FROM pokemon WHERE id = %s", (pokemon_id,))
+            deleted = cur.rowcount > 0
+        await conn.commit()
+        return deleted
+
+
+async def list_pokemon_options_for_ops() -> dict:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT id, name FROM attribute ORDER BY sort_order, id")
+            attrs = await cur.fetchall()
+            await cur.execute("SELECT id, name FROM pokemon_trait ORDER BY sort_order, id")
+            traits = await cur.fetchall()
+            await cur.execute("SELECT id, name, icon FROM skill ORDER BY name, id")
+            skills = await cur.fetchall()
+            return {
+                "attributes": [{"id": row["id"], "name": row["name"]} for row in attrs],
+                "traits": [{"id": row["id"], "name": row["name"]} for row in traits],
+                "skills": [
+                    {"id": row["id"], "name": row["name"], "icon": build_image_url(row.get("icon") or "")}
+                    for row in skills
+                ],
+            }
+
+
+async def get_pokemon_evolution_chain_for_ops(pokemon_id: int) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT id, name, chain_id FROM pokemon WHERE id = %s", (pokemon_id,))
+            pokemon = await cur.fetchone()
+            if not pokemon:
+                return None
+            chain_id = pokemon.get("chain_id")
+            if not chain_id:
+                return {"chain_id": None, "steps": []}
+            await cur.execute(
+                """
+                SELECT sort_order, pokemon_name, evolution_condition
+                FROM evolution_chain
+                WHERE chain_id = %s
+                ORDER BY sort_order, id
+                """,
+                (chain_id,),
+            )
+            rows = await cur.fetchall()
+            steps = [
+                {
+                    "sort_order": row["sort_order"],
+                    "pokemon_name": row["pokemon_name"],
+                    "evolution_condition": row.get("evolution_condition") or "",
+                }
+                for row in rows
+            ]
+            enriched_steps = await _enrich_evolution_steps(conn, steps)
+            return {
+                "chain_id": chain_id,
+                "steps": enriched_steps,
+            }
+
+
+async def save_pokemon_evolution_chain_for_ops(pokemon_id: int, steps: list[dict]) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT id, name, chain_id FROM pokemon WHERE id = %s", (pokemon_id,))
+            pokemon = await cur.fetchone()
+            if not pokemon:
+                return None
+
+            chain_id = pokemon.get("chain_id")
+            if chain_id is None:
+                await cur.execute("SELECT COALESCE(MAX(chain_id), 0) + 1 AS next_chain_id FROM evolution_chain")
+                next_row = await cur.fetchone() or {}
+                chain_id = int(next_row.get("next_chain_id") or 1)
+                await cur.execute("UPDATE pokemon SET chain_id = %s WHERE id = %s", (chain_id, pokemon_id))
+
+            await cur.execute("DELETE FROM evolution_chain WHERE chain_id = %s", (chain_id,))
+            for idx, step in enumerate(steps, start=1):
+                pokemon_name = (step.get("pokemon_name") or "").strip()
+                if not pokemon_name:
+                    continue
+                await cur.execute(
+                    """
+                    INSERT INTO evolution_chain (chain_id, sort_order, pokemon_name, evolution_condition)
+                    VALUES (%s, %s, %s, %s)
+                    """,
+                    (
+                        chain_id,
+                        int(step.get("sort_order") or idx),
+                        pokemon_name,
+                        (step.get("evolution_condition") or "").strip(),
+                    ),
+                )
+        await conn.commit()
+    return await get_pokemon_evolution_chain_for_ops(pokemon_id)
+
+
+async def search_evolution_chain_for_ops(keyword: str) -> dict | None:
+    pool = await get_pool()
+    kw = keyword.strip()
+    if not kw:
+        return None
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT id, name
+                FROM pokemon
+                WHERE chain_id IS NOT NULL AND name LIKE %s
+                ORDER BY name, id
+                LIMIT 1
+                """,
+                (f"%{kw}%",),
+            )
+            row = await cur.fetchone()
+            if not row:
+                return None
+            return await get_pokemon_evolution_chain_for_ops(int(row["id"]))
+
+
+async def _enrich_evolution_steps(conn: AsyncConnection, steps: list[dict]) -> list[dict]:
+    names = sorted({(step.get("pokemon_name") or "").strip() for step in steps if (step.get("pokemon_name") or "").strip()})
+    if not names:
+        return []
+    placeholders = ", ".join(["%s"] * len(names))
+    sql = f"""
+        SELECT name, image, image_lc
+        FROM pokemon
+        WHERE name IN ({placeholders})
+    """
+    async with conn.cursor() as cur:
+        await cur.execute(sql, names)
+        rows = await cur.fetchall()
+    mapping = {
+        (row.get("name") or "").strip(): build_friend_image_url(row.get("image_lc", ""), row.get("image", ""))
+        for row in rows
+    }
+    enriched: list[dict] = []
+    for step in steps:
+        pokemon_name = (step.get("pokemon_name") or "").strip()
+        image_url = mapping.get(pokemon_name, "")
+        enriched.append(
+            {
+                "sort_order": int(step.get("sort_order") or 0),
+                "pokemon_name": pokemon_name,
+                "evolution_condition": (step.get("evolution_condition") or "").strip(),
+                "image_url": image_url,
+                "matched": bool(image_url),
+            }
+        )
+    return enriched

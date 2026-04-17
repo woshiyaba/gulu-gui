@@ -67,6 +67,109 @@ export interface OpsUserUpdatePayload {
   role: 'editor' | 'admin'
 }
 
+export interface OpsPokemonSkillItem {
+  skill_id: number
+  type: string
+  sort_order: number
+}
+
+export interface OpsPokemonItem {
+  id: number
+  no: string
+  name: string
+  type_name: string
+  form_name: string
+  trait_name: string
+  attributes: string[]
+  egg_groups: string[]
+}
+
+export interface OpsPokemonListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsPokemonItem[]
+}
+
+export interface OpsPokemonDetail {
+  id: number
+  no: string
+  name: string
+  image: string
+  type: string
+  type_name: string
+  form: string
+  form_name: string
+  egg_group: string
+  trait_id: number
+  detail_url: string
+  image_lc: string
+  chain_id: number | null
+  hp: number
+  atk: number
+  matk: number
+  def_val: number
+  mdef: number
+  spd: number
+  total_race: number
+  obtain_method: string
+  attribute_ids: number[]
+  egg_groups: string[]
+  skills: OpsPokemonSkillItem[]
+}
+
+export interface OpsPokemonOptionItem {
+  id: number
+  name: string
+  icon?: string
+}
+
+export interface OpsEvolutionChainStep {
+  sort_order: number
+  pokemon_name: string
+  evolution_condition: string
+  image_url?: string
+  matched?: boolean
+}
+
+export interface OpsEvolutionChain {
+  chain_id: number | null
+  steps: OpsEvolutionChainStep[]
+}
+
+export interface OpsPokemonOptionsResponse {
+  attributes: OpsPokemonOptionItem[]
+  traits: OpsPokemonOptionItem[]
+  skills: OpsPokemonOptionItem[]
+  skill_sources: string[]
+}
+
+export interface OpsPokemonUpsertPayload {
+  no: string
+  name: string
+  image: string
+  type: string
+  type_name: string
+  form: string
+  form_name: string
+  egg_group: string
+  trait_id: number
+  detail_url: string
+  image_lc: string
+  chain_id: number | null
+  hp: number
+  atk: number
+  matk: number
+  def_val: number
+  mdef: number
+  spd: number
+  total_race: number
+  obtain_method: string
+  attribute_ids: number[]
+  egg_groups: string[]
+  skills: OpsPokemonSkillItem[]
+}
+
 const http = axios.create({
   baseURL: apiBaseUrl,
   timeout: 10000,
@@ -143,4 +246,49 @@ export function updateOpsUser(id: number, payload: OpsUserUpdatePayload): Promis
 
 export function deleteOpsUser(id: number): Promise<void> {
   return http.delete(`/api/ops/users/${id}`).then(() => undefined)
+}
+
+export function fetchOpsPokemon(params: {
+  keyword?: string
+  no?: string
+  name?: string
+  type_code?: string
+  form_code?: string
+  trait_id?: number
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsPokemonListResponse> {
+  return http.get<OpsPokemonListResponse>('/api/ops/pokemon', { params }).then((r) => r.data)
+}
+
+export function fetchOpsPokemonDetail(id: number): Promise<OpsPokemonDetail> {
+  return http.get<OpsPokemonDetail>(`/api/ops/pokemon/${id}`).then((r) => r.data)
+}
+
+export function fetchOpsPokemonOptions(): Promise<OpsPokemonOptionsResponse> {
+  return http.get<OpsPokemonOptionsResponse>('/api/ops/pokemon/options').then((r) => r.data)
+}
+
+export function createOpsPokemon(payload: OpsPokemonUpsertPayload): Promise<OpsPokemonDetail> {
+  return http.post<OpsPokemonDetail>('/api/ops/pokemon', payload).then((r) => r.data)
+}
+
+export function updateOpsPokemon(id: number, payload: OpsPokemonUpsertPayload): Promise<OpsPokemonDetail> {
+  return http.put<OpsPokemonDetail>(`/api/ops/pokemon/${id}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsPokemon(id: number): Promise<void> {
+  return http.delete(`/api/ops/pokemon/${id}`).then(() => undefined)
+}
+
+export function fetchOpsPokemonEvolutionChain(id: number): Promise<OpsEvolutionChain> {
+  return http.get<OpsEvolutionChain>(`/api/ops/pokemon/${id}/evolution-chain`).then((r) => r.data)
+}
+
+export function updateOpsPokemonEvolutionChain(id: number, steps: OpsEvolutionChainStep[]): Promise<OpsEvolutionChain> {
+  return http.put<OpsEvolutionChain>(`/api/ops/pokemon/${id}/evolution-chain`, { steps }).then((r) => r.data)
+}
+
+export function searchOpsPokemonEvolutionChain(keyword: string): Promise<OpsEvolutionChain> {
+  return http.get<OpsEvolutionChain>('/api/ops/pokemon/evolution-chain/search', { params: { keyword } }).then((r) => r.data)
 }

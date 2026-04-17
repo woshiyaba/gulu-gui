@@ -11,6 +11,12 @@ from api.schemas.ops import (
     OpsUserInfo,
     OpsUserListResponse,
     OpsUserUpdateRequest,
+    OpsPokemonDetailResponse,
+    OpsPokemonListResponse,
+    OpsPokemonOptionsResponse,
+    OpsPokemonUpsertRequest,
+    OpsEvolutionChainResponse,
+    OpsEvolutionChainUpsertRequest,
 )
 from api.services import ops_service
 
@@ -46,8 +52,8 @@ async def update_ops_me(
 async def get_dicts(
     dict_type: str = Query(default=""),
     keyword: str = Query(default=""),
-    page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=10, ge=1, le=100),
+    page: int | None = Query(default=1, ge=1),
+    page_size: int | None = Query(default=10, ge=1, le=100),
     _: dict = Depends(get_current_ops_user),
 ):
     return await ops_service.get_dicts(
@@ -112,4 +118,93 @@ async def delete_ops_user(
     current_user: dict = Depends(get_current_ops_user),
 ):
     await ops_service.delete_user(current_user, user_id)
+    return Response(status_code=204)
+
+
+@router.get("/pokemon", response_model=OpsPokemonListResponse)
+async def list_ops_pokemon(
+    keyword: str = Query(default=""),
+    no: str = Query(default=""),
+    name: str = Query(default=""),
+    type_code: str = Query(default=""),
+    form_code: str = Query(default=""),
+    trait_id: int | None = Query(default=None, ge=1),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.list_pokemon_for_ops(
+        current_user,
+        keyword=keyword,
+        no=no,
+        name=name,
+        type_code=type_code,
+        form_code=form_code,
+        trait_id=trait_id,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.get("/pokemon/options", response_model=OpsPokemonOptionsResponse)
+async def get_ops_pokemon_options(current_user: dict = Depends(get_current_ops_user)):
+    return await ops_service.get_pokemon_options_for_ops(current_user)
+
+
+@router.get("/pokemon/{pokemon_id}", response_model=OpsPokemonDetailResponse)
+async def get_ops_pokemon_detail(
+    pokemon_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.get_pokemon_detail_for_ops(current_user, pokemon_id)
+
+
+@router.get("/pokemon/{pokemon_id}/evolution-chain", response_model=OpsEvolutionChainResponse)
+async def get_ops_pokemon_evolution_chain(
+    pokemon_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.get_pokemon_evolution_chain_for_ops(current_user, pokemon_id)
+
+
+@router.put("/pokemon/{pokemon_id}/evolution-chain", response_model=OpsEvolutionChainResponse)
+async def update_ops_pokemon_evolution_chain(
+    pokemon_id: int,
+    payload: OpsEvolutionChainUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.update_pokemon_evolution_chain_for_ops(current_user, pokemon_id, payload.model_dump())
+
+
+@router.get("/pokemon/evolution-chain/search", response_model=OpsEvolutionChainResponse)
+async def search_ops_pokemon_evolution_chain(
+    keyword: str = Query(default=""),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.search_pokemon_evolution_chain_for_ops(current_user, keyword)
+
+
+@router.post("/pokemon", response_model=OpsPokemonDetailResponse)
+async def create_ops_pokemon(
+    payload: OpsPokemonUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.create_pokemon_for_ops(current_user, payload.model_dump())
+
+
+@router.put("/pokemon/{pokemon_id}", response_model=OpsPokemonDetailResponse)
+async def update_ops_pokemon(
+    pokemon_id: int,
+    payload: OpsPokemonUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.update_pokemon_for_ops(current_user, pokemon_id, payload.model_dump())
+
+
+@router.delete("/pokemon/{pokemon_id}", status_code=204)
+async def delete_ops_pokemon(
+    pokemon_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    await ops_service.delete_pokemon_for_ops(current_user, pokemon_id)
     return Response(status_code=204)

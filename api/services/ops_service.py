@@ -154,16 +154,27 @@ def ensure_role(user: dict, allowed_roles: set[str]) -> None:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="没有操作权限")
 
 
-async def get_dicts(dict_type: str = "", keyword: str = "", page: int = 1, page_size: int = 10) -> dict:
-    page = max(page, 1)
-    page_size = max(1, min(page_size, 100))
+async def get_dicts(
+    dict_type: str = "",
+    keyword: str = "",
+    page: int | None = 1,
+    page_size: int | None = 10,
+) -> dict:
+    # 仅按 dict_type 拉下拉时，允许不传分页，直接返回该类型全量字典。
+    if page is None and page_size is None:
+        items = await ops_repository.list_dicts_all(dict_type=dict_type, keyword=keyword)
+        total = len(items)
+        return {"total": total, "page": 1, "page_size": total if total > 0 else 1, "items": items}
+
+    safe_page = max(page or 1, 1)
+    safe_page_size = max(1, min(page_size or 10, 100))
     total, items = await ops_repository.list_dicts(
         dict_type=dict_type,
         keyword=keyword,
-        page=page,
-        page_size=page_size,
+        page=safe_page,
+        page_size=safe_page_size,
     )
-    return {"total": total, "page": page, "page_size": page_size, "items": items}
+    return {"total": total, "page": safe_page, "page_size": safe_page_size, "items": items}
 
 
 async def create_dict(user: dict, payload: dict) -> dict:
@@ -327,3 +338,176 @@ async def delete_user(user: dict, target_user_id: int) -> None:
         before_json=serialize_ops_user(before),
         after_json=None,
     )
+
+
+def _normalize_pokemon_payload(payload: dict) -> dict:
+    normalized = dict(payload)
+    normalized["no"] = (payload.get("no") or "").strip()
+    normalized["name"] = (payload.get("name") or "").strip()
+    normalized["egg_groups"] = [x.strip() for x in (payload.get("egg_groups") or []) if str(x).strip()]
+    normalized["skills"] = payload.get("skills") or []
+    if not normalized["no"] or not normalized["name"]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="编号和名称不能为空")
+    if not normalized.get("trait_id"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="特性不能为空")
+    return normalized
+
+
+async def list_pokemon_for_ops(
+    user: dict,
+    keyword: str = "",
+    no: str = "",
+    name: str = "",
+    type_code: str = "",
+    form_code: str = "",
+    trait_id: int | None = None,
+    page: int = 1,
+    page_size: int = 10,
+) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    page = max(page, 1)
+    page_size = max(1, min(page_size, 100))
+    total, rows = await ops_repository.list_pokemon_for_ops(
+        keyword=keyword.strip(),
+        no=no.strip(),
+        name=name.strip(),
+        type_code=type_code.strip(),
+        form_code=form_code.strip(),
+        trait_id=trait_id,
+        page=page,
+        page_size=page_size,
+    )
+    items: list[dict] = []
+    for row in rows:
+        items.append(
+            {
+                "id": row["id"],
+                "no": row["no"],
+                "name": row["name"],
+                "type_name": row.get("type_name", ""),
+                "form_name": row.get("form_name", ""),
+                "trait_name": row.get("trait_name", ""),
+                "attributes": [x for x in (row.get("attr_names") or "").split(",") if x],
+                "egg_groups": [x for x in (row.get("egg_group_names") or "").split(",") if x],
+            }
+        )
+    return {"total": total, "page": page, "page_size": page_size, "items": items}
+
+
+async def get_pokemon_detail_for_ops(user: dict, pokemon_id: int) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    detail = await ops_repository.get_pokemon_detail_for_ops(pokemon_id)
+    if not detail:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="精灵不存在")
+    return detail
+
+
+async def create_pokemon_for_ops(user: dict, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    normalized = _normalize_pokemon_payload(payload)
+    created = await ops_repository.save_pokemon_for_ops(normalized)
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="pokemon",
+        resource_id=str(created["id"]),
+        action="create",
+        before_json=None,
+        after_json=created,
+    )
+    return created
+
+
+async def update_pokemon_for_ops(user: dict, pokemon_id: int, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_pokemon_detail_for_ops(pokemon_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="精灵不存在")
+    normalized = _normalize_pokemon_payload(payload)
+    updated = await ops_repository.save_pokemon_for_ops(normalized, pokemon_id=pokemon_id)
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="pokemon",
+        resource_id=str(pokemon_id),
+        action="update",
+        before_json=before,
+        after_json=updated,
+    )
+    return updated
+
+
+async def delete_pokemon_for_ops(user: dict, pokemon_id: int) -> None:
+    ensure_role(user, {"admin"})
+    before = await ops_repository.get_pokemon_detail_for_ops(pokemon_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="精灵不存在")
+    deleted = await ops_repository.delete_pokemon_for_ops(pokemon_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="精灵不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="pokemon",
+        resource_id=str(pokemon_id),
+        action="delete",
+        before_json=before,
+        after_json=None,
+    )
+
+
+async def get_pokemon_options_for_ops(user: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    result = await ops_repository.list_pokemon_options_for_ops()
+    result["skill_sources"] = ["原生技能", "学习技能"]
+    return result
+
+
+async def get_pokemon_evolution_chain_for_ops(user: dict, pokemon_id: int) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    result = await ops_repository.get_pokemon_evolution_chain_for_ops(pokemon_id)
+    if result is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="精灵不存在")
+    return result
+
+
+async def update_pokemon_evolution_chain_for_ops(user: dict, pokemon_id: int, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_pokemon_evolution_chain_for_ops(pokemon_id)
+    if before is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="精灵不存在")
+
+    steps = payload.get("steps") or []
+    normalized_steps: list[dict] = []
+    for idx, step in enumerate(steps, start=1):
+        pokemon_name = (step.get("pokemon_name") or "").strip()
+        if not pokemon_name:
+            continue
+        normalized_steps.append(
+            {
+                "sort_order": int(step.get("sort_order") or idx),
+                "pokemon_name": pokemon_name,
+                "evolution_condition": (step.get("evolution_condition") or "").strip(),
+            }
+        )
+    if not normalized_steps:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="进化链至少保留一条有效步骤")
+
+    after = await ops_repository.save_pokemon_evolution_chain_for_ops(pokemon_id, normalized_steps)
+    if after is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="精灵不存在")
+
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="evolution_chain",
+        resource_id=str(after.get("chain_id") or ""),
+        action="update",
+        before_json=before,
+        after_json=after,
+    )
+    return after
+
+
+async def search_pokemon_evolution_chain_for_ops(user: dict, keyword: str) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    result = await ops_repository.search_evolution_chain_for_ops(keyword)
+    if result is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="未找到匹配的进化链")
+    return result

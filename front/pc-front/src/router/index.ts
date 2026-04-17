@@ -42,6 +42,10 @@ const router = createRouter({
           component: () => import('@/views/ops/OpsDictsView.vue'),
         },
         {
+          path: 'pokemon',
+          component: () => import('@/views/ops/OpsPokemonView.vue'),
+        },
+        {
           path: 'users',
           component: () => import('@/views/ops/OpsUsersView.vue'),
         },

@@ -24,7 +24,7 @@ const menus = [
   { to: '/ops/home', label: '首页' },
   { to: '/ops/dicts', label: '字典维护' },
   { to: '/ops/users', label: '用户管理' },
-  { to: '/ops/pokemon', label: '精灵维护', disabled: true },
+  { to: '/ops/pokemon', label: '精灵维护' },
   { to: '/ops/skills', label: '技能维护', disabled: true },
   { to: '/ops/map', label: '地图维护', disabled: true },
 ]
@@ -763,9 +763,9 @@ onUnmounted(() => {
 }
 
 .error {
-  color: #dc2626;
-  background: #fef0f0;
-  border: 1px solid #fde2e2;
+  color: #fff;
+  background: #f56c6c;
+  border: 1px solid #f56c6c;
   border-radius: 4px;
   padding: 10px 12px;
 }
