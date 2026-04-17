@@ -50,6 +50,23 @@ export interface OpsDictPayload {
   sort_order: number
 }
 
+export interface OpsUserListResponse {
+  items: OpsUser[]
+}
+
+export interface OpsUserCreatePayload {
+  username: string
+  nickname: string
+  password: string
+  role: 'editor' | 'admin'
+}
+
+export interface OpsUserUpdatePayload {
+  nickname: string
+  password?: string
+  role: 'editor' | 'admin'
+}
+
 const http = axios.create({
   baseURL: apiBaseUrl,
   timeout: 10000,
@@ -110,4 +127,20 @@ export function updateOpsDict(id: number, payload: OpsDictPayload): Promise<OpsD
 
 export function deleteOpsDict(id: number): Promise<void> {
   return http.delete(`/api/ops/dicts/${id}`).then(() => undefined)
+}
+
+export function fetchOpsUsers(): Promise<OpsUserListResponse> {
+  return http.get<OpsUserListResponse>('/api/ops/users').then((r) => r.data)
+}
+
+export function createOpsUser(payload: OpsUserCreatePayload): Promise<OpsUser> {
+  return http.post<OpsUser>('/api/ops/users', payload).then((r) => r.data)
+}
+
+export function updateOpsUser(id: number, payload: OpsUserUpdatePayload): Promise<OpsUser> {
+  return http.put<OpsUser>(`/api/ops/users/${id}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsUser(id: number): Promise<void> {
+  return http.delete(`/api/ops/users/${id}`).then(() => undefined)
 }

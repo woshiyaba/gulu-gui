@@ -41,6 +41,10 @@ const router = createRouter({
           path: 'dicts',
           component: () => import('@/views/ops/OpsDictsView.vue'),
         },
+        {
+          path: 'users',
+          component: () => import('@/views/ops/OpsUsersView.vue'),
+        },
       ],
     },
   ],

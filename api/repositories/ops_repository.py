@@ -66,6 +66,20 @@ async def get_user_by_id(user_id: int) -> dict | None:
             return await cur.fetchone()
 
 
+async def list_ops_users() -> list[dict]:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT id, username, password_hash, nickname, role, is_active
+                FROM ops_user
+                ORDER BY id DESC
+                """
+            )
+            return await cur.fetchall()
+
+
 async def count_ops_users() -> int:
     pool = await get_pool()
     async with pool.connection() as conn:
@@ -93,6 +107,77 @@ async def create_ops_user(
                 (username, password_hash, nickname, role),
             )
         await conn.commit()
+
+
+async def create_ops_user_with_return(
+    username: str,
+    password_hash: str,
+    nickname: str,
+    role: str,
+) -> dict:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                INSERT INTO ops_user (username, password_hash, nickname, role)
+                VALUES (%s, %s, %s, %s)
+                RETURNING id, username, password_hash, nickname, role, is_active
+                """,
+                (username, password_hash, nickname, role),
+            )
+            row = await cur.fetchone()
+        await conn.commit()
+        return row
+
+
+async def update_ops_user_by_admin(
+    user_id: int,
+    nickname: str,
+    role: str,
+    password_hash: str | None = None,
+) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            if password_hash is None:
+                await cur.execute(
+                    """
+                    UPDATE ops_user
+                    SET nickname = %s,
+                        role = %s,
+                        updated_at = NOW()
+                    WHERE id = %s
+                    RETURNING id, username, password_hash, nickname, role, is_active
+                    """,
+                    (nickname, role, user_id),
+                )
+            else:
+                await cur.execute(
+                    """
+                    UPDATE ops_user
+                    SET nickname = %s,
+                        role = %s,
+                        password_hash = %s,
+                        updated_at = NOW()
+                    WHERE id = %s
+                    RETURNING id, username, password_hash, nickname, role, is_active
+                    """,
+                    (nickname, role, password_hash, user_id),
+                )
+            row = await cur.fetchone()
+        await conn.commit()
+        return row
+
+
+async def delete_ops_user(user_id: int) -> bool:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("DELETE FROM ops_user WHERE id = %s", (user_id,))
+            deleted = cur.rowcount > 0
+        await conn.commit()
+        return deleted
 
 
 async def update_ops_user_profile(

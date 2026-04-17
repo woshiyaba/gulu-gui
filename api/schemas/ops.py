@@ -45,3 +45,20 @@ class OpsProfileUpdateRequest(BaseModel):
     nickname: str = ""
     current_password: str = ""
     new_password: str = ""
+
+
+class OpsUserCreateRequest(BaseModel):
+    username: str
+    nickname: str = ""
+    password: str
+    role: str = "editor"
+
+
+class OpsUserUpdateRequest(BaseModel):
+    nickname: str = ""
+    password: str = ""
+    role: str = "editor"
+
+
+class OpsUserListResponse(BaseModel):
+    items: list[OpsUserInfo] = Field(default_factory=list)

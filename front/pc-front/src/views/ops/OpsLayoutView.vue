@@ -8,6 +8,7 @@ const router = useRouter()
 const user = ref<OpsUser | null>(null)
 const profileVisible = ref(false)
 const userMenuVisible = ref(false)
+const sidebarCollapsed = ref(false)
 const profileSaving = ref(false)
 const profileError = ref('')
 const profileSuccess = ref('')
@@ -22,6 +23,7 @@ const toasts = ref<Array<{ id: number; message: string; type: 'success' | 'error
 const menus = [
   { to: '/ops/home', label: '首页' },
   { to: '/ops/dicts', label: '字典维护' },
+  { to: '/ops/users', label: '用户管理' },
   { to: '/ops/pokemon', label: '精灵维护', disabled: true },
   { to: '/ops/skills', label: '技能维护', disabled: true },
   { to: '/ops/map', label: '地图维护', disabled: true },
@@ -75,6 +77,10 @@ function toggleUserMenu() {
 
 function closeUserMenu() {
   userMenuVisible.value = false
+}
+
+function toggleSidebar() {
+  sidebarCollapsed.value = !sidebarCollapsed.value
 }
 
 function onWindowKeydown(event: KeyboardEvent) {
@@ -155,7 +161,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="ops-layout">
+  <div class="ops-layout" :class="{ collapsed: sidebarCollapsed }">
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-logo">G</div>
@@ -209,6 +215,9 @@ onUnmounted(() => {
     <main class="main">
       <header class="topbar">
         <div class="page-meta">
+          <button type="button" class="collapse-btn" @click="toggleSidebar">
+            <span class="collapse-icon">{{ sidebarCollapsed ? '>' : '<' }}</span>
+          </button>
           <h2>{{ pageTitle }}</h2>
         </div>
         <div class="userbox">
@@ -300,6 +309,11 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: 256px 1fr;
   background: #f5f7fb;
+  transition: grid-template-columns 0.2s ease;
+}
+
+.ops-layout.collapsed {
+  grid-template-columns: 76px 1fr;
 }
 
 .sidebar {
@@ -319,6 +333,11 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   background: rgba(0, 0, 0, 0.14);
+}
+
+.ops-layout.collapsed .brand {
+  padding: 0 10px;
+  justify-content: center;
 }
 
 .brand-logo {
@@ -343,6 +362,25 @@ onUnmounted(() => {
   margin-top: 4px;
   font-size: 12px;
   color: rgba(223, 230, 238, 0.72);
+}
+
+.ops-layout.collapsed .brand-text,
+.ops-layout.collapsed .menu-group-title,
+.ops-layout.collapsed .menu-item:not(.disabled) {
+  font-size: 0;
+}
+
+.ops-layout.collapsed .brand-text {
+  display: none;
+}
+
+.ops-layout.collapsed .menu-item {
+  justify-content: center;
+  padding: 0;
+}
+
+.ops-layout.collapsed .menu-item .menu-icon {
+  margin: 0;
 }
 
 .menu {
@@ -443,6 +481,7 @@ onUnmounted(() => {
   min-width: 0;
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .page-meta h2 {
@@ -450,6 +489,29 @@ onUnmounted(() => {
   line-height: 1.1;
   color: #303133;
   font-weight: 600;
+}
+
+.collapse-btn {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  background: #fff;
+  color: #606266;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.collapse-btn:hover {
+  color: #409eff;
+  border-color: #409eff;
+}
+
+.collapse-icon {
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 700;
 }
 
 .topbar p {

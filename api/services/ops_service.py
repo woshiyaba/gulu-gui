@@ -213,3 +213,117 @@ async def delete_dict(user: dict, dict_id: int) -> None:
         before_json=before,
         after_json=None,
     )
+
+
+async def list_users(user: dict) -> dict:
+    ensure_role(user, {"admin"})
+    rows = await ops_repository.list_ops_users()
+    return {"items": [serialize_ops_user(row) for row in rows]}
+
+
+async def create_user(user: dict, payload: dict) -> dict:
+    ensure_role(user, {"admin"})
+    username = (payload.get("username") or "").strip()
+    nickname = (payload.get("nickname") or "").strip()
+    password = payload.get("password") or ""
+    role = (payload.get("role") or "editor").strip()
+
+    if not username:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="账号不能为空")
+    if len(username) < 3:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="账号至少 3 位")
+    if len(password) < 6:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="密码至少 6 位")
+    if role not in {"admin", "editor"}:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="角色无效")
+
+    exists = await ops_repository.get_user_by_username(username)
+    if exists:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="账号已存在")
+
+    if not nickname:
+        nickname = username
+
+    created = await ops_repository.create_ops_user_with_return(
+        username=username,
+        password_hash=hash_password(password),
+        nickname=nickname,
+        role=role,
+    )
+
+    result = serialize_ops_user(created)
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="ops_user",
+        resource_id=str(result["id"]),
+        action="create",
+        before_json=None,
+        after_json=result,
+    )
+    return result
+
+
+async def update_user(user: dict, target_user_id: int, payload: dict) -> dict:
+    ensure_role(user, {"admin"})
+    target = await ops_repository.get_user_by_id(target_user_id)
+    if not target:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
+
+    nickname = (payload.get("nickname") or "").strip() or target["nickname"] or target["username"]
+    role = (payload.get("role") or target["role"]).strip()
+    password = payload.get("password") or ""
+
+    if role not in {"admin", "editor"}:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="角色无效")
+    if target_user_id == user["id"] and role != "admin":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="不能把自己降级为 editor")
+
+    password_hash = None
+    if password:
+        if len(password) < 6:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="密码至少 6 位")
+        password_hash = hash_password(password)
+
+    before = serialize_ops_user(target)
+    updated = await ops_repository.update_ops_user_by_admin(
+        user_id=target_user_id,
+        nickname=nickname,
+        role=role,
+        password_hash=password_hash,
+    )
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
+
+    after = serialize_ops_user(updated)
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="ops_user",
+        resource_id=str(target_user_id),
+        action="update",
+        before_json=before,
+        after_json=after,
+    )
+    return after
+
+
+async def delete_user(user: dict, target_user_id: int) -> None:
+    ensure_role(user, {"admin"})
+    if target_user_id == user["id"]:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="不能删除当前登录账号")
+
+    before = await ops_repository.get_user_by_id(target_user_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
+
+    deleted = await ops_repository.delete_ops_user(target_user_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="用户不存在")
+
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="ops_user",
+        resource_id=str(target_user_id),
+        action="delete",
+        before_json=serialize_ops_user(before),
+        after_json=None,
+    )

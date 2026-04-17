@@ -7,7 +7,10 @@ from api.schemas.ops import (
     OpsLoginRequest,
     OpsLoginResponse,
     OpsProfileUpdateRequest,
+    OpsUserCreateRequest,
     OpsUserInfo,
+    OpsUserListResponse,
+    OpsUserUpdateRequest,
 )
 from api.services import ops_service
 
@@ -78,4 +81,35 @@ async def delete_dict(
     current_user: dict = Depends(get_current_ops_user),
 ):
     await ops_service.delete_dict(current_user, dict_id)
+    return Response(status_code=204)
+
+
+@router.get("/users", response_model=OpsUserListResponse)
+async def list_ops_users(current_user: dict = Depends(get_current_ops_user)):
+    return await ops_service.list_users(current_user)
+
+
+@router.post("/users", response_model=OpsUserInfo)
+async def create_ops_user(
+    payload: OpsUserCreateRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.create_user(current_user, payload.model_dump())
+
+
+@router.put("/users/{user_id}", response_model=OpsUserInfo)
+async def update_ops_user(
+    user_id: int,
+    payload: OpsUserUpdateRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.update_user(current_user, user_id, payload.model_dump())
+
+
+@router.delete("/users/{user_id}", status_code=204)
+async def delete_ops_user(
+    user_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    await ops_service.delete_user(current_user, user_id)
     return Response(status_code=204)
