@@ -3,10 +3,13 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import time
+from pathlib import Path
 from typing import Callable
+from uuid import uuid4
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException, UploadFile, status
 
 from api.repositories import ops_repository
 
@@ -15,6 +18,9 @@ OPS_TOKEN_TTL_SECONDS = int(os.getenv("OPS_TOKEN_TTL_SECONDS", "43200"))
 OPS_INIT_USERNAME = os.getenv("OPS_INIT_USERNAME", "admin")
 OPS_INIT_PASSWORD = os.getenv("OPS_INIT_PASSWORD", "admin123456")
 OPS_INIT_NICKNAME = os.getenv("OPS_INIT_NICKNAME", "默认管理员")
+
+_ALLOWED_FRIEND_IMAGE_SUFFIX = {".webp", ".png", ".jpg", ".jpeg", ".gif"}
+_MAX_FRIEND_IMAGE_BYTES = 5 * 1024 * 1024
 
 
 def _b64encode(raw: bytes) -> str:
@@ -517,3 +523,72 @@ async def search_pokemon_evolution_chain_for_ops(user: dict, keyword: str) -> di
     if result is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="未找到匹配的进化链")
     return result
+
+
+def _friend_upload_stem(raw_stem: str) -> str:
+    stem = re.sub(r"[^0-9A-Za-z._-]", "_", raw_stem).strip("._-")
+    return stem[:120] if stem else ""
+
+
+def _friend_upload_filename(original: str) -> str:
+    path = Path(original)
+    suf = path.suffix.lower()
+    if suf not in _ALLOWED_FRIEND_IMAGE_SUFFIX:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="仅支持 webp、png、jpg、jpeg、gif",
+        )
+    stem = _friend_upload_stem(path.stem)
+    if not stem:
+        stem = uuid4().hex
+    return f"{stem}{suf}"
+
+
+def _friend_unique_dest(directory: Path, filename: str) -> Path:
+    candidate = directory / filename
+    if not candidate.exists():
+        return candidate
+    stem, suf = Path(filename).stem, Path(filename).suffix
+    for i in range(2, 1000):
+        alt = directory / f"{stem}_{i}{suf}"
+        if not alt.exists():
+            return alt
+    return directory / f"{uuid4().hex}{suf}"
+
+
+async def save_friend_image_upload(user: dict, upload: UploadFile) -> dict:
+    """将朋友图保存到 FRIEND_IMAGE_UPLOAD_DIR，返回写入库用的 image_lc 与预览 URL。"""
+    ensure_role(user, {"editor", "admin"})
+    from config import FRIEND_IMAGE_BASE_URL, FRIEND_IMAGE_UPLOAD_DIR
+
+    if not upload.filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="请选择文件")
+
+    filename = _friend_upload_filename(upload.filename)
+    root = Path(FRIEND_IMAGE_UPLOAD_DIR).resolve()
+    try:
+        root.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"无法创建上传目录: {exc}",
+        ) from exc
+
+    dest = _friend_unique_dest(root, filename)
+    content = await upload.read()
+    if not content:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="文件为空")
+    if len(content) > _MAX_FRIEND_IMAGE_BYTES:
+        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="图片不能超过 5MB")
+
+    try:
+        dest.write_bytes(content)
+    except OSError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"写入文件失败: {exc}",
+        ) from exc
+
+    image_lc = dest.name
+    preview_url = f"{FRIEND_IMAGE_BASE_URL}{image_lc}"
+    return {"image_lc": image_lc, "preview_url": preview_url}

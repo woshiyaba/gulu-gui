@@ -64,6 +64,11 @@ class OpsUserListResponse(BaseModel):
     items: list[OpsUserInfo] = Field(default_factory=list)
 
 
+class OpsFriendImageUploadResponse(BaseModel):
+    image_lc: str
+    preview_url: str
+
+
 class OpsPokemonSkillItem(BaseModel):
     skill_id: int
     type: str = "原生技能"
