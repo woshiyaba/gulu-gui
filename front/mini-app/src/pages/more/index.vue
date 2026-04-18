@@ -8,7 +8,7 @@ interface MenuItem {
 
 const menuItems: MenuItem[] = [
   {
-    title: '身高体重查宠',
+    title: '孵蛋查询',
     desc: '输入身高体重，匹配对应宠物',
     url: '/pages/pokemon/body-match',
     color: '#2b74ff',

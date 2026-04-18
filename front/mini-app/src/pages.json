@@ -35,7 +35,7 @@
 		{
 			"path": "pages/pokemon/body-match",
 			"style": {
-				"navigationBarTitleText": "身高体重查宠"
+				"navigationBarTitleText": "孵蛋查询"
 			}
 		},
 		{
