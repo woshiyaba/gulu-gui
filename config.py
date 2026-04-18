@@ -24,9 +24,5 @@ BASE_URL = "https://rocom.game-walkthrough.com"
 
 STATIC_BASE_URL = os.getenv("STATIC_BASE_URL", "https://wikiroco.com")
 FRIEND_IMAGE_BASE_URL = f"{STATIC_BASE_URL}/images/friends/"
-# 朋友图上传落盘目录（生产可设为 /var/www/images/friends，与 Nginx /images/friends 一致）
-_CONFIG_ROOT = os.path.dirname(os.path.abspath(__file__))
-FRIEND_IMAGE_UPLOAD_DIR = (os.getenv("FRIEND_IMAGE_UPLOAD_DIR") or "").strip() or os.path.join(
-    _CONFIG_ROOT, "data", "uploads", "friends"
-)
+FRIEND_IMAGE_UPLOAD_DIR = os.getenv("FRIEND_IMAGE_UPLOAD_DIR", "/var/www/images/friends").strip()
 CATEGORY_ICON_BASE_URL = f"{STATIC_BASE_URL}/images/icon"
