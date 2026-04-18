@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
-import { fetchPokemonDetail } from '@/api/pokemon'
-import type { PokemonDetail } from '@/types/pokemon'
+import { fetchPokemonDetail, fetchPokemonEvolutionChain } from '@/api/pokemon'
+import type { PokemonDetail, PokemonEvolutionChain } from '@/types/pokemon'
 
 const pokemon = ref<PokemonDetail | null>(null)
+const evolutionChain = ref<PokemonEvolutionChain | null>(null)
 const loading = ref(true)
 const error = ref('')
 
@@ -32,6 +33,17 @@ function goBack() {
   })
 }
 
+function isCurrentEvolutionItem(name: string) {
+  return pokemon.value?.name === name
+}
+
+function goToEvolution(name: string) {
+  if (pokemon.value?.name === name) return
+  uni.redirectTo({
+    url: `/pages/pokemon/detail?name=${encodeURIComponent(name)}`,
+  })
+}
+
 function previewImage(url: string) {
   if (!url) return
 
@@ -45,10 +57,14 @@ async function loadDetail(name: string) {
   error.value = ''
 
   try {
-    const response = await fetchPokemonDetail(name)
-    pokemon.value = response
+    const [detail, chain] = await Promise.all([
+      fetchPokemonDetail(name),
+      fetchPokemonEvolutionChain(name),
+    ])
+    pokemon.value = detail
+    evolutionChain.value = chain
     uni.setNavigationBarTitle({
-      title: response.name,
+      title: detail.name,
     })
   } catch (err) {
     error.value = err instanceof Error ? err.message : '宠物详情加载失败'
@@ -157,6 +173,44 @@ onLoad((options) => {
         <text class="section-title">特性</text>
         <text class="trait-name">{{ pokemon.trait.name }}</text>
         <text class="trait-desc">{{ pokemon.trait.desc || '暂无描述' }}</text>
+      </view>
+
+      <view class="section-card">
+        <text class="section-title">进化链</text>
+        <view v-if="!evolutionChain?.stages?.length" class="evo-empty">
+          <text class="empty-text">暂无进化链数据</text>
+        </view>
+        <view v-else class="evo-stages">
+          <template v-for="(stage, index) in evolutionChain.stages" :key="stage.sort_order">
+            <view class="evo-stage">
+              <view class="evo-items">
+                <view
+                  v-for="item in stage.items"
+                  :key="item.name"
+                  class="evo-item"
+                  :class="{ 'evo-item-active': isCurrentEvolutionItem(item.name) }"
+                  @tap="goToEvolution(item.name)"
+                >
+                  <view class="evo-img-wrap">
+                    <image
+                      v-if="item.image_url"
+                      class="evo-img"
+                      :src="item.image_url"
+                      mode="aspectFit"
+                    />
+                    <text v-else class="evo-img-placeholder">?</text>
+                  </view>
+                  <text class="evo-name">{{ item.name }}</text>
+                </view>
+              </view>
+            </view>
+
+            <view v-if="index < evolutionChain.stages.length - 1" class="evo-arrow-block">
+              <text class="evo-arrow">↓</text>
+              <text v-if="stage.next_condition" class="evo-condition">{{ stage.next_condition }}</text>
+            </view>
+          </template>
+        </view>
       </view>
 
       <view v-if="pokemon.defensive_type_chart?.cells?.length" class="section-card">
@@ -524,6 +578,91 @@ onLoad((options) => {
   font-size: 24rpx;
   line-height: 1.8;
   color: #6f89b2;
+}
+
+.evo-stages {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.evo-items {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16rpx;
+}
+
+.evo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+  padding: 16rpx;
+  border-radius: 20rpx;
+  border: 2rpx solid #e7eefb;
+  background: #f8fbff;
+  min-width: 140rpx;
+}
+
+.evo-item-active {
+  border-color: #4d8eff;
+  box-shadow: 0 0 0 4rpx rgba(77, 142, 255, 0.14);
+}
+
+.evo-img-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 18rpx;
+  background: linear-gradient(180deg, #edf5ff 0%, #f9fbff 100%);
+}
+
+.evo-img {
+  width: 80rpx;
+  height: 80rpx;
+}
+
+.evo-img-placeholder {
+  font-size: 48rpx;
+  color: #b5c8e8;
+}
+
+.evo-name {
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #1f3760;
+  text-align: center;
+  word-break: break-all;
+}
+
+.evo-arrow-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.evo-arrow {
+  font-size: 40rpx;
+  line-height: 1;
+  color: #8aa2c9;
+}
+
+.evo-condition {
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  background: #f0f4ff;
+  font-size: 20rpx;
+  color: #5a749f;
+  text-align: center;
+}
+
+.evo-empty {
+  margin-top: 16rpx;
 }
 
 .type-chart-tip {

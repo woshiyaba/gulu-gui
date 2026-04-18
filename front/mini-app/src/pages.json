@@ -1,11 +1,29 @@
 {
 	"pages": [
 		{
-			
 			"path": "pages/index/index",
 			"style": {
 				"navigationBarTitleText": "精灵图鉴",
 				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/skill/list",
+			"style": {
+				"navigationBarTitleText": "技能图鉴"
+			}
+		},
+		{
+			"path": "pages/map/index",
+			"style": {
+				"navigationBarTitleText": "世界地图",
+				"navigationBarBackgroundColor": "#FFFFFF"
+			}
+		},
+		{
+			"path": "pages/more/index",
+			"style": {
+				"navigationBarTitleText": "更多"
 			}
 		},
 		{
@@ -19,6 +37,12 @@
 			"style": {
 				"navigationBarTitleText": "身高体重查宠"
 			}
+		},
+		{
+			"path": "pages/skill/stone",
+			"style": {
+				"navigationBarTitleText": "技能石查询"
+			}
 		}
 	],
 	"globalStyle": {
@@ -26,6 +50,38 @@
 		"navigationBarTitleText": "精灵图鉴",
 		"navigationBarBackgroundColor": "#F0F7FF",
 		"backgroundColor": "#F6FAFF"
+	},
+	"tabBar": {
+		"color": "#8aa2c9",
+		"selectedColor": "#2b74ff",
+		"backgroundColor": "#ffffff",
+		"borderStyle": "white",
+		"list": [
+			{
+				"pagePath": "pages/index/index",
+				"text": "图鉴",
+				"iconPath": "static/tab/tab-pokedex.png",
+				"selectedIconPath": "static/tab/tab-pokedex-active.png"
+			},
+			{
+				"pagePath": "pages/skill/list",
+				"text": "技能",
+				"iconPath": "static/tab/tab-skill.png",
+				"selectedIconPath": "static/tab/tab-skill-active.png"
+			},
+			{
+				"pagePath": "pages/map/index",
+				"text": "地图",
+				"iconPath": "static/tab/tab-map.png",
+				"selectedIconPath": "static/tab/tab-map-active.png"
+			},
+			{
+				"pagePath": "pages/more/index",
+				"text": "更多",
+				"iconPath": "static/tab/tab-more.png",
+				"selectedIconPath": "static/tab/tab-more-active.png"
+			}
+		]
 	},
 	"uniIdRouter": {}
 }

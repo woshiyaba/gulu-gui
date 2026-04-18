@@ -8,7 +8,12 @@
       "Bash(curl -s http://localhost:8000/api/attributes)",
       "Bash(taskkill //F //IM python.exe)",
       "Bash(taskkill //F //IM uvicorn.exe)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git -C \"E:\\\\game\\\\洛克王国世界\\\\wikiroco\\\\gulu-gui\" log --oneline --all -20)",
+      "Bash(node -e ' *)",
+      "Bash(npx vue-tsc *)",
+      "Bash(curl -s \"https://wikiroco.com/api/pokemon/categories\")",
+      "Bash(curl -sI \"https://wikiroco.com/images/icon/17310030067.png\")"
     ]
   }
 }

@@ -34,6 +34,57 @@ export interface PokemonBodyMatchResponse {
   items: PokemonBodyMatchItem[]
 }
 
+export interface SkillStone {
+  skill_name: string
+  obtain_method: string
+  icon: string
+}
+
+export interface SkillListResponse {
+  total: number
+  items: Skill[]
+}
+
+export interface SkillStoneListResponse {
+  total: number
+  items: SkillStone[]
+}
+
+export interface Category {
+  id: number
+  category_id: number
+  description: string
+  type: string
+  category_image_url: string
+}
+
+export interface MapPoint {
+  id: number
+  source_id: number
+  map_id: number
+  title: string
+  latitude: number
+  longitude: number
+  category_id: number
+  category_image_url: string
+}
+
+export interface EvolutionChainItem {
+  name: string
+  image_url: string
+}
+
+export interface EvolutionChainStage {
+  sort_order: number
+  next_condition: string
+  items: EvolutionChainItem[]
+}
+
+export interface PokemonEvolutionChain {
+  chain_id: number | null
+  stages: EvolutionChainStage[]
+}
+
 export interface Stats {
   hp: number
   atk: number

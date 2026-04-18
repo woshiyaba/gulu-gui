@@ -73,7 +73,7 @@ async function onSubmit() {
     </view>
 
     <view class="panel hero-panel">
-      <text class="page-title">身高体重查宠</text>
+      <text class="page-title">孵蛋查询</text>
       <text class="page-subtitle">输入身高和体重，系统会自动换算并匹配对应宠物。</text>
     </view>
 

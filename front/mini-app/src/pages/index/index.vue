@@ -98,12 +98,6 @@ function navigateToDetail(name: string) {
   })
 }
 
-function navigateToBodyMatch() {
-  uni.navigateTo({
-    url: '/pages/pokemon/body-match',
-  })
-}
-
 async function initializePage() {
   await loadAttributes()
   await resetAndLoadPokemon()
@@ -148,9 +142,8 @@ onUnload(() => {
       <view class="hero-main">
         <view>
           <text class="hero-title">洛克王国精灵图鉴</text>
-          <text class="hero-subtitle">支持按名称、属性快速查询，也可以根据身高体重找宠物。</text>
+          <text class="hero-subtitle">支持按名称、属性快速查询精灵信息。</text>
         </view>
-        <button class="hero-button" @tap="navigateToBodyMatch">身高体重查宠</button>
       </view>
 
       <view class="search-box">
@@ -279,23 +272,6 @@ onUnload(() => {
   font-size: 24rpx;
   line-height: 1.6;
   color: #5f7da6;
-}
-
-.hero-button {
-  margin: 0;
-  padding: 0 26rpx;
-  height: 72rpx;
-  line-height: 72rpx;
-  border: none;
-  border-radius: 999rpx;
-  background: linear-gradient(135deg, #2b74ff 0%, #53a0ff 100%);
-  color: #ffffff;
-  font-size: 24rpx;
-  font-weight: 600;
-}
-
-.hero-button::after {
-  border: none;
 }
 
 .search-box {
