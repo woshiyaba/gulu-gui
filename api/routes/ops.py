@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, Response, UploadFile, status
 
 from api.schemas.ops import (
     OpsDictItem,
@@ -17,6 +17,7 @@ from api.schemas.ops import (
     OpsPokemonUpsertRequest,
     OpsEvolutionChainResponse,
     OpsEvolutionChainUpsertRequest,
+    OpsFriendImageUploadResponse,
 )
 from api.services import ops_service
 
@@ -155,6 +156,14 @@ async def list_ops_pokemon(
 @router.get("/pokemon/options", response_model=OpsPokemonOptionsResponse)
 async def get_ops_pokemon_options(current_user: dict = Depends(get_current_ops_user)):
     return await ops_service.get_pokemon_options_for_ops(current_user)
+
+
+@router.post("/pokemon/friend-image", response_model=OpsFriendImageUploadResponse)
+async def upload_ops_friend_image(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.save_friend_image_upload(current_user, file)
 
 
 @router.get("/pokemon/{pokemon_id}", response_model=OpsPokemonDetailResponse)

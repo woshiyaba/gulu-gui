@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import {
   clearOpsToken,
   createOpsPokemon,
@@ -14,6 +14,7 @@ import {
   showOpsToast,
   updateOpsPokemonEvolutionChain,
   updateOpsPokemon,
+  uploadOpsFriendImage,
   type OpsEvolutionChainStep,
   type OpsPokemonDetail,
   type OpsPokemonItem,
@@ -60,6 +61,10 @@ const skillSelectorPageSize = 10
 const evolutionSteps = ref<OpsEvolutionChainStep[]>([])
 const evolutionChainId = ref<number | null>(null)
 const evolutionSearchKeyword = ref('')
+/** 已选但未保存的图片（保存时再上传） */
+const pendingFriendFile = ref<File | null>(null)
+const pendingFriendPreviewUrl = ref('')
+const friendFileInputRef = ref<HTMLInputElement | null>(null)
 const evolutionEditorVisible = ref(false)
 const evolutionEditingIndex = ref<number | null>(null)
 const evolutionDraft = reactive<OpsEvolutionChainStep>({
@@ -122,6 +127,28 @@ const form = reactive<OpsPokemonDetail>({
   skills: [],
 })
 
+const friendStaticBase = (import.meta.env.VITE_STATIC_BASE_URL || 'https://wikiroco.com').replace(/\/+$/, '')
+
+const friendDisplaySrc = computed(() => {
+  if (pendingFriendPreviewUrl.value) return pendingFriendPreviewUrl.value
+  const lc = (form.image_lc || '').trim()
+  if (!lc) return ''
+  if (lc.startsWith('http')) return lc
+  return `${friendStaticBase}/images/friends/${lc.replace(/^\//, '')}`
+})
+
+function revokeFriendPendingPreview() {
+  if (pendingFriendPreviewUrl.value) {
+    URL.revokeObjectURL(pendingFriendPreviewUrl.value)
+    pendingFriendPreviewUrl.value = ''
+  }
+}
+
+function resetPendingFriend() {
+  pendingFriendFile.value = null
+  revokeFriendPendingPreview()
+}
+
 const skillMap = computed(() => {
   const map = new Map<number, OpsPokemonOptionItem>()
   for (const item of skills.value) {
@@ -171,6 +198,25 @@ const filteredTraitSuggestions = computed(() => {
   return traits.value.filter((item) => item.name.toLowerCase().includes(kw)).slice(0, 12)
 })
 
+function triggerFriendFilePick() {
+  friendFileInputRef.value?.click()
+}
+
+function clearFriendImage() {
+  resetPendingFriend()
+  form.image_lc = ''
+}
+
+function onFriendImageSelected(ev: Event) {
+  const el = ev.target as HTMLInputElement
+  const file = el.files?.[0]
+  if (!file) return
+  revokeFriendPendingPreview()
+  pendingFriendFile.value = file
+  pendingFriendPreviewUrl.value = URL.createObjectURL(file)
+  el.value = ''
+}
+
 function resetForm() {
   editingId.value = null
   form.id = 0
@@ -185,6 +231,7 @@ function resetForm() {
   form.trait_id = 0
   form.detail_url = ''
   form.image_lc = ''
+  resetPendingFriend()
   form.chain_id = null
   form.hp = 0
   form.atk = 0
@@ -213,6 +260,7 @@ async function openEditModal(id: number) {
   try {
     const [detail, chain] = await Promise.all([fetchOpsPokemonDetail(id), fetchOpsPokemonEvolutionChain(id)])
     editingId.value = id
+    resetPendingFriend()
     Object.assign(form, detail)
     evolutionChainId.value = chain.chain_id
     evolutionSteps.value = (chain.steps || []).map((step) => ({ ...step }))
@@ -309,6 +357,7 @@ function closeModal() {
   modalVisible.value = false
   skillSelectorVisible.value = false
   evolutionEditorVisible.value = false
+  resetPendingFriend()
 }
 
 function isEggGroupSelected(group: string): boolean {
@@ -474,6 +523,16 @@ async function submit() {
       showOpsToast('属性必须选择 1-2 种', 'error')
       return
     }
+    if (pendingFriendFile.value) {
+      try {
+        const data = await uploadOpsFriendImage(pendingFriendFile.value)
+        form.image_lc = data.image_lc
+        resetPendingFriend()
+      } catch (err: any) {
+        showOpsToast(err?.response?.data?.detail || '图片上传失败', 'error')
+        return
+      }
+    }
     const payload = {
       ...form,
       no: form.no.trim(),
@@ -564,6 +623,10 @@ watch(skillTotalPages, (newVal) => {
 onMounted(async () => {
   await loadOptions()
   await loadList()
+})
+
+onBeforeUnmount(() => {
+  revokeFriendPendingPreview()
 })
 </script>
 
@@ -707,34 +770,78 @@ onMounted(async () => {
           <h3>{{ editingId ? '编辑精灵' : '新增精灵' }}</h3>
         </div>
         <form class="form-grid" @submit.prevent="submit" @keydown.enter.prevent>
-          <section class="full section-card">
+          <section class="full section-card section-basic-with-art">
             <h4>基础信息</h4>
-            <div class="section-grid">
-              <label><span>编号</span><input v-model="form.no" required type="text" /></label>
-              <label><span>名称</span><input v-model="form.name" required type="text" /></label>
-              <label>
-                <span>阶段编码</span>
-                <select v-model="form.type">
-                  <option value="">请选择</option>
-                  <option v-for="item in typeOptions" :key="item.code" :value="item.code">{{ item.code }}</option>
-                </select>
-              </label>
-              <label><span>阶段名称</span><input :value="form.type_name" type="text" disabled /></label>
-              <label>
-                <span>形态编码</span>
-                <select v-model="form.form">
-                  <option value="">请选择</option>
-                  <option v-for="item in formOptions" :key="item.code" :value="item.code">{{ item.code }}</option>
-                </select>
-              </label>
-              <label><span>形态名称</span><input :value="form.form_name" type="text" disabled /></label>
-              <label>
-                <span>特性</span>
-                <select v-model.number="form.trait_id" required>
-                  <option :value="0">请选择</option>
-                  <option v-for="t in traits" :key="t.id" :value="t.id">{{ t.name }}</option>
-                </select>
-              </label>
+            <div class="basic-with-art">
+              <div class="basic-with-art-fields">
+                <div class="section-grid">
+                  <label><span>编号</span><input v-model="form.no" required type="text" /></label>
+                  <label><span>名称</span><input v-model="form.name" required type="text" /></label>
+                  <label>
+                    <span>阶段编码</span>
+                    <select v-model="form.type">
+                      <option value="">请选择</option>
+                      <option v-for="item in typeOptions" :key="item.code" :value="item.code">{{ item.code }}</option>
+                    </select>
+                  </label>
+                  <label><span>阶段名称</span><input :value="form.type_name" type="text" disabled /></label>
+                  <label>
+                    <span>形态编码</span>
+                    <select v-model="form.form">
+                      <option value="">请选择</option>
+                      <option v-for="item in formOptions" :key="item.code" :value="item.code">{{ item.code }}</option>
+                    </select>
+                  </label>
+                  <label><span>形态名称</span><input :value="form.form_name" type="text" disabled /></label>
+                  <label>
+                    <span>特性</span>
+                    <select v-model.number="form.trait_id" required>
+                      <option :value="0">请选择</option>
+                      <option v-for="t in traits" :key="t.id" :value="t.id">{{ t.name }}</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+              <aside class="basic-with-art-side" aria-label="精灵立绘">
+                <div class="basic-art-heading">立绘</div>
+                <div class="friend-image-main">
+                  <button
+                    type="button"
+                    class="friend-image-preview"
+                    :disabled="saving"
+                    @click="triggerFriendFilePick"
+                  >
+                    <img v-if="friendDisplaySrc" :src="friendDisplaySrc" alt="" class="friend-image-preview-img" />
+                    <div v-else class="friend-image-placeholder-inner">
+                      <span class="friend-image-placeholder-title">暂无</span>
+                      <span class="friend-image-placeholder-sub">点击上传</span>
+                    </div>
+                  </button>
+                  <input
+                    ref="friendFileInputRef"
+                    type="file"
+                    class="friend-file-hidden"
+                    accept=".webp,.png,.jpg,.jpeg,.gif,image/webp,image/png,image/jpeg,image/gif"
+                    :disabled="saving"
+                    @change="onFriendImageSelected"
+                  />
+                  <div class="friend-image-actions">
+                    <button type="button" class="btn-primary btn-compact" :disabled="saving" @click="triggerFriendFilePick">
+                      {{ friendDisplaySrc ? '更换' : '选择图片' }}
+                    </button>
+                    <button
+                      v-if="form.image_lc || pendingFriendFile"
+                      type="button"
+                      class="btn-secondary btn-compact"
+                      :disabled="saving"
+                      @click="clearFriendImage"
+                    >
+                      移除
+                    </button>
+                  </div>
+                  <p class="friend-image-note">点击底部「保存」时上传图片并写入数据库</p>
+                </div>
+              </aside>
             </div>
           </section>
 
@@ -1062,6 +1169,117 @@ onMounted(async () => {
 .section-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
 .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 12px; }
 .section-grid .wide { grid-column: 1 / -1; }
+.section-basic-with-art > h4 {
+  margin-bottom: 12px;
+}
+.basic-with-art {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 168px;
+  gap: 16px 20px;
+  align-items: start;
+}
+.basic-with-art-fields { min-width: 0; }
+.basic-with-art-side {
+  position: sticky;
+  top: 0;
+  padding: 10px 10px 12px;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.basic-art-heading {
+  font-size: 12px;
+  font-weight: 600;
+  color: #909399;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
+}
+.friend-image-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+  width: 100%;
+}
+.friend-file-hidden {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.friend-image-preview {
+  width: 100%;
+  aspect-ratio: 1;
+  max-height: 148px;
+  padding: 0;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  background: #f5f7fa;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+.friend-image-preview:hover:not(:disabled) {
+  border-color: #409eff;
+  background: #ecf5ff;
+}
+.friend-image-preview:disabled {
+  cursor: wait;
+  opacity: 0.85;
+}
+.friend-image-preview-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+.friend-image-placeholder-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px;
+  text-align: center;
+}
+.friend-image-placeholder-title { font-size: 12px; color: #606266; }
+.friend-image-placeholder-sub { font-size: 11px; color: #c0c4cc; }
+.friend-image-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: stretch;
+}
+.friend-image-actions .btn-primary,
+.friend-image-actions .btn-secondary {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.btn-compact {
+  height: 32px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+.friend-image-note {
+  margin: 0;
+  font-size: 11px;
+  color: #c0c4cc;
+  line-height: 1.4;
+}
+@media (max-width: 720px) {
+  .basic-with-art {
+    grid-template-columns: 1fr;
+  }
+  .basic-with-art-side {
+    position: static;
+    max-width: 220px;
+  }
+}
 .attr-picker { display: flex; flex-wrap: wrap; gap: 8px; }
 .attr-pill {
   height: 30px;

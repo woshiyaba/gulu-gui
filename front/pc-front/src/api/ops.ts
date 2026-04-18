@@ -144,6 +144,11 @@ export interface OpsPokemonOptionsResponse {
   skill_sources: string[]
 }
 
+export interface OpsFriendImageUploadResponse {
+  image_lc: string
+  preview_url: string
+}
+
 export interface OpsPokemonUpsertPayload {
   no: string
   name: string
@@ -173,6 +178,18 @@ export interface OpsPokemonUpsertPayload {
 const http = axios.create({
   baseURL: apiBaseUrl,
   timeout: 10000,
+})
+
+const httpUpload = axios.create({
+  baseURL: apiBaseUrl,
+  timeout: 120000,
+})
+httpUpload.interceptors.request.use((config) => {
+  const token = localStorage.getItem(TOKEN_KEY)
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
 })
 
 http.interceptors.request.use((config) => {
@@ -270,6 +287,14 @@ export function fetchOpsPokemonDetail(id: number): Promise<OpsPokemonDetail> {
 
 export function fetchOpsPokemonOptions(): Promise<OpsPokemonOptionsResponse> {
   return http.get<OpsPokemonOptionsResponse>('/api/ops/pokemon/options').then((r) => r.data)
+}
+
+export function uploadOpsFriendImage(file: File): Promise<OpsFriendImageUploadResponse> {
+  const body = new FormData()
+  body.append('file', file)
+  return httpUpload
+    .post<OpsFriendImageUploadResponse>('/api/ops/pokemon/friend-image', body)
+    .then((r) => r.data)
 }
 
 export function createOpsPokemon(payload: OpsPokemonUpsertPayload): Promise<OpsPokemonDetail> {
