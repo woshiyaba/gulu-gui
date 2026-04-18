@@ -26,3 +26,6 @@ STATIC_BASE_URL = os.getenv("STATIC_BASE_URL", "https://wikiroco.com")
 FRIEND_IMAGE_BASE_URL = f"{STATIC_BASE_URL}/images/friends/"
 FRIEND_IMAGE_UPLOAD_DIR = os.getenv("FRIEND_IMAGE_UPLOAD_DIR", "/var/www/images/friends").strip()
 CATEGORY_ICON_BASE_URL = f"{STATIC_BASE_URL}/images/icon"
+# 技能图标
+SKILL_ICON_BASE_URL = f"{STATIC_BASE_URL}/images/icon/skill/"
+SKILL_ICON_UPLOAD_DIR = os.getenv("SKILL_ICON_UPLOAD_DIR", "/var/www/images/icon/skill").strip()
