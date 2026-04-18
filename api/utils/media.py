@@ -1,4 +1,4 @@
-from config import BASE_URL, FRIEND_IMAGE_BASE_URL
+from config import BASE_URL, FRIEND_IMAGE_BASE_URL, SKILL_ICON_BASE_URL
 
 
 def build_image_url(path: str) -> str:
@@ -23,3 +23,18 @@ def build_friend_image_url(image_lc: str, fallback_path: str = "") -> str:
             return image_lc
         return f"{FRIEND_IMAGE_BASE_URL}{image_lc.lstrip('/')}"
     return build_image_url(fallback_path)
+
+
+def build_skill_icon_url(icon: str) -> str:
+    """技能图标 URL：
+    - http 开头：原样返回
+    - 带路径分隔（老数据，如 "/icon/skill/xxx.png"）：走 build_image_url，拼 BASE_URL
+    - 纯文件名（新上传落在 SKILL_ICON_UPLOAD_DIR）：拼 SKILL_ICON_BASE_URL
+    """
+    if not icon:
+        return ""
+    if icon.startswith("http"):
+        return icon
+    if "/" in icon:
+        return build_image_url(icon)
+    return f"{SKILL_ICON_BASE_URL}{icon}"

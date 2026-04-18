@@ -320,3 +320,99 @@ export function updateOpsPokemonEvolutionChain(id: number, steps: OpsEvolutionCh
 export function searchOpsPokemonEvolutionChain(keyword: string): Promise<OpsEvolutionChain> {
   return http.get<OpsEvolutionChain>('/api/ops/pokemon/evolution-chain/search', { params: { keyword } }).then((r) => r.data)
 }
+
+// ---------- 技能维护 ----------
+
+export interface OpsSkillItem {
+  id: number
+  name: string
+  attr: string
+  type: string
+  power: number
+  consume: number
+  skill_desc: string
+  icon: string
+  icon_url: string
+}
+
+export interface OpsSkillListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsSkillItem[]
+}
+
+export interface OpsSkillUpsertPayload {
+  name: string
+  attr: string
+  type: string
+  power: number
+  consume: number
+  skill_desc: string
+  icon: string
+}
+
+export interface OpsSkillUsageItem {
+  id: number
+  no: string
+  name: string
+  type: string
+  sort_order: number
+}
+
+export interface OpsSkillUsageResponse {
+  total: number
+  items: OpsSkillUsageItem[]
+}
+
+export interface OpsSkillOptionsResponse {
+  attrs: string[]
+  types: string[]
+}
+
+export interface OpsSkillIconUploadResponse {
+  icon: string
+  preview_url: string
+}
+
+export function fetchOpsSkills(params: {
+  keyword?: string
+  attr?: string
+  type?: string
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsSkillListResponse> {
+  return http.get<OpsSkillListResponse>('/api/ops/skills', { params }).then((r) => r.data)
+}
+
+export function fetchOpsSkillDetail(id: number): Promise<OpsSkillItem> {
+  return http.get<OpsSkillItem>(`/api/ops/skills/${id}`).then((r) => r.data)
+}
+
+export function fetchOpsSkillOptions(): Promise<OpsSkillOptionsResponse> {
+  return http.get<OpsSkillOptionsResponse>('/api/ops/skills/options').then((r) => r.data)
+}
+
+export function fetchOpsSkillUsages(id: number): Promise<OpsSkillUsageResponse> {
+  return http.get<OpsSkillUsageResponse>(`/api/ops/skills/${id}/usages`).then((r) => r.data)
+}
+
+export function createOpsSkill(payload: OpsSkillUpsertPayload): Promise<OpsSkillItem> {
+  return http.post<OpsSkillItem>('/api/ops/skills', payload).then((r) => r.data)
+}
+
+export function updateOpsSkill(id: number, payload: OpsSkillUpsertPayload): Promise<OpsSkillItem> {
+  return http.put<OpsSkillItem>(`/api/ops/skills/${id}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsSkill(id: number, force = false): Promise<void> {
+  return http.delete(`/api/ops/skills/${id}`, { params: force ? { force: 1 } : {} }).then(() => undefined)
+}
+
+export function uploadOpsSkillIcon(file: File): Promise<OpsSkillIconUploadResponse> {
+  const body = new FormData()
+  body.append('file', file)
+  return httpUpload
+    .post<OpsSkillIconUploadResponse>('/api/ops/skills/icon', body)
+    .then((r) => r.data)
+}

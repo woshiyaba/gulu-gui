@@ -21,6 +21,8 @@ OPS_INIT_NICKNAME = os.getenv("OPS_INIT_NICKNAME", "默认管理员")
 
 _ALLOWED_FRIEND_IMAGE_SUFFIX = {".webp", ".png", ".jpg", ".jpeg", ".gif"}
 _MAX_FRIEND_IMAGE_BYTES = 5 * 1024 * 1024
+_ALLOWED_SKILL_ICON_SUFFIX = {".webp", ".png", ".jpg", ".jpeg", ".gif"}
+_MAX_SKILL_ICON_BYTES = 2 * 1024 * 1024
 
 
 def _b64encode(raw: bytes) -> str:
@@ -556,6 +558,53 @@ def _friend_unique_dest(directory: Path, filename: str) -> Path:
     return directory / f"{uuid4().hex}{suf}"
 
 
+async def _save_image_upload(
+    upload: UploadFile,
+    *,
+    upload_dir: str,
+    base_url: str,
+    allowed_suffix: set[str],
+    max_bytes: int,
+    suffix_hint: str,
+) -> dict:
+    if not upload.filename:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="请选择文件")
+    path = Path(upload.filename)
+    suf = path.suffix.lower()
+    if suf not in allowed_suffix:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"仅支持 {suffix_hint}",
+        )
+    stem = _friend_upload_stem(path.stem) or uuid4().hex
+    filename = f"{stem}{suf}"
+    root = Path(upload_dir).resolve()
+    try:
+        root.mkdir(parents=True, exist_ok=True)
+    except OSError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"无法创建上传目录: {exc}",
+        ) from exc
+    dest = _friend_unique_dest(root, filename)
+    content = await upload.read()
+    if not content:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="文件为空")
+    if len(content) > max_bytes:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"文件不能超过 {max_bytes // (1024 * 1024)}MB",
+        )
+    try:
+        dest.write_bytes(content)
+    except OSError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"写入文件失败: {exc}",
+        ) from exc
+    return {"filename": dest.name, "preview_url": f"{base_url}{dest.name}"}
+
+
 async def save_friend_image_upload(user: dict, upload: UploadFile) -> dict:
     """将朋友图保存到 FRIEND_IMAGE_UPLOAD_DIR，返回写入库用的 image_lc 与预览 URL。"""
     ensure_role(user, {"editor", "admin"})
@@ -592,3 +641,155 @@ async def save_friend_image_upload(user: dict, upload: UploadFile) -> dict:
     image_lc = dest.name
     preview_url = f"{FRIEND_IMAGE_BASE_URL}{image_lc}"
     return {"image_lc": image_lc, "preview_url": preview_url}
+
+
+def _normalize_skill_payload(payload: dict) -> dict:
+    name = (payload.get("name") or "").strip()
+    if not name:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="技能名称不能为空")
+    if len(name) > 50:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="技能名称过长")
+    try:
+        power = int(payload.get("power") or 0)
+        consume = int(payload.get("consume") or 0)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="威力/消耗必须为整数") from exc
+    if power < 0 or power > 9999:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="威力必须在 0-9999 之间")
+    if consume < 0 or consume > 9999:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="消耗必须在 0-9999 之间")
+    return {
+        "name": name,
+        "attr": (payload.get("attr") or "").strip(),
+        "type": (payload.get("type") or "").strip(),
+        "power": power,
+        "consume": consume,
+        "skill_desc": (payload.get("skill_desc") or "").strip(),
+        "icon": (payload.get("icon") or "").strip(),
+    }
+
+
+async def list_skills_for_ops(
+    user: dict,
+    keyword: str = "",
+    attr: str = "",
+    type_: str = "",
+    page: int = 1,
+    page_size: int = 10,
+) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    page = max(page, 1)
+    page_size = max(1, min(page_size, 100))
+    total, items = await ops_repository.list_skills_for_ops(
+        keyword=keyword.strip(),
+        attr=attr.strip(),
+        type_=type_.strip(),
+        page=page,
+        page_size=page_size,
+    )
+    return {"total": total, "page": page, "page_size": page_size, "items": items}
+
+
+async def get_skill_detail_for_ops(user: dict, skill_id: int) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    detail = await ops_repository.get_skill_for_ops(skill_id)
+    if not detail:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="技能不存在")
+    return detail
+
+
+async def create_skill_for_ops(user: dict, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    normalized = _normalize_skill_payload(payload)
+    exists = await ops_repository.get_skill_by_name(normalized["name"])
+    if exists:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="技能名称已存在")
+    created = await ops_repository.create_skill_for_ops(normalized)
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="skill",
+        resource_id=str(created["id"]),
+        action="create",
+        before_json=None,
+        after_json=created,
+    )
+    return created
+
+
+async def update_skill_for_ops(user: dict, skill_id: int, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_skill_for_ops(skill_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="技能不存在")
+    normalized = _normalize_skill_payload(payload)
+    if normalized["name"] != before["name"]:
+        exists = await ops_repository.get_skill_by_name(normalized["name"])
+        if exists and int(exists["id"]) != skill_id:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="技能名称已存在")
+    updated = await ops_repository.update_skill_for_ops(skill_id, normalized)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="技能不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="skill",
+        resource_id=str(skill_id),
+        action="update",
+        before_json=before,
+        after_json=updated,
+    )
+    return updated
+
+
+async def delete_skill_for_ops(user: dict, skill_id: int, force: bool = False) -> None:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_skill_for_ops(skill_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="技能不存在")
+    total, _ = await ops_repository.list_skill_usages_for_ops(skill_id)
+    if total > 0:
+        if not force:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"该技能已被 {total} 只精灵使用，不能直接删除",
+            )
+        ensure_role(user, {"admin"})
+    deleted = await ops_repository.delete_skill_for_ops(skill_id, force=force)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="技能不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="skill",
+        resource_id=str(skill_id),
+        action="delete" if not force else "force_delete",
+        before_json=before,
+        after_json=None,
+    )
+
+
+async def list_skill_usages_for_ops(user: dict, skill_id: int) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_skill_for_ops(skill_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="技能不存在")
+    total, items = await ops_repository.list_skill_usages_for_ops(skill_id)
+    return {"total": total, "items": items}
+
+
+async def get_skill_options_for_ops(user: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    return await ops_repository.list_skill_options_for_ops()
+
+
+async def save_skill_icon_upload(user: dict, upload: UploadFile) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    from config import SKILL_ICON_BASE_URL, SKILL_ICON_UPLOAD_DIR
+
+    result = await _save_image_upload(
+        upload,
+        upload_dir=SKILL_ICON_UPLOAD_DIR,
+        base_url=SKILL_ICON_BASE_URL,
+        allowed_suffix=_ALLOWED_SKILL_ICON_SUFFIX,
+        max_bytes=_MAX_SKILL_ICON_BYTES,
+        suffix_hint="webp、png、jpg、jpeg、gif",
+    )
+    return {"icon": result["filename"], "preview_url": result["preview_url"]}

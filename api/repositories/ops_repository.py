@@ -1,7 +1,7 @@
 from psycopg import AsyncConnection
 
 from db.connection import get_pool
-from api.utils.media import build_friend_image_url, build_image_url
+from api.utils.media import build_friend_image_url, build_image_url, build_skill_icon_url
 
 
 OPS_TABLES_SQL = """
@@ -757,6 +757,226 @@ async def search_evolution_chain_for_ops(keyword: str) -> dict | None:
             if not row:
                 return None
             return await get_pokemon_evolution_chain_for_ops(int(row["id"]))
+
+
+def _skill_row_to_item(row: dict) -> dict:
+    icon = (row.get("icon") or "").strip()
+    return {
+        "id": row["id"],
+        "name": row.get("name") or "",
+        "attr": row.get("attr_name") or "",
+        "type": row.get("type") or "",
+        "power": int(row.get("power") or 0),
+        "consume": int(row.get("consume") or 0),
+        "skill_desc": row.get("skill_desc") or "",
+        "icon": icon,
+        "icon_url": build_skill_icon_url(icon),
+    }
+
+
+_SKILL_BASE_SELECT = """
+    SELECT s.id, s.name, COALESCE(a.name, '') AS attr_name, s.type,
+           s.power, s.consume, s.skill_desc, s.icon
+    FROM skill s
+    LEFT JOIN attribute a ON a.id = s.attr_id
+"""
+
+
+async def _resolve_attr_id(cur, attr_name: str) -> int | None:
+    attr_name = (attr_name or "").strip()
+    if not attr_name:
+        return None
+    await cur.execute("SELECT id FROM attribute WHERE name = %s", (attr_name,))
+    row = await cur.fetchone()
+    return int(row["id"]) if row else None
+
+
+async def list_skills_for_ops(
+    keyword: str = "",
+    attr: str = "",
+    type_: str = "",
+    page: int = 1,
+    page_size: int = 10,
+) -> tuple[int, list[dict]]:
+    pool = await get_pool()
+    conditions: list[str] = []
+    params: list = []
+    if keyword:
+        conditions.append("s.name LIKE %s")
+        params.append(f"%{keyword}%")
+    if attr:
+        conditions.append("a.name = %s")
+        params.append(attr)
+    if type_:
+        conditions.append("s.type = %s")
+        params.append(type_)
+    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    offset = (page - 1) * page_size
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT COUNT(*) AS cnt
+                FROM skill s
+                LEFT JOIN attribute a ON a.id = s.attr_id
+                {where_clause}
+                """,
+                params,
+            )
+            total_row = await cur.fetchone() or {}
+            total = int(total_row.get("cnt", 0))
+            await cur.execute(
+                f"""
+                {_SKILL_BASE_SELECT}
+                {where_clause}
+                ORDER BY s.id DESC
+                LIMIT %s OFFSET %s
+                """,
+                [*params, page_size, offset],
+            )
+            rows = await cur.fetchall()
+            return total, [_skill_row_to_item(row) for row in rows]
+
+
+async def get_skill_for_ops(skill_id: int) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"{_SKILL_BASE_SELECT} WHERE s.id = %s",
+                (skill_id,),
+            )
+            row = await cur.fetchone()
+            return _skill_row_to_item(row) if row else None
+
+
+async def get_skill_by_name(name: str) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT id, name FROM skill WHERE name = %s",
+                (name,),
+            )
+            return await cur.fetchone()
+
+
+async def create_skill_for_ops(payload: dict) -> dict:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            attr_id = await _resolve_attr_id(cur, payload.get("attr", ""))
+            await cur.execute(
+                """
+                INSERT INTO skill (name, attr_id, type, power, consume, skill_desc, icon)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+                """,
+                (
+                    payload["name"],
+                    attr_id,
+                    payload.get("type", ""),
+                    int(payload.get("power") or 0),
+                    int(payload.get("consume") or 0),
+                    payload.get("skill_desc") or "",
+                    payload.get("icon") or "",
+                ),
+            )
+            row = await cur.fetchone()
+            skill_id = int(row["id"])
+        await conn.commit()
+    detail = await get_skill_for_ops(skill_id)
+    assert detail is not None
+    return detail
+
+
+async def update_skill_for_ops(skill_id: int, payload: dict) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            attr_id = await _resolve_attr_id(cur, payload.get("attr", ""))
+            await cur.execute(
+                """
+                UPDATE skill
+                SET name = %s, attr_id = %s, type = %s, power = %s, consume = %s, skill_desc = %s, icon = %s
+                WHERE id = %s
+                """,
+                (
+                    payload["name"],
+                    attr_id,
+                    payload.get("type", ""),
+                    int(payload.get("power") or 0),
+                    int(payload.get("consume") or 0),
+                    payload.get("skill_desc") or "",
+                    payload.get("icon") or "",
+                    skill_id,
+                ),
+            )
+            if cur.rowcount == 0:
+                return None
+        await conn.commit()
+    return await get_skill_for_ops(skill_id)
+
+
+async def delete_skill_for_ops(skill_id: int, *, force: bool = False) -> bool:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            if force:
+                await cur.execute("DELETE FROM pokemon_skill WHERE skill_id = %s", (skill_id,))
+            await cur.execute("DELETE FROM skill WHERE id = %s", (skill_id,))
+            deleted = cur.rowcount > 0
+        await conn.commit()
+        return deleted
+
+
+async def list_skill_usages_for_ops(skill_id: int) -> tuple[int, list[dict]]:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT p.id, p.no, p.name, ps.type, ps.sort_order
+                FROM pokemon_skill ps
+                JOIN pokemon p ON p.id = ps.pokemon_id
+                WHERE ps.skill_id = %s
+                ORDER BY p.no, p.id
+                """,
+                (skill_id,),
+            )
+            rows = await cur.fetchall()
+            items = [
+                {
+                    "id": row["id"],
+                    "no": row.get("no") or "",
+                    "name": row.get("name") or "",
+                    "type": row.get("type") or "原生技能",
+                    "sort_order": int(row.get("sort_order") or 0),
+                }
+                for row in rows
+            ]
+            return len(items), items
+
+
+async def list_skill_options_for_ops() -> dict:
+    """返回技能 attr（属性名）与 type 的可选值。"""
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT name FROM attribute ORDER BY sort_order, id")
+            attrs = [row["name"] for row in await cur.fetchall() if row.get("name")]
+
+            await cur.execute(
+                "SELECT label FROM sys_dict WHERE dict_type = 'skill_type' ORDER BY sort_order, id"
+            )
+            type_rows = await cur.fetchall()
+            types = [row["label"] for row in type_rows if row.get("label")]
+            if not types:
+                await cur.execute(
+                    "SELECT DISTINCT type FROM skill WHERE COALESCE(type, '') <> '' ORDER BY type"
+                )
+                types = [row["type"] for row in await cur.fetchall()]
+    return {"attrs": attrs, "types": types}
 
 
 async def _enrich_evolution_steps(conn: AsyncConnection, steps: list[dict]) -> list[dict]:

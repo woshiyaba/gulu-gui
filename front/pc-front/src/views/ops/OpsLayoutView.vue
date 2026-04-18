@@ -25,7 +25,7 @@ const menus = [
   { to: '/ops/dicts', label: '字典维护' },
   { to: '/ops/users', label: '用户管理' },
   { to: '/ops/pokemon', label: '精灵维护' },
-  { to: '/ops/skills', label: '技能维护', disabled: true },
+  { to: '/ops/skills', label: '技能维护' },
   { to: '/ops/map', label: '地图维护', disabled: true },
 ]
 

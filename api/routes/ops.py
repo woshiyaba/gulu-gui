@@ -18,6 +18,12 @@ from api.schemas.ops import (
     OpsEvolutionChainResponse,
     OpsEvolutionChainUpsertRequest,
     OpsFriendImageUploadResponse,
+    OpsSkillDetailResponse,
+    OpsSkillIconUploadResponse,
+    OpsSkillListResponse,
+    OpsSkillOptionsResponse,
+    OpsSkillUpsertRequest,
+    OpsSkillUsageResponse,
 )
 from api.services import ops_service
 
@@ -223,3 +229,80 @@ async def delete_ops_pokemon(
 ):
     await ops_service.delete_pokemon_for_ops(current_user, pokemon_id)
     return Response(status_code=204)
+
+
+# ---------- 技能维护 ----------
+
+@router.get("/skills", response_model=OpsSkillListResponse)
+async def list_ops_skills(
+    keyword: str = Query(default=""),
+    attr: str = Query(default=""),
+    type_: str = Query(default="", alias="type"),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.list_skills_for_ops(
+        current_user,
+        keyword=keyword,
+        attr=attr,
+        type_=type_,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.get("/skills/options", response_model=OpsSkillOptionsResponse)
+async def get_ops_skill_options(current_user: dict = Depends(get_current_ops_user)):
+    return await ops_service.get_skill_options_for_ops(current_user)
+
+
+@router.post("/skills/icon", response_model=OpsSkillIconUploadResponse)
+async def upload_ops_skill_icon(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.save_skill_icon_upload(current_user, file)
+
+
+@router.post("/skills", response_model=OpsSkillDetailResponse)
+async def create_ops_skill(
+    payload: OpsSkillUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.create_skill_for_ops(current_user, payload.model_dump())
+
+
+@router.get("/skills/{skill_id}", response_model=OpsSkillDetailResponse)
+async def get_ops_skill_detail(
+    skill_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.get_skill_detail_for_ops(current_user, skill_id)
+
+
+@router.put("/skills/{skill_id}", response_model=OpsSkillDetailResponse)
+async def update_ops_skill(
+    skill_id: int,
+    payload: OpsSkillUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.update_skill_for_ops(current_user, skill_id, payload.model_dump())
+
+
+@router.delete("/skills/{skill_id}", status_code=204)
+async def delete_ops_skill(
+    skill_id: int,
+    force: int = Query(default=0),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    await ops_service.delete_skill_for_ops(current_user, skill_id, force=bool(force))
+    return Response(status_code=204)
+
+
+@router.get("/skills/{skill_id}/usages", response_model=OpsSkillUsageResponse)
+async def get_ops_skill_usages(
+    skill_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.list_skill_usages_for_ops(current_user, skill_id)

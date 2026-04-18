@@ -174,3 +174,59 @@ class OpsEvolutionChainResponse(BaseModel):
 
 class OpsEvolutionChainUpsertRequest(BaseModel):
     steps: list[OpsEvolutionChainStepItem] = Field(default_factory=list)
+
+
+class OpsSkillListItem(BaseModel):
+    id: int
+    name: str
+    attr: str = ""
+    type: str = ""
+    power: int = 0
+    consume: int = 0
+    skill_desc: str = ""
+    icon: str = ""
+    icon_url: str = ""
+
+
+class OpsSkillListResponse(BaseModel):
+    total: int
+    page: int = 1
+    page_size: int = 10
+    items: list[OpsSkillListItem] = Field(default_factory=list)
+
+
+class OpsSkillDetailResponse(OpsSkillListItem):
+    pass
+
+
+class OpsSkillUpsertRequest(BaseModel):
+    name: str
+    attr: str = ""
+    type: str = ""
+    power: int = 0
+    consume: int = 0
+    skill_desc: str = ""
+    icon: str = ""
+
+
+class OpsSkillUsageItem(BaseModel):
+    id: int
+    no: str
+    name: str
+    type: str = "原生技能"
+    sort_order: int = 0
+
+
+class OpsSkillUsageResponse(BaseModel):
+    total: int
+    items: list[OpsSkillUsageItem] = Field(default_factory=list)
+
+
+class OpsSkillOptionsResponse(BaseModel):
+    attrs: list[str] = Field(default_factory=list)
+    types: list[str] = Field(default_factory=list)
+
+
+class OpsSkillIconUploadResponse(BaseModel):
+    icon: str
+    preview_url: str

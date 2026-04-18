@@ -49,6 +49,10 @@ const router = createRouter({
           path: 'users',
           component: () => import('@/views/ops/OpsUsersView.vue'),
         },
+        {
+          path: 'skills',
+          component: () => import('@/views/ops/OpsSkillsView.vue'),
+        },
       ],
     },
   ],
