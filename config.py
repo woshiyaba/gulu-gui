@@ -21,3 +21,7 @@ PG_CONFIG = {
 }
 
 BASE_URL = "https://rocom.game-walkthrough.com"
+
+STATIC_BASE_URL = os.getenv("STATIC_BASE_URL", "https://wikiroco.com")
+FRIEND_IMAGE_BASE_URL = f"{STATIC_BASE_URL}/images/friends/"
+CATEGORY_ICON_BASE_URL = f"{STATIC_BASE_URL}/images/icon"

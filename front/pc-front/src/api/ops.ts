@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const DEFAULT_API_BASE_URL = import.meta.env.PROD
-  ? 'http://101.126.137.23:8000'
+  ? 'https://wikiroco.com'
   : 'http://localhost:8000'
 
 const apiBaseUrl = (import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE_URL).replace(/\/+$/, '')

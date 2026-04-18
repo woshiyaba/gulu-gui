@@ -12,7 +12,7 @@ import type {
 } from '@/types'
 
 const DEFAULT_API_BASE_URL = import.meta.env.PROD
-  ? 'http://101.126.137.23:8000'
+  ? 'https://wikiroco.com'
   : 'http://localhost:8000'
 
 // 统一收口接口地址，打包和本地开发分别走不同环境配置。

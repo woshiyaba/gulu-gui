@@ -11,7 +11,7 @@ from api.utils.pokemon_mapper import (
 )
 from api.utils.type_chart import build_defensive_type_chart_payload
 
-_CATEGORY_ICON_BASE_URL = "http://101.126.137.23/images/icon"
+from config import CATEGORY_ICON_BASE_URL as _CATEGORY_ICON_BASE_URL
 
 
 class PokemonNotFoundError(Exception):

@@ -9,7 +9,7 @@ interface ApiErrorPayload {
   message?: string
 }
 
-const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://101.126.137.23:80'
+const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://wikiroco.com'
 const API_BASE_URL = DEFAULT_API_BASE_URL.replace(/\/+$/, '')
 
 function isOmittableQueryValue(value: unknown): boolean {

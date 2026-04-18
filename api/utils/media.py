@@ -1,6 +1,4 @@
-from config import BASE_URL
-
-FRIEND_IMAGE_BASE_URL = "http://101.126.137.23/images/friends/"
+from config import BASE_URL, FRIEND_IMAGE_BASE_URL
 
 
 def build_image_url(path: str) -> str:

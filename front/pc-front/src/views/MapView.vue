@@ -134,7 +134,7 @@ function initMap(geoJson: ReturnType<typeof buildGeoJSON>, rawPoints: MapPoint[]
       sources: {
         'rocom-raster': {
           type: 'raster',
-          tiles: ['http://101.126.137.23/images/tiles/rocom/4010_v3_7f2d9c/{z}/{y}_{x}.png?v1'],
+          tiles: ['https://wikiroco.com/images/tiles/rocom/4010_v3_7f2d9c/{z}/{y}_{x}.png?v1'],
           tileSize: 256,
           maxzoom: 13,
           bounds: [-1.4, 0, 0, 1.4],
