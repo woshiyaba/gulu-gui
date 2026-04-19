@@ -219,7 +219,7 @@ async def update_dict(user: dict, dict_id: int, payload: dict) -> dict:
 
 
 async def delete_dict(user: dict, dict_id: int) -> None:
-    ensure_role(user, {"admin"})
+    ensure_role(user, {"editor", "admin"})
     before = await ops_repository.get_dict_by_id(dict_id)
     if not before:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="字典项不存在")
@@ -450,7 +450,7 @@ async def update_pokemon_for_ops(user: dict, pokemon_id: int, payload: dict) -> 
 
 
 async def delete_pokemon_for_ops(user: dict, pokemon_id: int) -> None:
-    ensure_role(user, {"admin"})
+    ensure_role(user, {"editor", "admin"})
     before = await ops_repository.get_pokemon_detail_for_ops(pokemon_id)
     if not before:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="精灵不存在")
