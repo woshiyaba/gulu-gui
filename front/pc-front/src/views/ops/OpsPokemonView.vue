@@ -737,7 +737,7 @@ onBeforeUnmount(() => {
               <td>{{ item.egg_groups.join(' / ') }}</td>
               <td>
                 <button type="button" class="txt-btn" @click="openEditModal(item.id)">修改</button>
-                <button v-if="isAdmin" type="button" class="txt-btn danger" @click="removeItem(item.id, item.name)">删除</button>
+                <button type="button" class="txt-btn danger" @click="removeItem(item.id, item.name)">删除</button>
               </td>
             </tr>
           </tbody>

@@ -226,7 +226,7 @@ onMounted(() => {
               <td>
                 <div class="action-group">
                   <button type="button" class="text-btn" @click="editItem(item)">修改</button>
-                  <button v-if="isAdmin" type="button" class="text-btn danger" @click="removeItem(item)">删除</button>
+                  <button type="button" class="text-btn danger" @click="removeItem(item)">删除</button>
                 </div>
               </td>
             </tr>
