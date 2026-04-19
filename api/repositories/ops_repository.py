@@ -708,12 +708,46 @@ async def save_pokemon_evolution_chain_for_ops(pokemon_id: int, steps: list[dict
             if not pokemon:
                 return None
 
-            chain_id = pokemon.get("chain_id")
+            step_names = sorted({
+                (step.get("pokemon_name") or "").strip()
+                for step in steps
+                if (step.get("pokemon_name") or "").strip()
+            })
+
+            existing_chain_ids: list[int] = []
+            matched_pokemon_ids: list[int] = []
+            if step_names:
+                placeholders = ", ".join(["%s"] * len(step_names))
+                await cur.execute(
+                    f"SELECT id, chain_id FROM pokemon WHERE name IN ({placeholders})",
+                    step_names,
+                )
+                for row in await cur.fetchall():
+                    matched_pokemon_ids.append(int(row["id"]))
+                    if row.get("chain_id") is not None:
+                        existing_chain_ids.append(int(row["chain_id"]))
+
+            current_chain_id = pokemon.get("chain_id")
+            # 优先复用 steps 中已存在的 chain_id（按出现频次取最常见的一个）
+            chain_id: int | None = None
+            if existing_chain_ids:
+                from collections import Counter
+                chain_id = Counter(existing_chain_ids).most_common(1)[0][0]
+            elif current_chain_id is not None:
+                chain_id = int(current_chain_id)
+
             if chain_id is None:
                 await cur.execute("SELECT COALESCE(MAX(chain_id), 0) + 1 AS next_chain_id FROM evolution_chain")
                 next_row = await cur.fetchone() or {}
                 chain_id = int(next_row.get("next_chain_id") or 1)
-                await cur.execute("UPDATE pokemon SET chain_id = %s WHERE id = %s", (chain_id, pokemon_id))
+
+            # 把当前精灵 + 所有 steps 中匹配到的 pokemon 行统一挂到这条 chain 上
+            ids_to_attach = sorted(set(matched_pokemon_ids) | {pokemon_id})
+            placeholders = ", ".join(["%s"] * len(ids_to_attach))
+            await cur.execute(
+                f"UPDATE pokemon SET chain_id = %s WHERE id IN ({placeholders})",
+                [chain_id, *ids_to_attach],
+            )
 
             await cur.execute("DELETE FROM evolution_chain WHERE chain_id = %s", (chain_id,))
             for idx, step in enumerate(steps, start=1):
@@ -737,26 +771,71 @@ async def save_pokemon_evolution_chain_for_ops(pokemon_id: int, steps: list[dict
 
 
 async def search_evolution_chain_for_ops(keyword: str) -> dict | None:
+    """根据关键词查找一条进化链。
+
+    匹配优先级：
+      1. evolution_chain.pokemon_name 精确等于 kw
+      2. pokemon.name 精确等于 kw 且已挂 chain_id
+      3. evolution_chain.pokemon_name LIKE %kw%
+      4. pokemon.name LIKE %kw% 且已挂 chain_id
+    命中后返回该 chain_id 的完整链。
+    """
     pool = await get_pool()
     kw = keyword.strip()
     if not kw:
         return None
+
+    queries: list[tuple[str, tuple]] = [
+        (
+            "SELECT chain_id FROM evolution_chain WHERE pokemon_name = %s ORDER BY chain_id LIMIT 1",
+            (kw,),
+        ),
+        (
+            "SELECT chain_id FROM pokemon WHERE chain_id IS NOT NULL AND name = %s ORDER BY id LIMIT 1",
+            (kw,),
+        ),
+        (
+            "SELECT chain_id FROM evolution_chain WHERE pokemon_name LIKE %s ORDER BY chain_id LIMIT 1",
+            (f"%{kw}%",),
+        ),
+        (
+            "SELECT chain_id FROM pokemon WHERE chain_id IS NOT NULL AND name LIKE %s ORDER BY name, id LIMIT 1",
+            (f"%{kw}%",),
+        ),
+    ]
+
     async with pool.connection() as conn:
         async with conn.cursor() as cur:
+            chain_id: int | None = None
+            for sql, params in queries:
+                await cur.execute(sql, params)
+                row = await cur.fetchone()
+                if row and row.get("chain_id") is not None:
+                    chain_id = int(row["chain_id"])
+                    break
+            if chain_id is None:
+                return None
+
             await cur.execute(
                 """
-                SELECT id, name
-                FROM pokemon
-                WHERE chain_id IS NOT NULL AND name LIKE %s
-                ORDER BY name, id
-                LIMIT 1
+                SELECT sort_order, pokemon_name, evolution_condition
+                FROM evolution_chain
+                WHERE chain_id = %s
+                ORDER BY sort_order, id
                 """,
-                (f"%{kw}%",),
+                (chain_id,),
             )
-            row = await cur.fetchone()
-            if not row:
-                return None
-            return await get_pokemon_evolution_chain_for_ops(int(row["id"]))
+            rows = await cur.fetchall()
+            steps = [
+                {
+                    "sort_order": row["sort_order"],
+                    "pokemon_name": row["pokemon_name"],
+                    "evolution_condition": row.get("evolution_condition") or "",
+                }
+                for row in rows
+            ]
+            enriched_steps = await _enrich_evolution_steps(conn, steps)
+            return {"chain_id": chain_id, "steps": enriched_steps}
 
 
 def _skill_row_to_item(row: dict) -> dict:
