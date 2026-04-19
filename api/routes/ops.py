@@ -24,6 +24,11 @@ from api.schemas.ops import (
     OpsSkillOptionsResponse,
     OpsSkillUpsertRequest,
     OpsSkillUsageResponse,
+    OpsSkillStoneAvailableResponse,
+    OpsSkillStoneCreateRequest,
+    OpsSkillStoneItem,
+    OpsSkillStoneListResponse,
+    OpsSkillStoneUpdateRequest,
 )
 from api.services import ops_service
 
@@ -306,3 +311,69 @@ async def get_ops_skill_usages(
     current_user: dict = Depends(get_current_ops_user),
 ):
     return await ops_service.list_skill_usages_for_ops(current_user, skill_id)
+
+
+# ---------- 技能石维护 ----------
+
+@router.get("/skill-stones", response_model=OpsSkillStoneListResponse)
+async def list_ops_skill_stones(
+    keyword: str = Query(default=""),
+    attr: str = Query(default=""),
+    type_: str = Query(default="", alias="type"),
+    obtain_keyword: str = Query(default=""),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.list_skill_stones_for_ops(
+        current_user,
+        keyword=keyword,
+        attr=attr,
+        type_=type_,
+        obtain_keyword=obtain_keyword,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.get("/skill-stones/available-skills", response_model=OpsSkillStoneAvailableResponse)
+async def list_ops_skill_stone_available_skills(
+    keyword: str = Query(default=""),
+    limit: int = Query(default=30, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.list_available_skills_for_stone(current_user, keyword=keyword, limit=limit)
+
+
+@router.post("/skill-stones", response_model=OpsSkillStoneItem)
+async def create_ops_skill_stone(
+    payload: OpsSkillStoneCreateRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.create_skill_stone_for_ops(current_user, payload.model_dump())
+
+
+@router.get("/skill-stones/{stone_id}", response_model=OpsSkillStoneItem)
+async def get_ops_skill_stone_detail(
+    stone_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.get_skill_stone_detail_for_ops(current_user, stone_id)
+
+
+@router.put("/skill-stones/{stone_id}", response_model=OpsSkillStoneItem)
+async def update_ops_skill_stone(
+    stone_id: int,
+    payload: OpsSkillStoneUpdateRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.update_skill_stone_for_ops(current_user, stone_id, payload.model_dump())
+
+
+@router.delete("/skill-stones/{stone_id}", status_code=204)
+async def delete_ops_skill_stone(
+    stone_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    await ops_service.delete_skill_stone_for_ops(current_user, stone_id)
+    return Response(status_code=204)

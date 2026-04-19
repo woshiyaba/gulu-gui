@@ -53,6 +53,10 @@ const router = createRouter({
           path: 'skills',
           component: () => import('@/views/ops/OpsSkillsView.vue'),
         },
+        {
+          path: 'skill-stones',
+          component: () => import('@/views/ops/OpsSkillStonesView.vue'),
+        },
       ],
     },
   ],

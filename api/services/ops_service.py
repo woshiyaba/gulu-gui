@@ -780,6 +780,128 @@ async def get_skill_options_for_ops(user: dict) -> dict:
     return await ops_repository.list_skill_options_for_ops()
 
 
+_MAX_OBTAIN_METHOD_LEN = 255
+
+
+def _normalize_obtain_method(value: str | None) -> str:
+    text = (value or "").strip()
+    if not text:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="获取方式不能为空")
+    if len(text) > _MAX_OBTAIN_METHOD_LEN:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"获取方式不能超过 {_MAX_OBTAIN_METHOD_LEN} 字",
+        )
+    return text
+
+
+async def list_skill_stones_for_ops(
+    user: dict,
+    keyword: str = "",
+    attr: str = "",
+    type_: str = "",
+    obtain_keyword: str = "",
+    page: int = 1,
+    page_size: int = 10,
+) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    page = max(page, 1)
+    page_size = max(1, min(page_size, 100))
+    total, items = await ops_repository.list_skill_stones_for_ops(
+        keyword=keyword.strip(),
+        attr=attr.strip(),
+        type_=type_.strip(),
+        obtain_keyword=obtain_keyword.strip(),
+        page=page,
+        page_size=page_size,
+    )
+    return {"total": total, "page": page, "page_size": page_size, "items": items}
+
+
+async def get_skill_stone_detail_for_ops(user: dict, stone_id: int) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    detail = await ops_repository.get_skill_stone_for_ops(stone_id)
+    if not detail:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="技能石不存在")
+    return detail
+
+
+async def create_skill_stone_for_ops(user: dict, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    try:
+        skill_id = int(payload.get("skill_id") or 0)
+    except (TypeError, ValueError):
+        skill_id = 0
+    if skill_id <= 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="请选择技能")
+    obtain_method = _normalize_obtain_method(payload.get("obtain_method"))
+
+    skill = await ops_repository.get_skill_for_ops(skill_id)
+    if not skill:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="技能不存在")
+    exists = await ops_repository.get_skill_stone_by_skill_id(skill_id)
+    if exists:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="该技能已存在技能石")
+
+    created = await ops_repository.create_skill_stone_for_ops(skill_id, obtain_method)
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="skill_stone",
+        resource_id=str(created["id"]),
+        action="create",
+        before_json=None,
+        after_json=created,
+    )
+    return created
+
+
+async def update_skill_stone_for_ops(user: dict, stone_id: int, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_skill_stone_for_ops(stone_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="技能石不存在")
+    obtain_method = _normalize_obtain_method(payload.get("obtain_method"))
+    updated = await ops_repository.update_skill_stone_for_ops(stone_id, obtain_method)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="技能石不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="skill_stone",
+        resource_id=str(stone_id),
+        action="update",
+        before_json=before,
+        after_json=updated,
+    )
+    return updated
+
+
+async def delete_skill_stone_for_ops(user: dict, stone_id: int) -> None:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_skill_stone_for_ops(stone_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="技能石不存在")
+    deleted = await ops_repository.delete_skill_stone_for_ops(stone_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="技能石不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="skill_stone",
+        resource_id=str(stone_id),
+        action="delete",
+        before_json=before,
+        after_json=None,
+    )
+
+
+async def list_available_skills_for_stone(user: dict, keyword: str = "", limit: int = 30) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    safe_limit = max(1, min(limit, 100))
+    items = await ops_repository.list_available_skills_for_stone(
+        keyword=keyword.strip(), limit=safe_limit
+    )
+    return {"items": items}
+
+
 async def save_skill_icon_upload(user: dict, upload: UploadFile) -> dict:
     ensure_role(user, {"editor", "admin"})
     from config import SKILL_ICON_BASE_URL, SKILL_ICON_UPLOAD_DIR

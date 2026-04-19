@@ -230,3 +230,43 @@ class OpsSkillOptionsResponse(BaseModel):
 class OpsSkillIconUploadResponse(BaseModel):
     icon: str
     preview_url: str
+
+
+class OpsSkillStoneItem(BaseModel):
+    id: int
+    skill_id: int
+    skill_name: str = ""
+    skill_attr: str = ""
+    skill_type: str = ""
+    skill_icon: str = ""
+    skill_icon_url: str = ""
+    obtain_method: str = ""
+
+
+class OpsSkillStoneListResponse(BaseModel):
+    total: int
+    page: int = 1
+    page_size: int = 10
+    items: list[OpsSkillStoneItem] = Field(default_factory=list)
+
+
+class OpsSkillStoneCreateRequest(BaseModel):
+    skill_id: int
+    obtain_method: str
+
+
+class OpsSkillStoneUpdateRequest(BaseModel):
+    obtain_method: str
+
+
+class OpsSkillStoneAvailableSkill(BaseModel):
+    id: int
+    name: str
+    attr: str = ""
+    type: str = ""
+    icon: str = ""
+    icon_url: str = ""
+
+
+class OpsSkillStoneAvailableResponse(BaseModel):
+    items: list[OpsSkillStoneAvailableSkill] = Field(default_factory=list)

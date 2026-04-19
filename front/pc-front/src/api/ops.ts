@@ -416,3 +416,81 @@ export function uploadOpsSkillIcon(file: File): Promise<OpsSkillIconUploadRespon
     .post<OpsSkillIconUploadResponse>('/api/ops/skills/icon', body)
     .then((r) => r.data)
 }
+
+// ---------- 技能石维护 ----------
+
+export interface OpsSkillStoneItem {
+  id: number
+  skill_id: number
+  skill_name: string
+  skill_attr: string
+  skill_type: string
+  skill_icon: string
+  skill_icon_url: string
+  obtain_method: string
+}
+
+export interface OpsSkillStoneListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsSkillStoneItem[]
+}
+
+export interface OpsSkillStoneCreatePayload {
+  skill_id: number
+  obtain_method: string
+}
+
+export interface OpsSkillStoneUpdatePayload {
+  obtain_method: string
+}
+
+export interface OpsSkillStoneAvailableSkill {
+  id: number
+  name: string
+  attr: string
+  type: string
+  icon: string
+  icon_url: string
+}
+
+export interface OpsSkillStoneAvailableResponse {
+  items: OpsSkillStoneAvailableSkill[]
+}
+
+export function fetchOpsSkillStones(params: {
+  keyword?: string
+  attr?: string
+  type?: string
+  obtain_keyword?: string
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsSkillStoneListResponse> {
+  return http.get<OpsSkillStoneListResponse>('/api/ops/skill-stones', { params }).then((r) => r.data)
+}
+
+export function fetchOpsSkillStoneDetail(id: number): Promise<OpsSkillStoneItem> {
+  return http.get<OpsSkillStoneItem>(`/api/ops/skill-stones/${id}`).then((r) => r.data)
+}
+
+export function fetchOpsSkillStoneAvailableSkills(params: {
+  keyword?: string
+  limit?: number
+} = {}): Promise<OpsSkillStoneAvailableResponse> {
+  return http
+    .get<OpsSkillStoneAvailableResponse>('/api/ops/skill-stones/available-skills', { params })
+    .then((r) => r.data)
+}
+
+export function createOpsSkillStone(payload: OpsSkillStoneCreatePayload): Promise<OpsSkillStoneItem> {
+  return http.post<OpsSkillStoneItem>('/api/ops/skill-stones', payload).then((r) => r.data)
+}
+
+export function updateOpsSkillStone(id: number, payload: OpsSkillStoneUpdatePayload): Promise<OpsSkillStoneItem> {
+  return http.put<OpsSkillStoneItem>(`/api/ops/skill-stones/${id}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsSkillStone(id: number): Promise<void> {
+  return http.delete(`/api/ops/skill-stones/${id}`).then(() => undefined)
+}

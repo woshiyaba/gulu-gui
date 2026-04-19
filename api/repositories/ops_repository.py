@@ -979,6 +979,192 @@ async def list_skill_options_for_ops() -> dict:
     return {"attrs": attrs, "types": types}
 
 
+# ---------- 技能石维护 ----------
+
+_SKILL_STONE_BASE_SELECT = """
+    SELECT ss.id, ss.skill_id, ss.obtain_method,
+           s.name AS skill_name,
+           COALESCE(a.name, '') AS skill_attr,
+           s.type AS skill_type,
+           s.icon AS skill_icon
+    FROM skill_stone ss
+    JOIN skill s ON s.id = ss.skill_id
+    LEFT JOIN attribute a ON a.id = s.attr_id
+"""
+
+
+def _skill_stone_row_to_item(row: dict) -> dict:
+    icon = (row.get("skill_icon") or "").strip()
+    return {
+        "id": row["id"],
+        "skill_id": row["skill_id"],
+        "skill_name": row.get("skill_name") or "",
+        "skill_attr": row.get("skill_attr") or "",
+        "skill_type": row.get("skill_type") or "",
+        "skill_icon": icon,
+        "skill_icon_url": build_skill_icon_url(icon),
+        "obtain_method": row.get("obtain_method") or "",
+    }
+
+
+async def list_skill_stones_for_ops(
+    keyword: str = "",
+    attr: str = "",
+    type_: str = "",
+    obtain_keyword: str = "",
+    page: int = 1,
+    page_size: int = 10,
+) -> tuple[int, list[dict]]:
+    pool = await get_pool()
+    conditions: list[str] = []
+    params: list = []
+    if keyword:
+        conditions.append("s.name LIKE %s")
+        params.append(f"%{keyword}%")
+    if attr:
+        conditions.append("a.name = %s")
+        params.append(attr)
+    if type_:
+        conditions.append("s.type = %s")
+        params.append(type_)
+    if obtain_keyword:
+        conditions.append("ss.obtain_method LIKE %s")
+        params.append(f"%{obtain_keyword}%")
+    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    offset = (page - 1) * page_size
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT COUNT(*) AS cnt
+                FROM skill_stone ss
+                JOIN skill s ON s.id = ss.skill_id
+                LEFT JOIN attribute a ON a.id = s.attr_id
+                {where_clause}
+                """,
+                params,
+            )
+            total_row = await cur.fetchone() or {}
+            total = int(total_row.get("cnt", 0))
+            await cur.execute(
+                f"""
+                {_SKILL_STONE_BASE_SELECT}
+                {where_clause}
+                ORDER BY ss.id DESC
+                LIMIT %s OFFSET %s
+                """,
+                [*params, page_size, offset],
+            )
+            rows = await cur.fetchall()
+            return total, [_skill_stone_row_to_item(row) for row in rows]
+
+
+async def get_skill_stone_for_ops(stone_id: int) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"{_SKILL_STONE_BASE_SELECT} WHERE ss.id = %s",
+                (stone_id,),
+            )
+            row = await cur.fetchone()
+            return _skill_stone_row_to_item(row) if row else None
+
+
+async def get_skill_stone_by_skill_id(skill_id: int) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT id, skill_id FROM skill_stone WHERE skill_id = %s",
+                (skill_id,),
+            )
+            return await cur.fetchone()
+
+
+async def create_skill_stone_for_ops(skill_id: int, obtain_method: str) -> dict:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                INSERT INTO skill_stone (skill_id, obtain_method)
+                VALUES (%s, %s)
+                RETURNING id
+                """,
+                (skill_id, obtain_method),
+            )
+            row = await cur.fetchone()
+            stone_id = int(row["id"])
+        await conn.commit()
+    detail = await get_skill_stone_for_ops(stone_id)
+    assert detail is not None
+    return detail
+
+
+async def update_skill_stone_for_ops(stone_id: int, obtain_method: str) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "UPDATE skill_stone SET obtain_method = %s WHERE id = %s",
+                (obtain_method, stone_id),
+            )
+            if cur.rowcount == 0:
+                return None
+        await conn.commit()
+    return await get_skill_stone_for_ops(stone_id)
+
+
+async def delete_skill_stone_for_ops(stone_id: int) -> bool:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("DELETE FROM skill_stone WHERE id = %s", (stone_id,))
+            deleted = cur.rowcount > 0
+        await conn.commit()
+        return deleted
+
+
+async def list_available_skills_for_stone(keyword: str = "", limit: int = 30) -> list[dict]:
+    """返回尚未挂技能石的技能候选。"""
+    pool = await get_pool()
+    conditions = ["NOT EXISTS (SELECT 1 FROM skill_stone ss WHERE ss.skill_id = s.id)"]
+    params: list = []
+    if keyword:
+        conditions.append("s.name LIKE %s")
+        params.append(f"%{keyword}%")
+    where_clause = "WHERE " + " AND ".join(conditions)
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT s.id, s.name, COALESCE(a.name, '') AS attr, s.type, s.icon
+                FROM skill s
+                LEFT JOIN attribute a ON a.id = s.attr_id
+                {where_clause}
+                ORDER BY s.name, s.id
+                LIMIT %s
+                """,
+                [*params, limit],
+            )
+            rows = await cur.fetchall()
+    items: list[dict] = []
+    for row in rows:
+        icon = (row.get("icon") or "").strip()
+        items.append(
+            {
+                "id": row["id"],
+                "name": row.get("name") or "",
+                "attr": row.get("attr") or "",
+                "type": row.get("type") or "",
+                "icon": icon,
+                "icon_url": build_skill_icon_url(icon),
+            }
+        )
+    return items
+
+
 async def _enrich_evolution_steps(conn: AsyncConnection, steps: list[dict]) -> list[dict]:
     names = sorted({(step.get("pokemon_name") or "").strip() for step in steps if (step.get("pokemon_name") or "").strip()})
     if not names:
