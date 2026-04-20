@@ -2,6 +2,8 @@
 -- ============================================================
 -- 迁移重建：先删表（子表 -> 父表）
 -- ============================================================
+DROP TABLE IF EXISTS pokemon_lineup_member CASCADE;
+DROP TABLE IF EXISTS pokemon_lineup CASCADE;
 DROP TABLE IF EXISTS personality CASCADE;
 DROP TABLE IF EXISTS attribute_matchup CASCADE;
 DROP TABLE IF EXISTS pokemon_egg_group CASCADE;
@@ -253,4 +255,38 @@ CREATE TABLE personality (
     spd_mod_pct     NUMERIC(3,2) NOT NULL DEFAULT 0,
     CONSTRAINT uk_personality_en UNIQUE (name_en),
     CONSTRAINT uk_personality_zh UNIQUE (name_zh)
+);
+
+-- 精灵阵容：一套阵容最多配置 6 只精灵
+CREATE TABLE IF NOT EXISTS pokemon_lineup (
+    id            SERIAL       PRIMARY KEY,
+    title         VARCHAR(100) NOT NULL DEFAULT '',
+    lineup_desc   TEXT         NOT NULL DEFAULT '',
+    source_type   VARCHAR(30)  NOT NULL DEFAULT '',
+    sort_order    INT          NOT NULL DEFAULT 0,
+    is_active     BOOLEAN      NOT NULL DEFAULT TRUE,
+    created_at    TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMP    NOT NULL DEFAULT NOW()
+);
+
+-- 精灵阵容成员：单只精灵的血脉、性格、资质、技能与说明
+CREATE TABLE IF NOT EXISTS pokemon_lineup_member (
+    id                SERIAL PRIMARY KEY,
+    lineup_id         INT    NOT NULL REFERENCES pokemon_lineup(id) ON DELETE CASCADE,
+    sort_order        INT    NOT NULL DEFAULT 1,
+    pokemon_id        INT    NOT NULL REFERENCES pokemon(id),
+    bloodline_dict_id INT    REFERENCES sys_dict(id),
+    personality_id    SMALLINT REFERENCES personality(id),
+    qual_1_stat_key   VARCHAR(20) NOT NULL DEFAULT '',
+    qual_1_value      INT         NOT NULL DEFAULT 0,
+    qual_2_stat_key   VARCHAR(20) NOT NULL DEFAULT '',
+    qual_2_value      INT         NOT NULL DEFAULT 0,
+    qual_3_stat_key   VARCHAR(20) NOT NULL DEFAULT '',
+    qual_3_value      INT         NOT NULL DEFAULT 0,
+    skill_1_id        INT REFERENCES skill(id),
+    skill_2_id        INT REFERENCES skill(id),
+    skill_3_id        INT REFERENCES skill(id),
+    skill_4_id        INT REFERENCES skill(id),
+    member_desc       TEXT NOT NULL DEFAULT '',
+    CONSTRAINT uk_pokemon_lineup_member_order UNIQUE (lineup_id, sort_order)
 );
