@@ -43,7 +43,13 @@ from api.schemas.starlight_duel import (
     StarlightDuelEpisodeUpsertRequest,
     StarlightDuelSearchResponse,
 )
-from api.services import ops_service, banner_service, personality_service, starlight_duel_service
+from api.schemas.pokemon_lineup import (
+    PokemonLineupDetail,
+    PokemonLineupListResponse,
+    PokemonLineupSearchResponse,
+    PokemonLineupUpsertRequest,
+)
+from api.services import ops_service, banner_service, personality_service, starlight_duel_service, pokemon_lineup_service
 
 router = APIRouter(prefix="/api/ops", tags=["ops"])
 
@@ -551,4 +557,83 @@ async def delete_ops_starlight_duel_episode(
     current_user: dict = Depends(get_current_ops_user),
 ):
     await starlight_duel_service.delete_episode_for_ops(current_user, episode_id)
+    return Response(status_code=204)
+
+
+# ── 精灵阵容 ────────────────────────────────────────────
+
+
+@router.get("/pokemon-lineups/search-pokemon", response_model=PokemonLineupSearchResponse)
+async def search_pokemon_lineup_pokemon(
+    keyword: str = Query(default=""),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await pokemon_lineup_service.search_pokemon_for_ops(current_user, keyword)
+
+
+@router.get("/pokemon-lineups/search-skills", response_model=PokemonLineupSearchResponse)
+async def search_pokemon_lineup_skills(
+    keyword: str = Query(default=""),
+    pokemon_id: int | None = Query(default=None),
+    exclude_skill_ids: list[int] = Query(default_factory=list),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await pokemon_lineup_service.search_skills_for_ops(
+        current_user,
+        keyword=keyword,
+        pokemon_id=pokemon_id,
+        exclude_skill_ids=exclude_skill_ids,
+    )
+
+
+@router.get("/pokemon-lineups", response_model=PokemonLineupListResponse)
+async def list_ops_pokemon_lineups(
+    keyword: str = Query(default=""),
+    source_type: str = Query(default=""),
+    is_active: bool | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await pokemon_lineup_service.list_lineups_for_ops(
+        current_user,
+        keyword=keyword,
+        source_type=source_type.strip(),
+        is_active=is_active,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.post("/pokemon-lineups", response_model=PokemonLineupDetail)
+async def create_ops_pokemon_lineup(
+    payload: PokemonLineupUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await pokemon_lineup_service.create_lineup_for_ops(current_user, payload.model_dump())
+
+
+@router.get("/pokemon-lineups/{lineup_id}", response_model=PokemonLineupDetail)
+async def get_ops_pokemon_lineup(
+    lineup_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await pokemon_lineup_service.get_lineup_detail_for_ops(current_user, lineup_id)
+
+
+@router.put("/pokemon-lineups/{lineup_id}", response_model=PokemonLineupDetail)
+async def update_ops_pokemon_lineup(
+    lineup_id: int,
+    payload: PokemonLineupUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await pokemon_lineup_service.update_lineup_for_ops(current_user, lineup_id, payload.model_dump())
+
+
+@router.delete("/pokemon-lineups/{lineup_id}", status_code=204)
+async def delete_ops_pokemon_lineup(
+    lineup_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    await pokemon_lineup_service.delete_lineup_for_ops(current_user, lineup_id)
     return Response(status_code=204)

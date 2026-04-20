@@ -27,6 +27,7 @@ const menus = [
   { to: '/ops/pokemon', label: '精灵维护' },
   { to: '/ops/banners', label: 'Banner管理' },
   { to: '/ops/starlight-duel', label: '星光对决' },
+  { to: '/ops/pokemon-lineups', label: '阵容管理' },
   { to: '/ops/skills', label: '技能维护' },
   { to: '/ops/skill-stones', label: '技能石维护' },
   { to: '/ops/personalities', label: '性格维护' },

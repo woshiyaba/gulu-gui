@@ -69,6 +69,10 @@ const router = createRouter({
           path: 'starlight-duel',
           component: () => import('@/views/ops/OpsStarlightDuelView.vue'),
         },
+        {
+          path: 'pokemon-lineups',
+          component: () => import('@/views/ops/OpsPokemonLineupsView.vue'),
+        },
       ],
     },
   ],

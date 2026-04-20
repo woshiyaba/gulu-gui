@@ -707,3 +707,141 @@ export function updateOpsStarlightDuelEpisode(id: number, payload: OpsStarlightD
 export function deleteOpsStarlightDuelEpisode(id: number): Promise<void> {
   return http.delete(`/api/ops/starlight-duel/episodes/${id}`).then(() => undefined)
 }
+
+// ── 精灵阵容 ────────────────────────────────────────────
+
+export type OpsPokemonLineupStatKey = string
+
+export interface OpsPokemonLineupMember {
+  id?: number
+  pokemon_id: number
+  pokemon_name: string
+  pokemon_image: string
+  sort_order: number
+  bloodline_dict_id: number | null
+  bloodline_label: string
+  personality_id: number | null
+  personality_name_zh: string
+  qual_1: OpsPokemonLineupStatKey | ''
+  qual_2: OpsPokemonLineupStatKey | ''
+  qual_3: OpsPokemonLineupStatKey | ''
+  skill_1_id: number | null
+  skill_1_name: string
+  skill_1_image?: string
+  skill_2_id: number | null
+  skill_2_name: string
+  skill_2_image?: string
+  skill_3_id: number | null
+  skill_3_name: string
+  skill_3_image?: string
+  skill_4_id: number | null
+  skill_4_name: string
+  skill_4_image?: string
+  member_desc: string
+}
+
+export interface OpsPokemonLineup {
+  id: number
+  title: string
+  lineup_desc: string
+  source_type: string
+  sort_order: number
+  is_active: boolean
+  members: OpsPokemonLineupMember[]
+}
+
+export interface OpsPokemonLineupListItem {
+  id: number
+  title: string
+  source_type: string
+  sort_order: number
+  is_active: boolean
+  member_count: number
+}
+
+export interface OpsPokemonLineupListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsPokemonLineupListItem[]
+}
+
+export interface OpsPokemonLineupMemberPayload {
+  pokemon_id: number
+  sort_order: number
+  bloodline_dict_id: number | null
+  personality_id: number | null
+  qual_1: OpsPokemonLineupStatKey | ''
+  qual_2: OpsPokemonLineupStatKey | ''
+  qual_3: OpsPokemonLineupStatKey | ''
+  skill_1_id: number | null
+  skill_2_id: number | null
+  skill_3_id: number | null
+  skill_4_id: number | null
+  member_desc: string
+}
+
+export interface OpsPokemonLineupPayload {
+  title: string
+  lineup_desc: string
+  source_type: string
+  sort_order: number
+  is_active: boolean
+  members: OpsPokemonLineupMemberPayload[]
+}
+
+export interface OpsPokemonLineupSearchItem {
+  id: number
+  name: string
+  image?: string
+}
+
+export interface OpsPokemonLineupSearchResponse {
+  items: OpsPokemonLineupSearchItem[]
+}
+
+export function searchPokemonLineupPokemon(keyword: string): Promise<OpsPokemonLineupSearchResponse> {
+  return http.get<OpsPokemonLineupSearchResponse>('/api/ops/pokemon-lineups/search-pokemon', { params: { keyword } }).then((r) => r.data)
+}
+
+export function searchPokemonLineupSkills(params: {
+  keyword: string
+  pokemon_id: number
+  exclude_skill_ids?: number[]
+}): Promise<OpsPokemonLineupSearchResponse> {
+  const query = new URLSearchParams()
+  query.append('keyword', params.keyword)
+  query.append('pokemon_id', String(params.pokemon_id))
+  for (const id of params.exclude_skill_ids ?? []) {
+    query.append('exclude_skill_ids', String(id))
+  }
+  return http
+    .get<OpsPokemonLineupSearchResponse>('/api/ops/pokemon-lineups/search-skills', { params: query })
+    .then((r) => r.data)
+}
+
+export function fetchOpsPokemonLineups(params: {
+  keyword?: string
+  source_type?: string
+  is_active?: boolean | null
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsPokemonLineupListResponse> {
+  return http.get<OpsPokemonLineupListResponse>('/api/ops/pokemon-lineups', { params }).then((r) => r.data)
+}
+
+export function fetchOpsPokemonLineup(id: number): Promise<OpsPokemonLineup> {
+  return http.get<OpsPokemonLineup>(`/api/ops/pokemon-lineups/${id}`).then((r) => r.data)
+}
+
+export function createOpsPokemonLineup(payload: OpsPokemonLineupPayload): Promise<OpsPokemonLineup> {
+  return http.post<OpsPokemonLineup>('/api/ops/pokemon-lineups', payload).then((r) => r.data)
+}
+
+export function updateOpsPokemonLineup(id: number, payload: OpsPokemonLineupPayload): Promise<OpsPokemonLineup> {
+  return http.put<OpsPokemonLineup>(`/api/ops/pokemon-lineups/${id}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsPokemonLineup(id: number): Promise<void> {
+  return http.delete(`/api/ops/pokemon-lineups/${id}`).then(() => undefined)
+}

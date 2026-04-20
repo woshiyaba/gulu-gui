@@ -23,6 +23,13 @@ import psycopg2
 
 from config import PG_CONFIG
 
+LINEUP_TYPE_DICT = "pokemon_lineup_type"
+LINEUP_TYPE_ROWS = [
+    (LINEUP_TYPE_DICT, "pvp", "PVP", 1),
+    (LINEUP_TYPE_DICT, "pve", "PVE", 2),
+    (LINEUP_TYPE_DICT, "starlight_duel", "星光对决", 3),
+]
+
 
 PG_DDL = """
 DROP TABLE IF EXISTS pokemon_lineup_member CASCADE;
@@ -46,12 +53,9 @@ CREATE TABLE IF NOT EXISTS pokemon_lineup_member (
     pokemon_id        INT    NOT NULL REFERENCES pokemon(id),
     bloodline_dict_id INT    REFERENCES sys_dict(id),
     personality_id    SMALLINT REFERENCES personality(id),
-    qual_1_stat_key   VARCHAR(20) NOT NULL DEFAULT '',
-    qual_1_value      INT         NOT NULL DEFAULT 0,
-    qual_2_stat_key   VARCHAR(20) NOT NULL DEFAULT '',
-    qual_2_value      INT         NOT NULL DEFAULT 0,
-    qual_3_stat_key   VARCHAR(20) NOT NULL DEFAULT '',
-    qual_3_value      INT         NOT NULL DEFAULT 0,
+    qual_1           VARCHAR(20) NOT NULL DEFAULT '',
+    qual_2           VARCHAR(20) NOT NULL DEFAULT '',
+    qual_3           VARCHAR(20) NOT NULL DEFAULT '',
     skill_1_id        INT REFERENCES skill(id),
     skill_2_id        INT REFERENCES skill(id),
     skill_3_id        INT REFERENCES skill(id),
@@ -59,6 +63,14 @@ CREATE TABLE IF NOT EXISTS pokemon_lineup_member (
     member_desc       TEXT NOT NULL DEFAULT '',
     CONSTRAINT uk_pokemon_lineup_member_order UNIQUE (lineup_id, sort_order)
 );
+"""
+
+DICT_UPSERT_SQL = """
+INSERT INTO sys_dict (dict_type, code, label, sort_order)
+VALUES (%s, %s, %s, %s)
+ON CONFLICT (dict_type, code) DO UPDATE
+SET label = EXCLUDED.label,
+    sort_order = EXCLUDED.sort_order
 """
 
 
@@ -83,6 +95,7 @@ def main() -> None:
     print("  create pokemon lineup tables")
     print("  target: PostgreSQL")
     print("  tables: pokemon_lineup, pokemon_lineup_member")
+    print(f"  dict seed: {LINEUP_TYPE_DICT} ({len(LINEUP_TYPE_ROWS)} items)")
     print("=" * 60)
 
     conn = pg_conn()
@@ -90,6 +103,7 @@ def main() -> None:
     try:
         with conn.cursor() as cur:
             cur.execute(PG_DDL)
+            cur.executemany(DICT_UPSERT_SQL, LINEUP_TYPE_ROWS)
 
         if args.dry_run:
             conn.rollback()
