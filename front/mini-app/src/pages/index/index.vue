@@ -2,9 +2,11 @@
 import { computed, ref, watch } from 'vue'
 import { onLoad, onPullDownRefresh, onReachBottom, onUnload } from '@dcloudio/uni-app'
 import PokemonCard from '@/components/PokemonCard.vue'
-import { fetchAttributes, fetchPokemon, type PokemonQuery } from '@/api/pokemon'
+import { fetchAttributes, fetchBanners, fetchPokemon, type PokemonQuery } from '@/api/pokemon'
 import type { Attribute, Pokemon } from '@/types/pokemon'
+import type { Banner } from '@/types/banner'
 
+const banners = ref<Banner[]>([])
 const attributes = ref<Attribute[]>([])
 const pokemons = ref<Pokemon[]>([])
 const total = ref(0)
@@ -98,8 +100,26 @@ function navigateToDetail(name: string) {
   })
 }
 
+function onBannerTap(index: number) {
+  const banner = banners.value[index]
+  if (!banner) return
+  if (banner.link_type === 'starlight_duel' && banner.link_param) {
+    uni.navigateTo({ url: `/pages/starlight-duel/detail?episode=${banner.link_param}` })
+  } else if (banner.link_type === 'pokemon' && banner.link_param) {
+    uni.navigateTo({ url: `/pages/pokemon/detail?name=${encodeURIComponent(banner.link_param)}` })
+  }
+}
+
+async function loadBanners() {
+  try {
+    banners.value = await fetchBanners()
+  } catch {
+    banners.value = []
+  }
+}
+
 async function initializePage() {
-  await loadAttributes()
+  await Promise.all([loadBanners(), loadAttributes()])
   await resetAndLoadPokemon()
 }
 
@@ -139,12 +159,21 @@ onUnload(() => {
 <template>
   <view class="page">
     <view class="hero-card">
-      <view class="hero-main">
-        <view>
-          <text class="hero-title">洛克王国精灵图鉴</text>
-          <text class="hero-subtitle">支持按名称、属性快速查询精灵信息。</text>
-        </view>
-      </view>
+      <swiper
+        v-if="banners.length > 0"
+        class="banner-swiper"
+        :autoplay="true"
+        :circular="true"
+        :indicator-dots="banners.length > 1"
+        indicator-color="rgba(255,255,255,0.4)"
+        indicator-active-color="#ffffff"
+        :interval="4000"
+        :duration="500"
+      >
+        <swiper-item v-for="(banner, index) in banners" :key="banner.id" @tap="onBannerTap(index)">
+          <image class="banner-image" :src="banner.image_url" mode="aspectFill" />
+        </swiper-item>
+      </swiper>
 
       <view class="search-box">
         <input
@@ -252,30 +281,20 @@ onUnload(() => {
   padding: 28rpx;
 }
 
-.hero-main {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 20rpx;
+.banner-swiper {
+  height: 280rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  margin-bottom: 20rpx;
 }
 
-.hero-title {
-  display: block;
-  font-size: 40rpx;
-  font-weight: 700;
-  color: #1f4ea3;
-}
-
-.hero-subtitle {
-  display: block;
-  margin-top: 10rpx;
-  font-size: 24rpx;
-  line-height: 1.6;
-  color: #5f7da6;
+.banner-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 20rpx;
 }
 
 .search-box {
-  margin-top: 24rpx;
   padding: 0 24rpx;
   border-radius: 999rpx;
   background: #f3f8ff;

@@ -11,6 +11,8 @@ from api.schemas.pokemon import (
     SkillListResponse,
     SkillStoneListResponse,
 )
+from api.schemas.banner import BannerItem
+from api.schemas.starlight_duel import StarlightDuelEpisodeDetail
 from api.services.pokemon_service import (
     PokemonNotFoundError,
     get_attributes as get_attributes_service,
@@ -25,8 +27,25 @@ from api.services.pokemon_service import (
     get_skill_types as get_skill_types_service,
     get_skills as get_skills_service,
 )
+from api.services import banner_service, starlight_duel_service
 
 router = APIRouter(prefix="/api")
+
+
+@router.get("/banners", response_model=list[BannerItem])
+async def get_banners():
+    return await banner_service.list_active_banners()
+
+
+@router.get("/starlight-duel/latest", response_model=StarlightDuelEpisodeDetail | None)
+async def get_starlight_duel_latest():
+    return await starlight_duel_service.get_latest_episode()
+
+
+@router.get("/starlight-duel/{episode_number}", response_model=StarlightDuelEpisodeDetail)
+async def get_starlight_duel_episode(episode_number: int):
+    return await starlight_duel_service.get_episode_by_number(episode_number)
+
 
 @router.get("/attributes", response_model=list[AttributeItem])
 async def get_attributes():

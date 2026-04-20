@@ -102,3 +102,23 @@ export function fetchMapPoints() {
     url: '/api/pokemon/map-points',
   })
 }
+
+import type { Banner, StarlightDuelEpisode } from '@/types/banner'
+
+export function fetchBanners() {
+  return request<Banner[]>({
+    url: '/api/banners',
+  })
+}
+
+export function fetchStarlightDuelLatest() {
+  return request<StarlightDuelEpisode | null>({
+    url: '/api/starlight-duel/latest',
+  })
+}
+
+export function fetchStarlightDuelEpisode(episodeNumber: number) {
+  return request<StarlightDuelEpisode>({
+    url: `/api/starlight-duel/${episodeNumber}`,
+  })
+}

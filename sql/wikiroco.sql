@@ -189,6 +189,42 @@ CREATE TABLE pokemon_egg_group (
         REFERENCES pokemon (id) ON DELETE CASCADE
 );
 
+-- Banner
+CREATE TABLE IF NOT EXISTS banner (
+    id          SERIAL       PRIMARY KEY,
+    title       VARCHAR(100) NOT NULL DEFAULT '',
+    image_url   VARCHAR(500) NOT NULL,
+    link_type   VARCHAR(50)  NOT NULL DEFAULT '',
+    link_param  VARCHAR(255) NOT NULL DEFAULT '',
+    sort_order  INT          NOT NULL DEFAULT 0,
+    is_active   BOOLEAN      NOT NULL DEFAULT TRUE,
+    created_at  TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP    NOT NULL DEFAULT NOW()
+);
+
+-- 星光对决
+CREATE TABLE IF NOT EXISTS starlight_duel_episode (
+    id              SERIAL       PRIMARY KEY,
+    episode_number  INT          NOT NULL UNIQUE,
+    title           VARCHAR(100) NOT NULL DEFAULT '',
+    strategy_text   TEXT         NOT NULL DEFAULT '',
+    is_active       BOOLEAN      NOT NULL DEFAULT TRUE,
+    created_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMP    NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS starlight_duel_pet (
+    id          SERIAL PRIMARY KEY,
+    episode_id  INT    NOT NULL REFERENCES starlight_duel_episode(id) ON DELETE CASCADE,
+    pet_id      INT    NOT NULL REFERENCES pokemon(id),
+    sort_order  INT    NOT NULL DEFAULT 1,
+    skill_1_id  INT    REFERENCES skill(id),
+    skill_2_id  INT    REFERENCES skill(id),
+    skill_3_id  INT    REFERENCES skill(id),
+    skill_4_id  INT    REFERENCES skill(id),
+    UNIQUE (episode_id, sort_order)
+);
+
 -- 属性克制矩阵（防守属性 × 进攻属性 → 倍率）
 CREATE TABLE attribute_matchup (
     defender_attr_id INT            NOT NULL,

@@ -57,6 +57,14 @@ const router = createRouter({
           path: 'skill-stones',
           component: () => import('@/views/ops/OpsSkillStonesView.vue'),
         },
+        {
+          path: 'banners',
+          component: () => import('@/views/ops/OpsBannersView.vue'),
+        },
+        {
+          path: 'starlight-duel',
+          component: () => import('@/views/ops/OpsStarlightDuelView.vue'),
+        },
       ],
     },
   ],

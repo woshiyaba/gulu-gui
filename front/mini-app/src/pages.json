@@ -43,6 +43,12 @@
 			"style": {
 				"navigationBarTitleText": "技能石查询"
 			}
+		},
+		{
+			"path": "pages/starlight-duel/detail",
+			"style": {
+				"navigationBarTitleText": "星光对决"
+			}
 		}
 	],
 	"globalStyle": {

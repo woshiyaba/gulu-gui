@@ -30,7 +30,14 @@ from api.schemas.ops import (
     OpsSkillStoneListResponse,
     OpsSkillStoneUpdateRequest,
 )
-from api.services import ops_service
+from api.schemas.banner import BannerItem, BannerListResponse, BannerUpsertRequest
+from api.schemas.starlight_duel import (
+    StarlightDuelEpisodeDetail,
+    StarlightDuelEpisodeListResponse,
+    StarlightDuelEpisodeUpsertRequest,
+    StarlightDuelSearchResponse,
+)
+from api.services import ops_service, banner_service, starlight_duel_service
 
 router = APIRouter(prefix="/api/ops", tags=["ops"])
 
@@ -236,6 +243,44 @@ async def delete_ops_pokemon(
     return Response(status_code=204)
 
 
+# ── Banner ──────────────────────────────────────────────
+
+
+@router.get("/banners", response_model=BannerListResponse)
+async def list_ops_banners(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await banner_service.list_banners_for_ops(current_user, page=page, page_size=page_size)
+
+
+@router.post("/banners", response_model=BannerItem)
+async def create_ops_banner(
+    payload: BannerUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await banner_service.create_banner_for_ops(current_user, payload.model_dump())
+
+
+@router.put("/banners/{banner_id}", response_model=BannerItem)
+async def update_ops_banner(
+    banner_id: int,
+    payload: BannerUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await banner_service.update_banner_for_ops(current_user, banner_id, payload.model_dump())
+
+
+@router.delete("/banners/{banner_id}", status_code=204)
+async def delete_ops_banner(
+    banner_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    await banner_service.delete_banner_for_ops(current_user, banner_id)
+    return Response(status_code=204)
+
+
 # ---------- 技能维护 ----------
 
 @router.get("/skills", response_model=OpsSkillListResponse)
@@ -376,4 +421,66 @@ async def delete_ops_skill_stone(
     current_user: dict = Depends(get_current_ops_user),
 ):
     await ops_service.delete_skill_stone_for_ops(current_user, stone_id)
+    return Response(status_code=204)
+
+
+# ── 星光对决 ────────────────────────────────────────────
+
+
+@router.get("/starlight-duel/search-pokemon", response_model=StarlightDuelSearchResponse)
+async def search_starlight_duel_pokemon(
+    keyword: str = Query(default=""),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await starlight_duel_service.search_pokemon_for_ops(current_user, keyword)
+
+
+@router.get("/starlight-duel/search-skills", response_model=StarlightDuelSearchResponse)
+async def search_starlight_duel_skills(
+    keyword: str = Query(default=""),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await starlight_duel_service.search_skills_for_ops(current_user, keyword)
+
+
+@router.get("/starlight-duel/episodes", response_model=StarlightDuelEpisodeListResponse)
+async def list_ops_starlight_duel_episodes(
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await starlight_duel_service.list_episodes_for_ops(current_user, page=page, page_size=page_size)
+
+
+@router.post("/starlight-duel/episodes", response_model=StarlightDuelEpisodeDetail)
+async def create_ops_starlight_duel_episode(
+    payload: StarlightDuelEpisodeUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await starlight_duel_service.create_episode_for_ops(current_user, payload.model_dump())
+
+
+@router.get("/starlight-duel/episodes/{episode_id}", response_model=StarlightDuelEpisodeDetail)
+async def get_ops_starlight_duel_episode(
+    episode_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await starlight_duel_service.get_episode_detail_for_ops(current_user, episode_id)
+
+
+@router.put("/starlight-duel/episodes/{episode_id}", response_model=StarlightDuelEpisodeDetail)
+async def update_ops_starlight_duel_episode(
+    episode_id: int,
+    payload: StarlightDuelEpisodeUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await starlight_duel_service.update_episode_for_ops(current_user, episode_id, payload.model_dump())
+
+
+@router.delete("/starlight-duel/episodes/{episode_id}", status_code=204)
+async def delete_ops_starlight_duel_episode(
+    episode_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    await starlight_duel_service.delete_episode_for_ops(current_user, episode_id)
     return Response(status_code=204)
