@@ -31,13 +31,19 @@ from api.schemas.ops import (
     OpsSkillStoneUpdateRequest,
 )
 from api.schemas.banner import BannerItem, BannerListResponse, BannerUpsertRequest
+from api.schemas.personality import (
+    PersonalityItem,
+    PersonalityListResponse,
+    PersonalityResetResponse,
+    PersonalityUpsertRequest,
+)
 from api.schemas.starlight_duel import (
     StarlightDuelEpisodeDetail,
     StarlightDuelEpisodeListResponse,
     StarlightDuelEpisodeUpsertRequest,
     StarlightDuelSearchResponse,
 )
-from api.services import ops_service, banner_service, starlight_duel_service
+from api.services import ops_service, banner_service, personality_service, starlight_duel_service
 
 router = APIRouter(prefix="/api/ops", tags=["ops"])
 
@@ -421,6 +427,68 @@ async def delete_ops_skill_stone(
     current_user: dict = Depends(get_current_ops_user),
 ):
     await ops_service.delete_skill_stone_for_ops(current_user, stone_id)
+    return Response(status_code=204)
+
+
+# ---------- 性格维护 ----------
+
+@router.get("/personalities", response_model=PersonalityListResponse)
+async def list_ops_personalities(
+    keyword: str = Query(default=""),
+    buff_stat: str = Query(default=""),
+    nerf_stat: str = Query(default=""),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=100, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await personality_service.list_personalities_for_ops(
+        current_user,
+        keyword=keyword,
+        buff_stat=buff_stat,
+        nerf_stat=nerf_stat,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.post("/personalities/reset", response_model=PersonalityResetResponse)
+async def reset_ops_personalities(
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await personality_service.reset_personalities_from_json(current_user)
+
+
+@router.post("/personalities", response_model=PersonalityItem)
+async def create_ops_personality(
+    payload: PersonalityUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await personality_service.create_personality_for_ops(current_user, payload.model_dump())
+
+
+@router.get("/personalities/{pid}", response_model=PersonalityItem)
+async def get_ops_personality(
+    pid: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await personality_service.get_personality_for_ops(current_user, pid)
+
+
+@router.put("/personalities/{pid}", response_model=PersonalityItem)
+async def update_ops_personality(
+    pid: int,
+    payload: PersonalityUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await personality_service.update_personality_for_ops(current_user, pid, payload.model_dump())
+
+
+@router.delete("/personalities/{pid}", status_code=204)
+async def delete_ops_personality(
+    pid: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    await personality_service.delete_personality_for_ops(current_user, pid)
     return Response(status_code=204)
 
 

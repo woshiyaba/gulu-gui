@@ -539,6 +539,79 @@ export function deleteOpsBanner(id: number): Promise<void> {
   return http.delete(`/api/ops/banners/${id}`).then(() => undefined)
 }
 
+// ── 精灵性格 ────────────────────────────────────────────
+
+export type OpsPersonalityStat = 'hp' | 'phy_atk' | 'mag_atk' | 'phy_def' | 'mag_def' | 'spd'
+
+export interface OpsPersonalityItem {
+  id: number
+  name_en: string
+  name_zh: string
+  hp_mod_pct: number
+  phy_atk_mod_pct: number
+  mag_atk_mod_pct: number
+  phy_def_mod_pct: number
+  mag_def_mod_pct: number
+  spd_mod_pct: number
+  buff_stat: OpsPersonalityStat | null
+  nerf_stat: OpsPersonalityStat | null
+  is_neutral: boolean
+}
+
+export interface OpsPersonalityListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsPersonalityItem[]
+}
+
+export interface OpsPersonalityUpsertPayload {
+  id?: number | null
+  name_en: string
+  name_zh: string
+  hp_mod_pct: number
+  phy_atk_mod_pct: number
+  mag_atk_mod_pct: number
+  phy_def_mod_pct: number
+  mag_def_mod_pct: number
+  spd_mod_pct: number
+}
+
+export interface OpsPersonalityResetResponse {
+  inserted: number
+  source: string
+}
+
+export function fetchOpsPersonalities(params: {
+  keyword?: string
+  buff_stat?: string
+  nerf_stat?: string
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsPersonalityListResponse> {
+  return http.get<OpsPersonalityListResponse>('/api/ops/personalities', { params }).then((r) => r.data)
+}
+
+export function fetchOpsPersonalityDetail(id: number): Promise<OpsPersonalityItem> {
+  return http.get<OpsPersonalityItem>(`/api/ops/personalities/${id}`).then((r) => r.data)
+}
+
+export function createOpsPersonality(payload: OpsPersonalityUpsertPayload): Promise<OpsPersonalityItem> {
+  return http.post<OpsPersonalityItem>('/api/ops/personalities', payload).then((r) => r.data)
+}
+
+export function updateOpsPersonality(id: number, payload: OpsPersonalityUpsertPayload): Promise<OpsPersonalityItem> {
+  return http.put<OpsPersonalityItem>(`/api/ops/personalities/${id}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsPersonality(id: number): Promise<void> {
+  return http.delete(`/api/ops/personalities/${id}`).then(() => undefined)
+}
+
+export function resetOpsPersonalities(): Promise<OpsPersonalityResetResponse> {
+  return http.post<OpsPersonalityResetResponse>('/api/ops/personalities/reset').then((r) => r.data)
+}
+
 // ── 星光对决 ────────────────────────────────────────────
 
 export interface OpsStarlightDuelPet {

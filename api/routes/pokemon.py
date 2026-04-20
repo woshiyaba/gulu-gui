@@ -12,6 +12,7 @@ from api.schemas.pokemon import (
     SkillStoneListResponse,
 )
 from api.schemas.banner import BannerItem
+from api.schemas.personality import PersonalityItem
 from api.schemas.starlight_duel import StarlightDuelEpisodeDetail
 from api.services.pokemon_service import (
     PokemonNotFoundError,
@@ -27,7 +28,7 @@ from api.services.pokemon_service import (
     get_skill_types as get_skill_types_service,
     get_skills as get_skills_service,
 )
-from api.services import banner_service, starlight_duel_service
+from api.services import banner_service, personality_service, starlight_duel_service
 
 router = APIRouter(prefix="/api")
 
@@ -51,6 +52,12 @@ async def get_starlight_duel_episode(episode_number: int):
 async def get_attributes():
     """返回所有不重复的属性列表，用于前端筛选栏。"""
     return await get_attributes_service()
+
+
+@router.get("/personalities", response_model=list[PersonalityItem])
+async def get_personalities_public():
+    """返回全部精灵性格字典（公共只读，供图鉴/计算器使用）。"""
+    return await personality_service.list_personalities_public()
 
 
 @router.get("/egg-groups", response_model=list[str])

@@ -2,6 +2,7 @@
 -- ============================================================
 -- 迁移重建：先删表（子表 -> 父表）
 -- ============================================================
+DROP TABLE IF EXISTS personality CASCADE;
 DROP TABLE IF EXISTS attribute_matchup CASCADE;
 DROP TABLE IF EXISTS pokemon_egg_group CASCADE;
 DROP TABLE IF EXISTS skill_stone CASCADE;
@@ -235,4 +236,21 @@ CREATE TABLE attribute_matchup (
         REFERENCES attribute (id) ON DELETE CASCADE,
     CONSTRAINT fk_am_attacker FOREIGN KEY (attacker_attr_id)
         REFERENCES attribute (id) ON DELETE CASCADE
+);
+
+-- 性格字典：每个性格对六维基础能力的乘法修正
+-- 规则：一项 +10% (0.10) + 另一项 -10% (-0.10)，其余为 0；6 维两两组合共 30 条
+-- final_stat = floor(base_stat * (1 + mod_pct))
+CREATE TABLE personality (
+    id              SMALLINT     PRIMARY KEY,
+    name_en         VARCHAR(32)  NOT NULL,
+    name_zh         VARCHAR(16)  NOT NULL,
+    hp_mod_pct      NUMERIC(3,2) NOT NULL DEFAULT 0,
+    phy_atk_mod_pct NUMERIC(3,2) NOT NULL DEFAULT 0,
+    mag_atk_mod_pct NUMERIC(3,2) NOT NULL DEFAULT 0,
+    phy_def_mod_pct NUMERIC(3,2) NOT NULL DEFAULT 0,
+    mag_def_mod_pct NUMERIC(3,2) NOT NULL DEFAULT 0,
+    spd_mod_pct     NUMERIC(3,2) NOT NULL DEFAULT 0,
+    CONSTRAINT uk_personality_en UNIQUE (name_en),
+    CONSTRAINT uk_personality_zh UNIQUE (name_zh)
 );

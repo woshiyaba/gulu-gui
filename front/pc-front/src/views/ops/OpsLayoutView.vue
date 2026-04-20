@@ -29,6 +29,7 @@ const menus = [
   { to: '/ops/starlight-duel', label: '星光对决' },
   { to: '/ops/skills', label: '技能维护' },
   { to: '/ops/skill-stones', label: '技能石维护' },
+  { to: '/ops/personalities', label: '性格维护' },
   { to: '/ops/map', label: '地图维护', disabled: true },
 ]
 

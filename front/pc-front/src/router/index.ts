@@ -62,6 +62,10 @@ const router = createRouter({
           component: () => import('@/views/ops/OpsBannersView.vue'),
         },
         {
+          path: 'personalities',
+          component: () => import('@/views/ops/OpsPersonalitiesView.vue'),
+        },
+        {
           path: 'starlight-duel',
           component: () => import('@/views/ops/OpsStarlightDuelView.vue'),
         },
