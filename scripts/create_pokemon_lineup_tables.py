@@ -25,9 +25,10 @@ from config import PG_CONFIG
 
 LINEUP_TYPE_DICT = "pokemon_lineup_type"
 LINEUP_TYPE_ROWS = [
-    (LINEUP_TYPE_DICT, "pvp", "PVP", 1),
-    (LINEUP_TYPE_DICT, "pve", "PVE", 2),
-    (LINEUP_TYPE_DICT, "starlight_duel", "星光对决", 3),
+    (LINEUP_TYPE_DICT, "shining_contest", "闪耀大赛", 1),
+    (LINEUP_TYPE_DICT, "open_battle", "露天对战", 2),
+    (LINEUP_TYPE_DICT, "season_battle", "赛季对战", 3),
+    (LINEUP_TYPE_DICT, "starlight_duel", "星光对决", 4),
 ]
 
 
@@ -64,6 +65,8 @@ CREATE TABLE IF NOT EXISTS pokemon_lineup_member (
     CONSTRAINT uk_pokemon_lineup_member_order UNIQUE (lineup_id, sort_order)
 );
 """
+
+DICT_DELETE_SQL = "DELETE FROM sys_dict WHERE dict_type = %s"
 
 DICT_UPSERT_SQL = """
 INSERT INTO sys_dict (dict_type, code, label, sort_order)
@@ -103,6 +106,7 @@ def main() -> None:
     try:
         with conn.cursor() as cur:
             cur.execute(PG_DDL)
+            cur.execute(DICT_DELETE_SQL, (LINEUP_TYPE_DICT,))
             cur.executemany(DICT_UPSERT_SQL, LINEUP_TYPE_ROWS)
 
         if args.dry_run:
