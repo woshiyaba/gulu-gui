@@ -264,7 +264,7 @@ async def list_pokemon(
             await cur.execute(
                 f"""
                 SELECT
-                    p.no, p.name, p.image, p.image_lc, p.type, p.type_name, p.form, p.form_name,
+                    p.no, p.name, p.image, p.image_lc, p.image_yise, p.type, p.type_name, p.form, p.form_name,
                     string_agg(a.name, ',' ORDER BY pa.id) AS attr_names,
                     string_agg(a.image, '|||' ORDER BY pa.id) AS attr_images,
                     (SELECT string_agg(peg.group_name, ',' ORDER BY peg.id)
@@ -273,7 +273,7 @@ async def list_pokemon(
                 LEFT JOIN pokemon_attribute pa ON pa.pokemon_id = p.id
                 LEFT JOIN attribute a ON a.id = pa.attr_id
                 {where_clause}
-                GROUP BY p.id, p.no, p.name, p.image, p.image_lc, p.type, p.type_name, p.form, p.form_name,
+                GROUP BY p.id, p.no, p.name, p.image, p.image_lc, p.image_yise, p.type, p.type_name, p.form, p.form_name,
                          p.hp, p.atk, p.matk, p.def_val, p.mdef, p.spd
                 {order_clause}
                 LIMIT %s OFFSET %s
@@ -334,7 +334,7 @@ async def get_pokemon_base(name: str) -> dict | None:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
-                SELECT p.no, p.name, p.image, p.image_lc, p.type, p.type_name, p.form, p.form_name,
+                SELECT p.no, p.name, p.image, p.image_lc, p.image_yise, p.type, p.type_name, p.form, p.form_name,
                        string_agg(a.name, ',' ORDER BY pa.id) AS attr_names,
                        string_agg(a.image, '|||' ORDER BY pa.id) AS attr_images,
                        (SELECT string_agg(peg.group_name, ',' ORDER BY peg.id)
@@ -343,7 +343,7 @@ async def get_pokemon_base(name: str) -> dict | None:
                 LEFT JOIN pokemon_attribute pa ON pa.pokemon_id = p.id
                 LEFT JOIN attribute a ON a.id = pa.attr_id
                 WHERE p.name = %s
-                GROUP BY p.id, p.no, p.name, p.image, p.image_lc, p.type, p.type_name, p.form, p.form_name
+                GROUP BY p.id, p.no, p.name, p.image, p.image_lc, p.image_yise, p.type, p.type_name, p.form, p.form_name
                 """,
                 (name,),
             )

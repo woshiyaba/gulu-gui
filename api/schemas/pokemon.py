@@ -18,6 +18,7 @@ class PokemonListItem(BaseModel):
     no: str
     name: str
     image_url: str
+    image_yise_url: str = ""
     type: str
     type_name: str
     form: str

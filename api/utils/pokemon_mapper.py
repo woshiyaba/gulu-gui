@@ -1,4 +1,4 @@
-from api.utils.media import build_friend_image_url, build_image_url
+from api.utils.media import build_friend_image_url, build_image_url, build_yise_image_url
 
 
 def parse_egg_groups(egg_group_names: str | None) -> list[str]:
@@ -30,6 +30,7 @@ def to_pokemon_list_item(row: dict) -> dict:
         "no": row["no"],
         "name": row["name"],
         "image_url": build_friend_image_url(row.get("image_lc", ""), row.get("image", "")),
+        "image_yise_url": build_yise_image_url(row.get("image_yise", "")),
         "type": row["type"],
         "type_name": row["type_name"],
         "form": row["form"],
@@ -57,6 +58,7 @@ def to_pokemon_detail(base: dict, detail: dict, skills_raw: list[dict]) -> dict:
         "no": base["no"],
         "name": base["name"],
         "image_url": build_friend_image_url(base.get("image_lc", ""), base.get("image", "")),
+        "image_yise_url": build_yise_image_url(base.get("image_yise", "")),
         "type": base["type"],
         "type_name": base["type_name"],
         "form": base["form"],

@@ -13,6 +13,7 @@ const pokemon = ref<PokemonDetail | null>(null)
 const evolutionChain = ref<PokemonEvolutionChain | null>(null)
 const loading = ref(true)
 const error = ref('')
+const showYise = ref(false)
 
 // 种族值配置：标签、最大值（用于进度条百分比）
 const STAT_CONFIGS = [
@@ -46,6 +47,7 @@ async function goToEvolution(name: string) {
 async function load(name: string) {
   loading.value = true
   error.value = ''
+  showYise.value = false
   try {
     const [detail, chain] = await Promise.all([
       fetchPokemonDetail(name),
@@ -89,12 +91,25 @@ watch(() => route.params.name, (n) => n && load(n as string))
       <!-- ① 基础信息卡 -->
       <section class="card info-card">
         <div class="pokemon-avatar">
-          <img v-if="pokemon.image_url" :src="pokemon.image_url" :alt="pokemon.name" class="avatar-img" />
+          <img
+            v-if="showYise && pokemon.image_yise_url ? pokemon.image_yise_url : pokemon.image_url"
+            :src="showYise && pokemon.image_yise_url ? pokemon.image_yise_url : pokemon.image_url"
+            :alt="pokemon.name"
+            class="avatar-img"
+          />
           <div v-else class="avatar-placeholder">?</div>
         </div>
         <div class="info-meta">
           <div class="info-no">{{ pokemon.no }}</div>
-          <div class="info-name">{{ pokemon.name }}</div>
+          <div class="info-name-row">
+            <div class="info-name">{{ pokemon.name }}</div>
+            <button
+              v-if="pokemon.image_yise_url"
+              class="yise-btn"
+              :class="{ 'yise-btn--active': showYise }"
+              @click="showYise = !showYise"
+            >{{ showYise ? '普通' : '异色' }}</button>
+          </div>
           <div class="info-attrs">
             <span v-for="a in pokemon.attributes" :key="a.attr_name" class="attr-tag">
               <img v-if="a.attr_image" :src="a.attr_image" :alt="a.attr_name" class="attr-icon" />
@@ -764,11 +779,40 @@ watch(() => route.params.name, (n) => n && load(n as string))
   margin-bottom: 4px;
 }
 
+.info-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
 .info-name {
   font-size: 26px;
   font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 10px;
+}
+
+.yise-btn {
+  flex-shrink: 0;
+  padding: 2px 12px;
+  border: 1.5px solid var(--color-accent);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-accent);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.yise-btn:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.yise-btn--active {
+  background: var(--color-accent);
+  color: #fff;
 }
 
 .info-attrs {

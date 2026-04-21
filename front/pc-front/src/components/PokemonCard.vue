@@ -1,9 +1,22 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import type { Pokemon } from '@/types'
 
 const props = defineProps<{ pokemon: Pokemon }>()
 const router = useRouter()
+
+const showYise = ref(false)
+
+const displayImage = computed(() =>
+  showYise.value && props.pokemon.image_yise_url
+    ? props.pokemon.image_yise_url
+    : props.pokemon.image_url
+)
+
+function toggleYise() {
+  showYise.value = !showYise.value
+}
 
 function goDetail() {
   router.push(`/pokemon/${encodeURIComponent(props.pokemon.name)}`)
@@ -14,8 +27,8 @@ function goDetail() {
   <div class="pokemon-card" @click="goDetail">
     <div class="card-img-wrap">
       <img
-        v-if="pokemon.image_url"
-        :src="pokemon.image_url"
+        v-if="displayImage"
+        :src="displayImage"
         :alt="pokemon.name"
         class="card-img"
         loading="lazy"
@@ -25,7 +38,15 @@ function goDetail() {
 
     <div class="card-body">
       <div class="card-no">{{ pokemon.no }}</div>
-      <div class="card-name">{{ pokemon.name }}</div>
+      <div class="card-name-row">
+        <div class="card-name">{{ pokemon.name }}</div>
+        <button
+          v-if="pokemon.image_yise_url"
+          class="yise-btn"
+          :class="{ 'yise-btn--active': showYise }"
+          @click.stop="toggleYise"
+        >{{ showYise ? '普通' : '异色' }}</button>
+      </div>
 
       <!-- 属性标签 -->
       <div class="card-attrs">
@@ -93,11 +114,40 @@ function goDetail() {
   margin-bottom: 2px;
 }
 
+.card-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
 .card-name {
   font-size: 15px;
   font-weight: 600;
   color: var(--color-text);
-  margin-bottom: 8px;
+}
+
+.yise-btn {
+  flex-shrink: 0;
+  padding: 1px 8px;
+  border: 1.5px solid var(--color-accent);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--color-accent);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.yise-btn:hover {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.yise-btn--active {
+  background: var(--color-accent);
+  color: #fff;
 }
 
 .card-attrs {

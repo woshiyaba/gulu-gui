@@ -1,4 +1,4 @@
-from config import BASE_URL, FRIEND_IMAGE_BASE_URL, SKILL_ICON_BASE_URL
+from config import BASE_URL, FRIEND_IMAGE_BASE_URL, SKILL_ICON_BASE_URL, STATIC_BASE_URL
 
 
 def build_image_url(path: str) -> str:
@@ -38,3 +38,9 @@ def build_skill_icon_url(icon: str) -> str:
     if "/" in icon:
         return build_image_url(icon)
     return f"{SKILL_ICON_BASE_URL}{icon}"
+
+
+def build_yise_image_url(image_yise: str) -> str:
+    if not image_yise:
+        return ""
+    return f"{STATIC_BASE_URL}/images{image_yise}"

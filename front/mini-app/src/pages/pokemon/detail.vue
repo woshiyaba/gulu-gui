@@ -8,6 +8,7 @@ const pokemon = ref<PokemonDetail | null>(null)
 const evolutionChain = ref<PokemonEvolutionChain | null>(null)
 const loading = ref(true)
 const error = ref('')
+const showYise = ref(false)
 
 const STAT_CONFIGS = [
   { key: 'hp', label: 'HP', color: 'linear-gradient(90deg, #35c88a 0%, #7be6b4 100%)' },
@@ -55,6 +56,7 @@ function previewImage(url: string) {
 async function loadDetail(name: string) {
   loading.value = true
   error.value = ''
+  showYise.value = false
 
   try {
     const [detail, chain] = await Promise.all([
@@ -105,11 +107,11 @@ onLoad((options) => {
 
     <view v-else-if="pokemon" class="content">
       <view class="hero-card">
-        <view class="hero-image-wrap" @tap="previewImage(pokemon.image_url)">
+        <view class="hero-image-wrap" @tap="previewImage(showYise && pokemon.image_yise_url ? pokemon.image_yise_url : pokemon.image_url)">
           <image
-            v-if="pokemon.image_url"
+            v-if="showYise && pokemon.image_yise_url ? pokemon.image_yise_url : pokemon.image_url"
             class="hero-image"
-            :src="pokemon.image_url"
+            :src="showYise && pokemon.image_yise_url ? pokemon.image_yise_url : pokemon.image_url"
             mode="aspectFit"
           />
           <view v-else class="hero-placeholder">?</view>
@@ -117,7 +119,15 @@ onLoad((options) => {
 
         <view class="hero-info">
           <text class="pokemon-no">#{{ pokemon.no || '--' }}</text>
-          <text class="pokemon-name">{{ pokemon.name }}</text>
+          <view class="name-row">
+            <text class="pokemon-name">{{ pokemon.name }}</text>
+            <text
+              v-if="pokemon.image_yise_url"
+              class="yise-btn"
+              :class="{ 'yise-btn--active': showYise }"
+              @tap="showYise = !showYise"
+            >{{ showYise ? '普通' : '异色' }}</text>
+          </view>
 
           <view class="badge-row">
             <text v-if="pokemon.type_name" class="badge type-badge">{{ pokemon.type_name }}</text>
@@ -447,10 +457,32 @@ onLoad((options) => {
   color: #8aa2c9;
 }
 
+.name-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
 .pokemon-name {
   font-size: 44rpx;
   font-weight: 700;
   color: #1f3760;
+}
+
+.yise-btn {
+  flex-shrink: 0;
+  padding: 4rpx 16rpx;
+  border: 1px solid #2b74ff;
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  color: #2b74ff;
+  background: transparent;
+  white-space: nowrap;
+}
+
+.yise-btn--active {
+  background: #2b74ff;
+  color: #ffffff;
 }
 
 .badge-row,

@@ -7,6 +7,7 @@ export interface Pokemon {
   no: string
   name: string
   image_url: string
+  image_yise_url: string
   type: string
   type_name: string
   form: string
