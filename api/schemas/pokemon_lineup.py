@@ -79,6 +79,10 @@ class PokemonLineupUpsertRequest(BaseModel):
     members: list[PokemonLineupMemberInput] = Field(default_factory=list)
 
 
+class PokemonLineupPublicList(BaseModel):
+    items: list[PokemonLineupDetail] = Field(default_factory=list)
+
+
 class PokemonLineupSearchItem(BaseModel):
     id: int
     name: str

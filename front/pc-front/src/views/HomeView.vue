@@ -191,6 +191,7 @@ onBeforeUnmount(() => {
       <RouterLink class="nav-link-btn" to="/body-match">量体查宠</RouterLink>
       <RouterLink class="nav-link-btn" to="/skill-stones">技能石查询</RouterLink>
       <RouterLink class="nav-link-btn" to="/skills">技能图鉴</RouterLink>
+      <RouterLink class="nav-link-btn" to="/lineups">阵容推荐</RouterLink>
 
       <button class="theme-btn" @click="toggleTheme">
         {{ isDark ? '切换浅色' : '夜间模式' }}

@@ -13,7 +13,9 @@ from api.schemas.pokemon import (
 )
 from api.schemas.banner import BannerItem
 from api.schemas.personality import PersonalityItem
+from api.schemas.pokemon_lineup import PokemonLineupDetail, PokemonLineupPublicList
 from api.schemas.starlight_duel import StarlightDuelEpisodeDetail
+from api.services import pokemon_lineup_service
 from api.services.pokemon_service import (
     PokemonNotFoundError,
     get_attributes as get_attributes_service,
@@ -46,6 +48,22 @@ async def get_starlight_duel_latest():
 @router.get("/starlight-duel/{episode_number}", response_model=StarlightDuelEpisodeDetail)
 async def get_starlight_duel_episode(episode_number: int):
     return await starlight_duel_service.get_episode_by_number(episode_number)
+
+
+@router.get("/pokemon-lineups", response_model=PokemonLineupPublicList)
+async def get_pokemon_lineups(
+    source_type: str = Query(default="", description="阵容分类筛选"),
+):
+    items = await pokemon_lineup_service.list_active_lineups(source_type=source_type)
+    return {"items": items}
+
+
+@router.get("/pokemon-lineups/{lineup_id}", response_model=PokemonLineupDetail)
+async def get_pokemon_lineup_detail(lineup_id: int):
+    lineup = await pokemon_lineup_service.get_lineup_detail(lineup_id)
+    if not lineup:
+        raise HTTPException(status_code=404, detail="阵容不存在或未启用")
+    return lineup
 
 
 @router.get("/attributes", response_model=list[AttributeItem])

@@ -2,6 +2,8 @@ import axios from 'axios'
 import type {
   Attribute,
   Category,
+  Lineup,
+  LineupListResponse,
   MapPoint,
   PokemonBodyMatchResponse,
   PokemonDetail,
@@ -104,6 +106,15 @@ export function fetchSkillStones(query: SkillStoneQuery = {}): Promise<SkillSton
   const skillName = query.skill_name?.trim()
   const params = skillName ? { skill_name: skillName } : undefined
   return http.get<SkillStoneListResponse>('/api/skill-stones', { params }).then((r) => r.data)
+}
+
+export function fetchLineups(sourceType?: string): Promise<LineupListResponse> {
+  const params = sourceType ? { source_type: sourceType } : undefined
+  return http.get<LineupListResponse>('/api/pokemon-lineups', { params }).then((r) => r.data)
+}
+
+export function fetchLineupDetail(id: number): Promise<Lineup> {
+  return http.get<Lineup>(`/api/pokemon-lineups/${id}`).then((r) => r.data)
 }
 
 export function fetchCategories(): Promise<Category[]> {

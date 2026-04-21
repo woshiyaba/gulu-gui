@@ -92,6 +92,17 @@ async def _normalize_payload(payload: dict) -> dict:
     }
 
 
+async def list_active_lineups(source_type: str = "") -> list[dict]:
+    return await pokemon_lineup_repository.list_active_lineups(source_type=source_type)
+
+
+async def get_lineup_detail(lineup_id: int) -> dict | None:
+    lineup = await pokemon_lineup_repository.get_lineup_by_id(lineup_id)
+    if not lineup or not lineup.get("is_active"):
+        return None
+    return lineup
+
+
 async def list_lineups_for_ops(
     user: dict,
     keyword: str = "",

@@ -273,6 +273,38 @@ async def delete_lineup(lineup_id: int) -> bool:
         return deleted
 
 
+async def list_active_lineups(source_type: str = "") -> list[dict]:
+    pool = await get_pool()
+    conditions = ["pl.is_active = TRUE"]
+    params: list = []
+
+    st = (source_type or "").strip()
+    if st:
+        conditions.append("pl.source_type = %s")
+        params.append(st)
+
+    where_sql = " AND ".join(conditions)
+
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT pl.id, pl.title, pl.lineup_desc, pl.source_type, pl.sort_order
+                FROM pokemon_lineup pl
+                WHERE {where_sql}
+                ORDER BY pl.sort_order DESC, pl.id DESC
+                """,
+                params,
+            )
+            lineups = await cur.fetchall()
+
+            result = []
+            for lineup in lineups:
+                members = await _fetch_members(cur, lineup["id"])
+                result.append({**lineup, "members": members})
+            return result
+
+
 async def search_pokemon(keyword: str, limit: int = 20) -> list[dict]:
     pool = await get_pool()
     async with pool.connection() as conn:

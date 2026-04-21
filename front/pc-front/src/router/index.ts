@@ -13,6 +13,14 @@ const router = createRouter({
     { path: '/skill-stones', component: SkillStoneView },
     { path: '/skills', component: SkillListView },
     {
+      path: '/lineups',
+      component: () => import('@/views/PokemonLineupsView.vue'),
+    },
+    {
+      path: '/lineups/:id',
+      component: () => import('@/views/PokemonLineupDetailView.vue'),
+    },
+    {
       path: '/pokemon/:name',
       component: () => import('@/views/PokemonDetailView.vue'),
     },
