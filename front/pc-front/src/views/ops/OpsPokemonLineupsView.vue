@@ -124,25 +124,24 @@ function skillKey(memberIndex: number, skillIndex: number): string {
 }
 
 async function loadOptions() {
-  try {
-    const [bloodlines, personalities, statDict, lineupTypes, resonanceMagics] = await Promise.all([
-      fetchOpsDicts({ dict_type: BLOODLINE_DICT_TYPE, page: 1, page_size: 100 }),
-      fetchOpsPersonalities({ page: 1, page_size: 100 }),
-      fetchOpsDicts({ dict_type: STAT_DICT_TYPE, page: 1, page_size: 100 }),
-      fetchOpsDicts({ dict_type: LINEUP_TYPE_DICT, page: 1, page_size: 100 }),
-      fetchOpsResonanceMagics({ page: 1, page_size: 200 }),
-    ])
-    bloodlineOptions.value = bloodlines.items
-    personalityOptions.value = personalities.items
-    lineupTypeOptions.value = lineupTypes.items
-    resonanceMagicOptions.value = resonanceMagics.items
+  const results = await Promise.allSettled([
+    fetchOpsDicts({ dict_type: BLOODLINE_DICT_TYPE, page: 1, page_size: 100 }),
+    fetchOpsPersonalities({ page: 1, page_size: 100 }),
+    fetchOpsDicts({ dict_type: STAT_DICT_TYPE, page: 1, page_size: 100 }),
+    fetchOpsDicts({ dict_type: LINEUP_TYPE_DICT, page: 1, page_size: 100 }),
+    fetchOpsResonanceMagics({ page: 1, page_size: 200 }),
+  ])
 
-    statOptions.value = statDict.items.map((item) => ({
+  if (results[0].status === 'fulfilled') bloodlineOptions.value = results[0].value.items
+  if (results[1].status === 'fulfilled') personalityOptions.value = results[1].value.items
+  if (results[3].status === 'fulfilled') lineupTypeOptions.value = results[3].value.items
+  if (results[4].status === 'fulfilled') resonanceMagicOptions.value = results[4].value.items
+
+  if (results[2].status === 'fulfilled') {
+    statOptions.value = results[2].value.items.map((item) => ({
       value: item.code as OpsPokemonLineupStatKey,
       label: item.label || item.code,
     }))
-  } catch {
-    // ignore, fallback to defaults
   }
 }
 

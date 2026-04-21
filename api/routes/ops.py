@@ -667,7 +667,7 @@ async def delete_ops_pokemon_lineup(
 async def list_ops_resonance_magics(
     keyword: str = Query(default=""),
     page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=10, ge=1, le=100),
+    page_size: int = Query(default=10, ge=1, le=200),
     current_user: dict = Depends(get_current_ops_user),
 ):
     return await ops_service.list_resonance_magics_for_ops(
