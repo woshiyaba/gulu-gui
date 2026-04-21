@@ -26,6 +26,7 @@ const isAdmin = ref(false)
 const pendingIconFile = ref<File | null>(null)
 const pendingIconPreviewUrl = ref('')
 const iconFileInputRef = ref<HTMLInputElement | null>(null)
+const resonanceMagicStaticBase = (import.meta.env.VITE_STATIC_BASE_URL || 'https://wikiroco.com').replace(/\/+$/, '')
 
 const form = reactive({
   id: 0,
@@ -55,7 +56,16 @@ const visiblePages = computed(() => {
 
 const iconDisplaySrc = computed(() => {
   if (pendingIconPreviewUrl.value) return pendingIconPreviewUrl.value
-  return (form.icon_url || '').trim()
+  const iconUrl = (form.icon_url || '').trim()
+  if (iconUrl) return iconUrl
+  const icon = (form.icon || '').trim()
+  if (!icon) return ''
+  if (icon.startsWith('http')) return icon
+  if (icon.startsWith('/resonance-magic/') || icon.startsWith('resonance-magic/')) {
+    const filename = icon.split('/').filter(Boolean).pop() || ''
+    return filename ? `${resonanceMagicStaticBase}/images/resonance-magic/${filename}` : ''
+  }
+  return icon
 })
 
 function revokePendingPreview() {

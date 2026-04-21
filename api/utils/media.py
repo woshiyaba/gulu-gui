@@ -45,6 +45,9 @@ def build_resonance_magic_icon_url(icon: str) -> str:
         return ""
     if icon.startswith("http"):
         return icon
+    if icon.startswith("/resonance-magic/") or icon.startswith("resonance-magic/"):
+        _, _, filename = icon.rpartition("/")
+        return f"{RESONANCE_MAGIC_ICON_BASE_URL}{filename}"
     if "/" in icon:
         return build_image_url(icon)
     return f"{RESONANCE_MAGIC_ICON_BASE_URL}{icon}"
