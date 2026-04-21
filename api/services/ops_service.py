@@ -919,6 +919,113 @@ async def list_available_skills_for_stone(user: dict, keyword: str = "", limit: 
     return {"items": items}
 
 
+def _normalize_resonance_magic_payload(payload: dict) -> dict:
+    name = (payload.get("name") or "").strip()
+    if not name:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="共鸣魔法名称不能为空")
+    if len(name) > 50:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="共鸣魔法名称过长")
+    try:
+        max_usage_count = int(payload.get("max_usage_count") or 1)
+        sort_order = int(payload.get("sort_order") or 0)
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="使用次数和排序必须为整数")
+    if max_usage_count < 1:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="最大可使用次数至少为1")
+    return {
+        "name": name,
+        "description": (payload.get("description") or "").strip(),
+        "max_usage_count": max_usage_count,
+        "icon": (payload.get("icon") or "").strip(),
+        "sort_order": sort_order,
+    }
+
+
+async def list_resonance_magics_for_ops(
+    user: dict,
+    keyword: str = "",
+    page: int = 1,
+    page_size: int = 10,
+) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    page = max(page, 1)
+    page_size = max(1, min(page_size, 100))
+    total, items = await ops_repository.list_resonance_magics_for_ops(
+        keyword=keyword.strip(),
+        page=page,
+        page_size=page_size,
+    )
+    return {"total": total, "page": page, "page_size": page_size, "items": items}
+
+
+async def get_resonance_magic_for_ops(user: dict, magic_id: int) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    detail = await ops_repository.get_resonance_magic_for_ops(magic_id)
+    if not detail:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="共鸣魔法不存在")
+    return detail
+
+
+async def create_resonance_magic_for_ops(user: dict, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    normalized = _normalize_resonance_magic_payload(payload)
+    exists = await ops_repository.get_resonance_magic_by_name(normalized["name"])
+    if exists:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="共鸣魔法名称已存在")
+    created = await ops_repository.create_resonance_magic_for_ops(normalized)
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="resonance_magic",
+        resource_id=str(created["id"]),
+        action="create",
+        before_json=None,
+        after_json=created,
+    )
+    return created
+
+
+async def update_resonance_magic_for_ops(user: dict, magic_id: int, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_resonance_magic_for_ops(magic_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="共鸣魔法不存在")
+    normalized = _normalize_resonance_magic_payload(payload)
+    if normalized["name"] != before["name"]:
+        exists = await ops_repository.get_resonance_magic_by_name(normalized["name"])
+        if exists and int(exists["id"]) != magic_id:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="共鸣魔法名称已存在")
+    updated = await ops_repository.update_resonance_magic_for_ops(magic_id, normalized)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="共鸣魔法不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="resonance_magic",
+        resource_id=str(magic_id),
+        action="update",
+        before_json=before,
+        after_json=updated,
+    )
+    return updated
+
+
+async def delete_resonance_magic_for_ops(user: dict, magic_id: int) -> None:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_resonance_magic_for_ops(magic_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="共鸣魔法不存在")
+    deleted = await ops_repository.delete_resonance_magic_for_ops(magic_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="共鸣魔法不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="resonance_magic",
+        resource_id=str(magic_id),
+        action="delete",
+        before_json=before,
+        after_json=None,
+    )
+
+
 async def save_skill_icon_upload(user: dict, upload: UploadFile) -> dict:
     ensure_role(user, {"editor", "admin"})
     from config import SKILL_ICON_BASE_URL, SKILL_ICON_UPLOAD_DIR

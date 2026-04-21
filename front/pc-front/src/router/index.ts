@@ -81,6 +81,10 @@ const router = createRouter({
           path: 'pokemon-lineups',
           component: () => import('@/views/ops/OpsPokemonLineupsView.vue'),
         },
+        {
+          path: 'resonance-magic',
+          component: () => import('@/views/ops/OpsResonanceMagicView.vue'),
+        },
       ],
     },
   ],

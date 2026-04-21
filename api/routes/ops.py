@@ -30,6 +30,9 @@ from api.schemas.ops import (
     OpsSkillStoneItem,
     OpsSkillStoneListResponse,
     OpsSkillStoneUpdateRequest,
+    OpsResonanceMagicListResponse,
+    OpsResonanceMagicDetailResponse,
+    OpsResonanceMagicUpsertRequest,
 )
 from api.schemas.banner import BannerItem, BannerListResponse, BannerUpsertRequest
 from api.schemas.personality import (
@@ -645,4 +648,56 @@ async def delete_ops_pokemon_lineup(
     current_user: dict = Depends(get_current_ops_user),
 ):
     await pokemon_lineup_service.delete_lineup_for_ops(current_user, lineup_id)
+    return Response(status_code=204)
+
+
+# ---------- 共鸣魔法维护 ----------
+
+
+@router.get("/resonance-magics", response_model=OpsResonanceMagicListResponse)
+async def list_ops_resonance_magics(
+    keyword: str = Query(default=""),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.list_resonance_magics_for_ops(
+        current_user,
+        keyword=keyword,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.post("/resonance-magics", response_model=OpsResonanceMagicDetailResponse)
+async def create_ops_resonance_magic(
+    payload: OpsResonanceMagicUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.create_resonance_magic_for_ops(current_user, payload.model_dump())
+
+
+@router.get("/resonance-magics/{magic_id}", response_model=OpsResonanceMagicDetailResponse)
+async def get_ops_resonance_magic(
+    magic_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.get_resonance_magic_for_ops(current_user, magic_id)
+
+
+@router.put("/resonance-magics/{magic_id}", response_model=OpsResonanceMagicDetailResponse)
+async def update_ops_resonance_magic(
+    magic_id: int,
+    payload: OpsResonanceMagicUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.update_resonance_magic_for_ops(current_user, magic_id, payload.model_dump())
+
+
+@router.delete("/resonance-magics/{magic_id}", status_code=204)
+async def delete_ops_resonance_magic(
+    magic_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    await ops_service.delete_resonance_magic_for_ops(current_user, magic_id)
     return Response(status_code=204)

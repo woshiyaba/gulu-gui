@@ -860,3 +860,49 @@ export function updateOpsPokemonLineup(id: number, payload: OpsPokemonLineupPayl
 export function deleteOpsPokemonLineup(id: number): Promise<void> {
   return http.delete(`/api/ops/pokemon-lineups/${id}`).then(() => undefined)
 }
+
+// ── 共鸣魔法 ────────────────────────────────────────────
+
+export interface OpsResonanceMagicItem {
+  id: number
+  name: string
+  description: string
+  max_usage_count: number
+  icon: string
+  sort_order: number
+}
+
+export interface OpsResonanceMagicListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsResonanceMagicItem[]
+}
+
+export interface OpsResonanceMagicPayload {
+  name: string
+  description: string
+  max_usage_count: number
+  icon: string
+  sort_order: number
+}
+
+export function fetchOpsResonanceMagics(params: {
+  keyword?: string
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsResonanceMagicListResponse> {
+  return http.get<OpsResonanceMagicListResponse>('/api/ops/resonance-magics', { params }).then((r) => r.data)
+}
+
+export function createOpsResonanceMagic(payload: OpsResonanceMagicPayload): Promise<OpsResonanceMagicItem> {
+  return http.post<OpsResonanceMagicItem>('/api/ops/resonance-magics', payload).then((r) => r.data)
+}
+
+export function updateOpsResonanceMagic(id: number, payload: OpsResonanceMagicPayload): Promise<OpsResonanceMagicItem> {
+  return http.put<OpsResonanceMagicItem>(`/api/ops/resonance-magics/${id}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsResonanceMagic(id: number): Promise<void> {
+  return http.delete(`/api/ops/resonance-magics/${id}`).then(() => undefined)
+}

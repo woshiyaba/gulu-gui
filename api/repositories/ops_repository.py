@@ -1280,6 +1280,121 @@ async def list_available_skills_for_stone(keyword: str = "", limit: int = 30) ->
     return items
 
 
+async def list_resonance_magics_for_ops(
+    keyword: str = "",
+    page: int = 1,
+    page_size: int = 10,
+) -> tuple[int, list[dict]]:
+    pool = await get_pool()
+    conditions: list[str] = []
+    params: list = []
+    if keyword:
+        conditions.append("name LIKE %s")
+        params.append(f"%{keyword}%")
+    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    offset = (page - 1) * page_size
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"SELECT COUNT(*) AS cnt FROM resonance_magic {where_clause}",
+                params,
+            )
+            total_row = await cur.fetchone() or {}
+            total = int(total_row.get("cnt", 0))
+            await cur.execute(
+                f"""
+                SELECT id, name, description, max_usage_count, icon, sort_order
+                FROM resonance_magic
+                {where_clause}
+                ORDER BY sort_order, id
+                LIMIT %s OFFSET %s
+                """,
+                [*params, page_size, offset],
+            )
+            items = await cur.fetchall()
+            return total, items
+
+
+async def get_resonance_magic_for_ops(magic_id: int) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT id, name, description, max_usage_count, icon, sort_order FROM resonance_magic WHERE id = %s",
+                (magic_id,),
+            )
+            return await cur.fetchone()
+
+
+async def get_resonance_magic_by_name(name: str) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT id, name FROM resonance_magic WHERE name = %s",
+                (name,),
+            )
+            return await cur.fetchone()
+
+
+async def create_resonance_magic_for_ops(payload: dict) -> dict:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                INSERT INTO resonance_magic (name, description, max_usage_count, icon, sort_order)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id, name, description, max_usage_count, icon, sort_order
+                """,
+                (
+                    payload["name"],
+                    payload.get("description") or "",
+                    payload.get("max_usage_count", 1),
+                    payload.get("icon") or "",
+                    payload.get("sort_order", 0),
+                ),
+            )
+            row = await cur.fetchone()
+        await conn.commit()
+        return row
+
+
+async def update_resonance_magic_for_ops(magic_id: int, payload: dict) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                UPDATE resonance_magic
+                SET name = %s, description = %s, max_usage_count = %s, icon = %s, sort_order = %s
+                WHERE id = %s
+                RETURNING id, name, description, max_usage_count, icon, sort_order
+                """,
+                (
+                    payload["name"],
+                    payload.get("description") or "",
+                    payload.get("max_usage_count", 1),
+                    payload.get("icon") or "",
+                    payload.get("sort_order", 0),
+                    magic_id,
+                ),
+            )
+            row = await cur.fetchone()
+        await conn.commit()
+        return row
+
+
+async def delete_resonance_magic_for_ops(magic_id: int) -> bool:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("DELETE FROM resonance_magic WHERE id = %s", (magic_id,))
+            deleted = cur.rowcount > 0
+        await conn.commit()
+        return deleted
+
+
 async def _enrich_evolution_steps(conn: AsyncConnection, steps: list[dict]) -> list[dict]:
     names = sorted({(step.get("pokemon_name") or "").strip() for step in steps if (step.get("pokemon_name") or "").strip()})
     if not names:

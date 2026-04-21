@@ -277,3 +277,31 @@ class OpsSkillStoneAvailableSkill(BaseModel):
 
 class OpsSkillStoneAvailableResponse(BaseModel):
     items: list[OpsSkillStoneAvailableSkill] = Field(default_factory=list)
+
+
+class OpsResonanceMagicListItem(BaseModel):
+    id: int
+    name: str
+    description: str = ""
+    max_usage_count: int = 0
+    icon: str = ""
+    sort_order: int = 0
+
+
+class OpsResonanceMagicListResponse(BaseModel):
+    total: int
+    page: int = 1
+    page_size: int = 10
+    items: list[OpsResonanceMagicListItem] = Field(default_factory=list)
+
+
+class OpsResonanceMagicDetailResponse(OpsResonanceMagicListItem):
+    pass
+
+
+class OpsResonanceMagicUpsertRequest(BaseModel):
+    name: str
+    description: str = ""
+    max_usage_count: int = 1
+    icon: str = ""
+    sort_order: int = 0
