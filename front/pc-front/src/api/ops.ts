@@ -104,6 +104,7 @@ export interface OpsPokemonDetail {
   trait_id: number
   detail_url: string
   image_lc: string
+  image_yise: string
   chain_id: number | null
   hp: number
   atk: number
@@ -149,6 +150,11 @@ export interface OpsFriendImageUploadResponse {
   preview_url: string
 }
 
+export interface OpsYiseImageUploadResponse {
+  image_yise: string
+  preview_url: string
+}
+
 export interface OpsPokemonUpsertPayload {
   no: string
   name: string
@@ -161,6 +167,7 @@ export interface OpsPokemonUpsertPayload {
   trait_id: number
   detail_url: string
   image_lc: string
+  image_yise: string
   chain_id: number | null
   hp: number
   atk: number
@@ -294,6 +301,14 @@ export function uploadOpsFriendImage(file: File): Promise<OpsFriendImageUploadRe
   body.append('file', file)
   return httpUpload
     .post<OpsFriendImageUploadResponse>('/api/ops/pokemon/friend-image', body)
+    .then((r) => r.data)
+}
+
+export function uploadOpsYiseImage(file: File): Promise<OpsYiseImageUploadResponse> {
+  const body = new FormData()
+  body.append('file', file)
+  return httpUpload
+    .post<OpsYiseImageUploadResponse>('/api/ops/pokemon/yise-image', body)
     .then((r) => r.data)
 }
 

@@ -69,6 +69,11 @@ class OpsFriendImageUploadResponse(BaseModel):
     preview_url: str
 
 
+class OpsYiseImageUploadResponse(BaseModel):
+    image_yise: str
+    preview_url: str
+
+
 class OpsPokemonSkillItem(BaseModel):
     skill_id: int
     type: str = "原生技能"
@@ -87,6 +92,7 @@ class OpsPokemonUpsertRequest(BaseModel):
     trait_id: int
     detail_url: str = ""
     image_lc: str = ""
+    image_yise: str = ""
     chain_id: int | None = None
     hp: int = 0
     atk: int = 0
@@ -132,6 +138,7 @@ class OpsPokemonDetailResponse(BaseModel):
     trait_id: int
     detail_url: str = ""
     image_lc: str = ""
+    image_yise: str = ""
     chain_id: int | None = None
     hp: int = 0
     atk: int = 0

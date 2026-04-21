@@ -517,7 +517,7 @@ async def get_pokemon_detail_for_ops(pokemon_id: int) -> dict | None:
                 """
                 SELECT
                     id, no, name, image, type, type_name, form, form_name, egg_group, trait_id,
-                    detail_url, image_lc, chain_id,
+                    detail_url, image_lc, COALESCE(image_yise, '') AS image_yise, chain_id,
                     hp, atk, matk, def_val, mdef, spd, total_race, obtain_method
                 FROM pokemon
                 WHERE id = %s
@@ -570,10 +570,10 @@ async def save_pokemon_for_ops(payload: dict, pokemon_id: int | None = None) -> 
                     """
                     INSERT INTO pokemon (
                         no, name, image, type, type_name, form, form_name, egg_group, trait_id,
-                        detail_url, image_lc, chain_id,
+                        detail_url, image_lc, image_yise, chain_id,
                         hp, atk, matk, def_val, mdef, spd, total_race, obtain_method
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     RETURNING id
                     """,
                     (
@@ -588,6 +588,7 @@ async def save_pokemon_for_ops(payload: dict, pokemon_id: int | None = None) -> 
                         payload["trait_id"],
                         payload.get("detail_url", ""),
                         payload.get("image_lc", ""),
+                        payload.get("image_yise", ""),
                         payload.get("chain_id"),
                         payload.get("hp", 0),
                         payload.get("atk", 0),
@@ -606,7 +607,7 @@ async def save_pokemon_for_ops(payload: dict, pokemon_id: int | None = None) -> 
                     """
                     UPDATE pokemon
                     SET no = %s, name = %s, image = %s, type = %s, type_name = %s, form = %s, form_name = %s,
-                        egg_group = %s, trait_id = %s, detail_url = %s, image_lc = %s, chain_id = %s,
+                        egg_group = %s, trait_id = %s, detail_url = %s, image_lc = %s, image_yise = %s, chain_id = %s,
                         hp = %s, atk = %s, matk = %s, def_val = %s, mdef = %s, spd = %s, total_race = %s, obtain_method = %s
                     WHERE id = %s
                     """,
@@ -622,6 +623,7 @@ async def save_pokemon_for_ops(payload: dict, pokemon_id: int | None = None) -> 
                         payload["trait_id"],
                         payload.get("detail_url", ""),
                         payload.get("image_lc", ""),
+                        payload.get("image_yise", ""),
                         payload.get("chain_id"),
                         payload.get("hp", 0),
                         payload.get("atk", 0),

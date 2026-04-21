@@ -18,6 +18,7 @@ from api.schemas.ops import (
     OpsEvolutionChainResponse,
     OpsEvolutionChainUpsertRequest,
     OpsFriendImageUploadResponse,
+    OpsYiseImageUploadResponse,
     OpsSkillDetailResponse,
     OpsSkillIconUploadResponse,
     OpsSkillListResponse,
@@ -194,6 +195,14 @@ async def upload_ops_friend_image(
     current_user: dict = Depends(get_current_ops_user),
 ):
     return await ops_service.save_friend_image_upload(current_user, file)
+
+
+@router.post("/pokemon/yise-image", response_model=OpsYiseImageUploadResponse)
+async def upload_ops_yise_image(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.save_yise_image_upload(current_user, file)
 
 
 @router.get("/pokemon/{pokemon_id}", response_model=OpsPokemonDetailResponse)

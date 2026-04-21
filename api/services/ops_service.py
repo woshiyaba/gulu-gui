@@ -605,6 +605,23 @@ async def _save_image_upload(
     return {"filename": dest.name, "preview_url": f"{base_url}{dest.name}"}
 
 
+async def save_yise_image_upload(user: dict, upload: UploadFile) -> dict:
+    """将异色立绘保存到 YISE_IMAGE_UPLOAD_DIR，返回写入库用的 image_yise 与预览 URL。"""
+    ensure_role(user, {"editor", "admin"})
+    from config import YISE_IMAGE_BASE_URL, YISE_IMAGE_UPLOAD_DIR
+
+    result = await _save_image_upload(
+        upload,
+        upload_dir=YISE_IMAGE_UPLOAD_DIR,
+        base_url=YISE_IMAGE_BASE_URL,
+        allowed_suffix=_ALLOWED_FRIEND_IMAGE_SUFFIX,
+        max_bytes=_MAX_FRIEND_IMAGE_BYTES,
+        suffix_hint="webp、png、jpg、jpeg、gif",
+    )
+    image_yise = f"/yise/friends/{result['filename']}"
+    return {"image_yise": image_yise, "preview_url": result["preview_url"]}
+
+
 async def save_friend_image_upload(user: dict, upload: UploadFile) -> dict:
     """将朋友图保存到 FRIEND_IMAGE_UPLOAD_DIR，返回写入库用的 image_lc 与预览 URL。"""
     ensure_role(user, {"editor", "admin"})

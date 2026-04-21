@@ -15,6 +15,7 @@ import {
   updateOpsPokemonEvolutionChain,
   updateOpsPokemon,
   uploadOpsFriendImage,
+  uploadOpsYiseImage,
   type OpsEvolutionChainStep,
   type OpsPokemonDetail,
   type OpsPokemonItem,
@@ -65,6 +66,10 @@ const evolutionSearchKeyword = ref('')
 const pendingFriendFile = ref<File | null>(null)
 const pendingFriendPreviewUrl = ref('')
 const friendFileInputRef = ref<HTMLInputElement | null>(null)
+/** 异色立绘 */
+const pendingYiseFile = ref<File | null>(null)
+const pendingYisePreviewUrl = ref('')
+const yiseFileInputRef = ref<HTMLInputElement | null>(null)
 const evolutionEditorVisible = ref(false)
 const evolutionEditingIndex = ref<number | null>(null)
 const evolutionDraft = reactive<OpsEvolutionChainStep>({
@@ -113,6 +118,7 @@ const form = reactive<OpsPokemonDetail>({
   trait_id: 0,
   detail_url: '',
   image_lc: '',
+  image_yise: '',
   chain_id: null,
   hp: 0,
   atk: 0,
@@ -137,6 +143,14 @@ const friendDisplaySrc = computed(() => {
   return `${friendStaticBase}/images/friends/${lc.replace(/^\//, '')}`
 })
 
+const yiseDisplaySrc = computed(() => {
+  if (pendingYisePreviewUrl.value) return pendingYisePreviewUrl.value
+  const yise = (form.image_yise || '').trim()
+  if (!yise) return ''
+  if (yise.startsWith('http')) return yise
+  return `${friendStaticBase}/images${yise}`
+})
+
 function revokeFriendPendingPreview() {
   if (pendingFriendPreviewUrl.value) {
     URL.revokeObjectURL(pendingFriendPreviewUrl.value)
@@ -144,9 +158,21 @@ function revokeFriendPendingPreview() {
   }
 }
 
+function revokeYisePendingPreview() {
+  if (pendingYisePreviewUrl.value) {
+    URL.revokeObjectURL(pendingYisePreviewUrl.value)
+    pendingYisePreviewUrl.value = ''
+  }
+}
+
 function resetPendingFriend() {
   pendingFriendFile.value = null
   revokeFriendPendingPreview()
+}
+
+function resetPendingYise() {
+  pendingYiseFile.value = null
+  revokeYisePendingPreview()
 }
 
 const skillMap = computed(() => {
@@ -202,9 +228,18 @@ function triggerFriendFilePick() {
   friendFileInputRef.value?.click()
 }
 
+function triggerYiseFilePick() {
+  yiseFileInputRef.value?.click()
+}
+
 function clearFriendImage() {
   resetPendingFriend()
   form.image_lc = ''
+}
+
+function clearYiseImage() {
+  resetPendingYise()
+  form.image_yise = ''
 }
 
 function onFriendImageSelected(ev: Event) {
@@ -214,6 +249,16 @@ function onFriendImageSelected(ev: Event) {
   revokeFriendPendingPreview()
   pendingFriendFile.value = file
   pendingFriendPreviewUrl.value = URL.createObjectURL(file)
+  el.value = ''
+}
+
+function onYiseImageSelected(ev: Event) {
+  const el = ev.target as HTMLInputElement
+  const file = el.files?.[0]
+  if (!file) return
+  revokeYisePendingPreview()
+  pendingYiseFile.value = file
+  pendingYisePreviewUrl.value = URL.createObjectURL(file)
   el.value = ''
 }
 
@@ -231,7 +276,9 @@ function resetForm() {
   form.trait_id = 0
   form.detail_url = ''
   form.image_lc = ''
+  form.image_yise = ''
   resetPendingFriend()
+  resetPendingYise()
   form.chain_id = null
   form.hp = 0
   form.atk = 0
@@ -261,6 +308,7 @@ async function openEditModal(id: number) {
     const [detail, chain] = await Promise.all([fetchOpsPokemonDetail(id), fetchOpsPokemonEvolutionChain(id)])
     editingId.value = id
     resetPendingFriend()
+    resetPendingYise()
     Object.assign(form, detail)
     evolutionChainId.value = chain.chain_id
     evolutionSteps.value = (chain.steps || []).map((step) => ({ ...step }))
@@ -358,6 +406,7 @@ function closeModal() {
   skillSelectorVisible.value = false
   evolutionEditorVisible.value = false
   resetPendingFriend()
+  resetPendingYise()
 }
 
 function isEggGroupSelected(group: string): boolean {
@@ -529,7 +578,17 @@ async function submit() {
         form.image_lc = data.image_lc
         resetPendingFriend()
       } catch (err: any) {
-        showOpsToast(err?.response?.data?.detail || '图片上传失败', 'error')
+        showOpsToast(err?.response?.data?.detail || '立绘上传失败', 'error')
+        return
+      }
+    }
+    if (pendingYiseFile.value) {
+      try {
+        const data = await uploadOpsYiseImage(pendingYiseFile.value)
+        form.image_yise = data.image_yise
+        resetPendingYise()
+      } catch (err: any) {
+        showOpsToast(err?.response?.data?.detail || '异色立绘上传失败', 'error')
         return
       }
     }
@@ -627,6 +686,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   revokeFriendPendingPreview()
+  revokeYisePendingPreview()
 })
 </script>
 
@@ -802,46 +862,86 @@ onBeforeUnmount(() => {
                   </label>
                 </div>
               </div>
-              <aside class="basic-with-art-side" aria-label="精灵立绘">
-                <div class="basic-art-heading">立绘</div>
-                <div class="friend-image-main">
-                  <button
-                    type="button"
-                    class="friend-image-preview"
-                    :disabled="saving"
-                    @click="triggerFriendFilePick"
-                  >
-                    <img v-if="friendDisplaySrc" :src="friendDisplaySrc" alt="" class="friend-image-preview-img" />
-                    <div v-else class="friend-image-placeholder-inner">
-                      <span class="friend-image-placeholder-title">暂无</span>
-                      <span class="friend-image-placeholder-sub">点击上传</span>
-                    </div>
-                  </button>
-                  <input
-                    ref="friendFileInputRef"
-                    type="file"
-                    class="friend-file-hidden"
-                    accept=".webp,.png,.jpg,.jpeg,.gif,image/webp,image/png,image/jpeg,image/gif"
-                    :disabled="saving"
-                    @change="onFriendImageSelected"
-                  />
-                  <div class="friend-image-actions">
-                    <button type="button" class="btn-primary btn-compact" :disabled="saving" @click="triggerFriendFilePick">
-                      {{ friendDisplaySrc ? '更换' : '选择图片' }}
-                    </button>
+              <div class="basic-with-art-sides">
+                <aside class="basic-with-art-side" aria-label="精灵立绘">
+                  <div class="basic-art-heading">立绘</div>
+                  <div class="friend-image-main">
                     <button
-                      v-if="form.image_lc || pendingFriendFile"
                       type="button"
-                      class="btn-secondary btn-compact"
+                      class="friend-image-preview"
                       :disabled="saving"
-                      @click="clearFriendImage"
+                      @click="triggerFriendFilePick"
                     >
-                      移除
+                      <img v-if="friendDisplaySrc" :src="friendDisplaySrc" alt="" class="friend-image-preview-img" />
+                      <div v-else class="friend-image-placeholder-inner">
+                        <span class="friend-image-placeholder-title">暂无</span>
+                        <span class="friend-image-placeholder-sub">点击上传</span>
+                      </div>
                     </button>
+                    <input
+                      ref="friendFileInputRef"
+                      type="file"
+                      class="friend-file-hidden"
+                      accept=".webp,.png,.jpg,.jpeg,.gif,image/webp,image/png,image/jpeg,image/gif"
+                      :disabled="saving"
+                      @change="onFriendImageSelected"
+                    />
+                    <div class="friend-image-actions">
+                      <button type="button" class="btn-primary btn-compact" :disabled="saving" @click="triggerFriendFilePick">
+                        {{ friendDisplaySrc ? '更换' : '选择图片' }}
+                      </button>
+                      <button
+                        v-if="form.image_lc || pendingFriendFile"
+                        type="button"
+                        class="btn-secondary btn-compact"
+                        :disabled="saving"
+                        @click="clearFriendImage"
+                      >
+                        移除
+                      </button>
+                    </div>
                   </div>
-                  <p class="friend-image-note">点击底部「保存」时上传图片并写入数据库</p>
-                </div>
-              </aside>
+                </aside>
+                <aside class="basic-with-art-side" aria-label="异色立绘">
+                  <div class="basic-art-heading">异色</div>
+                  <div class="friend-image-main">
+                    <button
+                      type="button"
+                      class="friend-image-preview"
+                      :disabled="saving"
+                      @click="triggerYiseFilePick"
+                    >
+                      <img v-if="yiseDisplaySrc" :src="yiseDisplaySrc" alt="" class="friend-image-preview-img" />
+                      <div v-else class="friend-image-placeholder-inner">
+                        <span class="friend-image-placeholder-title">暂无</span>
+                        <span class="friend-image-placeholder-sub">点击上传</span>
+                      </div>
+                    </button>
+                    <input
+                      ref="yiseFileInputRef"
+                      type="file"
+                      class="friend-file-hidden"
+                      accept=".webp,.png,.jpg,.jpeg,.gif,image/webp,image/png,image/jpeg,image/gif"
+                      :disabled="saving"
+                      @change="onYiseImageSelected"
+                    />
+                    <div class="friend-image-actions">
+                      <button type="button" class="btn-primary btn-compact" :disabled="saving" @click="triggerYiseFilePick">
+                        {{ yiseDisplaySrc ? '更换' : '选择图片' }}
+                      </button>
+                      <button
+                        v-if="form.image_yise || pendingYiseFile"
+                        type="button"
+                        class="btn-secondary btn-compact"
+                        :disabled="saving"
+                        @click="clearYiseImage"
+                      >
+                        移除
+                      </button>
+                    </div>
+                  </div>
+                </aside>
+              </div>
             </div>
           </section>
 
@@ -1174,14 +1274,19 @@ onBeforeUnmount(() => {
 }
 .basic-with-art {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 168px;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 16px 20px;
   align-items: start;
 }
 .basic-with-art-fields { min-width: 0; }
-.basic-with-art-side {
+.basic-with-art-sides {
+  display: flex;
+  gap: 12px;
   position: sticky;
   top: 0;
+}
+.basic-with-art-side {
+  width: 148px;
   padding: 10px 10px 12px;
   border: 1px solid #e4e7ed;
   border-radius: 8px;
@@ -1275,9 +1380,12 @@ onBeforeUnmount(() => {
   .basic-with-art {
     grid-template-columns: 1fr;
   }
-  .basic-with-art-side {
+  .basic-with-art-sides {
     position: static;
-    max-width: 220px;
+    justify-content: flex-start;
+  }
+  .basic-with-art-side {
+    width: 140px;
   }
 }
 .attr-picker { display: flex; flex-wrap: wrap; gap: 8px; }
