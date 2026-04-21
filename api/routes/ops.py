@@ -33,6 +33,7 @@ from api.schemas.ops import (
     OpsResonanceMagicListResponse,
     OpsResonanceMagicDetailResponse,
     OpsResonanceMagicUpsertRequest,
+    OpsResonanceMagicIconUploadResponse,
 )
 from api.schemas.banner import BannerItem, BannerListResponse, BannerUpsertRequest
 from api.schemas.personality import (
@@ -206,6 +207,14 @@ async def upload_ops_yise_image(
     current_user: dict = Depends(get_current_ops_user),
 ):
     return await ops_service.save_yise_image_upload(current_user, file)
+
+
+@router.post("/resonance-magics/icon", response_model=OpsResonanceMagicIconUploadResponse)
+async def upload_ops_resonance_magic_icon(
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.save_resonance_magic_icon_upload(current_user, file)
 
 
 @router.get("/pokemon/{pokemon_id}", response_model=OpsPokemonDetailResponse)

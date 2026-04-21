@@ -887,6 +887,11 @@ export interface OpsResonanceMagicPayload {
   sort_order: number
 }
 
+export interface OpsResonanceMagicIconUploadResponse {
+  icon: string
+  preview_url: string
+}
+
 export function fetchOpsResonanceMagics(params: {
   keyword?: string
   page?: number
@@ -905,4 +910,12 @@ export function updateOpsResonanceMagic(id: number, payload: OpsResonanceMagicPa
 
 export function deleteOpsResonanceMagic(id: number): Promise<void> {
   return http.delete(`/api/ops/resonance-magics/${id}`).then(() => undefined)
+}
+
+export function uploadOpsResonanceMagicIcon(file: File): Promise<OpsResonanceMagicIconUploadResponse> {
+  const body = new FormData()
+  body.append('file', file)
+  return httpUpload
+    .post<OpsResonanceMagicIconUploadResponse>('/api/ops/resonance-magics/icon', body)
+    .then((r) => r.data)
 }

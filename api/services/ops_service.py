@@ -660,6 +660,23 @@ async def save_friend_image_upload(user: dict, upload: UploadFile) -> dict:
     return {"image_lc": image_lc, "preview_url": preview_url}
 
 
+async def save_resonance_magic_icon_upload(user: dict, upload: UploadFile) -> dict:
+    """将共鸣魔法图标保存到 RESONANCE_MAGIC_ICON_UPLOAD_DIR，返回写入库用的 icon 与预览 URL。"""
+    ensure_role(user, {"editor", "admin"})
+    from config import RESONANCE_MAGIC_ICON_BASE_URL, RESONANCE_MAGIC_ICON_UPLOAD_DIR
+
+    result = await _save_image_upload(
+        upload,
+        upload_dir=RESONANCE_MAGIC_ICON_UPLOAD_DIR,
+        base_url=RESONANCE_MAGIC_ICON_BASE_URL,
+        allowed_suffix=_ALLOWED_FRIEND_IMAGE_SUFFIX,
+        max_bytes=2 * 1024 * 1024,
+        suffix_hint="webp、png、jpg、jpeg、gif",
+    )
+    icon = f"/resonance-magic/{result['filename']}"
+    return {"icon": icon, "preview_url": result["preview_url"]}
+
+
 def _normalize_skill_payload(payload: dict) -> dict:
     name = (payload.get("name") or "").strip()
     if not name:

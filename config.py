@@ -32,3 +32,7 @@ YISE_IMAGE_UPLOAD_DIR = os.getenv("YISE_IMAGE_UPLOAD_DIR", "/var/www/images/yise
 # 技能图标
 SKILL_ICON_BASE_URL = f"{STATIC_BASE_URL}/images/icon/skill/"
 SKILL_ICON_UPLOAD_DIR = os.getenv("SKILL_ICON_UPLOAD_DIR", "/var/www/images/icon/skill").strip()
+
+# 共鸣魔法图标
+RESONANCE_MAGIC_ICON_BASE_URL = f"{STATIC_BASE_URL}/images/resonance-magic/"
+RESONANCE_MAGIC_ICON_UPLOAD_DIR = os.getenv("RESONANCE_MAGIC_ICON_UPLOAD_DIR", "/var/www/images/resonance-magic").strip()

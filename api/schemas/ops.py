@@ -239,6 +239,11 @@ class OpsSkillIconUploadResponse(BaseModel):
     preview_url: str
 
 
+class OpsResonanceMagicIconUploadResponse(BaseModel):
+    icon: str
+    preview_url: str
+
+
 class OpsSkillStoneItem(BaseModel):
     id: int
     skill_id: int

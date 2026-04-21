@@ -8,6 +8,7 @@ import {
   fetchOpsResonanceMagics,
   showOpsToast,
   updateOpsResonanceMagic,
+  uploadOpsResonanceMagicIcon,
   type OpsResonanceMagicItem,
 } from '@/api/ops'
 
@@ -179,11 +180,16 @@ async function submit() {
   saving.value = true
   error.value = ''
   try {
+    let icon = form.icon.trim()
+    if (pendingIconFile.value) {
+      const result = await uploadOpsResonanceMagicIcon(pendingIconFile.value)
+      icon = result.icon
+    }
     const payload = {
       name: form.name.trim(),
       description: form.description.trim(),
       max_usage_count: Number(form.max_usage_count) || 1,
-      icon: form.icon.trim(),
+      icon,
       sort_order: Number(form.sort_order) || 0,
     }
     if (editingId.value) {
