@@ -166,6 +166,9 @@ export interface Lineup {
   title: string
   lineup_desc: string
   source_type: string
+  resonance_magic_id: number | null
+  resonance_magic_name: string
+  resonance_magic_icon: string
   sort_order: number
   is_active: boolean
   members: LineupMember[]

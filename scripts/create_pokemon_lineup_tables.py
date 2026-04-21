@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS pokemon_lineup (
     title         VARCHAR(100) NOT NULL DEFAULT '',
     lineup_desc   TEXT         NOT NULL DEFAULT '',
     source_type   VARCHAR(30)  NOT NULL DEFAULT '',
+    resonance_magic_id INT     REFERENCES resonance_magic(id),
     sort_order    INT          NOT NULL DEFAULT 0,
     is_active     BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at    TIMESTAMP    NOT NULL DEFAULT NOW(),

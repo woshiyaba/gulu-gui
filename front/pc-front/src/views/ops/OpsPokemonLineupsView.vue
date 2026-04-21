@@ -9,6 +9,7 @@ import {
   fetchOpsPersonalities,
   fetchOpsPokemonLineup,
   fetchOpsPokemonLineups,
+  fetchOpsResonanceMagics,
   searchPokemonLineupPokemon,
   searchPokemonLineupSkills,
   showOpsToast,
@@ -16,6 +17,7 @@ import {
   type OpsDictItem,
   type OpsPersonalityItem,
   type OpsPokemonLineupListItem,
+  type OpsResonanceMagicItem,
   type OpsPokemonLineupSearchItem,
   type OpsPokemonLineupStatKey,
 } from '@/api/ops'
@@ -55,6 +57,7 @@ const statOptions = ref<Array<{ value: OpsPokemonLineupStatKey; label: string }>
 const bloodlineOptions = ref<OpsDictItem[]>([])
 const personalityOptions = ref<OpsPersonalityItem[]>([])
 const lineupTypeOptions = ref<OpsDictItem[]>([])
+const resonanceMagicOptions = ref<OpsResonanceMagicItem[]>([])
 
 const keyword = ref('')
 const sourceTypeFilter = ref('')
@@ -64,6 +67,7 @@ const form = reactive({
   title: '',
   lineup_desc: '',
   source_type: '',
+  resonance_magic_id: null as number | null,
   sort_order: 1,
   is_active: true,
   members: [] as MemberForm[],
@@ -121,15 +125,17 @@ function skillKey(memberIndex: number, skillIndex: number): string {
 
 async function loadOptions() {
   try {
-    const [bloodlines, personalities, statDict, lineupTypes] = await Promise.all([
+    const [bloodlines, personalities, statDict, lineupTypes, resonanceMagics] = await Promise.all([
       fetchOpsDicts({ dict_type: BLOODLINE_DICT_TYPE, page: 1, page_size: 100 }),
       fetchOpsPersonalities({ page: 1, page_size: 100 }),
       fetchOpsDicts({ dict_type: STAT_DICT_TYPE, page: 1, page_size: 100 }),
       fetchOpsDicts({ dict_type: LINEUP_TYPE_DICT, page: 1, page_size: 100 }),
+      fetchOpsResonanceMagics({ page: 1, page_size: 200 }),
     ])
     bloodlineOptions.value = bloodlines.items
     personalityOptions.value = personalities.items
     lineupTypeOptions.value = lineupTypes.items
+    resonanceMagicOptions.value = resonanceMagics.items
 
     statOptions.value = statDict.items.map((item) => ({
       value: item.code as OpsPokemonLineupStatKey,
@@ -145,6 +151,7 @@ function resetForm() {
   form.title = ''
   form.lineup_desc = ''
   form.source_type = ''
+  form.resonance_magic_id = null
   form.sort_order = 1
   form.is_active = true
   form.members = [emptyMember(1)]
@@ -173,6 +180,7 @@ async function editItem(item: OpsPokemonLineupListItem) {
     form.title = detail.title
     form.lineup_desc = detail.lineup_desc
     form.source_type = detail.source_type
+    form.resonance_magic_id = detail.resonance_magic_id
     form.sort_order = detail.sort_order || 1
     form.is_active = detail.is_active
     form.members = detail.members.length > 0
@@ -385,6 +393,7 @@ async function submitForm() {
       title: form.title.trim(),
       lineup_desc: form.lineup_desc,
       source_type: form.source_type.trim(),
+      resonance_magic_id: form.resonance_magic_id,
       sort_order: Number(form.sort_order || 1),
       is_active: form.is_active,
       members: form.members.map((member, index) => ({
@@ -490,6 +499,7 @@ onMounted(async () => {
               <th class="col-index">序号</th>
               <th>标题</th>
               <th>分类</th>
+              <th>共鸣魔法</th>
               <th>成员数</th>
               <th>排序</th>
               <th>状态</th>
@@ -501,6 +511,7 @@ onMounted(async () => {
               <td>{{ pageStart + index }}</td>
               <td class="label-cell">{{ item.title || '-' }}</td>
               <td>{{ sourceTypeLabel(item.source_type) }}</td>
+              <td>{{ item.resonance_magic_name || '-' }}</td>
               <td>{{ item.member_count }}</td>
               <td>{{ item.sort_order }}</td>
               <td>
@@ -561,6 +572,13 @@ onMounted(async () => {
             <label class="form-row">
               <span>排序</span>
               <input v-model.number="form.sort_order" type="number" min="1" placeholder="默认 1" />
+            </label>
+            <label class="form-row">
+              <span>共鸣</span>
+              <select v-model="form.resonance_magic_id">
+                <option :value="null">未设置</option>
+                <option v-for="opt in resonanceMagicOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
+              </select>
             </label>
             <label class="form-row">
               <span>状态</span>

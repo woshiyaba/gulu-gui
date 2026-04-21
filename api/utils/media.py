@@ -1,4 +1,4 @@
-from config import BASE_URL, FRIEND_IMAGE_BASE_URL, SKILL_ICON_BASE_URL, STATIC_BASE_URL
+from config import BASE_URL, FRIEND_IMAGE_BASE_URL, RESONANCE_MAGIC_ICON_BASE_URL, SKILL_ICON_BASE_URL, STATIC_BASE_URL
 
 
 def build_image_url(path: str) -> str:
@@ -38,6 +38,16 @@ def build_skill_icon_url(icon: str) -> str:
     if "/" in icon:
         return build_image_url(icon)
     return f"{SKILL_ICON_BASE_URL}{icon}"
+
+
+def build_resonance_magic_icon_url(icon: str) -> str:
+    if not icon:
+        return ""
+    if icon.startswith("http"):
+        return icon
+    if "/" in icon:
+        return build_image_url(icon)
+    return f"{RESONANCE_MAGIC_ICON_BASE_URL}{icon}"
 
 
 def build_yise_image_url(image_yise: str) -> str:

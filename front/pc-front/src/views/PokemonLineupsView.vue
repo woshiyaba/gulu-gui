@@ -83,6 +83,12 @@ onMounted(() => {
             <span class="lineup-tag">{{ sourceLabel(lineup.source_type) }}</span>
           </div>
 
+          <div v-if="lineup.resonance_magic_name" class="resonance-row">
+            <img v-if="lineup.resonance_magic_icon" :src="lineup.resonance_magic_icon" class="resonance-icon" alt="" />
+            <span class="resonance-label">共鸣魔法</span>
+            <span class="resonance-name">{{ lineup.resonance_magic_name }}</span>
+          </div>
+
           <div class="member-row">
             <div
               v-for="m in lineup.members"
@@ -266,6 +272,30 @@ onMounted(() => {
   gap: 8px;
   padding: 10px 20px 12px;
   flex-wrap: wrap;
+}
+
+.resonance-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.resonance-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.resonance-label {
+  color: var(--color-muted);
+}
+
+.resonance-name {
+  color: var(--color-text);
 }
 
 .member-avatar {

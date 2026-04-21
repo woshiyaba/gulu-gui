@@ -290,6 +290,7 @@ class OpsResonanceMagicListItem(BaseModel):
     description: str = ""
     max_usage_count: int = 0
     icon: str = ""
+    icon_url: str = ""
     sort_order: int = 0
 
 

@@ -78,6 +78,13 @@ async def _normalize_payload(payload: dict) -> dict:
         valid_lineup_types = await _load_valid_lineup_types()
         if source_type not in valid_lineup_types:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="阵容分类不存在")
+    resonance_magic_id = payload.get("resonance_magic_id")
+    if resonance_magic_id in ("", 0):
+        resonance_magic_id = None
+    if resonance_magic_id is not None:
+        resonance_magic = await ops_repository.get_resonance_magic_for_ops(int(resonance_magic_id))
+        if not resonance_magic:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="共鸣魔法不存在")
     normalized_members: list[dict] = []
     for idx, member in enumerate(members, start=1):
         normalized_members.append(await _validate_member(member, idx, valid_stat_keys))
@@ -86,6 +93,7 @@ async def _normalize_payload(payload: dict) -> dict:
         "title": (payload.get("title") or "").strip(),
         "lineup_desc": payload.get("lineup_desc") or "",
         "source_type": source_type,
+        "resonance_magic_id": int(resonance_magic_id) if resonance_magic_id is not None else None,
         "sort_order": int(payload.get("sort_order", 1) or 1),
         "is_active": bool(payload.get("is_active", True)),
         "members": normalized_members,

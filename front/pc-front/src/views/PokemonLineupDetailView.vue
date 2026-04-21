@@ -80,6 +80,11 @@ onMounted(() => {
             <span class="meta-tag">{{ sourceLabel(lineup.source_type) }}</span>
             <span class="meta-count">{{ lineup.members.length }} 只精灵</span>
           </div>
+          <div v-if="lineup.resonance_magic_name" class="resonance-row">
+            <img v-if="lineup.resonance_magic_icon" :src="lineup.resonance_magic_icon" class="resonance-icon" alt="" />
+            <span class="resonance-label">共鸣魔法</span>
+            <strong class="resonance-name">{{ lineup.resonance_magic_name }}</strong>
+          </div>
           <p v-if="lineup.lineup_desc" class="lineup-desc">{{ lineup.lineup_desc }}</p>
         </section>
 
@@ -240,6 +245,30 @@ onMounted(() => {
   line-height: 1.8;
   color: var(--color-text);
   white-space: pre-wrap;
+}
+
+.resonance-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.resonance-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.resonance-label {
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.resonance-name {
+  font-size: 14px;
+  color: var(--color-text);
 }
 
 .members-grid {

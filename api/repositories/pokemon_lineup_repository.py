@@ -1,5 +1,5 @@
 from db.connection import get_pool
-from api.utils.media import build_friend_image_url, build_skill_icon_url
+from api.utils.media import build_friend_image_url, build_resonance_magic_icon_url, build_skill_icon_url
 
 
 _MEMBER_JOIN_SQL = """
@@ -85,9 +85,19 @@ async def get_lineup_by_id(lineup_id: int) -> dict | None:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
-                SELECT id, title, lineup_desc, source_type, sort_order, is_active
-                FROM pokemon_lineup
-                WHERE id = %s
+                SELECT
+                    pl.id,
+                    pl.title,
+                    pl.lineup_desc,
+                    pl.source_type,
+                    pl.resonance_magic_id,
+                    rm.name AS resonance_magic_name,
+                    rm.icon AS resonance_magic_icon_raw,
+                    pl.sort_order,
+                    pl.is_active
+                FROM pokemon_lineup pl
+                LEFT JOIN resonance_magic rm ON rm.id = pl.resonance_magic_id
+                WHERE pl.id = %s
                 """,
                 (lineup_id,),
             )
@@ -95,7 +105,12 @@ async def get_lineup_by_id(lineup_id: int) -> dict | None:
             if not lineup:
                 return None
             members = await _fetch_members(cur, lineup_id)
-            return {**lineup, "members": members}
+            return {
+                **lineup,
+                "resonance_magic_name": lineup.get("resonance_magic_name") or "",
+                "resonance_magic_icon": build_resonance_magic_icon_url((lineup.get("resonance_magic_icon_raw") or "").strip()),
+                "members": members,
+            }
 
 
 async def list_lineups_paginated(
@@ -139,19 +154,31 @@ async def list_lineups_paginated(
                     pl.id,
                     pl.title,
                     pl.source_type,
+                    pl.resonance_magic_id,
+                    rm.name AS resonance_magic_name,
+                    rm.icon AS resonance_magic_icon_raw,
                     pl.sort_order,
                     pl.is_active,
                     COUNT(plm.id) AS member_count
                 FROM pokemon_lineup pl
+                LEFT JOIN resonance_magic rm ON rm.id = pl.resonance_magic_id
                 LEFT JOIN pokemon_lineup_member plm ON plm.lineup_id = pl.id
                 {where_sql}
-                GROUP BY pl.id
+                GROUP BY pl.id, rm.id, rm.name, rm.icon
                 ORDER BY pl.sort_order DESC, pl.id DESC
                 LIMIT %s OFFSET %s
                 """,
                 [*params, page_size, offset],
             )
-            items = await cur.fetchall()
+            rows = await cur.fetchall()
+            items = [
+                {
+                    **row,
+                    "resonance_magic_name": row.get("resonance_magic_name") or "",
+                    "resonance_magic_icon": build_resonance_magic_icon_url((row.get("resonance_magic_icon_raw") or "").strip()),
+                }
+                for row in rows
+            ]
             return total, items
 
 
@@ -161,14 +188,15 @@ async def create_lineup(payload: dict) -> dict:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
-                INSERT INTO pokemon_lineup (title, lineup_desc, source_type, sort_order, is_active)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO pokemon_lineup (title, lineup_desc, source_type, resonance_magic_id, sort_order, is_active)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
                 (
                     payload["title"],
                     payload["lineup_desc"],
                     payload["source_type"],
+                    payload.get("resonance_magic_id"),
                     payload["sort_order"],
                     payload["is_active"],
                 ),
@@ -213,7 +241,7 @@ async def update_lineup(lineup_id: int, payload: dict) -> dict | None:
             await cur.execute(
                 """
                 UPDATE pokemon_lineup
-                SET title = %s, lineup_desc = %s, source_type = %s, sort_order = %s, is_active = %s, updated_at = NOW()
+                SET title = %s, lineup_desc = %s, source_type = %s, resonance_magic_id = %s, sort_order = %s, is_active = %s, updated_at = NOW()
                 WHERE id = %s
                 RETURNING id
                 """,
@@ -221,6 +249,7 @@ async def update_lineup(lineup_id: int, payload: dict) -> dict | None:
                     payload["title"],
                     payload["lineup_desc"],
                     payload["source_type"],
+                    payload.get("resonance_magic_id"),
                     payload["sort_order"],
                     payload["is_active"],
                     lineup_id,
@@ -289,8 +318,10 @@ async def list_active_lineups(source_type: str = "") -> list[dict]:
         async with conn.cursor() as cur:
             await cur.execute(
                 f"""
-                SELECT pl.id, pl.title, pl.lineup_desc, pl.source_type, pl.sort_order
+                SELECT pl.id, pl.title, pl.lineup_desc, pl.source_type, pl.sort_order, pl.is_active
+                     , pl.resonance_magic_id, rm.name AS resonance_magic_name, rm.icon AS resonance_magic_icon_raw
                 FROM pokemon_lineup pl
+                LEFT JOIN resonance_magic rm ON rm.id = pl.resonance_magic_id
                 WHERE {where_sql}
                 ORDER BY pl.sort_order DESC, pl.id DESC
                 """,
@@ -301,7 +332,14 @@ async def list_active_lineups(source_type: str = "") -> list[dict]:
             result = []
             for lineup in lineups:
                 members = await _fetch_members(cur, lineup["id"])
-                result.append({**lineup, "members": members})
+                result.append(
+                    {
+                        **lineup,
+                        "resonance_magic_name": lineup.get("resonance_magic_name") or "",
+                        "resonance_magic_icon": build_resonance_magic_icon_url((lineup.get("resonance_magic_icon_raw") or "").strip()),
+                        "members": members,
+                    }
+                )
             return result
 
 

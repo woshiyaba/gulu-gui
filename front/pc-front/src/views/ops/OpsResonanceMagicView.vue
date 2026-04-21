@@ -23,8 +23,6 @@ const currentPage = ref(1)
 const pageSize = 10
 const total = ref(0)
 const isAdmin = ref(false)
-const totalPages = ref(1)
-
 const pendingIconFile = ref<File | null>(null)
 const pendingIconPreviewUrl = ref('')
 const iconFileInputRef = ref<HTMLInputElement | null>(null)
@@ -35,15 +33,29 @@ const form = reactive({
   description: '',
   max_usage_count: 1,
   icon: '',
+  icon_url: '',
   sort_order: 0,
+})
+
+const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize)))
+const pageStart = computed(() => {
+  if (total.value === 0) return 0
+  return (currentPage.value - 1) * pageSize + 1
+})
+const pageEnd = computed(() => Math.min(currentPage.value * pageSize, total.value))
+const visiblePages = computed(() => {
+  const pages: number[] = []
+  const start = Math.max(1, currentPage.value - 2)
+  const end = Math.min(totalPages.value, currentPage.value + 2)
+  for (let p = start; p <= end; p += 1) {
+    pages.push(p)
+  }
+  return pages
 })
 
 const iconDisplaySrc = computed(() => {
   if (pendingIconPreviewUrl.value) return pendingIconPreviewUrl.value
-  const icon = (form.icon || '').trim()
-  if (!icon) return ''
-  if (icon.startsWith('http')) return icon
-  return icon
+  return (form.icon_url || '').trim()
 })
 
 function revokePendingPreview() {
@@ -65,6 +77,7 @@ function triggerIconFilePick() {
 function clearIconImage() {
   resetPendingIcon()
   form.icon = ''
+  form.icon_url = ''
 }
 
 function onIconImageSelected(ev: Event) {
@@ -75,25 +88,6 @@ function onIconImageSelected(ev: Event) {
   pendingIconFile.value = file
   pendingIconPreviewUrl.value = URL.createObjectURL(file)
   el.value = ''
-}
-
-function pageStart() {
-  if (total.value === 0) return 0
-  return (currentPage.value - 1) * pageSize + 1
-}
-
-function pageEnd() {
-  return Math.min(currentPage.value * pageSize, total.value)
-}
-
-function visiblePages() {
-  const pages: number[] = []
-  const start = Math.max(1, currentPage.value - 2)
-  const end = Math.min(totalPages.value, currentPage.value + 2)
-  for (let p = start; p <= end; p += 1) {
-    pages.push(p)
-  }
-  return pages
 }
 
 async function goToPage(target: number) {
@@ -109,6 +103,7 @@ function resetForm() {
   form.description = ''
   form.max_usage_count = 1
   form.icon = ''
+  form.icon_url = ''
   form.sort_order = 0
   resetPendingIcon()
 }
@@ -125,6 +120,7 @@ function editItem(item: OpsResonanceMagicItem) {
   form.description = item.description
   form.max_usage_count = item.max_usage_count
   form.icon = item.icon
+  form.icon_url = item.icon_url || ''
   form.sort_order = item.sort_order
   resetPendingIcon()
   modalVisible.value = true
@@ -150,7 +146,6 @@ async function loadData() {
     isAdmin.value = me.role === 'admin'
     items.value = data.items
     total.value = data.total
-    totalPages.value = Math.max(1, Math.ceil(data.total / pageSize))
     currentPage.value = data.page
   } catch (err: any) {
     const detail = err?.response?.data?.detail || '加载失败'
@@ -184,6 +179,7 @@ async function submit() {
     if (pendingIconFile.value) {
       const result = await uploadOpsResonanceMagicIcon(pendingIconFile.value)
       icon = result.icon
+      form.icon_url = result.preview_url
     }
     const payload = {
       name: form.name.trim(),
@@ -290,7 +286,7 @@ onBeforeUnmount(() => {
           <button type="button" class="pager-btn" :disabled="currentPage === 1" @click="goToPage(1)">首页</button>
           <button type="button" class="pager-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">上一页</button>
           <button
-            v-for="p in visiblePages()"
+            v-for="p in visiblePages"
             :key="p"
             type="button"
             class="pager-btn"

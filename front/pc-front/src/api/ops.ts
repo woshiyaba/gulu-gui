@@ -760,6 +760,9 @@ export interface OpsPokemonLineup {
   title: string
   lineup_desc: string
   source_type: string
+  resonance_magic_id: number | null
+  resonance_magic_name: string
+  resonance_magic_icon?: string
   sort_order: number
   is_active: boolean
   members: OpsPokemonLineupMember[]
@@ -769,6 +772,9 @@ export interface OpsPokemonLineupListItem {
   id: number
   title: string
   source_type: string
+  resonance_magic_id: number | null
+  resonance_magic_name: string
+  resonance_magic_icon?: string
   sort_order: number
   is_active: boolean
   member_count: number
@@ -800,6 +806,7 @@ export interface OpsPokemonLineupPayload {
   title: string
   lineup_desc: string
   source_type: string
+  resonance_magic_id: number | null
   sort_order: number
   is_active: boolean
   members: OpsPokemonLineupMemberPayload[]
@@ -869,6 +876,7 @@ export interface OpsResonanceMagicItem {
   description: string
   max_usage_count: number
   icon: string
+  icon_url?: string
   sort_order: number
 }
 

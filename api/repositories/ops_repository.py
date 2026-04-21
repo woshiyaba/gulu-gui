@@ -1,7 +1,7 @@
 from psycopg import AsyncConnection
 
 from db.connection import get_pool
-from api.utils.media import build_friend_image_url, build_image_url, build_skill_icon_url
+from api.utils.media import build_friend_image_url, build_image_url, build_resonance_magic_icon_url, build_skill_icon_url
 
 
 OPS_TABLES_SQL = """
@@ -295,7 +295,14 @@ async def list_dicts(
                 """,
                 [*params, page_size, offset],
             )
-            items = await cur.fetchall()
+            rows = await cur.fetchall()
+            items = [
+                {
+                    **row,
+                    "icon_url": build_resonance_magic_icon_url((row.get("icon") or "").strip()),
+                }
+                for row in rows
+            ]
             return total, items
 
 
@@ -1323,7 +1330,13 @@ async def get_resonance_magic_for_ops(magic_id: int) -> dict | None:
                 "SELECT id, name, description, max_usage_count, icon, sort_order FROM resonance_magic WHERE id = %s",
                 (magic_id,),
             )
-            return await cur.fetchone()
+            row = await cur.fetchone()
+            if not row:
+                return None
+            return {
+                **row,
+                "icon_url": build_resonance_magic_icon_url((row.get("icon") or "").strip()),
+            }
 
 
 async def get_resonance_magic_by_name(name: str) -> dict | None:
@@ -1357,7 +1370,10 @@ async def create_resonance_magic_for_ops(payload: dict) -> dict:
             )
             row = await cur.fetchone()
         await conn.commit()
-        return row
+        return {
+            **row,
+            "icon_url": build_resonance_magic_icon_url((row.get("icon") or "").strip()),
+        }
 
 
 async def update_resonance_magic_for_ops(magic_id: int, payload: dict) -> dict | None:
@@ -1382,7 +1398,12 @@ async def update_resonance_magic_for_ops(magic_id: int, payload: dict) -> dict |
             )
             row = await cur.fetchone()
         await conn.commit()
-        return row
+        if not row:
+            return None
+        return {
+            **row,
+            "icon_url": build_resonance_magic_icon_url((row.get("icon") or "").strip()),
+        }
 
 
 async def delete_resonance_magic_for_ops(magic_id: int) -> bool:

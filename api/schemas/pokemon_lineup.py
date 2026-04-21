@@ -49,6 +49,9 @@ class PokemonLineupDetail(BaseModel):
     title: str = ""
     lineup_desc: str = ""
     source_type: str = ""
+    resonance_magic_id: int | None = None
+    resonance_magic_name: str = ""
+    resonance_magic_icon: str = ""
     sort_order: int = 0
     is_active: bool = True
     members: list[PokemonLineupMemberItem] = Field(default_factory=list)
@@ -58,6 +61,9 @@ class PokemonLineupListItem(BaseModel):
     id: int
     title: str = ""
     source_type: str = ""
+    resonance_magic_id: int | None = None
+    resonance_magic_name: str = ""
+    resonance_magic_icon: str = ""
     sort_order: int = 0
     is_active: bool = True
     member_count: int = 0
@@ -74,6 +80,7 @@ class PokemonLineupUpsertRequest(BaseModel):
     title: str = ""
     lineup_desc: str = ""
     source_type: str = ""
+    resonance_magic_id: int | None = None
     sort_order: int = 1
     is_active: bool = True
     members: list[PokemonLineupMemberInput] = Field(default_factory=list)
