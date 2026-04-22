@@ -9,7 +9,7 @@ from api.utils.pokemon_mapper import (
     to_pokemon_list_item,
     to_skill_item,
 )
-from api.utils.type_chart import build_defensive_type_chart_payload
+from api.utils.type_chart import build_defensive_type_chart_payload, combine_defensive_multipliers
 
 from config import CATEGORY_ICON_BASE_URL as _CATEGORY_ICON_BASE_URL
 
@@ -86,14 +86,20 @@ def _compute_restrain(
     - strong_against：该精灵进攻对方倍率 > 1 的属性（克制）
     - resisted：该精灵进攻对方倍率 < 1 的属性（被抵抗）
     """
-    # 防守侧：合并多属性倍率
-    def_combined: dict[str, Fraction] = {}
+    # 防守侧：合并多属性倍率（使用洛克王国规则）
+    # 先按进攻属性分组收集所有防守倍率
+    def_multipliers: dict[str, list[Fraction]] = {}
     for row in defensive_rows:
         attacker = row.get("attacker_attr")
         if not attacker:
             continue
         mul = _fraction_from_db(row.get("multiplier"))
-        def_combined[attacker] = def_combined.get(attacker, Fraction(1, 1)) * mul
+        def_multipliers.setdefault(attacker, []).append(mul)
+
+    # 使用洛克王国规则合并倍率
+    def_combined: dict[str, Fraction] = {}
+    for attacker, multipliers in def_multipliers.items():
+        def_combined[attacker] = combine_defensive_multipliers(multipliers)
 
     weak_against = [a for a, m in def_combined.items() if m > 1]
     resist = [a for a, m in def_combined.items() if 0 < m < 1]
