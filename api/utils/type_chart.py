@@ -34,6 +34,34 @@ def _eff_bucket(frac: Fraction) -> str:
     return "neutral"
 
 
+def combine_defensive_multipliers(multipliers: list[Fraction]) -> Fraction:
+    """
+    合并防守方多个属性的受击倍率（洛克王国规则）。
+
+    洛克王国与宝可梦不同，双属性都克制时不是 2×2=4，而是 3 倍。
+    具体规则：
+    - 只有一个属性：直接返回该属性的倍率
+    - 双属性都克制（2, 2）：返回 3
+    - 其他组合：正常相乘（如 0.5×0.5=1/4，2×0.5=1）
+    """
+    if not multipliers:
+        return Fraction(1, 1)
+    if len(multipliers) == 1:
+        return multipliers[0]
+
+    combined = Fraction(1, 1)
+    for m in multipliers:
+        combined *= m
+
+    # 洛克王国特殊规则：双克制 4→3
+    if combined == 4:
+        return Fraction(3, 1)
+    return combined
+
+
+_combine_defensive_multipliers = combine_defensive_multipliers
+
+
 def build_defensive_type_chart_payload(
     defender_attrs: list[str],
     axis: list[str],
@@ -61,9 +89,11 @@ def build_defensive_type_chart_payload(
 
     cells: list[dict] = []
     for attacker in axis:
-        combined = Fraction(1, 1)
-        for d in defenders:
-            combined *= single.get((d, attacker), Fraction(1, 1))
+        multipliers = [
+            single.get((d, attacker), Fraction(1, 1))
+            for d in defenders
+        ]
+        combined = _combine_defensive_multipliers(multipliers)
         cells.append(
             {
                 "attacker_attr": attacker,
