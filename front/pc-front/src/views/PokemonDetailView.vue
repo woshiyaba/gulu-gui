@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchPokemonDetail, fetchPokemonEvolutionChain } from '@/api/pokemon'
 import { useTheme } from '@/composables/useTheme'
@@ -14,6 +14,23 @@ const evolutionChain = ref<PokemonEvolutionChain | null>(null)
 const loading = ref(true)
 const error = ref('')
 const showYise = ref(false)
+
+const activeSkillSource = ref('')
+
+const skillSources = computed<string[]>(() => {
+  if (!pokemon.value) return []
+  const seen = new Set<string>()
+  for (const s of pokemon.value.skills) {
+    if (s.source) seen.add(s.source)
+  }
+  return Array.from(seen)
+})
+
+const filteredSkills = computed(() => {
+  if (!pokemon.value) return []
+  if (!activeSkillSource.value) return pokemon.value.skills
+  return pokemon.value.skills.filter(s => s.source === activeSkillSource.value)
+})
 
 // 种族值配置：标签、最大值（用于进度条百分比）
 const STAT_CONFIGS = [
@@ -48,6 +65,7 @@ async function load(name: string) {
   loading.value = true
   error.value = ''
   showYise.value = false
+  activeSkillSource.value = ''
   try {
     const [detail, chain] = await Promise.all([
       fetchPokemonDetail(name),
@@ -267,8 +285,24 @@ watch(() => route.params.name, (n) => n && load(n as string))
 
       <!-- ⑥ 技能列表 -->
       <section class="card skills-card">
-        <h2 class="section-title">技能（{{ pokemon.skills.length }} 个）</h2>
-        <div v-if="pokemon.skills.length === 0" class="no-data">暂无技能数据</div>
+        <h2 class="section-title">技能（{{ filteredSkills.length }} 个）</h2>
+
+        <div v-if="skillSources.length > 1" class="skill-source-tabs">
+          <button
+            class="skill-source-tab"
+            :class="{ 'skill-source-tab--active': activeSkillSource === '' }"
+            @click="activeSkillSource = ''"
+          >全部</button>
+          <button
+            v-for="src in skillSources"
+            :key="src"
+            class="skill-source-tab"
+            :class="{ 'skill-source-tab--active': activeSkillSource === src }"
+            @click="activeSkillSource = src"
+          >{{ src }}</button>
+        </div>
+
+        <div v-if="filteredSkills.length === 0" class="no-data">暂无技能数据</div>
         <table v-else class="skill-table">
           <thead>
             <tr>
@@ -281,7 +315,7 @@ watch(() => route.params.name, (n) => n && load(n as string))
             </tr>
           </thead>
           <tbody>
-            <tr v-for="sk in pokemon.skills" :key="sk.name">
+            <tr v-for="sk in filteredSkills" :key="sk.name">
               <td
                 class="skill-name"
                 tabindex="0"
@@ -989,6 +1023,39 @@ watch(() => route.params.name, (n) => n && load(n as string))
 .rtag-resisted { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
 
 /* ⑤ 技能表格 */
+.skill-source-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.skill-source-tab {
+  padding: 4px 14px;
+  border: 1.5px solid var(--color-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.skill-source-tab:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.skill-source-tab--active {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.skill-source-tab--active:hover {
+  color: #fff;
+}
+
 .skill-table {
   width: 100%;
   border-collapse: collapse;

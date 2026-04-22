@@ -112,6 +112,7 @@ export interface Skill {
   attr: string
   power: number
   type: string
+  source: string
   consume: number
   desc: string
   icon: string

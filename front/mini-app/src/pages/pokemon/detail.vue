@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { fetchPokemonDetail, fetchPokemonEvolutionChain } from '@/api/pokemon'
 import type { PokemonDetail, PokemonEvolutionChain } from '@/types/pokemon'
@@ -9,6 +9,23 @@ const evolutionChain = ref<PokemonEvolutionChain | null>(null)
 const loading = ref(true)
 const error = ref('')
 const showYise = ref(false)
+
+const activeSkillSource = ref('')
+
+const skillSources = computed<string[]>(() => {
+  if (!pokemon.value) return []
+  const seen = new Set<string>()
+  for (const s of pokemon.value.skills) {
+    if (s.source) seen.add(s.source)
+  }
+  return Array.from(seen)
+})
+
+const filteredSkills = computed(() => {
+  if (!pokemon.value) return []
+  if (!activeSkillSource.value) return pokemon.value.skills
+  return pokemon.value.skills.filter(s => s.source === activeSkillSource.value)
+})
 
 const STAT_CONFIGS = [
   { key: 'hp', label: 'HP', color: 'linear-gradient(90deg, #35c88a 0%, #7be6b4 100%)' },
@@ -57,6 +74,7 @@ async function loadDetail(name: string) {
   loading.value = true
   error.value = ''
   showYise.value = false
+  activeSkillSource.value = ''
 
   try {
     const [detail, chain] = await Promise.all([
@@ -317,16 +335,35 @@ onLoad((options) => {
       <view class="section-card">
         <view class="skill-head">
           <text class="section-title">技能列表</text>
-          <text class="skill-count">{{ pokemon.skills.length }} 个</text>
+          <text class="skill-count">{{ filteredSkills.length }} 个</text>
         </view>
 
-        <view v-if="pokemon.skills.length === 0">
+        <view v-if="skillSources.length > 1" class="skill-tabs">
+          <view
+            class="skill-tab"
+            :class="{ 'skill-tab--active': activeSkillSource === '' }"
+            @tap="activeSkillSource = ''"
+          >
+            <text>全部</text>
+          </view>
+          <view
+            v-for="src in skillSources"
+            :key="src"
+            class="skill-tab"
+            :class="{ 'skill-tab--active': activeSkillSource === src }"
+            @tap="activeSkillSource = src"
+          >
+            <text>{{ src }}</text>
+          </view>
+        </view>
+
+        <view v-if="filteredSkills.length === 0">
           <text class="empty-text">暂无技能数据</text>
         </view>
 
         <view v-else class="skill-list">
           <view
-            v-for="skill in pokemon.skills"
+            v-for="skill in filteredSkills"
             :key="skill.name"
             class="skill-card"
           >
@@ -855,6 +892,26 @@ onLoad((options) => {
 .skill-count {
   font-size: 22rpx;
   color: #7d94ba;
+}
+
+.skill-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 20rpx;
+}
+
+.skill-tab {
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+  color: #45638e;
+  background: #eef4ff;
+}
+
+.skill-tab--active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #2b74ff 0%, #5b9aff 100%);
 }
 
 .skill-list {

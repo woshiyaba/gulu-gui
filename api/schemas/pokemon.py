@@ -112,6 +112,7 @@ class PokemonSkill(BaseModel):
     attr: str = ""
     power: int = 0
     type: str = ""
+    source: str = ""
     consume: int = 0
     desc: str = ""
     icon: str = ""

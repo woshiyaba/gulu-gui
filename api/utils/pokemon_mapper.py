@@ -46,6 +46,7 @@ def to_skill_item(row: dict) -> dict:
         "attr": row["attr"],
         "power": row["power"],
         "type": row["type"],
+        "source": row.get("source", ""),
         "consume": row["consume"],
         "desc": row["skill_desc"] or "",
         "icon": build_image_url(row["icon"]),

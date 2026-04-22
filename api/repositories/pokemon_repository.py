@@ -433,7 +433,8 @@ async def get_pokemon_skills(name: str) -> list[dict]:
             await cur.execute(
                 """
                 SELECT s.name, COALESCE(a.name, '') AS attr,
-                       s.power, s.type, s.consume, s.skill_desc, s.icon
+                       s.power, s.type, s.consume, s.skill_desc, s.icon,
+                       ps.type AS source
                 FROM pokemon_skill ps
                 JOIN skill s ON s.id = ps.skill_id
                 LEFT JOIN attribute a ON a.id = s.attr_id
