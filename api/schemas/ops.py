@@ -24,6 +24,7 @@ class OpsDictItem(BaseModel):
     dict_type: str
     code: str
     label: str
+    extra: str = ""
     sort_order: int = 0
 
 
@@ -38,6 +39,7 @@ class OpsDictUpsertRequest(BaseModel):
     dict_type: str
     code: str
     label: str
+    extra: str = ""
     sort_order: int = 0
 
 

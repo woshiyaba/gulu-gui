@@ -45,9 +45,15 @@
 			}
 		},
 		{
-			"path": "pages/starlight-duel/detail",
+			"path": "pages/lineup/list",
 			"style": {
-				"navigationBarTitleText": "星光对决"
+				"navigationBarTitleText": "阵容推荐"
+			}
+		},
+		{
+			"path": "pages/lineup/detail",
+			"style": {
+				"navigationBarTitleText": "阵容详情"
 			}
 		}
 	],

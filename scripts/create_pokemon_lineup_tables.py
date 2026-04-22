@@ -25,10 +25,10 @@ from config import PG_CONFIG
 
 LINEUP_TYPE_DICT = "pokemon_lineup_type"
 LINEUP_TYPE_ROWS = [
-    (LINEUP_TYPE_DICT, "shining_contest", "闪耀大赛", 1),
-    (LINEUP_TYPE_DICT, "open_battle", "露天对战", 2),
-    (LINEUP_TYPE_DICT, "season_battle", "赛季对战", 3),
-    (LINEUP_TYPE_DICT, "starlight_duel", "星光对决", 4),
+    (LINEUP_TYPE_DICT, "shining_contest", "闪耀大赛", "multi", 1),
+    (LINEUP_TYPE_DICT, "open_battle", "露天对战", "single", 2),
+    (LINEUP_TYPE_DICT, "season_battle", "赛季对战", "single", 3),
+    (LINEUP_TYPE_DICT, "starlight_duel", "星光对决", "single", 4),
 ]
 
 
@@ -70,10 +70,11 @@ CREATE TABLE IF NOT EXISTS pokemon_lineup_member (
 DICT_DELETE_SQL = "DELETE FROM sys_dict WHERE dict_type = %s"
 
 DICT_UPSERT_SQL = """
-INSERT INTO sys_dict (dict_type, code, label, sort_order)
-VALUES (%s, %s, %s, %s)
+INSERT INTO sys_dict (dict_type, code, label, extra, sort_order)
+VALUES (%s, %s, %s, %s, %s)
 ON CONFLICT (dict_type, code) DO UPDATE
 SET label = EXCLUDED.label,
+    extra = EXCLUDED.extra,
     sort_order = EXCLUDED.sort_order
 """
 

@@ -100,8 +100,8 @@ async def _normalize_payload(payload: dict) -> dict:
     }
 
 
-async def list_active_lineups(source_type: str = "") -> list[dict]:
-    return await pokemon_lineup_repository.list_active_lineups(source_type=source_type)
+async def list_active_lineups(source_type: str = "", ids: list[int] | None = None) -> list[dict]:
+    return await pokemon_lineup_repository.list_active_lineups(source_type=source_type, ids=ids)
 
 
 async def get_lineup_detail(lineup_id: int) -> dict | None:

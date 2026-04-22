@@ -302,7 +302,7 @@ async def delete_lineup(lineup_id: int) -> bool:
         return deleted
 
 
-async def list_active_lineups(source_type: str = "") -> list[dict]:
+async def list_active_lineups(source_type: str = "", ids: list[int] | None = None) -> list[dict]:
     pool = await get_pool()
     conditions = ["pl.is_active = TRUE"]
     params: list = []
@@ -311,6 +311,11 @@ async def list_active_lineups(source_type: str = "") -> list[dict]:
     if st:
         conditions.append("pl.source_type = %s")
         params.append(st)
+
+    if ids:
+        placeholders = ", ".join(["%s"] * len(ids))
+        conditions.append(f"pl.id IN ({placeholders})")
+        params.extend(ids)
 
     where_sql = " AND ".join(conditions)
 

@@ -42,19 +42,13 @@ from api.schemas.personality import (
     PersonalityResetResponse,
     PersonalityUpsertRequest,
 )
-from api.schemas.starlight_duel import (
-    StarlightDuelEpisodeDetail,
-    StarlightDuelEpisodeListResponse,
-    StarlightDuelEpisodeUpsertRequest,
-    StarlightDuelSearchResponse,
-)
 from api.schemas.pokemon_lineup import (
     PokemonLineupDetail,
     PokemonLineupListResponse,
     PokemonLineupSearchResponse,
     PokemonLineupUpsertRequest,
 )
-from api.services import ops_service, banner_service, personality_service, starlight_duel_service, pokemon_lineup_service
+from api.services import ops_service, banner_service, personality_service, pokemon_lineup_service
 
 router = APIRouter(prefix="/api/ops", tags=["ops"])
 
@@ -519,68 +513,6 @@ async def delete_ops_personality(
     return Response(status_code=204)
 
 
-# ── 星光对决 ────────────────────────────────────────────
-
-
-@router.get("/starlight-duel/search-pokemon", response_model=StarlightDuelSearchResponse)
-async def search_starlight_duel_pokemon(
-    keyword: str = Query(default=""),
-    current_user: dict = Depends(get_current_ops_user),
-):
-    return await starlight_duel_service.search_pokemon_for_ops(current_user, keyword)
-
-
-@router.get("/starlight-duel/search-skills", response_model=StarlightDuelSearchResponse)
-async def search_starlight_duel_skills(
-    keyword: str = Query(default=""),
-    current_user: dict = Depends(get_current_ops_user),
-):
-    return await starlight_duel_service.search_skills_for_ops(current_user, keyword)
-
-
-@router.get("/starlight-duel/episodes", response_model=StarlightDuelEpisodeListResponse)
-async def list_ops_starlight_duel_episodes(
-    page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=10, ge=1, le=100),
-    current_user: dict = Depends(get_current_ops_user),
-):
-    return await starlight_duel_service.list_episodes_for_ops(current_user, page=page, page_size=page_size)
-
-
-@router.post("/starlight-duel/episodes", response_model=StarlightDuelEpisodeDetail)
-async def create_ops_starlight_duel_episode(
-    payload: StarlightDuelEpisodeUpsertRequest,
-    current_user: dict = Depends(get_current_ops_user),
-):
-    return await starlight_duel_service.create_episode_for_ops(current_user, payload.model_dump())
-
-
-@router.get("/starlight-duel/episodes/{episode_id}", response_model=StarlightDuelEpisodeDetail)
-async def get_ops_starlight_duel_episode(
-    episode_id: int,
-    current_user: dict = Depends(get_current_ops_user),
-):
-    return await starlight_duel_service.get_episode_detail_for_ops(current_user, episode_id)
-
-
-@router.put("/starlight-duel/episodes/{episode_id}", response_model=StarlightDuelEpisodeDetail)
-async def update_ops_starlight_duel_episode(
-    episode_id: int,
-    payload: StarlightDuelEpisodeUpsertRequest,
-    current_user: dict = Depends(get_current_ops_user),
-):
-    return await starlight_duel_service.update_episode_for_ops(current_user, episode_id, payload.model_dump())
-
-
-@router.delete("/starlight-duel/episodes/{episode_id}", status_code=204)
-async def delete_ops_starlight_duel_episode(
-    episode_id: int,
-    current_user: dict = Depends(get_current_ops_user),
-):
-    await starlight_duel_service.delete_episode_for_ops(current_user, episode_id)
-    return Response(status_code=204)
-
-
 # ── 精灵阵容 ────────────────────────────────────────────
 
 
@@ -613,7 +545,7 @@ async def list_ops_pokemon_lineups(
     source_type: str = Query(default=""),
     is_active: bool | None = Query(default=None),
     page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=10, ge=1, le=100),
+    page_size: int = Query(default=10, ge=1, le=200),
     current_user: dict = Depends(get_current_ops_user),
 ):
     return await pokemon_lineup_service.list_lineups_for_ops(

@@ -103,7 +103,7 @@ export function fetchMapPoints() {
   })
 }
 
-import type { Banner, StarlightDuelEpisode } from '@/types/banner'
+import type { Banner, Lineup } from '@/types/banner'
 
 export function fetchBanners() {
   return request<Banner[]>({
@@ -111,14 +111,15 @@ export function fetchBanners() {
   })
 }
 
-export function fetchStarlightDuelLatest() {
-  return request<StarlightDuelEpisode | null>({
-    url: '/api/starlight-duel/latest',
+export function fetchLineupDetail(id: number) {
+  return request<Lineup>({
+    url: `/api/pokemon-lineups/${id}`,
   })
 }
 
-export function fetchStarlightDuelEpisode(episodeNumber: number) {
-  return request<StarlightDuelEpisode>({
-    url: `/api/starlight-duel/${episodeNumber}`,
+export function fetchLineupsByIds(ids: number[]) {
+  const params = ids.map((id) => `ids=${id}`).join('&')
+  return request<{ items: Lineup[] }>({
+    url: `/api/pokemon-lineups?${params}`,
   })
 }

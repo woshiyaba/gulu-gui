@@ -33,6 +33,7 @@ export interface OpsDictItem {
   dict_type: string
   code: string
   label: string
+  extra: string
   sort_order: number
 }
 
@@ -47,6 +48,7 @@ export interface OpsDictPayload {
   dict_type: string
   code: string
   label: string
+  extra: string
   sort_order: number
 }
 
@@ -518,6 +520,7 @@ export interface OpsBannerItem {
   image_url: string
   link_type: string
   link_param: string
+  link_extra: string
   sort_order: number
   is_active: boolean
 }
@@ -625,102 +628,6 @@ export function deleteOpsPersonality(id: number): Promise<void> {
 
 export function resetOpsPersonalities(): Promise<OpsPersonalityResetResponse> {
   return http.post<OpsPersonalityResetResponse>('/api/ops/personalities/reset').then((r) => r.data)
-}
-
-// ── 星光对决 ────────────────────────────────────────────
-
-export interface OpsStarlightDuelPet {
-  id?: number
-  pet_id: number
-  pet_name: string
-  pet_image: string
-  sort_order: number
-  skill_1_id: number | null
-  skill_1_name: string
-  skill_2_id: number | null
-  skill_2_name: string
-  skill_3_id: number | null
-  skill_3_name: string
-  skill_4_id: number | null
-  skill_4_name: string
-}
-
-export interface OpsStarlightDuelEpisode {
-  id: number
-  episode_number: number
-  title: string
-  strategy_text: string
-  is_active: boolean
-  pets: OpsStarlightDuelPet[]
-}
-
-export interface OpsStarlightDuelEpisodeListItem {
-  id: number
-  episode_number: number
-  title: string
-  is_active: boolean
-}
-
-export interface OpsStarlightDuelListResponse {
-  total: number
-  page: number
-  page_size: number
-  items: OpsStarlightDuelEpisodeListItem[]
-}
-
-export interface OpsStarlightDuelPetPayload {
-  pet_id: number
-  sort_order: number
-  skill_1_id: number | null
-  skill_2_id: number | null
-  skill_3_id: number | null
-  skill_4_id: number | null
-}
-
-export interface OpsStarlightDuelEpisodePayload {
-  episode_number: number
-  title: string
-  strategy_text: string
-  is_active: boolean
-  pets: OpsStarlightDuelPetPayload[]
-}
-
-export interface OpsStarlightDuelSearchItem {
-  id: number
-  name: string
-  image?: string
-}
-
-export interface OpsStarlightDuelSearchResponse {
-  items: OpsStarlightDuelSearchItem[]
-}
-
-export function searchStarlightDuelPokemon(keyword: string): Promise<OpsStarlightDuelSearchResponse> {
-  return http.get<OpsStarlightDuelSearchResponse>('/api/ops/starlight-duel/search-pokemon', { params: { keyword } }).then((r) => r.data)
-}
-
-export function searchStarlightDuelSkills(keyword: string): Promise<OpsStarlightDuelSearchResponse> {
-  return http.get<OpsStarlightDuelSearchResponse>('/api/ops/starlight-duel/search-skills', { params: { keyword } }).then((r) => r.data)
-}
-
-export function fetchOpsStarlightDuelEpisodes(params: { page?: number; page_size?: number } = {}): Promise<OpsStarlightDuelListResponse> {
-  return http.get<OpsStarlightDuelListResponse>('/api/ops/starlight-duel/episodes', { params }).then((r) => r.data)
-}
-
-export function fetchOpsStarlightDuelEpisode(id: number): Promise<OpsStarlightDuelEpisode> {
-  return http.get<OpsStarlightDuelEpisode>(`/api/ops/starlight-duel/episodes/${id}`).then((r) => r.data)
-}
-
-export function createOpsStarlightDuelEpisode(payload: OpsStarlightDuelEpisodePayload): Promise<OpsStarlightDuelEpisode> {
-  return http.post<OpsStarlightDuelEpisode>('/api/ops/starlight-duel/episodes', payload).then((r) => r.data)
-}
-
-export function updateOpsStarlightDuelEpisode(id: number, payload: OpsStarlightDuelEpisodePayload): Promise<OpsStarlightDuelEpisode> {
-  return http.put<OpsStarlightDuelEpisode>(`/api/ops/starlight-duel/episodes/${id}`, payload).then((r) => r.data)
-}
-
-export function deleteOpsStarlightDuelEpisode(id: number): Promise<void> {
-  return http.delete(`/api/ops/starlight-duel/episodes/${id}`).then(() => undefined)
 }
 
 // ── 精灵阵容 ────────────────────────────────────────────

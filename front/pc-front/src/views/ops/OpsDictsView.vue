@@ -28,6 +28,7 @@ const form = reactive({
   dict_type: '',
   code: '',
   label: '',
+  extra: '',
   sort_order: 0,
 })
 
@@ -56,6 +57,7 @@ function resetForm() {
   form.dict_type = ''
   form.code = ''
   form.label = ''
+  form.extra = ''
   form.sort_order = 0
 }
 
@@ -73,6 +75,7 @@ function editItem(item: OpsDictItem) {
   form.dict_type = item.dict_type
   form.code = item.code
   form.label = item.label
+  form.extra = item.extra
   form.sort_order = item.sort_order
   drawerVisible.value = true
 }
@@ -129,6 +132,7 @@ async function submitForm() {
       dict_type: form.dict_type.trim(),
       code: form.code.trim(),
       label: form.label.trim(),
+      extra: form.extra.trim(),
       sort_order: Number(form.sort_order) || 0,
     }
     if (editingId.value) {
@@ -212,6 +216,7 @@ onMounted(() => {
               <th>字典类型</th>
               <th>字典编码</th>
               <th>字典名称</th>
+              <th>扩展信息</th>
               <th class="col-sort">排序</th>
               <th class="col-actions">操作</th>
             </tr>
@@ -222,6 +227,7 @@ onMounted(() => {
               <td>{{ item.dict_type }}</td>
               <td>{{ item.code }}</td>
               <td class="label-cell">{{ item.label }}</td>
+              <td>{{ item.extra || '-' }}</td>
               <td>{{ item.sort_order }}</td>
               <td>
                 <div class="action-group">
@@ -290,6 +296,10 @@ onMounted(() => {
             <label class="form-row">
               <span>字典名称</span>
               <input v-model="form.label" required type="text" placeholder="请输入字典名称" />
+            </label>
+            <label class="form-row">
+              <span>扩展信息</span>
+              <input v-model="form.extra" type="text" placeholder="可选，如 single/multi" />
             </label>
             <label class="form-row">
               <span>显示排序</span>

@@ -7,6 +7,7 @@ class BannerItem(BaseModel):
     image_url: str = ""
     link_type: str = ""
     link_param: str = ""
+    link_extra: str = ""
     sort_order: int = 0
     is_active: bool = True
 

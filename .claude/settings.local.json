@@ -13,7 +13,8 @@
       "Bash(node -e ' *)",
       "Bash(npx vue-tsc *)",
       "Bash(curl -s \"https://wikiroco.com/api/pokemon/categories\")",
-      "Bash(curl -sI \"https://wikiroco.com/images/icon/17310030067.png\")"
+      "Bash(curl -sI \"https://wikiroco.com/images/icon/17310030067.png\")",
+      "Bash(grep -E \"\\\\.\\(py\\)$\")"
     ]
   }
 }

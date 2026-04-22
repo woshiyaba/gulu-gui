@@ -102,11 +102,12 @@ function navigateToDetail(name: string) {
 
 function onBannerTap(index: number) {
   const banner = banners.value[index]
-  if (!banner) return
-  if (banner.link_type === 'starlight_duel' && banner.link_param) {
-    uni.navigateTo({ url: `/pages/starlight-duel/detail?episode=${banner.link_param}` })
-  } else if (banner.link_type === 'pokemon' && banner.link_param) {
-    uni.navigateTo({ url: `/pages/pokemon/detail?name=${encodeURIComponent(banner.link_param)}` })
+  if (!banner?.link_type || !banner.link_param) return
+  if (banner.link_extra === 'multi') {
+    uni.navigateTo({ url: `/pages/lineup/list?ids=${banner.link_param}` })
+  } else {
+    // single 模式：直接跳转阵容详情
+    uni.navigateTo({ url: `/pages/lineup/detail?id=${banner.link_param}` })
   }
 }
 

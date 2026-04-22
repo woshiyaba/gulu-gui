@@ -4,31 +4,48 @@ export interface Banner {
   image_url: string
   link_type: string
   link_param: string
+  link_extra: string
   sort_order: number
   is_active: boolean
 }
 
-export interface StarlightDuelPet {
+export interface LineupMember {
   id: number
-  pet_id: number
-  pet_name: string
-  pet_image: string
+  pokemon_id: number
+  pokemon_name: string
+  pokemon_image: string
   sort_order: number
+  bloodline_dict_id: number | null
+  bloodline_label: string
+  personality_id: number | null
+  personality_name_zh: string
+  qual_1: string
+  qual_2: string
+  qual_3: string
   skill_1_id: number | null
   skill_1_name: string
+  skill_1_image: string
   skill_2_id: number | null
   skill_2_name: string
+  skill_2_image: string
   skill_3_id: number | null
   skill_3_name: string
+  skill_3_image: string
   skill_4_id: number | null
   skill_4_name: string
+  skill_4_image: string
+  member_desc: string
 }
 
-export interface StarlightDuelEpisode {
+export interface Lineup {
   id: number
-  episode_number: number
   title: string
-  strategy_text: string
+  lineup_desc: string
+  source_type: string
+  resonance_magic_id: number | null
+  resonance_magic_name: string
+  resonance_magic_icon: string
+  sort_order: number
   is_active: boolean
-  pets: StarlightDuelPet[]
+  members: LineupMember[]
 }

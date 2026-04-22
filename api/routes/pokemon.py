@@ -14,7 +14,6 @@ from api.schemas.pokemon import (
 from api.schemas.banner import BannerItem
 from api.schemas.personality import PersonalityItem
 from api.schemas.pokemon_lineup import PokemonLineupDetail, PokemonLineupPublicList
-from api.schemas.starlight_duel import StarlightDuelEpisodeDetail
 from api.services import pokemon_lineup_service
 from api.services.pokemon_service import (
     PokemonNotFoundError,
@@ -30,7 +29,7 @@ from api.services.pokemon_service import (
     get_skill_types as get_skill_types_service,
     get_skills as get_skills_service,
 )
-from api.services import banner_service, personality_service, starlight_duel_service
+from api.services import banner_service, personality_service
 
 router = APIRouter(prefix="/api")
 
@@ -40,21 +39,28 @@ async def get_banners():
     return await banner_service.list_active_banners()
 
 
-@router.get("/starlight-duel/latest", response_model=StarlightDuelEpisodeDetail | None)
+@router.get("/starlight-duel/latest", response_model=PokemonLineupDetail | None)
 async def get_starlight_duel_latest():
-    return await starlight_duel_service.get_latest_episode()
+    items = await pokemon_lineup_service.list_active_lineups(source_type="starlight_duel")
+    return items[0] if items else None
 
 
-@router.get("/starlight-duel/{episode_number}", response_model=StarlightDuelEpisodeDetail)
-async def get_starlight_duel_episode(episode_number: int):
-    return await starlight_duel_service.get_episode_by_number(episode_number)
+@router.get("/starlight-duel/{lineup_id}", response_model=PokemonLineupDetail)
+async def get_starlight_duel_by_lineup(lineup_id: int):
+    lineup = await pokemon_lineup_service.get_lineup_detail(lineup_id)
+    if not lineup:
+        raise HTTPException(status_code=404, detail="阵容不存在或未启用")
+    return lineup
 
 
 @router.get("/pokemon-lineups", response_model=PokemonLineupPublicList)
 async def get_pokemon_lineups(
     source_type: str = Query(default="", description="阵容分类筛选"),
+    ids: list[int] = Query(default=[], description="按 ID 列表筛选"),
 ):
-    items = await pokemon_lineup_service.list_active_lineups(source_type=source_type)
+    items = await pokemon_lineup_service.list_active_lineups(
+        source_type=source_type, ids=ids or None,
+    )
     return {"items": items}
 
 

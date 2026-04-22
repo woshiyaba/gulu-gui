@@ -34,11 +34,12 @@ CREATE TABLE attribute (
 -- 通用字典
 -- dict_type 区分字典类别，code 是业务编码，label 是显示名
 CREATE TABLE sys_dict (
-    id        SERIAL      PRIMARY KEY,
-    dict_type VARCHAR(30) NOT NULL,           -- 字典类别
-    code      VARCHAR(30) NOT NULL,           -- 编码
-    label     VARCHAR(30) NOT NULL,           -- 显示
-    sort_order INT        NOT NULL DEFAULT 0, -- 排序
+    id        SERIAL       PRIMARY KEY,
+    dict_type VARCHAR(30)  NOT NULL,           -- 字典类别
+    code      VARCHAR(30)  NOT NULL,           -- 编码
+    label     VARCHAR(30)  NOT NULL,           -- 显示
+    extra     VARCHAR(100) NOT NULL DEFAULT '', -- 扩展信息，如 pokemon_lineup_type 用 single/multi 标记展示模式
+    sort_order INT         NOT NULL DEFAULT 0, -- 排序
     CONSTRAINT uk_sys_dict UNIQUE (dict_type, code)
 );
 
