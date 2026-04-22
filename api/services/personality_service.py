@@ -56,18 +56,12 @@ def _serialize(row: dict | None) -> dict | None:
 
 
 def _validate_payload(payload: dict) -> None:
-    name_en = (payload.get("name_en") or "").strip()
-    name_zh = (payload.get("name_zh") or "").strip()
-    if not name_en:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="英文名不能为空")
-    if len(name_en) > 32:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="英文名最长 32 个字符")
-    if not name_zh:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="中文名不能为空")
-    if len(name_zh) > 16:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="中文名最长 16 个字符")
-    payload["name_en"] = name_en
-    payload["name_zh"] = name_zh
+    name = (payload.get("name") or "").strip()
+    if not name:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="名称不能为空")
+    if len(name) > 32:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="名称最长 32 个字符")
+    payload["name"] = name
 
     for col in personality_repository.STAT_COLS:
         val = float(payload.get(col) or 0)
@@ -214,11 +208,10 @@ async def reset_personalities_from_json(user: dict) -> dict:
         data = json.load(f)
 
     rows: list[dict] = []
-    for item in data:
+    for idx, item in enumerate(data, start=1):
         rows.append({
-            "id": int(item["id"]),
-            "name_en": item["name"],
-            "name_zh": item["localized"]["zh"],
+            "id": int(item.get("id") or idx),
+            "name": str(item.get("name") or "").strip(),
             "hp_mod_pct": float(item.get("hp_mod_pct", 0) or 0),
             "phy_atk_mod_pct": float(item.get("phy_atk_mod_pct", 0) or 0),
             "mag_atk_mod_pct": float(item.get("mag_atk_mod_pct", 0) or 0),
@@ -226,6 +219,8 @@ async def reset_personalities_from_json(user: dict) -> dict:
             "mag_def_mod_pct": float(item.get("mag_def_mod_pct", 0) or 0),
             "spd_mod_pct": float(item.get("spd_mod_pct", 0) or 0),
         })
+    for row in rows:
+        _validate_payload(row)
 
     inserted = await personality_repository.bulk_upsert_personalities(rows)
     await ops_repository.create_audit_log(

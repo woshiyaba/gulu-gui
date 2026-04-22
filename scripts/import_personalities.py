@@ -45,8 +45,7 @@ JSON_PATH = Path(__file__).resolve().parent.parent / "docs" / "pets" / "personal
 MYSQL_DDL = """
 CREATE TABLE IF NOT EXISTS personality (
     id              SMALLINT       NOT NULL COMMENT '性格ID，来源 personalities.json',
-    name_en         VARCHAR(32)    NOT NULL COMMENT '英文名',
-    name_zh         VARCHAR(16)    NOT NULL COMMENT '中文名',
+    name            VARCHAR(32)    NOT NULL COMMENT '名称',
     hp_mod_pct      DECIMAL(3, 2)  NOT NULL DEFAULT 0 COMMENT 'HP修正：+0.10/-0.10/0',
     phy_atk_mod_pct DECIMAL(3, 2)  NOT NULL DEFAULT 0 COMMENT '物攻修正',
     mag_atk_mod_pct DECIMAL(3, 2)  NOT NULL DEFAULT 0 COMMENT '魔攻修正',
@@ -54,24 +53,21 @@ CREATE TABLE IF NOT EXISTS personality (
     mag_def_mod_pct DECIMAL(3, 2)  NOT NULL DEFAULT 0 COMMENT '魔防修正',
     spd_mod_pct     DECIMAL(3, 2)  NOT NULL DEFAULT 0 COMMENT '速度修正',
     PRIMARY KEY (id),
-    UNIQUE KEY uk_personality_en (name_en),
-    UNIQUE KEY uk_personality_zh (name_zh)
+    UNIQUE KEY uk_personality_name (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='精灵性格字典（六维乘法修正）';
 """
 
 PG_DDL = """
 CREATE TABLE IF NOT EXISTS personality (
     id              SMALLINT     PRIMARY KEY,
-    name_en         VARCHAR(32)  NOT NULL,
-    name_zh         VARCHAR(16)  NOT NULL,
+    name            VARCHAR(32)  NOT NULL,
     hp_mod_pct      NUMERIC(3,2) NOT NULL DEFAULT 0,
     phy_atk_mod_pct NUMERIC(3,2) NOT NULL DEFAULT 0,
     mag_atk_mod_pct NUMERIC(3,2) NOT NULL DEFAULT 0,
     phy_def_mod_pct NUMERIC(3,2) NOT NULL DEFAULT 0,
     mag_def_mod_pct NUMERIC(3,2) NOT NULL DEFAULT 0,
     spd_mod_pct     NUMERIC(3,2) NOT NULL DEFAULT 0,
-    CONSTRAINT uk_personality_en UNIQUE (name_en),
-    CONSTRAINT uk_personality_zh UNIQUE (name_zh)
+    CONSTRAINT uk_personality_name UNIQUE (name)
 );
 """
 
@@ -84,18 +80,18 @@ def _load_rows() -> list[tuple]:
 
     rows: list[tuple] = []
     seen_ids: set[int] = set()
-    for item in data:
-        pid = int(item["id"])
+    for idx, item in enumerate(data, start=1):
+        pid = int(item.get("id") or idx)
         if pid in seen_ids:
             raise ValueError(f"重复的性格 id={pid}")
         seen_ids.add(pid)
 
-        name_en = item["name"]
-        name_zh = item["localized"]["zh"]
+        name = str(item.get("name") or "").strip()
+        if not name:
+            raise ValueError(f"空名称，id={pid}")
         rows.append((
             pid,
-            name_en,
-            name_zh,
+            name,
             item.get("hp_mod_pct", 0),
             item.get("phy_atk_mod_pct", 0),
             item.get("mag_atk_mod_pct", 0),
@@ -128,14 +124,14 @@ def write_mysql(rows: list[tuple], dry_run: bool) -> None:
     conn = mysql_conn()
     try:
         with conn.cursor() as cur:
+            cur.execute("DROP TABLE IF EXISTS personality")
             cur.execute(MYSQL_DDL)
-            cur.execute("DELETE FROM personality")
             cur.executemany(
                 """INSERT INTO personality
-                   (id, name_en, name_zh,
+                   (id, name,
                     hp_mod_pct, phy_atk_mod_pct, mag_atk_mod_pct,
                     phy_def_mod_pct, mag_def_mod_pct, spd_mod_pct)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
                 rows,
             )
         if dry_run:
@@ -167,16 +163,38 @@ def write_pg(rows: list[tuple], dry_run: bool) -> None:
     conn.autocommit = False
     try:
         with conn.cursor() as cur:
+            # 保留外键关系：先临时移除引用 personality 的外键，再重建 personality，最后再加回
+            cur.execute("ALTER TABLE IF EXISTS pokemon_lineup_member DROP CONSTRAINT IF EXISTS pokemon_lineup_member_personality_id_fkey")
+            cur.execute("DROP TABLE IF EXISTS personality")
             cur.execute(PG_DDL)
-            cur.execute("DELETE FROM personality")
             psycopg2.extras.execute_values(
                 cur,
                 """INSERT INTO personality
-                   (id, name_en, name_zh,
+                   (id, name,
                     hp_mod_pct, phy_atk_mod_pct, mag_atk_mod_pct,
                     phy_def_mod_pct, mag_def_mod_pct, spd_mod_pct)
                    VALUES %s""",
                 rows,
+            )
+            cur.execute(
+                """
+                DO $$
+                BEGIN
+                    IF EXISTS (
+                        SELECT 1
+                        FROM information_schema.tables
+                        WHERE table_name = 'pokemon_lineup_member'
+                    ) THEN
+                        ALTER TABLE pokemon_lineup_member
+                        ADD CONSTRAINT pokemon_lineup_member_personality_id_fkey
+                        FOREIGN KEY (personality_id) REFERENCES personality(id);
+                    END IF;
+                EXCEPTION
+                    WHEN duplicate_object THEN
+                        NULL;
+                END
+                $$;
+                """
             )
         if dry_run:
             conn.rollback()
@@ -196,8 +214,8 @@ def main() -> None:
     parser.add_argument(
         "--only",
         choices=("mysql", "pg", "both"),
-        default="both",
-        help="仅写入指定库（默认两边都写）",
+        default="pg",
+        help="仅写入指定库（默认仅写 PG）",
     )
     args = parser.parse_args()
 

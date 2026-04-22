@@ -21,7 +21,7 @@ _MEMBER_JOIN_SQL = """
         p.image AS pokemon_image_raw,
         p.image_lc AS pokemon_image_lc,
         d.label AS bloodline_label,
-        per.name_zh AS personality_name_zh,
+        per.name AS personality_name_zh,
         s1.name AS skill_1_name,
         s1.icon AS skill_1_icon,
         s2.name AS skill_2_name,

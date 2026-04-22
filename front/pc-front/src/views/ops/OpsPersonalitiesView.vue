@@ -7,7 +7,6 @@ import {
   fetchOpsDicts,
   fetchOpsMe,
   fetchOpsPersonalities,
-  resetOpsPersonalities,
   showOpsToast,
   updateOpsPersonality,
   type OpsPersonalityItem,
@@ -70,7 +69,6 @@ async function loadStatDict() {
 
 const loading = ref(false)
 const saving = ref(false)
-const resetting = ref(false)
 const error = ref('')
 const items = ref<OpsPersonalityItem[]>([])
 const total = ref(0)
@@ -107,8 +105,7 @@ const drawerVisible = ref(false)
 const editingId = ref<number | null>(null)
 const form = reactive({
   id: null as number | null,
-  name_en: '',
-  name_zh: '',
+  name: '',
   buff_stat: '' as '' | OpsPersonalityStat,
   nerf_stat: '' as '' | OpsPersonalityStat,
 })
@@ -132,7 +129,7 @@ function modClass(value: number): string {
 }
 
 const formValid = computed(() => {
-  if (!form.name_zh.trim() || !form.name_en.trim()) return false
+  if (!form.name.trim()) return false
   // 允许全中性，或一加一减（且不同项）
   const { buff_stat, nerf_stat } = form
   if (!buff_stat && !nerf_stat) return true
@@ -143,8 +140,7 @@ const formValid = computed(() => {
 function resetForm() {
   editingId.value = null
   form.id = null
-  form.name_en = ''
-  form.name_zh = ''
+  form.name = ''
   form.buff_stat = ''
   form.nerf_stat = ''
 }
@@ -161,8 +157,7 @@ function closeDrawer() {
 function editItem(item: OpsPersonalityItem) {
   editingId.value = item.id
   form.id = item.id
-  form.name_en = item.name_en
-  form.name_zh = item.name_zh
+  form.name = item.name
   form.buff_stat = (item.buff_stat ?? '') as '' | OpsPersonalityStat
   form.nerf_stat = (item.nerf_stat ?? '') as '' | OpsPersonalityStat
   drawerVisible.value = true
@@ -201,7 +196,7 @@ async function loadData() {
 async function submitForm() {
   if (saving.value) return
   if (!formValid.value) {
-    error.value = '请校验：中文名/英文名必填，且加成项与削弱项须不同（或都不选表示中性）。'
+    error.value = '请校验：名称必填，且加成项与削弱项须不同（或都不选表示中性）。'
     showOpsToast(error.value, 'error')
     return
   }
@@ -220,8 +215,7 @@ async function submitForm() {
     if (form.nerf_stat) mods[STAT_COL_MAP[form.nerf_stat]] = -0.1
     const payload = {
       id: editingId.value ? undefined : form.id,
-      name_en: form.name_en.trim(),
-      name_zh: form.name_zh.trim(),
+      name: form.name.trim(),
       ...mods,
     } as any
     if (editingId.value) {
@@ -243,7 +237,7 @@ async function submitForm() {
 
 async function removeItem(item: OpsPersonalityItem) {
   if (!isAdmin.value) return
-  if (!window.confirm(`确定删除性格「${item.name_zh} / ${item.name_en}」吗？`)) return
+  if (!window.confirm(`确定删除性格「${item.name}」吗？`)) return
   try {
     await deleteOpsPersonality(item.id)
     if (editingId.value === item.id) resetForm()
@@ -252,22 +246,6 @@ async function removeItem(item: OpsPersonalityItem) {
   } catch (err: any) {
     error.value = err?.response?.data?.detail || '删除失败'
     showOpsToast(error.value, 'error')
-  }
-}
-
-async function resetFromJson() {
-  if (!isAdmin.value) return
-  if (!window.confirm('将从 docs/pets/personalities.json 全量覆盖现有性格数据，确定继续？')) return
-  resetting.value = true
-  try {
-    const resp = await resetOpsPersonalities()
-    showOpsToast(`已重置 ${resp.inserted} 条性格`, 'success')
-    await loadData()
-  } catch (err: any) {
-    error.value = err?.response?.data?.detail || '重置失败'
-    showOpsToast(error.value, 'error')
-  } finally {
-    resetting.value = false
   }
 }
 
@@ -296,7 +274,7 @@ onMounted(() => {
       <div class="filter-bar">
         <label class="filter-item">
           <span>关键字</span>
-          <input v-model="query.keyword" type="text" placeholder="中/英文名" @keyup.enter="onSearch" />
+          <input v-model="query.keyword" type="text" placeholder="名称" @keyup.enter="onSearch" />
         </label>
         <label class="filter-item">
           <span>加成项</span>
@@ -321,15 +299,6 @@ onMounted(() => {
       <div class="toolbar">
         <div class="toolbar-left">
           <button v-if="isAdmin" type="button" class="btn-primary" @click="openCreateDrawer">新增</button>
-          <button
-            v-if="isAdmin"
-            type="button"
-            class="btn-secondary"
-            :disabled="resetting"
-            @click="resetFromJson"
-          >
-            {{ resetting ? '重置中...' : '从 JSON 重置' }}
-          </button>
         </div>
         <div class="toolbar-meta">共 {{ total }} 条</div>
       </div>
@@ -345,9 +314,7 @@ onMounted(() => {
         <table class="tbl">
           <thead>
             <tr>
-              <th class="col-id">ID</th>
-              <th>中文名</th>
-              <th>英文名</th>
+              <th>名称</th>
               <th>加成项</th>
               <th>削弱项</th>
               <th v-for="key in statOrder" :key="`th-${key}`">{{ labelOf(key) }}</th>
@@ -356,9 +323,7 @@ onMounted(() => {
           </thead>
           <tbody>
             <tr v-for="item in items" :key="item.id">
-              <td>{{ item.id }}</td>
-              <td class="cell-name">{{ item.name_zh }}</td>
-              <td class="cell-name-en">{{ item.name_en }}</td>
+              <td class="cell-name">{{ item.name }}</td>
               <td>
                 <span v-if="item.buff_stat" class="tag mod-buff">{{ labelOf(item.buff_stat) }}</span>
                 <span v-else class="muted">—</span>
@@ -414,12 +379,8 @@ onMounted(() => {
         <form class="modal-body" @submit.prevent="submitForm">
           <div class="form-grid">
             <label class="form-row">
-              <span>中文名</span>
-              <input v-model="form.name_zh" type="text" required placeholder="例：胆小" maxlength="16" />
-            </label>
-            <label class="form-row">
-              <span>英文名</span>
-              <input v-model="form.name_en" type="text" required placeholder="例：Timid" maxlength="32" />
+              <span>名称</span>
+              <input v-model="form.name" type="text" required placeholder="例：胆小" maxlength="32" />
             </label>
             <label class="form-row">
               <span>加成项</span>
@@ -592,10 +553,6 @@ onMounted(() => {
   background: #f5f7fa;
 }
 
-.col-id {
-  width: 60px;
-}
-
 .col-actions {
   width: 120px;
 }
@@ -603,10 +560,6 @@ onMounted(() => {
 .cell-name {
   font-weight: 600;
   color: #303133;
-}
-
-.cell-name-en {
-  color: #606266;
 }
 
 .tag {

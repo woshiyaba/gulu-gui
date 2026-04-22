@@ -16,7 +16,7 @@ STAT_KEY_TO_COL = {
     "mag_def": "mag_def_mod_pct",
     "spd": "spd_mod_pct",
 }
-SELECT_COLS = "id, name_en, name_zh, " + ", ".join(STAT_COLS)
+SELECT_COLS = "id, name, " + ", ".join(STAT_COLS)
 
 
 def _col(stat_key: str) -> str | None:
@@ -40,9 +40,9 @@ async def list_personalities(
 
     kw = (keyword or "").strip()
     if kw:
-        conditions.append("(name_zh ILIKE %s OR name_en ILIKE %s)")
+        conditions.append("name ILIKE %s")
         like = f"%{kw}%"
-        params.extend([like, like])
+        params.append(like)
 
     buff_col = _col(buff_stat)
     if buff_col:
@@ -107,14 +107,13 @@ async def create_personality(payload: dict) -> dict:
         async with conn.cursor() as cur:
             await cur.execute(
                 f"""
-                INSERT INTO personality (id, name_en, name_zh, {", ".join(STAT_COLS)})
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO personality (id, name, {", ".join(STAT_COLS)})
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING {SELECT_COLS}
                 """,
                 (
                     payload["id"],
-                    payload["name_en"],
-                    payload["name_zh"],
+                    payload["name"],
                     payload["hp_mod_pct"],
                     payload["phy_atk_mod_pct"],
                     payload["mag_atk_mod_pct"],
@@ -135,15 +134,14 @@ async def update_personality(pid: int, payload: dict) -> dict | None:
             await cur.execute(
                 f"""
                 UPDATE personality
-                SET name_en = %s, name_zh = %s,
+                SET name = %s,
                     hp_mod_pct = %s, phy_atk_mod_pct = %s, mag_atk_mod_pct = %s,
                     phy_def_mod_pct = %s, mag_def_mod_pct = %s, spd_mod_pct = %s
                 WHERE id = %s
                 RETURNING {SELECT_COLS}
                 """,
                 (
-                    payload["name_en"],
-                    payload["name_zh"],
+                    payload["name"],
                     payload["hp_mod_pct"],
                     payload["phy_atk_mod_pct"],
                     payload["mag_atk_mod_pct"],
@@ -178,7 +176,7 @@ async def bulk_upsert_personalities(rows: list[dict]) -> int:
             await cur.execute("DELETE FROM personality")
             values = [
                 (
-                    r["id"], r["name_en"], r["name_zh"],
+                    r["id"], r["name"],
                     r["hp_mod_pct"], r["phy_atk_mod_pct"], r["mag_atk_mod_pct"],
                     r["phy_def_mod_pct"], r["mag_def_mod_pct"], r["spd_mod_pct"],
                 )
@@ -186,8 +184,8 @@ async def bulk_upsert_personalities(rows: list[dict]) -> int:
             ]
             await cur.executemany(
                 f"""
-                INSERT INTO personality (id, name_en, name_zh, {", ".join(STAT_COLS)})
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO personality (id, name, {", ".join(STAT_COLS)})
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 values,
             )

@@ -3,8 +3,7 @@ from pydantic import BaseModel, Field
 
 class PersonalityItem(BaseModel):
     id: int
-    name_en: str
-    name_zh: str
+    name: str
     hp_mod_pct: float = 0.0
     phy_atk_mod_pct: float = 0.0
     mag_atk_mod_pct: float = 0.0
@@ -25,8 +24,7 @@ class PersonalityListResponse(BaseModel):
 
 class PersonalityUpsertRequest(BaseModel):
     id: int | None = None
-    name_en: str
-    name_zh: str
+    name: str
     hp_mod_pct: float = 0.0
     phy_atk_mod_pct: float = 0.0
     mag_atk_mod_pct: float = 0.0

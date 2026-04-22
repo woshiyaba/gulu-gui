@@ -563,8 +563,7 @@ export type OpsPersonalityStat = 'hp' | 'phy_atk' | 'mag_atk' | 'phy_def' | 'mag
 
 export interface OpsPersonalityItem {
   id: number
-  name_en: string
-  name_zh: string
+  name: string
   hp_mod_pct: number
   phy_atk_mod_pct: number
   mag_atk_mod_pct: number
@@ -585,8 +584,7 @@ export interface OpsPersonalityListResponse {
 
 export interface OpsPersonalityUpsertPayload {
   id?: number | null
-  name_en: string
-  name_zh: string
+  name: string
   hp_mod_pct: number
   phy_atk_mod_pct: number
   mag_atk_mod_pct: number

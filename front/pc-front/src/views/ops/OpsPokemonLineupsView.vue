@@ -649,7 +649,7 @@ onMounted(async () => {
                 <span>性格</span>
                 <select v-model="member.personality_id">
                   <option :value="null">未设置</option>
-                  <option v-for="opt in personalityOptions" :key="opt.id" :value="opt.id">{{ opt.name_zh }}</option>
+                  <option v-for="opt in personalityOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
                 </select>
               </label>
             </div>

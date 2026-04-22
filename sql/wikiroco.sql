@@ -246,16 +246,14 @@ CREATE TABLE attribute_matchup (
 -- final_stat = floor(base_stat * (1 + mod_pct))
 CREATE TABLE personality (
     id              SMALLINT     PRIMARY KEY,
-    name_en         VARCHAR(32)  NOT NULL,
-    name_zh         VARCHAR(16)  NOT NULL,
+    name            VARCHAR(32)  NOT NULL,
     hp_mod_pct      NUMERIC(3,2) NOT NULL DEFAULT 0,
     phy_atk_mod_pct NUMERIC(3,2) NOT NULL DEFAULT 0,
     mag_atk_mod_pct NUMERIC(3,2) NOT NULL DEFAULT 0,
     phy_def_mod_pct NUMERIC(3,2) NOT NULL DEFAULT 0,
     mag_def_mod_pct NUMERIC(3,2) NOT NULL DEFAULT 0,
     spd_mod_pct     NUMERIC(3,2) NOT NULL DEFAULT 0,
-    CONSTRAINT uk_personality_en UNIQUE (name_en),
-    CONSTRAINT uk_personality_zh UNIQUE (name_zh)
+    CONSTRAINT uk_personality_name UNIQUE (name)
 );
 
 -- 精灵阵容：一套阵容最多配置 6 只精灵
