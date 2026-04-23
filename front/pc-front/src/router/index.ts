@@ -81,6 +81,10 @@ const router = createRouter({
           path: 'resonance-magic',
           component: () => import('@/views/ops/OpsResonanceMagicView.vue'),
         },
+        {
+          path: 'marks',
+          component: () => import('@/views/ops/OpsMarksView.vue'),
+        },
       ],
     },
   ],

@@ -1056,3 +1056,100 @@ async def save_skill_icon_upload(user: dict, upload: UploadFile) -> dict:
         suffix_hint="webp、png、jpg、jpeg、gif",
     )
     return {"icon": result["filename"], "preview_url": result["preview_url"]}
+
+
+def _normalize_mark_payload(payload: dict) -> dict:
+    key = (payload.get("key") or "").strip()
+    zh_name = (payload.get("zh_name") or "").strip()
+    if not key:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="英文标识不能为空")
+    if not zh_name:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="中文名不能为空")
+    if len(key) > 50:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="英文标识不能超过 50 字符")
+    if len(zh_name) > 50:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="中文名不能超过 50 字符")
+    return {
+        "key": key,
+        "zh_name": zh_name,
+        "zh_description": (payload.get("zh_description") or "").strip(),
+        "image": (payload.get("image") or "").strip(),
+        "sort_order": int(payload.get("sort_order") or 0),
+    }
+
+
+async def list_marks_for_ops(
+    user: dict,
+    keyword: str = "",
+    page: int = 1,
+    page_size: int = 10,
+) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    page = max(page, 1)
+    page_size = max(1, min(page_size, 100))
+    total, items = await ops_repository.list_marks_for_ops(
+        keyword=keyword.strip(),
+        page=page,
+        page_size=page_size,
+    )
+    return {"total": total, "page": page, "page_size": page_size, "items": items}
+
+
+async def create_mark_for_ops(user: dict, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    normalized = _normalize_mark_payload(payload)
+    exists = await ops_repository.get_mark_by_key(normalized["key"])
+    if exists:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="英文标识已存在")
+    created = await ops_repository.create_mark_for_ops(normalized)
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="pokemon_mark",
+        resource_id=str(created["id"]),
+        action="create",
+        before_json=None,
+        after_json=created,
+    )
+    return created
+
+
+async def update_mark_for_ops(user: dict, mark_id: int, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_mark_for_ops(mark_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="印记不存在")
+    normalized = _normalize_mark_payload(payload)
+    if normalized["key"] != before["key"]:
+        exists = await ops_repository.get_mark_by_key(normalized["key"])
+        if exists and int(exists["id"]) != mark_id:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="英文标识已存在")
+    updated = await ops_repository.update_mark_for_ops(mark_id, normalized)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="印记不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="pokemon_mark",
+        resource_id=str(mark_id),
+        action="update",
+        before_json=before,
+        after_json=updated,
+    )
+    return updated
+
+
+async def delete_mark_for_ops(user: dict, mark_id: int) -> None:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_mark_for_ops(mark_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="印记不存在")
+    deleted = await ops_repository.delete_mark_for_ops(mark_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="印记不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="pokemon_mark",
+        resource_id=str(mark_id),
+        action="delete",
+        before_json=before,
+        after_json=None,
+    )

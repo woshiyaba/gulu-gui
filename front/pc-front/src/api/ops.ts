@@ -832,3 +832,49 @@ export function uploadOpsResonanceMagicIcon(file: File): Promise<OpsResonanceMag
     .post<OpsResonanceMagicIconUploadResponse>('/api/ops/resonance-magics/icon', body)
     .then((r) => r.data)
 }
+
+// ── 印记维护 ────────────────────────────────────────────
+
+export interface OpsMarkItem {
+  id: number
+  key: string
+  zh_name: string
+  zh_description: string
+  image: string
+  sort_order: number
+}
+
+export interface OpsMarkListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsMarkItem[]
+}
+
+export interface OpsMarkPayload {
+  key: string
+  zh_name: string
+  zh_description: string
+  image: string
+  sort_order: number
+}
+
+export function fetchOpsMarks(params: {
+  keyword?: string
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsMarkListResponse> {
+  return http.get<OpsMarkListResponse>('/api/ops/marks', { params }).then((r) => r.data)
+}
+
+export function createOpsMark(payload: OpsMarkPayload): Promise<OpsMarkItem> {
+  return http.post<OpsMarkItem>('/api/ops/marks', payload).then((r) => r.data)
+}
+
+export function updateOpsMark(id: number, payload: OpsMarkPayload): Promise<OpsMarkItem> {
+  return http.put<OpsMarkItem>(`/api/ops/marks/${id}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsMark(id: number): Promise<void> {
+  return http.delete(`/api/ops/marks/${id}`).then(() => undefined)
+}

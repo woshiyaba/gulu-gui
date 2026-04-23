@@ -34,6 +34,9 @@ from api.schemas.ops import (
     OpsResonanceMagicDetailResponse,
     OpsResonanceMagicUpsertRequest,
     OpsResonanceMagicIconUploadResponse,
+    OpsMarkItem,
+    OpsMarkListResponse,
+    OpsMarkUpsertRequest,
 )
 from api.schemas.banner import BannerItem, BannerListResponse, BannerUpsertRequest
 from api.schemas.personality import (
@@ -641,4 +644,48 @@ async def delete_ops_resonance_magic(
     current_user: dict = Depends(get_current_ops_user),
 ):
     await ops_service.delete_resonance_magic_for_ops(current_user, magic_id)
+    return Response(status_code=204)
+
+
+# ---------- 印记维护 ----------
+
+
+@router.get("/marks", response_model=OpsMarkListResponse)
+async def list_ops_marks(
+    keyword: str = Query(default=""),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=200),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.list_marks_for_ops(
+        current_user,
+        keyword=keyword,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.post("/marks", response_model=OpsMarkItem)
+async def create_ops_mark(
+    payload: OpsMarkUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.create_mark_for_ops(current_user, payload.model_dump())
+
+
+@router.put("/marks/{mark_id}", response_model=OpsMarkItem)
+async def update_ops_mark(
+    mark_id: int,
+    payload: OpsMarkUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.update_mark_for_ops(current_user, mark_id, payload.model_dump())
+
+
+@router.delete("/marks/{mark_id}", status_code=204)
+async def delete_ops_mark(
+    mark_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    await ops_service.delete_mark_for_ops(current_user, mark_id)
     return Response(status_code=204)

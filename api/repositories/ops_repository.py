@@ -60,6 +60,17 @@ CREATE TABLE IF NOT EXISTS starlight_duel_pet (
     skill_4_id INT REFERENCES skill(id),
     UNIQUE (episode_id, sort_order)
 );
+
+CREATE TABLE IF NOT EXISTS pokemon_mark (
+    id SERIAL PRIMARY KEY,
+    key VARCHAR(50) NOT NULL UNIQUE,
+    zh_name VARCHAR(50) NOT NULL,
+    zh_description TEXT NOT NULL DEFAULT '',
+    sort_order INT NOT NULL DEFAULT 0,
+    image VARCHAR(255) NOT NULL DEFAULT '',
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
 """
 
 
@@ -1413,6 +1424,134 @@ async def delete_resonance_magic_for_ops(magic_id: int) -> bool:
     async with pool.connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute("DELETE FROM resonance_magic WHERE id = %s", (magic_id,))
+            deleted = cur.rowcount > 0
+        await conn.commit()
+        return deleted
+
+
+def _mark_row_to_item(row: dict) -> dict:
+    return {
+        "id": row["id"],
+        "key": row.get("key") or "",
+        "zh_name": row.get("zh_name") or "",
+        "zh_description": row.get("zh_description") or "",
+        "image": row.get("image") or "",
+        "sort_order": int(row.get("sort_order") or 0),
+    }
+
+
+async def list_marks_for_ops(
+    keyword: str = "",
+    page: int = 1,
+    page_size: int = 10,
+) -> tuple[int, list[dict]]:
+    pool = await get_pool()
+    conditions: list[str] = []
+    params: list = []
+    if keyword:
+        conditions.append("(key LIKE %s OR zh_name LIKE %s)")
+        params.extend([f"%{keyword}%", f"%{keyword}%"])
+    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    offset = (page - 1) * page_size
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"SELECT COUNT(*) AS cnt FROM pokemon_mark {where_clause}",
+                params,
+            )
+            total_row = await cur.fetchone() or {}
+            total = int(total_row.get("cnt", 0))
+            await cur.execute(
+                f"""
+                SELECT id, key, zh_name, zh_description, image, sort_order
+                FROM pokemon_mark
+                {where_clause}
+                ORDER BY sort_order, id
+                LIMIT %s OFFSET %s
+                """,
+                [*params, page_size, offset],
+            )
+            rows = await cur.fetchall()
+            return total, [_mark_row_to_item(row) for row in rows]
+
+
+async def get_mark_for_ops(mark_id: int) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT id, key, zh_name, zh_description, image, sort_order FROM pokemon_mark WHERE id = %s",
+                (mark_id,),
+            )
+            row = await cur.fetchone()
+            return _mark_row_to_item(row) if row else None
+
+
+async def get_mark_by_key(key: str) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT id, key FROM pokemon_mark WHERE key = %s", (key,))
+            return await cur.fetchone()
+
+
+async def create_mark_for_ops(payload: dict) -> dict:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                INSERT INTO pokemon_mark (key, zh_name, zh_description, image, sort_order)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id, key, zh_name, zh_description, image, sort_order
+                """,
+                (
+                    payload["key"],
+                    payload["zh_name"],
+                    payload.get("zh_description") or "",
+                    payload.get("image") or "",
+                    int(payload.get("sort_order") or 0),
+                ),
+            )
+            row = await cur.fetchone()
+        await conn.commit()
+        return _mark_row_to_item(row)
+
+
+async def update_mark_for_ops(mark_id: int, payload: dict) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                UPDATE pokemon_mark
+                SET key = %s,
+                    zh_name = %s,
+                    zh_description = %s,
+                    image = %s,
+                    sort_order = %s
+                WHERE id = %s
+                RETURNING id, key, zh_name, zh_description, image, sort_order
+                """,
+                (
+                    payload["key"],
+                    payload["zh_name"],
+                    payload.get("zh_description") or "",
+                    payload.get("image") or "",
+                    int(payload.get("sort_order") or 0),
+                    mark_id,
+                ),
+            )
+            row = await cur.fetchone()
+        await conn.commit()
+        return _mark_row_to_item(row) if row else None
+
+
+async def delete_mark_for_ops(mark_id: int) -> bool:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("DELETE FROM pokemon_mark WHERE id = %s", (mark_id,))
             deleted = cur.rowcount > 0
         await conn.commit()
         return deleted
