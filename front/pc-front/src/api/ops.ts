@@ -184,6 +184,31 @@ export interface OpsPokemonUpsertPayload {
   skills: OpsPokemonSkillItem[]
 }
 
+export interface OpsPokemonMarkItem {
+  id: number
+  key: string
+  zh_name: string
+  zh_description: string
+  sort_order: number
+  image: string
+  image_url: string
+}
+
+export interface OpsPokemonMarkListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsPokemonMarkItem[]
+}
+
+export interface OpsPokemonMarkPayload {
+  key: string
+  zh_name: string
+  zh_description: string
+  sort_order: number
+  image: string
+}
+
 const http = axios.create({
   baseURL: apiBaseUrl,
   timeout: 10000,
@@ -831,4 +856,24 @@ export function uploadOpsResonanceMagicIcon(file: File): Promise<OpsResonanceMag
   return httpUpload
     .post<OpsResonanceMagicIconUploadResponse>('/api/ops/resonance-magics/icon', body)
     .then((r) => r.data)
+}
+
+export function fetchOpsPokemonMarks(params: {
+  keyword?: string
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsPokemonMarkListResponse> {
+  return http.get<OpsPokemonMarkListResponse>('/api/ops/pokemon-marks', { params }).then((r) => r.data)
+}
+
+export function createOpsPokemonMark(payload: OpsPokemonMarkPayload): Promise<OpsPokemonMarkItem> {
+  return http.post<OpsPokemonMarkItem>('/api/ops/pokemon-marks', payload).then((r) => r.data)
+}
+
+export function updateOpsPokemonMark(id: number, payload: OpsPokemonMarkPayload): Promise<OpsPokemonMarkItem> {
+  return http.put<OpsPokemonMarkItem>(`/api/ops/pokemon-marks/${id}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsPokemonMark(id: number): Promise<void> {
+  return http.delete(`/api/ops/pokemon-marks/${id}`).then(() => undefined)
 }

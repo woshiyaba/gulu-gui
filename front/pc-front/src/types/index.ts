@@ -29,6 +29,15 @@ export interface SkillStone {
   icon: string
 }
 
+export interface PokemonMark {
+  id: number
+  key: string
+  zh_name: string
+  zh_description: string
+  sort_order: number
+  image: string
+}
+
 export interface SkillStoneListResponse {
   total: number
   items: SkillStone[]

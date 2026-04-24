@@ -13,6 +13,10 @@ const router = createRouter({
     { path: '/skill-stones', component: SkillStoneView },
     { path: '/skills', component: SkillListView },
     {
+      path: '/pokemon-marks',
+      component: () => import('@/views/PokemonMarksView.vue'),
+    },
+    {
       path: '/lineups',
       component: () => import('@/views/PokemonLineupsView.vue'),
     },
@@ -80,6 +84,10 @@ const router = createRouter({
         {
           path: 'resonance-magic',
           component: () => import('@/views/ops/OpsResonanceMagicView.vue'),
+        },
+        {
+          path: 'pokemon-marks',
+          component: () => import('@/views/ops/OpsPokemonMarksView.vue'),
         },
       ],
     },

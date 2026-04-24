@@ -9,6 +9,7 @@ import type {
   PokemonDetail,
   PokemonEvolutionChain,
   PokemonListResponse,
+  PokemonMark,
   SkillListResponse,
   SkillStoneListResponse,
 } from '@/types'
@@ -123,4 +124,8 @@ export function fetchCategories(): Promise<Category[]> {
 
 export function fetchMapPoints(): Promise<MapPoint[]> {
   return http.get<MapPoint[]>('/api/pokemon/map-points').then((r) => r.data)
+}
+
+export function fetchPokemonMarks(): Promise<PokemonMark[]> {
+  return http.get<PokemonMark[]>('/api/pokemon-marks').then((r) => r.data)
 }
