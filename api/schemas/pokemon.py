@@ -78,6 +78,7 @@ class EvolutionChainItem(BaseModel):
 class EvolutionChainStage(BaseModel):
     sort_order: int
     next_condition: str = ""
+    pre_condition: str = ""
     items: list[EvolutionChainItem] = Field(default_factory=list)
 
 

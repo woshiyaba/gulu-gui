@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Any, Optional
 from uuid import uuid4
 
+from agents.sub.pk_subagent import battle_analyzer
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -192,13 +194,13 @@ def create_main_agent():
         tools=[call_api],
         name="main-agent",
         chat_model_kwargs={"extra_body": {"enable_search": True}},
+        subagents=[battle_analyzer],
     )
 
 
 # ---------------------------------------------------------------------------
 # CLI
 # ---------------------------------------------------------------------------
-
 
 def _extract_reply(result: dict) -> str:
     """从 agent 返回结果中提取最后一条 AI 回复文本。"""

@@ -65,6 +65,7 @@ export interface EvolutionChainItem {
 export interface EvolutionChainStage {
   sort_order: number
   next_condition: string
+  pre_condition: string
   items: EvolutionChainItem[]
 }
 

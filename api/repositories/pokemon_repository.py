@@ -404,7 +404,7 @@ async def list_evolution_chain_members(chain_id: int) -> list[dict]:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
-                SELECT chain_id, sort_order, pokemon_name, evolution_condition
+                SELECT chain_id, sort_order, pokemon_name, evolution_condition, pre_evolution_condition
                 FROM evolution_chain
                 WHERE chain_id = %s
                 ORDER BY sort_order
@@ -430,7 +430,7 @@ async def list_pokemon_variants_by_base_names(base_names: list[str]) -> list[dic
         async with conn.cursor() as cur:
             await cur.execute(
                 f"""
-                SELECT p.no, p.id, p.name, p.image
+                SELECT p.no, p.id, p.name, p.image, p.image_lc
                 FROM pokemon p
                 WHERE {' OR '.join(conditions)}
                 ORDER BY p.no, p.id, p.name

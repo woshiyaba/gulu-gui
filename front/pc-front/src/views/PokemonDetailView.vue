@@ -3,7 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { fetchPokemonDetail, fetchPokemonEvolutionChain } from '@/api/pokemon'
 import { useTheme } from '@/composables/useTheme'
-import type { PokemonDetail, PokemonEvolutionChain } from '@/types'
+import type { EvolutionChainItem, PokemonDetail, PokemonEvolutionChain } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -54,6 +54,53 @@ function focusSkillCell(ev: MouseEvent) {
 
 function isCurrentEvolutionItem(name: string) {
   return pokemon.value?.name === name
+}
+
+// 相同 sort_order 的 stage 视为同一层的多个分支，横向并排展示；
+// 每个分支保留自己的 pre_condition / next_condition，用于树形多分支进化的条件标注。
+interface EvolutionBranch {
+  key: string
+  pre_condition: string
+  next_condition: string
+  items: EvolutionChainItem[]
+}
+
+interface EvolutionLevel {
+  sort_order: number
+  branches: EvolutionBranch[]
+}
+
+const evolutionLevels = computed<EvolutionLevel[]>(() => {
+  const stages = evolutionChain.value?.stages
+  if (!stages?.length) return []
+  const map = new Map<number, EvolutionLevel>()
+  stages.forEach((stage, idx) => {
+    let level = map.get(stage.sort_order)
+    if (!level) {
+      level = { sort_order: stage.sort_order, branches: [] }
+      map.set(stage.sort_order, level)
+    }
+    level.branches.push({
+      key: `${stage.sort_order}-${idx}`,
+      pre_condition: (stage.pre_condition ?? '').trim(),
+      next_condition: (stage.next_condition ?? '').trim(),
+      items: stage.items ?? [],
+    })
+  })
+  return Array.from(map.values()).sort((a, b) => a.sort_order - b.sort_order)
+})
+
+function hasIncomingBar(levelIndex: number): boolean {
+  const cur = evolutionLevels.value[levelIndex]
+  return !!cur && levelIndex > 0 && cur.branches.length > 1
+}
+
+function hasOutgoingBar(levelIndex: number): boolean {
+  const levels = evolutionLevels.value
+  const cur = levels[levelIndex]
+  const next = levels[levelIndex + 1]
+  // 多父 → 单子 时，上层出连接线需要横向合并
+  return !!cur && !!next && cur.branches.length > 1 && next.branches.length === 1
 }
 
 async function goToEvolution(name: string) {
@@ -341,40 +388,77 @@ watch(() => route.params.name, (n) => n && load(n as string))
       <aside class="detail-side">
         <section class="card evolution-card">
           <h2 class="section-title">进化链</h2>
-          <div v-if="!evolutionChain?.stages?.length" class="no-data">暂无进化链数据</div>
-          <div v-else class="evolution-stages">
-            <template v-for="(stage, index) in evolutionChain.stages" :key="stage.sort_order">
-              <div class="evolution-stage">
-                <div class="evolution-items">
-                  <button
-                    v-for="item in stage.items"
-                    :key="item.name"
-                    type="button"
-                    class="evolution-item"
-                    :class="{ 'is-active': isCurrentEvolutionItem(item.name) }"
-                    @click="goToEvolution(item.name)"
-                  >
-                    <div class="evolution-item-image-wrap">
-                      <img
-                        v-if="item.image_url"
-                        :src="item.image_url"
-                        :alt="item.name"
-                        class="evolution-item-image"
-                      />
-                      <div v-else class="evolution-item-placeholder">?</div>
-                    </div>
-                    <div class="evolution-item-name">{{ item.name }}</div>
-                  </button>
-                </div>
-              </div>
+          <div v-if="!evolutionLevels.length" class="no-data">暂无进化链数据</div>
+          <div
+            v-else
+            class="evolution-tree"
+            :class="{ 'is-single-level': evolutionLevels.length === 1 }"
+          >
+            <div
+              v-for="(level, levelIndex) in evolutionLevels"
+              :key="level.sort_order"
+              class="evolution-level"
+            >
+              <div
+                v-for="(branch, branchIndex) in level.branches"
+                :key="branch.key"
+                class="evolution-branch"
+              >
+                <!-- 入连接线 + pre_condition：只有非第一层才展示 -->
+                <template v-if="levelIndex > 0">
+                  <div
+                    class="connector connector-in"
+                    :class="{
+                      'has-bar': hasIncomingBar(levelIndex),
+                      'is-first': branchIndex === 0,
+                      'is-last': branchIndex === level.branches.length - 1,
+                    }"
+                  ></div>
+                  <div v-if="branch.pre_condition" class="evolution-condition">
+                    {{ branch.pre_condition }}
+                  </div>
+                </template>
 
-              <div v-if="index < evolutionChain.stages.length - 1" class="evolution-arrow-block">
-                <div class="evolution-arrow">↓</div>
-                <div v-if="stage.next_condition" class="evolution-condition">
-                  {{ stage.next_condition }}
+                <div class="evolution-stage">
+                  <div class="evolution-items">
+                    <button
+                      v-for="item in branch.items"
+                      :key="item.name"
+                      type="button"
+                      class="evolution-item"
+                      :class="{ 'is-active': isCurrentEvolutionItem(item.name) }"
+                      @click="goToEvolution(item.name)"
+                    >
+                      <div class="evolution-item-image-wrap">
+                        <img
+                          v-if="item.image_url"
+                          :src="item.image_url"
+                          :alt="item.name"
+                          class="evolution-item-image"
+                        />
+                        <div v-else class="evolution-item-placeholder">?</div>
+                      </div>
+                      <div class="evolution-item-name">{{ item.name }}</div>
+                    </button>
+                  </div>
                 </div>
+
+                <!-- next_condition + 出连接线：只有非最后一层才展示 -->
+                <template v-if="levelIndex < evolutionLevels.length - 1">
+                  <div v-if="branch.next_condition" class="evolution-condition">
+                    {{ branch.next_condition }}
+                  </div>
+                  <div
+                    class="connector connector-out"
+                    :class="{
+                      'has-bar': hasOutgoingBar(levelIndex),
+                      'is-first': branchIndex === 0,
+                      'is-last': branchIndex === level.branches.length - 1,
+                    }"
+                  ></div>
+                </template>
               </div>
-            </template>
+            </div>
           </div>
         </section>
       </aside>
@@ -467,17 +551,41 @@ watch(() => route.params.name, (n) => n && load(n as string))
 
 .evolution-card {}
 
-.evolution-stages {
+/* 进化树：每一层横向并排展示所有分支，不同层之间由 connector 连接 */
+.evolution-tree {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  --connector-color: var(--color-border);
+  --connector-thickness: 2px;
+  --connector-half-gap: 5px;
 }
 
-/* flex wrap：每行固定3个，最后一行不足时自动居中 */
+.evolution-level {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.evolution-branch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex: 1 1 0;
+  min-width: 0;
+  /* 用 margin 代替 gap，使 connector 的横向合并线可以跨越分支间隙 */
+  margin: 0 var(--connector-half-gap);
+}
+
+.evolution-stage {
+  width: 100%;
+}
+
+/* 分支内部的形态卡片纵向堆叠，避免与分支之间的横向布局冲突 */
 .evolution-items {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
   gap: 8px;
 }
 
@@ -486,9 +594,7 @@ watch(() => route.params.name, (n) => n && load(n as string))
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  /* 固定占 1/3 宽度（减去 gap）*/
-  flex: 0 0 calc(33.33% - 6px);
-  max-width: calc(33.33% - 6px);
+  width: 100%;
   padding: 8px 6px 10px;
   border: 1px solid var(--color-border);
   border-radius: 12px;
@@ -538,30 +644,94 @@ watch(() => route.params.name, (n) => n && load(n as string))
   word-break: break-word;
 }
 
-.evolution-arrow-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
+/* —— 连接线 —— */
+/* connector = 一段位于卡片上/下方的空白区域，通过伪元素绘制竖线（::before）和可选的水平兄弟线（::after） */
+.connector {
+  position: relative;
+  width: 100%;
+  height: 28px;
+  flex-shrink: 0;
 }
 
-.evolution-arrow {
-  font-size: 26px;
-  line-height: 1;
-  color: var(--color-muted);
+/* 默认：贯穿整个 connector 的竖线 */
+.connector::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--connector-thickness);
+  background: var(--connector-color);
+  transform: translateX(calc(var(--connector-thickness) * -0.5));
 }
 
+/* 有 bar 的 connector-in：竖线从 bar（顶部）往下，bar 把所有兄弟连起来 */
+.connector-in.has-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  height: var(--connector-thickness);
+  background: var(--connector-color);
+  /* 向两侧延伸进分支间隙 */
+  left: calc(var(--connector-half-gap) * -1);
+  right: calc(var(--connector-half-gap) * -1);
+}
+
+/* 有 bar 的 connector-out：竖线从顶部到 bar（底部），bar 聚合多父分支 */
+.connector-out.has-bar::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  height: var(--connector-thickness);
+  background: var(--connector-color);
+  left: calc(var(--connector-half-gap) * -1);
+  right: calc(var(--connector-half-gap) * -1);
+}
+
+/* 首末分支：把水平线的外侧半段隐藏，形成 ┌ / ┐ / └ / ┘ */
+.connector.has-bar.is-first::after {
+  left: 50%;
+}
+.connector.has-bar.is-last::after {
+  right: 50%;
+}
+
+/* 条件胶囊：在分支 column 的正常流中，紧贴卡片上/下 */
 .evolution-condition {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 10px;
+  align-self: center;
+  max-width: 100%;
+  margin: 4px 0;
+  padding: 3px 10px;
   border-radius: 999px;
   background: var(--color-hover);
   color: var(--color-muted);
   font-size: 12px;
   line-height: 1.4;
   text-align: center;
+  word-break: break-word;
+}
+
+/* 单层级：没有上下连接线，分支横向铺成一行，每个分支内部 items 也铺成一行 */
+.evolution-tree.is-single-level .evolution-level {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.evolution-tree.is-single-level .evolution-branch {
+  flex: 0 1 auto;
+  margin: 0;
+}
+
+.evolution-tree.is-single-level .evolution-items {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.evolution-tree.is-single-level .evolution-item {
+  width: auto;
+  flex: 0 0 96px;
 }
 
 .center-msg {

@@ -2,7 +2,7 @@ from decimal import Decimal
 from fractions import Fraction
 
 from api.repositories import attribute_matchup_repository, pokemon_repository
-from api.utils.media import build_image_url
+from api.utils.media import build_friend_image_url, build_image_url
 from api.utils.pokemon_mapper import (
     to_attribute_item,
     to_pokemon_detail,
@@ -31,10 +31,11 @@ def _build_fallback_evolution_chain(base: dict) -> dict:
             {
                 "sort_order": 1,
                 "next_condition": "",
+                "pre_condition": "",
                 "items": [
                     {
                         "name": base["name"],
-                        "image_url": build_image_url(base.get("image", "")),
+                        "image_url": build_friend_image_url(base.get("image_lc", ""), ""),
                     }
                 ],
             }
@@ -52,11 +53,21 @@ def _group_variants_by_base_name(variant_rows: list[dict]) -> dict[str, list[dic
         if name in seen_names:
             continue
         seen_names.add(name)
+        # 先添加一次原本的形态，再添加一次去掉形态后缀的形态
+        grouped.setdefault(name, []).append(
+            {
+                "name": name,
+                "image_url": build_friend_image_url(row.get("image_lc", ""), ""),
+            }
+        )
         base_name = _strip_variant_suffix(name)
+        # 判断grouped 中是否已经有base_name的key
+        if base_name == name:
+            continue
         grouped.setdefault(base_name, []).append(
             {
                 "name": name,
-                "image_url": build_image_url(row.get("image", "")),
+                "image_url": build_friend_image_url(row.get("image_lc", ""), ""),
             }
         )
 
@@ -75,9 +86,9 @@ def _fraction_from_db(value) -> Fraction:
 
 
 def _compute_restrain(
-    defender_attrs: list[str],
-    defensive_rows: list[dict],
-    offensive_rows: list[dict],
+        defender_attrs: list[str],
+        defensive_rows: list[dict],
+        offensive_rows: list[dict],
 ) -> dict:
     """
     从属性克制矩阵计算 restrain 四个列表：
@@ -166,9 +177,9 @@ async def get_pokemon_marks() -> list[dict]:
 
 
 async def get_skills(
-    name: str = "",
-    skill_type: str = "",
-    attr: str = "",
+        name: str = "",
+        skill_type: str = "",
+        attr: str = "",
 ) -> dict:
     rows = await pokemon_repository.list_skills(
         name=name.strip(),
@@ -197,13 +208,13 @@ async def get_skill_stones(skill_name: str = "") -> dict:
 
 
 async def get_pokemon(
-    name: str = "",
-    attrs: list[str] | None = None,
-    egg_groups: list[str] | None = None,
-    order_by: str = "no",
-    order_dir: str = "asc",
-    page: int = 1,
-    page_size: int = 30,
+        name: str = "",
+        attrs: list[str] | None = None,
+        egg_groups: list[str] | None = None,
+        order_by: str = "no",
+        order_dir: str = "asc",
+        page: int = 1,
+        page_size: int = 30,
 ) -> dict:
     attrs = _normalize_multi_filter(attrs)
     egg_groups = _normalize_multi_filter(egg_groups)
@@ -345,7 +356,8 @@ async def get_pokemon_evolution_chain(name: str) -> dict:
         stages.append(
             {
                 "sort_order": member["sort_order"],
-                "next_condition": member.get("evolution_condition", ""),
+                "next_condition": member.get("evolution_condition", "") or "",
+                "pre_condition": member.get("pre_evolution_condition", "") or "",
                 "items": items,
             }
         )
