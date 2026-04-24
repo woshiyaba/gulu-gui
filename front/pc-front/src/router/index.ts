@@ -89,6 +89,10 @@ const router = createRouter({
           path: 'pokemon-marks',
           component: () => import('@/views/ops/OpsPokemonMarksView.vue'),
         },
+        {
+          path: 'marks',
+          component: () => import('@/views/ops/OpsMarksView.vue'),
+        },
       ],
     },
   ],

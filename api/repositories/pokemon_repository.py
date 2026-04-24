@@ -152,6 +152,21 @@ async def list_categories() -> list[dict]:
             return await cur.fetchall()
 
 
+async def list_pokemon_marks() -> list[dict]:
+    """查询 pokemon_mark 表的全部词条。"""
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT id, key, zh_name, zh_description, sort_order, image
+                FROM pokemon_mark
+                ORDER BY sort_order, id
+                """
+            )
+            return await cur.fetchall()
+
+
 async def list_skill_types() -> list[str]:
     """查询所有不重复的技能类型（物攻/魔攻/状态/防御），供前端筛选。"""
     pool = await get_pool()

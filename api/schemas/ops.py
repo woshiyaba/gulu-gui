@@ -313,3 +313,52 @@ class OpsResonanceMagicUpsertRequest(BaseModel):
     max_usage_count: int = 1
     icon: str = ""
     sort_order: int = 0
+
+
+class OpsPokemonMarkItem(BaseModel):
+    id: int
+    key: str
+    zh_name: str
+    zh_description: str = ""
+    sort_order: int = 0
+    image: str = ""
+    image_url: str = ""
+
+
+class OpsPokemonMarkListResponse(BaseModel):
+    total: int
+    page: int = 1
+    page_size: int = 10
+    items: list[OpsPokemonMarkItem] = Field(default_factory=list)
+
+
+class OpsPokemonMarkUpsertRequest(BaseModel):
+    key: str
+    zh_name: str
+    zh_description: str = ""
+    sort_order: int = 0
+    image: str = ""
+
+
+class OpsMarkItem(BaseModel):
+    id: int
+    key: str
+    zh_name: str
+    zh_description: str = ""
+    image: str = ""
+    sort_order: int = 0
+
+
+class OpsMarkListResponse(BaseModel):
+    total: int
+    page: int = 1
+    page_size: int = 10
+    items: list[OpsMarkItem] = Field(default_factory=list)
+
+
+class OpsMarkUpsertRequest(BaseModel):
+    key: str
+    zh_name: str
+    zh_description: str = ""
+    image: str = ""
+    sort_order: int = 0

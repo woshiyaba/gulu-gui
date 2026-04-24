@@ -8,6 +8,7 @@ from api.schemas.pokemon import (
     PokemonBodyMatchResponse,
     PokemonDetailResponse,
     PokemonListResponse,
+    PokemonMarkItem,
     SkillListResponse,
     SkillStoneListResponse,
 )
@@ -21,6 +22,7 @@ from api.services.pokemon_service import (
     get_categories as get_categories_service,
     get_egg_group_names as get_egg_group_names_service,
     get_pet_map_points as get_pet_map_points_service,
+    get_pokemon_marks as get_pokemon_marks_service,
     get_pokemon_by_body_metrics as get_pokemon_by_body_metrics_service,
     get_pokemon as get_pokemon_service,
     get_pokemon_detail as get_pokemon_detail_service,
@@ -100,6 +102,12 @@ async def get_categories():
 async def get_pet_map_points():
     """全量返回 pet_map_point 表数据，并补 category_id 对应图标地址。"""
     return await get_pet_map_points_service()
+
+
+@router.get("/pokemon-marks", response_model=list[PokemonMarkItem])
+async def get_pokemon_marks():
+    """返回 pokemon_mark 表的全部词条（印记、状态、增益、减益、环境等战斗术语）。"""
+    return await get_pokemon_marks_service()
 
 
 @router.get("/skill-stones", response_model=SkillStoneListResponse)

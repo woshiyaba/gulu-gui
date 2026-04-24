@@ -45,6 +45,12 @@
 			}
 		},
 		{
+			"path": "pages/more/pokemon-marks",
+			"style": {
+				"navigationBarTitleText": "名词解释"
+			}
+		},
+		{
 			"path": "pages/lineup/list",
 			"style": {
 				"navigationBarTitleText": "阵容推荐"

@@ -30,6 +30,7 @@ const menus = [
   { to: '/ops/skills', label: '技能维护' },
   { to: '/ops/skill-stones', label: '技能石维护' },
   { to: '/ops/personalities', label: '性格维护' },
+  { to: '/ops/marks', label: '印记维护' },
   { to: '/ops/resonance-magic', label: '共鸣魔法' },
   { to: '/ops/pokemon-marks', label: '名词解释' },
   { to: '/ops/map', label: '地图维护', disabled: true },

@@ -137,6 +137,15 @@ class DefensiveTypeChart(BaseModel):
     cells: list[DefensiveTypeChartCell] = Field(default_factory=list)
 
 
+class PokemonMarkItem(BaseModel):
+    id: int
+    key: str
+    zh_name: str
+    zh_description: str = ""
+    sort_order: int
+    image: str = ""
+
+
 class PokemonDetailResponse(PokemonListItem):
     obtain_method: str = ""
     stats: PokemonStats = Field(default_factory=PokemonStats)

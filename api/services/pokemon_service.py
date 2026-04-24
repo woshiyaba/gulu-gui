@@ -149,6 +149,22 @@ async def get_skill_types() -> list[str]:
     return await pokemon_repository.list_skill_types()
 
 
+async def get_pokemon_marks() -> list[dict]:
+    """返回 pokemon_mark 表的全部词条，图标路径补全为绝对地址。"""
+    rows = await pokemon_repository.list_pokemon_marks()
+    return [
+        {
+            "id": row["id"],
+            "key": row["key"],
+            "zh_name": row["zh_name"],
+            "zh_description": row.get("zh_description", ""),
+            "sort_order": row["sort_order"],
+            "image": build_image_url(row.get("image", "")),
+        }
+        for row in rows
+    ]
+
+
 async def get_skills(
     name: str = "",
     skill_type: str = "",

@@ -19,6 +19,12 @@ const menuItems: MenuItem[] = [
     url: '/pages/skill/stone',
     color: '#18a874',
   },
+  {
+    title: '名词解释',
+    desc: '印记、状态、环境等战斗术语说明',
+    url: '/pages/more/pokemon-marks',
+    color: '#f08b3a',
+  },
 ]
 
 function navigateTo(url: string) {
