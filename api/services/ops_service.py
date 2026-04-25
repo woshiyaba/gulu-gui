@@ -496,9 +496,10 @@ async def update_pokemon_evolution_chain_for_ops(user: dict, pokemon_id: int, pa
             continue
         normalized_steps.append(
             {
-                "sort_order": int(step.get("sort_order") or idx),
+                "sort_order": max(1, int(step.get("sort_order") or idx)),
                 "pokemon_name": pokemon_name,
                 "evolution_condition": (step.get("evolution_condition") or "").strip(),
+                "pre_evolution_condition": (step.get("pre_evolution_condition") or "").strip(),
             }
         )
     if not normalized_steps:

@@ -876,7 +876,7 @@ async def get_pokemon_evolution_chain_for_ops(pokemon_id: int) -> dict | None:
                 return {"chain_id": None, "steps": []}
             await cur.execute(
                 """
-                SELECT sort_order, pokemon_name, evolution_condition
+                SELECT sort_order, pokemon_name, evolution_condition, pre_evolution_condition
                 FROM evolution_chain
                 WHERE chain_id = %s
                 ORDER BY sort_order, id
@@ -889,6 +889,7 @@ async def get_pokemon_evolution_chain_for_ops(pokemon_id: int) -> dict | None:
                     "sort_order": row["sort_order"],
                     "pokemon_name": row["pokemon_name"],
                     "evolution_condition": row.get("evolution_condition") or "",
+                    "pre_evolution_condition": row.get("pre_evolution_condition") or "",
                 }
                 for row in rows
             ]
@@ -956,14 +957,17 @@ async def save_pokemon_evolution_chain_for_ops(pokemon_id: int, steps: list[dict
                     continue
                 await cur.execute(
                     """
-                    INSERT INTO evolution_chain (chain_id, sort_order, pokemon_name, evolution_condition)
-                    VALUES (%s, %s, %s, %s)
+                    INSERT INTO evolution_chain (
+                        chain_id, sort_order, pokemon_name, evolution_condition, pre_evolution_condition
+                    )
+                    VALUES (%s, %s, %s, %s, %s)
                     """,
                     (
                         chain_id,
                         int(step.get("sort_order") or idx),
                         pokemon_name,
                         (step.get("evolution_condition") or "").strip(),
+                        (step.get("pre_evolution_condition") or "").strip(),
                     ),
                 )
         await conn.commit()
@@ -1018,7 +1022,7 @@ async def search_evolution_chain_for_ops(keyword: str) -> dict | None:
 
             await cur.execute(
                 """
-                SELECT sort_order, pokemon_name, evolution_condition
+                SELECT sort_order, pokemon_name, evolution_condition, pre_evolution_condition
                 FROM evolution_chain
                 WHERE chain_id = %s
                 ORDER BY sort_order, id
@@ -1031,6 +1035,7 @@ async def search_evolution_chain_for_ops(keyword: str) -> dict | None:
                     "sort_order": row["sort_order"],
                     "pokemon_name": row["pokemon_name"],
                     "evolution_condition": row.get("evolution_condition") or "",
+                    "pre_evolution_condition": row.get("pre_evolution_condition") or "",
                 }
                 for row in rows
             ]
@@ -1727,6 +1732,7 @@ async def _enrich_evolution_steps(conn: AsyncConnection, steps: list[dict]) -> l
                 "sort_order": int(step.get("sort_order") or 0),
                 "pokemon_name": pokemon_name,
                 "evolution_condition": (step.get("evolution_condition") or "").strip(),
+                "pre_evolution_condition": (step.get("pre_evolution_condition") or "").strip(),
                 "image_url": image_url,
                 "matched": bool(image_url),
             }

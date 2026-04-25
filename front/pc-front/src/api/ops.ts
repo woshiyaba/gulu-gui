@@ -131,6 +131,7 @@ export interface OpsEvolutionChainStep {
   sort_order: number
   pokemon_name: string
   evolution_condition: string
+  pre_evolution_condition: string
   image_url?: string
   matched?: boolean
 }

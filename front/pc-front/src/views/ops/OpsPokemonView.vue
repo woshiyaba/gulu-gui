@@ -62,6 +62,9 @@ const skillSelectorPageSize = 10
 const evolutionSteps = ref<OpsEvolutionChainStep[]>([])
 const evolutionChainId = ref<number | null>(null)
 const evolutionSearchKeyword = ref('')
+const evolutionPokemonKeyword = ref('')
+const evolutionPokemonCandidates = ref<OpsPokemonItem[]>([])
+const evolutionPokemonSearching = ref(false)
 /** 已选但未保存的图片（保存时再上传） */
 const pendingFriendFile = ref<File | null>(null)
 const pendingFriendPreviewUrl = ref('')
@@ -76,6 +79,7 @@ const evolutionDraft = reactive<OpsEvolutionChainStep>({
   sort_order: 1,
   pokemon_name: '',
   evolution_condition: '',
+  pre_evolution_condition: '',
   image_url: '',
   matched: false,
 })
@@ -224,6 +228,30 @@ const filteredTraitSuggestions = computed(() => {
   return traits.value.filter((item) => item.name.toLowerCase().includes(kw)).slice(0, 12)
 })
 
+const sortedEvolutionSteps = computed(() =>
+  evolutionSteps.value
+    .map((step, index) => ({ step, index }))
+    .sort((a, b) => (a.step.sort_order || 0) - (b.step.sort_order || 0) || a.index - b.index)
+)
+
+const evolutionLevelsForEditor = computed(() => {
+  const levels: Array<{ sort_order: number; items: Array<{ step: OpsEvolutionChainStep; index: number }> }> = []
+  for (const item of sortedEvolutionSteps.value) {
+    const sortOrder = Math.max(1, Number(item.step.sort_order || 1))
+    let level = levels.find((x) => x.sort_order === sortOrder)
+    if (!level) {
+      level = { sort_order: sortOrder, items: [] }
+      levels.push(level)
+    }
+    level.items.push(item)
+  }
+  return levels
+})
+
+function getEvolutionLevelLastIndex(level: { items: Array<{ index: number }> }) {
+  return level.items[level.items.length - 1]?.index ?? evolutionSteps.value.length - 1
+}
+
 function triggerFriendFilePick() {
   friendFileInputRef.value?.click()
 }
@@ -295,6 +323,9 @@ function resetForm() {
   evolutionSteps.value = []
   evolutionChainId.value = null
   evolutionSearchKeyword.value = ''
+  evolutionPokemonKeyword.value = ''
+  evolutionPokemonCandidates.value = []
+  evolutionPokemonSearching.value = false
 }
 
 function openCreateModal() {
@@ -311,7 +342,10 @@ async function openEditModal(id: number) {
     resetPendingYise()
     Object.assign(form, detail)
     evolutionChainId.value = chain.chain_id
-    evolutionSteps.value = (chain.steps || []).map((step) => ({ ...step }))
+    evolutionSteps.value = (chain.steps || []).map((step) => ({
+      ...step,
+      pre_evolution_condition: step.pre_evolution_condition || '',
+    }))
     skillPage.value = 1
     modalVisible.value = true
   } catch (err: any) {
@@ -321,7 +355,51 @@ async function openEditModal(id: number) {
 
 function removeEvolutionStep(index: number) {
   evolutionSteps.value.splice(index, 1)
-  evolutionSteps.value = evolutionSteps.value.map((step, idx) => ({ ...step, sort_order: idx + 1 }))
+}
+
+function nextEvolutionSortOrder() {
+  return Math.max(0, ...evolutionSteps.value.map((step) => Number(step.sort_order || 0))) + 1
+}
+
+function hasEvolutionPokemon(name: string) {
+  const normalized = name.trim()
+  return evolutionSteps.value.some((step) => (step.pokemon_name || '').trim() === normalized)
+}
+
+function buildEvolutionStep(name: string, sortOrder = nextEvolutionSortOrder()): OpsEvolutionChainStep {
+  return {
+    sort_order: sortOrder,
+    pokemon_name: name.trim(),
+    evolution_condition: '',
+    pre_evolution_condition: '',
+    image_url: '',
+    matched: false,
+  }
+}
+
+function addCurrentPokemonToEvolution() {
+  const ownName = form.name.trim()
+  if (!ownName) {
+    showOpsToast('当前精灵名称为空，无法添加到进化链', 'error')
+    return
+  }
+  if (hasEvolutionPokemon(ownName)) {
+    showOpsToast('当前精灵已在进化链中', 'info')
+    return
+  }
+  evolutionSteps.value.push({
+    ...buildEvolutionStep(ownName, evolutionSteps.value.length ? nextEvolutionSortOrder() : 1),
+    image_url: friendDisplaySrc.value,
+    matched: !!friendDisplaySrc.value,
+  })
+}
+
+function createEvolutionChainDraft() {
+  if (evolutionSteps.value.length) {
+    showOpsToast('当前已经有进化链草稿，可继续添加精灵', 'info')
+    return
+  }
+  addCurrentPokemonToEvolution()
 }
 
 async function searchEvolutionChain() {
@@ -333,11 +411,42 @@ async function searchEvolutionChain() {
   try {
     const chain = await searchOpsPokemonEvolutionChain(kw)
     evolutionChainId.value = chain.chain_id
-    evolutionSteps.value = (chain.steps || []).map((step) => ({ ...step }))
-    showOpsToast('已加载进化链，可拖拽当前精灵到目标位置', 'success')
+    evolutionSteps.value = (chain.steps || []).map((step) => ({
+      ...step,
+      pre_evolution_condition: step.pre_evolution_condition || '',
+    }))
+    showOpsToast('已加载进化链，可添加或调整当前精灵后保存绑定', 'success')
   } catch (err: any) {
     showOpsToast(err?.response?.data?.detail || '搜索进化链失败', 'error')
   }
+}
+
+async function searchEvolutionPokemon() {
+  const kw = evolutionPokemonKeyword.value.trim()
+  if (!kw) {
+    showOpsToast('请输入精灵名称后再搜索', 'error')
+    return
+  }
+  evolutionPokemonSearching.value = true
+  try {
+    const data = await fetchOpsPokemon({ keyword: kw, page: 1, page_size: 10 })
+    evolutionPokemonCandidates.value = data.items
+    if (!data.items.length) {
+      showOpsToast('未找到匹配精灵', 'info')
+    }
+  } catch (err: any) {
+    showOpsToast(err?.response?.data?.detail || '搜索精灵失败', 'error')
+  } finally {
+    evolutionPokemonSearching.value = false
+  }
+}
+
+function addEvolutionPokemon(item: OpsPokemonItem) {
+  if (hasEvolutionPokemon(item.name)) {
+    showOpsToast('该精灵已在进化链中', 'info')
+    return
+  }
+  evolutionSteps.value.push(buildEvolutionStep(item.name, evolutionSteps.value.length ? nextEvolutionSortOrder() : 1))
 }
 
 function dragCurrentPokemon(_e: DragEvent) {
@@ -354,13 +463,12 @@ function dropCurrentPokemon(targetIndex: number) {
   const existing = existedIndex >= 0 ? evolutionSteps.value[existedIndex] : undefined
   const ownStep: OpsEvolutionChainStep = existing
     ? { ...existing }
-    : { sort_order: 1, pokemon_name: ownName, evolution_condition: '', image_url: '', matched: false }
+    : buildEvolutionStep(ownName, evolutionSteps.value[targetIndex]?.sort_order || nextEvolutionSortOrder())
   if (existedIndex >= 0) {
     evolutionSteps.value.splice(existedIndex, 1)
   }
   const insertIndex = Math.max(0, Math.min(targetIndex, evolutionSteps.value.length))
   evolutionSteps.value.splice(insertIndex, 0, ownStep)
-  evolutionSteps.value = evolutionSteps.value.map((step, idx) => ({ ...step, sort_order: idx + 1 }))
 }
 
 function dropCurrentPokemonAfter(targetIndex: number) {
@@ -374,6 +482,7 @@ function openEvolutionEditor(index: number) {
   evolutionDraft.sort_order = current.sort_order || index + 1
   evolutionDraft.pokemon_name = current.pokemon_name || ''
   evolutionDraft.evolution_condition = current.evolution_condition || ''
+  evolutionDraft.pre_evolution_condition = current.pre_evolution_condition || ''
   evolutionDraft.image_url = current.image_url || ''
   evolutionDraft.matched = current.matched ?? false
   evolutionEditorVisible.value = true
@@ -396,7 +505,8 @@ function saveEvolutionStep() {
     ...evolutionSteps.value[idx],
     pokemon_name: name,
     evolution_condition: evolutionDraft.evolution_condition.trim(),
-    sort_order: idx + 1,
+    pre_evolution_condition: evolutionDraft.pre_evolution_condition.trim(),
+    sort_order: Math.max(1, Number(evolutionDraft.sort_order || 1)),
   }
   closeEvolutionEditor()
 }
@@ -613,10 +723,11 @@ async function submit() {
       showOpsToast('精灵已创建', 'success')
     }
     const validEvolutionSteps = evolutionSteps.value
-      .map((step, idx) => ({
-        sort_order: idx + 1,
+      .map((step) => ({
+        sort_order: Math.max(1, Number(step.sort_order || 1)),
         pokemon_name: (step.pokemon_name || '').trim(),
         evolution_condition: (step.evolution_condition || '').trim(),
+        pre_evolution_condition: (step.pre_evolution_condition || '').trim(),
       }))
       .filter((step) => step.pokemon_name)
     if (validEvolutionSteps.length > 0) {
@@ -1039,7 +1150,34 @@ onBeforeUnmount(() => {
                   placeholder="按精灵名称搜索进化链"
                 />
                 <button type="button" class="btn-secondary" @click="searchEvolutionChain">搜索进化链</button>
+                <button type="button" class="btn-secondary" @click="createEvolutionChainDraft">新建链草稿</button>
               </div>
+            </div>
+            <div class="evo-toolbar">
+              <input
+                v-model="evolutionPokemonKeyword"
+                class="skill-search-input"
+                type="text"
+                placeholder="搜索精灵添加到进化链"
+                @keyup.enter="searchEvolutionPokemon"
+              />
+              <button type="button" class="btn-secondary" :disabled="evolutionPokemonSearching" @click="searchEvolutionPokemon">
+                {{ evolutionPokemonSearching ? '搜索中...' : '搜索精灵' }}
+              </button>
+              <button type="button" class="btn-secondary" @click="addCurrentPokemonToEvolution">添加当前精灵</button>
+            </div>
+            <div v-if="evolutionPokemonCandidates.length" class="evo-candidates">
+              <button
+                v-for="item in evolutionPokemonCandidates"
+                :key="item.id"
+                type="button"
+                class="evo-candidate"
+                @click="addEvolutionPokemon(item)"
+              >
+                <span>{{ item.no }}</span>
+                <strong>{{ item.name }}</strong>
+                <em>{{ item.type_name || '未分类' }}</em>
+              </button>
             </div>
             <div class="evo-topbar">
               <div class="own-pokemon-card" draggable="true" @dragstart="dragCurrentPokemon">
@@ -1056,38 +1194,48 @@ onBeforeUnmount(() => {
                 <div class="evo-name">{{ form.name || '未命名精灵' }}</div>
               </div>
             </div>
-            <div v-if="evolutionSteps.length" class="evo-flow">
-              <template v-for="(step, idx) in evolutionSteps" :key="`${step.pokemon_name}-${idx}`">
-                <article
-                  class="evo-card"
-                  @click="openEvolutionEditor(idx)"
-                  @dragover.prevent
-                  @drop.prevent="dropCurrentPokemon(idx)"
-                >
-                  <div class="evo-stage">第 {{ idx + 1 }} 阶</div>
-                  <div class="evo-image-wrap">
-                    <img v-if="step.image_url" :src="step.image_url" alt="pokemon" class="evo-image" />
-                    <div v-else class="evo-image-placeholder">未匹配</div>
-                  </div>
-                  <div class="evo-name">{{ step.pokemon_name || '未命名' }}</div>
-                  <div class="evo-condition">{{ step.evolution_condition || '无进化条件' }}</div>
-                  <div class="evo-actions">
-                    <button type="button" class="txt-btn" @click.stop="openEvolutionEditor(idx)">编辑</button>
-                    <button type="button" class="txt-btn danger" @click.stop="removeEvolutionStep(idx)">删除</button>
-                  </div>
-                </article>
+            <div v-if="evolutionSteps.length" class="evo-levels">
+              <section
+                v-for="(level, levelIndex) in evolutionLevelsForEditor"
+                :key="level.sort_order"
+                class="evo-level"
+              >
+                <div class="evo-level-title">排序 {{ level.sort_order }}</div>
+                <div class="evo-level-items">
+                  <article
+                    v-for="{ step, index: realIndex } in level.items"
+                    :key="`${step.pokemon_name}-${realIndex}`"
+                    class="evo-card"
+                    @click="openEvolutionEditor(realIndex)"
+                    @dragover.prevent
+                    @drop.prevent="dropCurrentPokemon(realIndex)"
+                  >
+                    <div class="evo-stage">第 {{ step.sort_order }} 阶</div>
+                    <div class="evo-image-wrap">
+                      <img v-if="step.image_url" :src="step.image_url" alt="pokemon" class="evo-image" />
+                      <div v-else class="evo-image-placeholder">未匹配</div>
+                    </div>
+                    <div class="evo-name">{{ step.pokemon_name || '未命名' }}</div>
+                    <div class="evo-condition">进化：{{ step.evolution_condition || '空' }}</div>
+                    <div class="evo-condition">前置：{{ step.pre_evolution_condition || '空' }}</div>
+                    <div class="evo-actions">
+                      <button type="button" class="txt-btn" @click.stop="openEvolutionEditor(realIndex)">编辑</button>
+                      <button type="button" class="txt-btn danger" @click.stop="removeEvolutionStep(realIndex)">删除</button>
+                    </div>
+                  </article>
+                </div>
                 <div
-                  v-if="idx < evolutionSteps.length - 1"
+                  v-if="levelIndex < evolutionLevelsForEditor.length - 1"
                   class="evo-arrow"
                   @dragover.prevent
-                  @drop.prevent="dropCurrentPokemonAfter(idx)"
+                  @drop.prevent="dropCurrentPokemonAfter(getEvolutionLevelLastIndex(level))"
                 >
                   →
                 </div>
-              </template>
+              </section>
               <div class="evo-end-drop" @dragover.prevent @drop.prevent="dropCurrentPokemon(evolutionSteps.length)">放到末尾</div>
             </div>
-            <div v-if="!evolutionSteps.length" class="placeholder">先搜索进化链，再拖拽当前精灵卡片到目标位置</div>
+            <div v-if="!evolutionSteps.length" class="placeholder">可搜索已有进化链，或点击“新建链草稿 / 添加当前精灵”开始配置</div>
           </section>
 
           <div class="full actions">
@@ -1153,12 +1301,20 @@ onBeforeUnmount(() => {
         </div>
         <div class="selector-body">
           <label>
+            <span>排序（相同排序表示同一阶段分支）</span>
+            <input v-model.number="evolutionDraft.sort_order" class="keyword-input" type="number" min="1" />
+          </label>
+          <label>
             <span>精灵名称</span>
             <input v-model="evolutionDraft.pokemon_name" class="keyword-input" type="text" placeholder="请输入精灵名称" />
           </label>
           <label>
             <span>进化条件</span>
-            <input v-model="evolutionDraft.evolution_condition" class="keyword-input" type="text" placeholder="如：等级32进化" />
+            <input v-model="evolutionDraft.evolution_condition" class="keyword-input" type="text" placeholder="可为空，如：等级32进化" />
+          </label>
+          <label>
+            <span>前置进化条件</span>
+            <input v-model="evolutionDraft.pre_evolution_condition" class="keyword-input" type="text" placeholder="可为空，如：完成指定任务" />
           </label>
         </div>
         <div class="actions">
@@ -1411,6 +1567,22 @@ onBeforeUnmount(() => {
 .skill-search-input { width: 220px; height: 36px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 10px; }
 .skill-row { display: grid; grid-template-columns: 1.8fr 1fr 110px auto; gap: 8px; margin-bottom: 8px; }
 .evo-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; overflow-x: hidden; padding-bottom: 4px; }
+.evo-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.evo-candidates { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.evo-candidate {
+  min-height: 34px;
+  border: 1px solid #dcdfe6;
+  border-radius: 999px;
+  background: #fff;
+  color: #303133;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 12px;
+  cursor: pointer;
+}
+.evo-candidate:hover { border-color: #409eff; color: #409eff; }
+.evo-candidate span, .evo-candidate em { color: #909399; font-size: 12px; font-style: normal; }
 .evo-topbar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
 .own-pokemon-card {
   width: 168px;
@@ -1422,6 +1594,15 @@ onBeforeUnmount(() => {
   gap: 8px;
   cursor: grab;
 }
+.evo-levels { display: grid; gap: 10px; }
+.evo-level { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.evo-level-title {
+  min-width: 64px;
+  color: #909399;
+  font-size: 12px;
+  font-weight: 600;
+}
+.evo-level-items { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; }
 .evo-card {
   width: 160px;
   min-width: 160px;
@@ -1539,6 +1720,9 @@ onBeforeUnmount(() => {
   .section-grid, .stats-grid { grid-template-columns: 1fr; }
   .skill-row { grid-template-columns: 1fr; }
   .evo-flow { flex-direction: column; align-items: stretch; }
+  .evo-toolbar { flex-direction: column; align-items: stretch; }
+  .evo-level { flex-direction: column; align-items: stretch; }
+  .evo-level-items { flex-direction: column; }
   .evo-topbar { justify-content: stretch; }
   .own-pokemon-card { width: 100%; }
   .evo-end-drop { width: 100%; min-width: 0; height: 40px; }

@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import { fetchPokemonDetail, fetchPokemonEvolutionChain } from '@/api/pokemon'
-import type { PokemonDetail, PokemonEvolutionChain } from '@/types/pokemon'
+import type { EvolutionChainItem, PokemonDetail, PokemonEvolutionChain } from '@/types/pokemon'
 
 const pokemon = ref<PokemonDetail | null>(null)
 const evolutionChain = ref<PokemonEvolutionChain | null>(null)
@@ -53,6 +53,53 @@ function goBack() {
 
 function isCurrentEvolutionItem(name: string) {
   return pokemon.value?.name === name
+}
+
+interface EvolutionBranch {
+  key: string
+  pre_condition: string
+  next_condition: string
+  items: EvolutionChainItem[]
+}
+
+interface EvolutionLevel {
+  sort_order: number
+  branches: EvolutionBranch[]
+}
+
+const evolutionLevels = computed<EvolutionLevel[]>(() => {
+  const stages = evolutionChain.value?.stages
+  if (!stages?.length) return []
+
+  const levelMap = new Map<number, EvolutionLevel>()
+  stages.forEach((stage, index) => {
+    let level = levelMap.get(stage.sort_order)
+    if (!level) {
+      level = { sort_order: stage.sort_order, branches: [] }
+      levelMap.set(stage.sort_order, level)
+    }
+
+    // 同 sort_order 是同层分支；同 stage 的 items 是同一宠物的不同形态。
+    level.branches.push({
+      key: `${stage.sort_order}-${index}`,
+      pre_condition: (stage.pre_condition ?? '').trim(),
+      next_condition: (stage.next_condition ?? '').trim(),
+      items: stage.items ?? [],
+    })
+  })
+
+  return Array.from(levelMap.values()).sort((a, b) => a.sort_order - b.sort_order)
+})
+
+function hasIncomingBar(levelIndex: number): boolean {
+  const level = evolutionLevels.value[levelIndex]
+  return levelIndex > 0 && !!level && level.branches.length > 1
+}
+
+function hasOutgoingBar(levelIndex: number): boolean {
+  const current = evolutionLevels.value[levelIndex]
+  const next = evolutionLevels.value[levelIndex + 1]
+  return !!current && !!next && current.branches.length > 1 && next.branches.length === 1
 }
 
 function goToEvolution(name: string) {
@@ -205,39 +252,72 @@ onLoad((options) => {
 
       <view class="section-card">
         <text class="section-title">进化链</text>
-        <view v-if="!evolutionChain?.stages?.length" class="evo-empty">
+        <view v-if="!evolutionLevels.length" class="evo-empty">
           <text class="empty-text">暂无进化链数据</text>
         </view>
-        <view v-else class="evo-stages">
-          <template v-for="(stage, index) in evolutionChain.stages" :key="stage.sort_order">
-            <view class="evo-stage">
-              <view class="evo-items">
+        <view
+          v-else
+          class="evo-tree"
+          :class="{ 'evo-tree-single': evolutionLevels.length === 1 }"
+        >
+          <view
+            v-for="(level, levelIndex) in evolutionLevels"
+            :key="level.sort_order"
+            class="evo-level"
+          >
+            <view
+              v-for="(branch, branchIndex) in level.branches"
+              :key="branch.key"
+              class="evo-branch"
+            >
+              <template v-if="levelIndex > 0">
                 <view
-                  v-for="item in stage.items"
-                  :key="item.name"
-                  class="evo-item"
-                  :class="{ 'evo-item-active': isCurrentEvolutionItem(item.name) }"
-                  @tap="goToEvolution(item.name)"
-                >
-                  <view class="evo-img-wrap">
-                    <image
-                      v-if="item.image_url"
-                      class="evo-img"
-                      :src="item.image_url"
-                      mode="aspectFit"
-                    />
-                    <text v-else class="evo-img-placeholder">?</text>
+                  class="evo-connector evo-connector-in"
+                  :class="{
+                    'evo-connector-bar': hasIncomingBar(levelIndex),
+                    'evo-connector-first': branchIndex === 0,
+                    'evo-connector-last': branchIndex === level.branches.length - 1,
+                  }"
+                />
+                <text v-if="branch.pre_condition" class="evo-condition">{{ branch.pre_condition }}</text>
+              </template>
+
+              <view class="evo-stage">
+                <view class="evo-items">
+                  <view
+                    v-for="item in branch.items"
+                    :key="item.name"
+                    class="evo-item"
+                    :class="{ 'evo-item-active': isCurrentEvolutionItem(item.name) }"
+                    @tap="goToEvolution(item.name)"
+                  >
+                    <view class="evo-img-wrap">
+                      <image
+                        v-if="item.image_url"
+                        class="evo-img"
+                        :src="item.image_url"
+                        mode="aspectFit"
+                      />
+                      <text v-else class="evo-img-placeholder">?</text>
+                    </view>
+                    <text class="evo-name">{{ item.name }}</text>
                   </view>
-                  <text class="evo-name">{{ item.name }}</text>
                 </view>
               </view>
-            </view>
 
-            <view v-if="index < evolutionChain.stages.length - 1" class="evo-arrow-block">
-              <text class="evo-arrow">↓</text>
-              <text v-if="stage.next_condition" class="evo-condition">{{ stage.next_condition }}</text>
+              <template v-if="levelIndex < evolutionLevels.length - 1">
+                <text v-if="branch.next_condition" class="evo-condition">{{ branch.next_condition }}</text>
+                <view
+                  class="evo-connector evo-connector-out"
+                  :class="{
+                    'evo-connector-bar': hasOutgoingBar(levelIndex),
+                    'evo-connector-first': branchIndex === 0,
+                    'evo-connector-last': branchIndex === level.branches.length - 1,
+                  }"
+                />
+              </template>
             </view>
-          </template>
+          </view>
         </view>
       </view>
 
@@ -649,22 +729,44 @@ onLoad((options) => {
   color: #6f89b2;
 }
 
-.evo-stages {
+.evo-tree {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
   margin-top: 20rpx;
+  --evo-line-color: #dbe4f3;
+  --evo-line-size: 2rpx;
+  --evo-branch-gap: 8rpx;
+}
+
+.evo-level {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+}
+
+.evo-branch {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  margin: 0 var(--evo-branch-gap);
+}
+
+.evo-stage {
+  width: 100%;
 }
 
 .evo-items {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 16rpx;
+  gap: 12rpx;
 }
 
 .evo-item {
   display: flex;
+  flex: 0 1 150rpx;
   flex-direction: column;
   align-items: center;
   gap: 10rpx;
@@ -672,7 +774,8 @@ onLoad((options) => {
   border-radius: 20rpx;
   border: 2rpx solid #e7eefb;
   background: #f8fbff;
-  min-width: 140rpx;
+  box-sizing: border-box;
+  min-width: 132rpx;
 }
 
 .evo-item-active {
@@ -708,26 +811,75 @@ onLoad((options) => {
   word-break: break-all;
 }
 
-.evo-arrow-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8rpx;
+.evo-connector {
+  position: relative;
+  flex-shrink: 0;
+  width: 100%;
+  height: 34rpx;
 }
 
-.evo-arrow {
-  font-size: 40rpx;
-  line-height: 1;
-  color: #8aa2c9;
+.evo-connector::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: var(--evo-line-size);
+  background: var(--evo-line-color);
+  content: '';
+  transform: translateX(-50%);
+}
+
+.evo-connector-bar::after {
+  position: absolute;
+  left: calc(var(--evo-branch-gap) * -1);
+  right: calc(var(--evo-branch-gap) * -1);
+  height: var(--evo-line-size);
+  background: var(--evo-line-color);
+  content: '';
+}
+
+.evo-connector-in.evo-connector-bar::after {
+  top: 0;
+}
+
+.evo-connector-out.evo-connector-bar::after {
+  bottom: 0;
+}
+
+.evo-connector-first::after {
+  left: 50%;
+}
+
+.evo-connector-last::after {
+  right: 50%;
 }
 
 .evo-condition {
-  padding: 6rpx 16rpx;
+  align-self: center;
+  max-width: 100%;
+  margin: 6rpx 0;
+  padding: 6rpx 14rpx;
   border-radius: 999rpx;
   background: #f0f4ff;
   font-size: 20rpx;
+  line-height: 1.5;
   color: #5a749f;
   text-align: center;
+  word-break: break-all;
+}
+
+.evo-tree-single .evo-level {
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.evo-tree-single .evo-branch {
+  flex: 0 1 auto;
+  margin: 0;
+}
+
+.evo-tree-single .evo-item {
+  flex-basis: 156rpx;
 }
 
 .evo-empty {

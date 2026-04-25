@@ -172,6 +172,7 @@ class OpsEvolutionChainStepItem(BaseModel):
     sort_order: int
     pokemon_name: str
     evolution_condition: str = ""
+    pre_evolution_condition: str = ""
     image_url: str = ""
     matched: bool = False
 
