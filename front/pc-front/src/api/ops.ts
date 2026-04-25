@@ -140,6 +140,25 @@ export interface OpsEvolutionChain {
   steps: OpsEvolutionChainStep[]
 }
 
+export interface OpsEvolutionGraphNode {
+  pokemon_id: number
+  pokemon_name: string
+  image_url?: string
+  is_root?: boolean
+}
+
+export interface OpsEvolutionGraphEdge {
+  pre_pokemon_id: number
+  pokemon_id: number
+  pre_evolution_condition: string
+}
+
+export interface OpsEvolutionGraph {
+  chain_id: number | null
+  nodes: OpsEvolutionGraphNode[]
+  edges: OpsEvolutionGraphEdge[]
+}
+
 export interface OpsPokemonOptionsResponse {
   attributes: OpsPokemonOptionItem[]
   traits: OpsPokemonOptionItem[]
@@ -361,6 +380,25 @@ export function updateOpsPokemonEvolutionChain(id: number, steps: OpsEvolutionCh
 
 export function searchOpsPokemonEvolutionChain(keyword: string): Promise<OpsEvolutionChain> {
   return http.get<OpsEvolutionChain>('/api/ops/pokemon/evolution-chain/search', { params: { keyword } }).then((r) => r.data)
+}
+
+export function fetchOpsEvolutionGraphByChainId(chainId: number): Promise<OpsEvolutionGraph> {
+  return http.get<OpsEvolutionGraph>(`/api/ops/evolution-chains/${chainId}`).then((r) => r.data)
+}
+
+export function fetchOpsEvolutionGraphByPokemonId(pokemonId: number): Promise<OpsEvolutionGraph> {
+  return http.get<OpsEvolutionGraph>(`/api/ops/evolution-chains/by-pokemon/${pokemonId}`).then((r) => r.data)
+}
+
+export function updateOpsEvolutionGraphByPokemonId(
+  pokemonId: number,
+  payload: { nodes: Array<{ pokemon_id: number }>; edges: OpsEvolutionGraphEdge[] },
+): Promise<OpsEvolutionGraph> {
+  return http.put<OpsEvolutionGraph>(`/api/ops/evolution-chains/by-pokemon/${pokemonId}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsEvolutionGraphByChainId(chainId: number): Promise<void> {
+  return http.delete(`/api/ops/evolution-chains/${chainId}`).then(() => undefined)
 }
 
 // ---------- 技能维护 ----------

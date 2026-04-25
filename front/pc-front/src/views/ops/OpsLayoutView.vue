@@ -25,6 +25,7 @@ const menus = [
   { to: '/ops/dicts', label: '字典维护' },
   { to: '/ops/users', label: '用户管理' },
   { to: '/ops/pokemon', label: '精灵维护' },
+  { to: '/ops/evolution-chains', label: '进化链维护' },
   { to: '/ops/banners', label: 'Banner管理' },
   { to: '/ops/pokemon-lineups', label: '阵容管理' },
   { to: '/ops/skills', label: '技能维护' },

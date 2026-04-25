@@ -58,6 +58,10 @@ const router = createRouter({
           component: () => import('@/views/ops/OpsPokemonView.vue'),
         },
         {
+          path: 'evolution-chains',
+          component: () => import('@/views/ops/OpsEvolutionChainsView.vue'),
+        },
+        {
           path: 'users',
           component: () => import('@/views/ops/OpsUsersView.vue'),
         },
