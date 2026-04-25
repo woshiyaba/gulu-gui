@@ -185,40 +185,6 @@ class OpsEvolutionChainUpsertRequest(BaseModel):
     steps: list[OpsEvolutionChainStepItem] = Field(default_factory=list)
 
 
-class OpsEvolutionGraphNode(BaseModel):
-    pokemon_id: int
-    pokemon_name: str = ""
-    image_url: str = ""
-    is_root: bool = False
-
-
-class OpsEvolutionGraphEdge(BaseModel):
-    pre_pokemon_id: int
-    pokemon_id: int
-    pre_evolution_condition: str = ""
-
-
-class OpsEvolutionGraphResponse(BaseModel):
-    chain_id: int | None = None
-    nodes: list[OpsEvolutionGraphNode] = Field(default_factory=list)
-    edges: list[OpsEvolutionGraphEdge] = Field(default_factory=list)
-
-
-class OpsEvolutionGraphUpsertNode(BaseModel):
-    pokemon_id: int
-
-
-class OpsEvolutionGraphUpsertEdge(BaseModel):
-    pre_pokemon_id: int
-    pokemon_id: int
-    pre_evolution_condition: str = ""
-
-
-class OpsEvolutionGraphUpsertRequest(BaseModel):
-    nodes: list[OpsEvolutionGraphUpsertNode] = Field(default_factory=list)
-    edges: list[OpsEvolutionGraphUpsertEdge] = Field(default_factory=list)
-
-
 class OpsSkillListItem(BaseModel):
     id: int
     name: str

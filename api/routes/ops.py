@@ -17,8 +17,6 @@ from api.schemas.ops import (
     OpsPokemonUpsertRequest,
     OpsEvolutionChainResponse,
     OpsEvolutionChainUpsertRequest,
-    OpsEvolutionGraphResponse,
-    OpsEvolutionGraphUpsertRequest,
     OpsFriendImageUploadResponse,
     OpsYiseImageUploadResponse,
     OpsSkillDetailResponse,
@@ -250,40 +248,6 @@ async def search_ops_pokemon_evolution_chain(
     current_user: dict = Depends(get_current_ops_user),
 ):
     return await ops_service.search_pokemon_evolution_chain_for_ops(current_user, keyword)
-
-
-@router.get("/evolution-chains/{chain_id}", response_model=OpsEvolutionGraphResponse)
-async def get_ops_evolution_graph_by_chain_id(
-    chain_id: int,
-    current_user: dict = Depends(get_current_ops_user),
-):
-    return await ops_service.get_evolution_graph_by_chain_id_for_ops(current_user, chain_id)
-
-
-@router.get("/evolution-chains/by-pokemon/{pokemon_id}", response_model=OpsEvolutionGraphResponse)
-async def get_ops_evolution_graph_by_pokemon_id(
-    pokemon_id: int,
-    current_user: dict = Depends(get_current_ops_user),
-):
-    return await ops_service.get_evolution_graph_by_pokemon_id_for_ops(current_user, pokemon_id)
-
-
-@router.put("/evolution-chains/by-pokemon/{pokemon_id}", response_model=OpsEvolutionGraphResponse)
-async def upsert_ops_evolution_graph_by_pokemon_id(
-    pokemon_id: int,
-    payload: OpsEvolutionGraphUpsertRequest,
-    current_user: dict = Depends(get_current_ops_user),
-):
-    return await ops_service.upsert_evolution_graph_by_pokemon_id_for_ops(current_user, pokemon_id, payload.model_dump())
-
-
-@router.delete("/evolution-chains/{chain_id}", status_code=204)
-async def delete_ops_evolution_graph_by_chain_id(
-    chain_id: int,
-    current_user: dict = Depends(get_current_ops_user),
-):
-    await ops_service.delete_evolution_graph_by_chain_id_for_ops(current_user, chain_id)
-    return Response(status_code=204)
 
 
 @router.post("/pokemon", response_model=OpsPokemonDetailResponse)

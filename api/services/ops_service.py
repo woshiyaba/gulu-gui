@@ -527,62 +527,6 @@ async def search_pokemon_evolution_chain_for_ops(user: dict, keyword: str) -> di
     return result
 
 
-async def get_evolution_graph_by_chain_id_for_ops(user: dict, chain_id: int) -> dict:
-    ensure_role(user, {"editor", "admin"})
-    result = await ops_repository.get_evolution_graph_by_chain_id_for_ops(chain_id)
-    if result is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="进化链不存在")
-    return result
-
-
-async def get_evolution_graph_by_pokemon_id_for_ops(user: dict, pokemon_id: int) -> dict:
-    ensure_role(user, {"editor", "admin"})
-    result = await ops_repository.get_evolution_graph_by_pokemon_id_for_ops(pokemon_id)
-    if result is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="精灵不存在")
-    return result
-
-
-async def upsert_evolution_graph_by_pokemon_id_for_ops(user: dict, pokemon_id: int, payload: dict) -> dict:
-    ensure_role(user, {"editor", "admin"})
-    before = await ops_repository.get_evolution_graph_by_pokemon_id_for_ops(pokemon_id)
-    if before is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="精灵不存在")
-    try:
-        after = await ops_repository.save_evolution_graph_by_pokemon_id_for_ops(pokemon_id, payload)
-    except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
-    if after is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="精灵不存在")
-    await ops_repository.create_audit_log(
-        user_id=user["id"],
-        resource_type="evolution_graph",
-        resource_id=str(after.get("chain_id") or ""),
-        action="update",
-        before_json=before,
-        after_json=after,
-    )
-    return after
-
-
-async def delete_evolution_graph_by_chain_id_for_ops(user: dict, chain_id: int) -> None:
-    ensure_role(user, {"editor", "admin"})
-    before = await ops_repository.get_evolution_graph_by_chain_id_for_ops(chain_id)
-    if not before:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="进化链不存在")
-    deleted = await ops_repository.delete_evolution_graph_by_chain_id_for_ops(chain_id)
-    if not deleted:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="进化链不存在")
-    await ops_repository.create_audit_log(
-        user_id=user["id"],
-        resource_type="evolution_graph",
-        resource_id=str(chain_id),
-        action="delete",
-        before_json=before,
-        after_json=None,
-    )
-
-
 def _friend_upload_stem(raw_stem: str) -> str:
     stem = re.sub(r"[^0-9A-Za-z._-]", "_", raw_stem).strip("._-")
     return stem[:120] if stem else ""
