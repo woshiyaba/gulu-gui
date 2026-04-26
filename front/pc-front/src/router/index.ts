@@ -21,6 +21,10 @@ const router = createRouter({
       component: () => import('@/views/PokemonLineupsView.vue'),
     },
     {
+      path: '/battle-pk',
+      component: () => import('@/views/BattlePkView.vue'),
+    },
+    {
       path: '/lineups/:id',
       component: () => import('@/views/PokemonLineupDetailView.vue'),
     },

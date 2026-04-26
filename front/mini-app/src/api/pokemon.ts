@@ -1,13 +1,18 @@
 import { request } from '@/utils/request'
 import type {
   Attribute,
+  BattlePkRequest,
+  BattlePkResponse,
+  BloodlineOption,
   Category,
   MapPoint,
+  PersonalityOption,
   PokemonBodyMatchResponse,
   PokemonDetail,
   PokemonEvolutionChain,
   PokemonListResponse,
   PokemonMark,
+  ResonanceMagicOption,
   SkillListResponse,
   SkillStoneListResponse,
 } from '@/types/pokemon'
@@ -128,5 +133,26 @@ export function fetchLineupsByIds(ids: number[]) {
   const params = ids.map((id) => `ids=${id}`).join('&')
   return request<{ items: Lineup[] }>({
     url: `/api/pokemon-lineups?${params}`,
+  })
+}
+
+export function fetchPersonalities() {
+  return request<PersonalityOption[]>({ url: '/api/personalities' })
+}
+
+export function fetchBloodlines() {
+  return request<BloodlineOption[]>({ url: '/api/bloodlines' })
+}
+
+export function fetchResonanceMagics() {
+  return request<ResonanceMagicOption[]>({ url: '/api/resonance-magics' })
+}
+
+export function submitBattlePk(payload: BattlePkRequest) {
+  return request<BattlePkResponse>({
+    url: '/api/battle-pk',
+    method: 'POST',
+    data: payload,
+    timeout: 120000,
   })
 }

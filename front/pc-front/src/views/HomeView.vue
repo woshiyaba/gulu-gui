@@ -192,6 +192,7 @@ onBeforeUnmount(() => {
       <RouterLink class="nav-link-btn" to="/skill-stones">技能石查询</RouterLink>
       <RouterLink class="nav-link-btn" to="/skills">技能图鉴</RouterLink>
       <RouterLink class="nav-link-btn" to="/lineups">阵容推荐</RouterLink>
+      <RouterLink class="nav-link-btn pk-link" to="/battle-pk">阵容 PK</RouterLink>
       <RouterLink class="nav-link-btn" to="/pokemon-marks">名词解释</RouterLink>
 
       <button class="theme-btn" @click="toggleTheme">
@@ -312,6 +313,14 @@ onBeforeUnmount(() => {
 .nav-link-btn:hover {
   background: var(--color-hover);
 }
+
+.nav-link-btn.pk-link {
+  background: linear-gradient(135deg, #409eff, #f56c6c);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+}
+.nav-link-btn.pk-link:hover { opacity: 0.9; background: linear-gradient(135deg, #409eff, #f56c6c); }
 
 .theme-btn:hover {
   border-color: var(--color-accent);

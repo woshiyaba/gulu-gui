@@ -2,6 +2,7 @@ interface RequestOptions {
   url: string
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   data?: unknown
+  timeout?: number
 }
 
 interface ApiErrorPayload {
@@ -33,13 +34,13 @@ function normalizeRequestData(data: unknown) {
   ) as any
 }
 
-export function request<T>({ url, method = 'GET', data }: RequestOptions): Promise<T> {
+export function request<T>({ url, method = 'GET', data, timeout = 10000 }: RequestOptions): Promise<T> {
   return new Promise((resolve, reject) => {
     uni.request({
       url: `${API_BASE_URL}${url}`,
       method,
       data: normalizeRequestData(data),
-      timeout: 10000,
+      timeout,
       success: (response) => {
         const { statusCode, data: body } = response
         if (statusCode >= 200 && statusCode < 300) {

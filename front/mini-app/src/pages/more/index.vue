@@ -27,6 +27,10 @@ const menuItems: MenuItem[] = [
   },
 ]
 
+function goBattlePk() {
+  uni.navigateTo({ url: '/pages/battle-pk/index' })
+}
+
 function navigateTo(url: string) {
   uni.navigateTo({ url })
 }
@@ -37,6 +41,14 @@ function navigateTo(url: string) {
     <view class="hero-card">
       <text class="hero-title">更多工具</text>
       <text class="hero-subtitle">快捷入口，查询更多游戏数据。</text>
+    </view>
+
+    <view class="pk-card" @tap="goBattlePk">
+      <view class="pk-content">
+        <text class="pk-title">阵容 PK · 模拟对战</text>
+        <text class="pk-desc">配置两套队伍，按经典回合制规则推演胜率与回合节奏</text>
+      </view>
+      <text class="pk-arrow">›</text>
     </view>
 
     <view class="menu-list">
@@ -90,6 +102,37 @@ function navigateTo(url: string) {
   margin-top: 10rpx;
   font-size: 24rpx;
   color: rgba(255, 255, 255, 0.8);
+}
+
+.pk-card {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #2b74ff 0%, #f56c6c 100%);
+  box-shadow: 0 12rpx 28rpx rgba(43, 116, 255, 0.22);
+}
+
+.pk-content { flex: 1; min-width: 0; }
+.pk-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #ffffff;
+}
+.pk-desc {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
+}
+.pk-arrow {
+  font-size: 40rpx;
+  color: rgba(255, 255, 255, 0.85);
+  flex-shrink: 0;
 }
 
 .menu-list {

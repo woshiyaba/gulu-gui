@@ -100,6 +100,10 @@ function navigateToDetail(name: string) {
   })
 }
 
+function goBattlePk() {
+  uni.navigateTo({ url: '/pages/battle-pk/index' })
+}
+
 function onBannerTap(index: number) {
   const banner = banners.value[index]
   if (!banner?.link_type || !banner.link_param) return
@@ -193,6 +197,14 @@ onUnload(() => {
       </view>
     </view>
 
+    <view class="pk-banner" @tap="goBattlePk">
+      <view class="pk-banner-content">
+        <text class="pk-banner-title">阵容 PK · 模拟对战</text>
+        <text class="pk-banner-desc">配两套队伍，一键看胜率与回合推演</text>
+      </view>
+      <text class="pk-banner-arrow">›</text>
+    </view>
+
     <view class="filter-card">
       <view class="section-head">
         <text class="section-title">属性筛选</text>
@@ -281,6 +293,21 @@ onUnload(() => {
 .filter-card {
   padding: 28rpx;
 }
+
+.pk-banner {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin-bottom: 24rpx;
+  padding: 22rpx 26rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #2b74ff 0%, #f56c6c 100%);
+  box-shadow: 0 12rpx 28rpx rgba(43, 116, 255, 0.22);
+}
+.pk-banner-content { flex: 1; min-width: 0; }
+.pk-banner-title { display: block; font-size: 30rpx; font-weight: 700; color: #fff; }
+.pk-banner-desc { display: block; margin-top: 4rpx; font-size: 22rpx; color: rgba(255,255,255,0.85); }
+.pk-banner-arrow { font-size: 40rpx; color: rgba(255,255,255,0.85); }
 
 .banner-swiper {
   height: 280rpx;

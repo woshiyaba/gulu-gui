@@ -30,6 +30,10 @@ function navigateToDetail(id: number) {
   uni.navigateTo({ url: `/pages/lineup/detail?id=${id}` })
 }
 
+function goBattlePk() {
+  uni.navigateTo({ url: '/pages/battle-pk/index' })
+}
+
 async function loadLineups(ids: number[]) {
   loading.value = true
   error.value = ''
@@ -67,7 +71,15 @@ onLoad((query) => {
       <text>{{ error }}</text>
     </view>
 
-    <view v-else class="lineup-grid">
+    <view v-if="!loading" class="pk-entry" @tap="goBattlePk">
+      <view class="pk-entry-content">
+        <text class="pk-entry-title">想 PK？模拟对战</text>
+        <text class="pk-entry-desc">配置两套阵容，自动给胜率与回合推演</text>
+      </view>
+      <text class="pk-entry-arrow">›</text>
+    </view>
+
+    <view v-if="!loading && !error" class="lineup-grid">
       <view
         v-for="lineup in lineups"
         :key="lineup.id"
@@ -142,6 +154,18 @@ onLoad((query) => {
   background: #fff2f2;
   box-shadow: 0 12rpx 32rpx rgba(64, 125, 255, 0.08);
 }
+
+.pk-entry {
+  display: flex; align-items: center; gap: 14rpx;
+  margin-bottom: 24rpx; padding: 24rpx 28rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(135deg, #2b74ff 0%, #f56c6c 100%);
+  box-shadow: 0 12rpx 28rpx rgba(43, 116, 255, 0.22);
+}
+.pk-entry-content { flex: 1; min-width: 0; }
+.pk-entry-title { display: block; font-size: 30rpx; font-weight: 700; color: #fff; }
+.pk-entry-desc { display: block; margin-top: 4rpx; font-size: 22rpx; color: rgba(255,255,255,0.85); }
+.pk-entry-arrow { font-size: 40rpx; color: rgba(255,255,255,0.85); }
 
 .lineup-grid {
   display: flex;

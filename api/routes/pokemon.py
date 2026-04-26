@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import APIRouter, HTTPException, Query
 
 from api.schemas.pokemon import (
@@ -14,7 +16,15 @@ from api.schemas.pokemon import (
 )
 from api.schemas.banner import BannerItem
 from api.schemas.personality import PersonalityItem
-from api.schemas.pokemon_lineup import PokemonLineupDetail, PokemonLineupPublicList
+from api.schemas.pokemon_lineup import (
+    BattlePkRequest,
+    BattlePkResponse,
+    BloodlineOption,
+    PokemonLineupDetail,
+    PokemonLineupPublicList,
+    ResonanceMagicOption,
+)
+from api.repositories import ops_repository
 from api.services import pokemon_lineup_service
 from api.services.pokemon_service import (
     PokemonNotFoundError,
@@ -72,6 +82,47 @@ async def get_pokemon_lineup_detail(lineup_id: int):
     if not lineup:
         raise HTTPException(status_code=404, detail="阵容不存在或未启用")
     return lineup
+
+
+@router.post("/battle-pk", response_model=BattlePkResponse)
+async def battle_pk(payload: BattlePkRequest):
+    """用户提交两套阵容，由 PK 子智能体按经典回合制规则模拟对战并返回结构化分析。"""
+    if not payload.team_a.members or not payload.team_b.members:
+        raise HTTPException(status_code=400, detail="双方阵容均需至少配置 1 只精灵")
+
+    from agents.sub.pk_subagent import analyze_battle
+
+    team_a = payload.team_a.model_dump()
+    team_b = payload.team_b.model_dump()
+    return await asyncio.to_thread(analyze_battle, team_a, team_b)
+
+
+@router.get("/bloodlines", response_model=list[BloodlineOption])
+async def get_bloodlines():
+    """公开返回精灵血脉字典（sys_dict 中 dict_type=pet_bloodline），供用户配置阵容时使用。"""
+    rows = await ops_repository.list_dicts_all(dict_type="pet_bloodline")
+    return [
+        {"id": row["id"], "code": row.get("code") or "", "label": row.get("label") or ""}
+        for row in rows
+    ]
+
+
+@router.get("/resonance-magics", response_model=list[ResonanceMagicOption])
+async def get_resonance_magics_public():
+    """公开返回共鸣魔法列表，供用户配置阵容时使用。"""
+    _, rows = await ops_repository.list_resonance_magics_for_ops(page=1, page_size=200)
+    from api.utils.media import build_resonance_magic_icon_url
+
+    return [
+        {
+            "id": row["id"],
+            "name": row.get("name") or "",
+            "description": row.get("description") or "",
+            "icon_url": build_resonance_magic_icon_url((row.get("icon") or "").strip()),
+            "max_usage_count": int(row.get("max_usage_count") or 0),
+        }
+        for row in rows
+    ]
 
 
 @router.get("/attributes", response_model=list[AttributeItem])

@@ -189,6 +189,104 @@ export interface LineupListResponse {
   items: Lineup[]
 }
 
+// ── 用户 PK 对战 ──────────────────────────────────────────
+export interface BattlePkMember {
+  pokemon_id: number | null
+  pokemon_name: string
+  sort_order: number
+  bloodline_dict_id: number | null
+  bloodline_label: string
+  personality_id: number | null
+  personality_name_zh: string
+  qual_1: string
+  qual_2: string
+  qual_3: string
+  skill_1_id: number | null
+  skill_1_name: string
+  skill_2_id: number | null
+  skill_2_name: string
+  skill_3_id: number | null
+  skill_3_name: string
+  skill_4_id: number | null
+  skill_4_name: string
+  member_desc: string
+}
+
+export interface BattlePkTeam {
+  title: string
+  lineup_desc: string
+  source_type: string
+  resonance_magic_id: number | null
+  resonance_magic_name: string
+  members: BattlePkMember[]
+}
+
+export interface BattlePkRequest {
+  team_a: BattlePkTeam
+  team_b: BattlePkTeam
+}
+
+export interface BattlePkSide {
+  summary: string
+  advantages: string[]
+  weaknesses: string[]
+}
+
+export interface BattlePkRound {
+  round: number
+  desc: string
+}
+
+export interface BattlePkVerdict {
+  winner: string
+  win_rate_a: number
+  reason: string
+}
+
+export interface BattlePkCompleteness {
+  ok: boolean
+  missing: string[]
+}
+
+export interface BattlePkResponse {
+  completeness: BattlePkCompleteness
+  team_a: BattlePkSide
+  team_b: BattlePkSide
+  key_rounds: BattlePkRound[]
+  turning_points: string[]
+  verdict: BattlePkVerdict
+  error?: string
+  raw?: string
+}
+
+export interface PersonalityOption {
+  id: number
+  name: string
+  hp_mod_pct: number
+  phy_atk_mod_pct: number
+  mag_atk_mod_pct: number
+  phy_def_mod_pct: number
+  mag_def_mod_pct: number
+  spd_mod_pct: number
+  buff_stat: string | null
+  nerf_stat: string | null
+  is_neutral: boolean
+}
+
+export interface BloodlineOption {
+  id: number
+  code: string
+  label: string
+}
+
+export interface ResonanceMagicOption {
+  id: number
+  name: string
+  description: string
+  icon_url: string
+  max_usage_count: number
+}
+
 export interface PokemonDetail extends Pokemon {
   obtain_method: string
   stats: Stats

@@ -61,6 +61,12 @@
 			"style": {
 				"navigationBarTitleText": "阵容详情"
 			}
+		},
+		{
+			"path": "pages/battle-pk/index",
+			"style": {
+				"navigationBarTitleText": "阵容 PK"
+			}
 		}
 	],
 	"globalStyle": {

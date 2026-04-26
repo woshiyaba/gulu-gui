@@ -1,15 +1,20 @@
 import axios from 'axios'
 import type {
   Attribute,
+  BattlePkRequest,
+  BattlePkResponse,
+  BloodlineOption,
   Category,
   Lineup,
   LineupListResponse,
   MapPoint,
+  PersonalityOption,
   PokemonBodyMatchResponse,
   PokemonDetail,
   PokemonEvolutionChain,
   PokemonListResponse,
   PokemonMark,
+  ResonanceMagicOption,
   SkillListResponse,
   SkillStoneListResponse,
 } from '@/types'
@@ -128,4 +133,22 @@ export function fetchMapPoints(): Promise<MapPoint[]> {
 
 export function fetchPokemonMarks(): Promise<PokemonMark[]> {
   return http.get<PokemonMark[]>('/api/pokemon-marks').then((r) => r.data)
+}
+
+export function fetchPersonalities(): Promise<PersonalityOption[]> {
+  return http.get<PersonalityOption[]>('/api/personalities').then((r) => r.data)
+}
+
+export function fetchBloodlines(): Promise<BloodlineOption[]> {
+  return http.get<BloodlineOption[]>('/api/bloodlines').then((r) => r.data)
+}
+
+export function fetchResonanceMagics(): Promise<ResonanceMagicOption[]> {
+  return http.get<ResonanceMagicOption[]>('/api/resonance-magics').then((r) => r.data)
+}
+
+export function submitBattlePk(payload: BattlePkRequest): Promise<BattlePkResponse> {
+  return http
+    .post<BattlePkResponse>('/api/battle-pk', payload, { timeout: 120000 })
+    .then((r) => r.data)
 }
