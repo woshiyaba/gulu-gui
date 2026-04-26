@@ -390,7 +390,7 @@ onMounted(async () => {
     <header class="pk-header">
       <RouterLink class="back-link" to="/">← 返回首页</RouterLink>
       <h1 class="pk-title">阵容 PK · 经典回合制对战模拟</h1>
-      <p class="pk-tip">配置两套队伍（每方最多 6 只），AI 将基于属性克制、速度线、物魔分流和换宠节奏给出胜率与回合推演。</p>
+      <p class="pk-tip">配置两套队伍（每方最多 6 只），将基于属性克制、速度线、物魔分流和换宠节奏给出胜率与回合推演。</p>
     </header>
 
     <main class="pk-main">
@@ -597,6 +597,55 @@ onMounted(async () => {
             <div class="bar">
               <div class="bar-a" :style="{ width: `${result.verdict.win_rate_a}%` }"></div>
               <div class="bar-b" :style="{ width: `${100 - result.verdict.win_rate_a}%` }"></div>
+            </div>
+          </div>
+
+          <div v-if="result.plan" class="plan-card">
+            <h3 class="plan-title">AI 推荐的最优出战计划</h3>
+            <div class="plan-orders">
+              <div class="plan-order plan-a">
+                <div class="plan-order-head">
+                  <span class="plan-tag tag-a">我方 最优顺序</span>
+                </div>
+                <div class="plan-chain">
+                  <template v-for="(name, i) in result.plan.team_a_order" :key="`oa-${i}`">
+                    <span class="chain-node">{{ name }}</span>
+                    <span v-if="i < result.plan.team_a_order.length - 1" class="chain-arrow">→</span>
+                  </template>
+                </div>
+                <p v-if="result.plan.team_a_order_reason" class="plan-reason">
+                  {{ result.plan.team_a_order_reason }}
+                </p>
+              </div>
+              <div class="plan-order plan-b">
+                <div class="plan-order-head">
+                  <span class="plan-tag tag-b">对手 最优顺序</span>
+                </div>
+                <div class="plan-chain">
+                  <template v-for="(name, i) in result.plan.team_b_order" :key="`ob-${i}`">
+                    <span class="chain-node">{{ name }}</span>
+                    <span v-if="i < result.plan.team_b_order.length - 1" class="chain-arrow">→</span>
+                  </template>
+                </div>
+                <p v-if="result.plan.team_b_order_reason" class="plan-reason">
+                  {{ result.plan.team_b_order_reason }}
+                </p>
+              </div>
+            </div>
+
+            <div class="plan-grid">
+              <div v-if="result.plan.skill_matchup?.length" class="plan-section">
+                <h4>技能应对关系</h4>
+                <ul>
+                  <li v-for="(s, i) in result.plan.skill_matchup" :key="`sm-${i}`">{{ s }}</li>
+                </ul>
+              </div>
+              <div v-if="result.plan.ability_impact?.length" class="plan-section">
+                <h4>特性 / 共鸣魔法 影响</h4>
+                <ul>
+                  <li v-for="(s, i) in result.plan.ability_impact" :key="`ai-${i}`">{{ s }}</li>
+                </ul>
+              </div>
             </div>
           </div>
 
@@ -859,6 +908,34 @@ input:focus, select:focus, textarea:focus {
 .bar-a { background: linear-gradient(90deg, #409eff, #66b1ff); }
 .bar-b { background: linear-gradient(90deg, #f78989, #f56c6c); }
 
+.plan-card {
+  margin-bottom: 16px; padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(64, 158, 255, 0.06), rgba(245, 108, 108, 0.06));
+  border: 1px solid var(--color-border); border-radius: 6px;
+}
+.plan-title { margin: 0 0 12px; font-size: 15px; }
+.plan-orders { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.plan-order {
+  padding: 10px 12px; border-radius: 4px;
+  background: var(--color-surface); border: 1px solid var(--color-border);
+}
+.plan-order-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.plan-tag { padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+.plan-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; }
+.chain-node {
+  padding: 3px 10px; border-radius: 12px;
+  background: var(--color-bg); border: 1px solid var(--color-border);
+  font-weight: 600;
+}
+.plan-a .chain-node { color: #409eff; border-color: rgba(64, 158, 255, 0.4); }
+.plan-b .chain-node { color: #f56c6c; border-color: rgba(245, 108, 108, 0.4); }
+.chain-arrow { color: var(--color-muted); font-size: 13px; }
+.plan-reason { margin: 8px 0 0; font-size: 12px; color: var(--color-muted); line-height: 1.6; }
+
+.plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.plan-section h4 { margin: 0 0 6px; font-size: 13px; color: var(--color-muted); }
+.plan-section ul { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.7; }
+
 .sides { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
 .side-block h3 { margin: 0 0 8px; font-size: 15px; }
 .side-block h4 { margin: 10px 0 6px; font-size: 13px; color: var(--color-muted); }
@@ -883,7 +960,7 @@ input:focus, select:focus, textarea:focus {
 @media (max-width: 960px) {
   .teams { grid-template-columns: 1fr; }
   .form-grid { grid-template-columns: 1fr 1fr; }
-  .sides { grid-template-columns: 1fr; }
+  .sides, .plan-orders, .plan-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
   .form-grid, .quality-grid, .pet-skills { grid-template-columns: 1fr; }

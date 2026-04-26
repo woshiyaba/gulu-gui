@@ -160,8 +160,18 @@ class BattlePkCompleteness(BaseModel):
     missing: list[str] = Field(default_factory=list)
 
 
+class BattlePkPlan(BaseModel):
+    team_a_order: list[str] = Field(default_factory=list)
+    team_a_order_reason: str = ""
+    team_b_order: list[str] = Field(default_factory=list)
+    team_b_order_reason: str = ""
+    skill_matchup: list[str] = Field(default_factory=list)
+    ability_impact: list[str] = Field(default_factory=list)
+
+
 class BattlePkResponse(BaseModel):
     completeness: BattlePkCompleteness = Field(default_factory=BattlePkCompleteness)
+    plan: BattlePkPlan = Field(default_factory=BattlePkPlan)
     team_a: BattlePkSide = Field(default_factory=BattlePkSide)
     team_b: BattlePkSide = Field(default_factory=BattlePkSide)
     key_rounds: list[BattlePkRound] = Field(default_factory=list)

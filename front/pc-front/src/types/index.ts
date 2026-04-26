@@ -248,8 +248,18 @@ export interface BattlePkCompleteness {
   missing: string[]
 }
 
+export interface BattlePkPlan {
+  team_a_order: string[]
+  team_a_order_reason: string
+  team_b_order: string[]
+  team_b_order_reason: string
+  skill_matchup: string[]
+  ability_impact: string[]
+}
+
 export interface BattlePkResponse {
   completeness: BattlePkCompleteness
+  plan?: BattlePkPlan
   team_a: BattlePkSide
   team_b: BattlePkSide
   key_rounds: BattlePkRound[]

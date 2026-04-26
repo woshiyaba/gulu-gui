@@ -5,6 +5,7 @@ import {
   fetchBloodlines,
   fetchPersonalities,
   fetchPokemon,
+  fetchPokemonDetail,
   fetchResonanceMagics,
   fetchSkills,
   submitBattlePk,
@@ -26,6 +27,7 @@ interface MemberForm {
   pokemon_id: number | null
   pokemon_name: string
   pokemon_image: string
+  pokemon_attrs: string[]
   sort_order: number
   bloodline_dict_id: number | null
   bloodline_label: string
@@ -69,6 +71,7 @@ function emptyMember(sort: number): MemberForm {
     pokemon_id: null,
     pokemon_name: '',
     pokemon_image: '',
+    pokemon_attrs: [],
     sort_order: sort,
     bloodline_dict_id: null,
     bloodline_label: '',
@@ -132,6 +135,29 @@ const pickerKeyword = ref('')
 const pickerLoading = ref(false)
 const pokemonHits = ref<Pokemon[]>([])
 const skillHits = ref<Skill[]>([])
+const selectedSkill = ref<Skill | null>(null)
+// 'pet'：仅展示当前精灵已配置的技能；'search'：调用接口按属性/名字搜索
+const skillSource = ref<'pet' | 'search'>('pet')
+const skillAttrFilter = ref<string>('')
+const petSkills = ref<Skill[]>([])
+
+// 弹层中实际用于渲染的技能列表
+const visibleSkills = computed<Skill[]>(() => {
+  if (skillSource.value === 'pet') {
+    const kw = pickerKeyword.value.trim().toLowerCase()
+    if (!kw) return petSkills.value
+    return petSkills.value.filter((s) => (s.name || '').toLowerCase().includes(kw))
+  }
+  return skillHits.value
+})
+
+// 技能弹层属性 chips：当前精灵的属性，无精灵时返回空数组
+const skillPickerAttrs = computed<string[]>(() => {
+  const ctx = pickerCtx.value
+  if (!ctx) return []
+  const m = teamRef(ctx.team).members[ctx.memberIndex]
+  return m?.pokemon_attrs || []
+})
 
 let searchTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -193,8 +219,9 @@ function openPokemonPicker(team: TeamKey, mi: number) {
   pokemonHits.value = []
 }
 
-function openSkillPicker(team: TeamKey, mi: number, si: number) {
-  if (!teamRef(team).members[mi]?.pokemon_name) {
+async function openSkillPicker(team: TeamKey, mi: number, si: number) {
+  const member = teamRef(team).members[mi]
+  if (!member?.pokemon_name) {
     uni.showToast({ title: '请先选择精灵', icon: 'none' })
     return
   }
@@ -202,6 +229,20 @@ function openSkillPicker(team: TeamKey, mi: number, si: number) {
   pickerCtx.value = { team, memberIndex: mi, skillIndex: si }
   pickerKeyword.value = ''
   skillHits.value = []
+  selectedSkill.value = null
+  skillAttrFilter.value = ''
+  // 默认展示该精灵自己的技能列表
+  skillSource.value = 'pet'
+  petSkills.value = []
+  pickerLoading.value = true
+  try {
+    const detail = await fetchPokemonDetail(member.pokemon_name)
+    petSkills.value = detail.skills || []
+  } catch {
+    petSkills.value = []
+  } finally {
+    pickerLoading.value = false
+  }
 }
 
 function openPersonalityPicker(team: TeamKey, mi: number) {
@@ -230,6 +271,10 @@ function closePicker() {
   pickerKeyword.value = ''
   pokemonHits.value = []
   skillHits.value = []
+  selectedSkill.value = null
+  skillAttrFilter.value = ''
+  skillSource.value = 'pet'
+  petSkills.value = []
 }
 
 // ── 搜索（精灵 / 技能） ───────────────────────────────
@@ -238,7 +283,8 @@ function onPickerKeywordInput(e: any) {
   if (searchTimer) clearTimeout(searchTimer)
   searchTimer = setTimeout(async () => {
     if (pickerKind.value === 'pokemon') await runPokemonSearch()
-    if (pickerKind.value === 'skill') await runSkillSearch()
+    // 技能在 pet 模式下走本地过滤（visibleSkills 计算属性），无需发请求
+    if (pickerKind.value === 'skill' && skillSource.value === 'search') await runSkillSearch()
   }, 280)
 }
 
@@ -261,19 +307,34 @@ async function runPokemonSearch() {
 
 async function runSkillSearch() {
   const kw = pickerKeyword.value.trim()
-  if (!kw) {
+  const attr = skillAttrFilter.value
+  // 关键字与属性筛选都为空时，避免一次拉全量技能
+  if (!kw && !attr) {
     skillHits.value = []
     return
   }
   pickerLoading.value = true
   try {
-    const res = await fetchSkills({ name: kw })
+    const res = await fetchSkills({ name: kw, attr })
     skillHits.value = res.items
   } catch {
     skillHits.value = []
   } finally {
     pickerLoading.value = false
   }
+}
+
+// attr 取值：null = 切回「本宠物」模式，'' = 「全部」搜索，其余 = 按属性搜索
+function setSkillFilter(attr: string | null) {
+  if (attr === null) {
+    skillSource.value = 'pet'
+    skillAttrFilter.value = ''
+    skillHits.value = []
+    return
+  }
+  skillSource.value = 'search'
+  skillAttrFilter.value = attr
+  void runSkillSearch()
 }
 
 // ── 选项确定 ──────────────────────────────────────────
@@ -286,15 +347,25 @@ function pickPokemon(item: Pokemon) {
   m.pokemon_id = Number.isFinite(idNum) ? idNum : null
   m.pokemon_name = item.name
   m.pokemon_image = item.image_url
+  m.pokemon_attrs = (item.attributes || []).map((a) => a.attr_name)
   closePicker()
 }
 
-function pickSkill(item: Skill) {
+function selectSkillPreview(item: Skill) {
+  // 仅高亮预览，不立即关闭弹层，避免点选时面板闪烁
+  selectedSkill.value = item
+}
+
+function confirmSkillPick() {
   const ctx = pickerCtx.value
-  if (!ctx || ctx.skillIndex === undefined) return
+  const skill = selectedSkill.value
+  if (!ctx || ctx.skillIndex === undefined || !skill) {
+    uni.showToast({ title: '请先选择一个技能', icon: 'none' })
+    return
+  }
   const m = teamRef(ctx.team).members[ctx.memberIndex]
   if (!m) return
-  m.skills[ctx.skillIndex] = { name: item.name, image: item.icon }
+  m.skills[ctx.skillIndex] = { name: skill.name, image: skill.icon }
   closePicker()
 }
 
@@ -476,7 +547,7 @@ onLoad(async () => {
   <view class="page">
     <view class="hero-card">
       <text class="hero-title">阵容 PK</text>
-      <text class="hero-subtitle">配置两套队伍，AI 按经典回合制规则给出胜率与回合推演。</text>
+      <text class="hero-subtitle">配置两套队伍，按经典回合制规则给出胜率与回合推演。</text>
     </view>
 
     <!-- 队伍切换 -->
@@ -705,6 +776,42 @@ onLoad(async () => {
           </view>
         </view>
 
+        <view v-if="result.plan" class="plan-card">
+          <text class="plan-title">AI 推荐的最优出战计划</text>
+
+          <view class="plan-order plan-a">
+            <text class="plan-tag a-tag">我方 最优顺序</text>
+            <view class="plan-chain">
+              <template v-for="(name, i) in result.plan.team_a_order" :key="`oa-${i}`">
+                <text class="chain-node a-node">{{ name }}</text>
+                <text v-if="i < result.plan.team_a_order.length - 1" class="chain-arrow">›</text>
+              </template>
+            </view>
+            <text v-if="result.plan.team_a_order_reason" class="plan-reason">{{ result.plan.team_a_order_reason }}</text>
+          </view>
+
+          <view class="plan-order plan-b">
+            <text class="plan-tag b-tag">对手 最优顺序</text>
+            <view class="plan-chain">
+              <template v-for="(name, i) in result.plan.team_b_order" :key="`ob-${i}`">
+                <text class="chain-node b-node">{{ name }}</text>
+                <text v-if="i < result.plan.team_b_order.length - 1" class="chain-arrow">›</text>
+              </template>
+            </view>
+            <text v-if="result.plan.team_b_order_reason" class="plan-reason">{{ result.plan.team_b_order_reason }}</text>
+          </view>
+
+          <view v-if="result.plan.skill_matchup?.length" class="plan-section">
+            <text class="plan-sub">技能应对关系</text>
+            <view v-for="(s, i) in result.plan.skill_matchup" :key="`sm-${i}`" class="plan-item">· {{ s }}</view>
+          </view>
+
+          <view v-if="result.plan.ability_impact?.length" class="plan-section">
+            <text class="plan-sub">特性 / 共鸣魔法 影响</text>
+            <view v-for="(s, i) in result.plan.ability_impact" :key="`ai-${i}`" class="plan-item">· {{ s }}</view>
+          </view>
+        </view>
+
         <view class="side-block">
           <text class="side-title">我方 · {{ result.team_a.summary }}</text>
           <text class="side-sub">优势</text>
@@ -751,19 +858,19 @@ onLoad(async () => {
           <text class="picker-close" @tap="closePicker">×</text>
         </view>
 
-        <!-- 搜索类（精灵/技能） -->
-        <template v-if="pickerKind === 'pokemon' || pickerKind === 'skill'">
+        <!-- 搜索类（精灵） -->
+        <template v-if="pickerKind === 'pokemon'">
           <view class="picker-search">
             <input
               class="picker-search-input"
               :value="pickerKeyword"
-              :placeholder="pickerKind === 'pokemon' ? '输入精灵名称' : '输入技能名称'"
+              placeholder="输入精灵名称"
               @input="onPickerKeywordInput"
             />
           </view>
           <scroll-view class="picker-list" scroll-y>
             <view v-if="pickerLoading" class="picker-tip">搜索中...</view>
-            <template v-else-if="pickerKind === 'pokemon'">
+            <template v-else>
               <view
                 v-for="opt in pokemonHits"
                 :key="opt.no"
@@ -776,23 +883,92 @@ onLoad(async () => {
               <view v-if="!pokemonHits.length && pickerKeyword" class="picker-tip">没有匹配的精灵</view>
               <view v-else-if="!pickerKeyword" class="picker-tip">输入关键字开始搜索</view>
             </template>
+          </scroll-view>
+        </template>
+
+        <!-- 技能：固定区域滑动浏览 + 预览 + 确认 -->
+        <template v-else-if="pickerKind === 'skill'">
+          <view class="picker-search">
+            <input
+              class="picker-search-input"
+              :value="pickerKeyword"
+              placeholder="输入技能名称（可选）"
+              @input="onPickerKeywordInput"
+            />
+          </view>
+          <scroll-view class="skill-attr-bar" scroll-x>
+            <view class="skill-attr-row">
+              <view
+                class="skill-attr-chip"
+                :class="{ active: skillSource === 'pet' }"
+                @tap="setSkillFilter(null)"
+              >本宠物</view>
+              <view
+                class="skill-attr-chip"
+                :class="{ active: skillSource === 'search' && skillAttrFilter === '' }"
+                @tap="setSkillFilter('')"
+              >全部</view>
+              <view
+                v-for="attr in skillPickerAttrs"
+                :key="attr"
+                class="skill-attr-chip"
+                :class="{ active: skillSource === 'search' && skillAttrFilter === attr }"
+                @tap="setSkillFilter(attr)"
+              >{{ attr }}</view>
+            </view>
+          </scroll-view>
+          <scroll-view class="skill-picker-list" scroll-y>
+            <view v-if="pickerLoading" class="picker-tip">加载中...</view>
             <template v-else>
               <view
-                v-for="opt in skillHits"
+                v-for="opt in visibleSkills"
                 :key="opt.name"
-                class="picker-item"
-                @tap="pickSkill(opt)"
+                class="skill-item"
+                :class="{ active: selectedSkill && selectedSkill.name === opt.name }"
+                @tap="selectSkillPreview(opt)"
               >
-                <image v-if="opt.icon" :src="opt.icon" class="picker-img" mode="aspectFit" />
-                <view class="picker-item-content">
-                  <text class="picker-item-text">{{ opt.name }}</text>
-                  <text class="picker-item-sub">{{ opt.attr }} · {{ opt.type }} · 威力 {{ opt.power }}</text>
+                <image v-if="opt.icon" :src="opt.icon" class="skill-item-icon" mode="aspectFit" />
+                <view class="skill-item-body">
+                  <view class="skill-item-row">
+                    <text class="skill-item-name">{{ opt.name }}</text>
+                    <text class="skill-item-tag">{{ opt.attr || '—' }}</text>
+                  </view>
+                  <text class="skill-item-meta">{{ opt.type || '—' }} · 威力 {{ opt.power || 0 }} · 消耗 {{ opt.consume || 0 }}</text>
+                  <text v-if="opt.desc" class="skill-item-desc">{{ opt.desc }}</text>
                 </view>
+                <text class="skill-item-check">{{ selectedSkill && selectedSkill.name === opt.name ? '✓' : '' }}</text>
               </view>
-              <view v-if="!skillHits.length && pickerKeyword" class="picker-tip">没有匹配的技能</view>
-              <view v-else-if="!pickerKeyword" class="picker-tip">输入关键字开始搜索</view>
+              <template v-if="!visibleSkills.length">
+                <view v-if="skillSource === 'pet' && pickerKeyword" class="picker-tip">该精灵的技能中没有匹配「{{ pickerKeyword }}」的</view>
+                <view v-else-if="skillSource === 'pet'" class="picker-tip">该精灵暂无技能数据，可点击「全部」或属性 chip 浏览</view>
+                <view v-else-if="pickerKeyword || skillAttrFilter" class="picker-tip">没有匹配的技能</view>
+                <view v-else class="picker-tip">点击上方筛选项或输入关键词开始浏览</view>
+              </template>
             </template>
           </scroll-view>
+
+          <view class="skill-preview" v-if="selectedSkill">
+            <view class="skill-preview-head">
+              <image v-if="selectedSkill.icon" :src="selectedSkill.icon" class="skill-preview-icon" mode="aspectFit" />
+              <view class="skill-preview-title-wrap">
+                <text class="skill-preview-title">已选：{{ selectedSkill.name }}</text>
+                <text class="skill-preview-meta">{{ selectedSkill.attr || '—' }} · {{ selectedSkill.type || '—' }} · 威力 {{ selectedSkill.power || 0 }} · 消耗 {{ selectedSkill.consume || 0 }}</text>
+              </view>
+            </view>
+            <text class="skill-preview-desc">{{ selectedSkill.desc || '暂无技能描述' }}</text>
+          </view>
+          <view class="skill-preview empty" v-else>
+            <text class="skill-preview-empty">点击列表中的技能查看描述并预选</text>
+          </view>
+
+          <view class="picker-foot">
+            <view class="picker-foot-btn cancel" @tap="closePicker">取消</view>
+            <view
+              class="picker-foot-btn confirm"
+              :class="{ disabled: !selectedSkill }"
+              @tap="confirmSkillPick"
+            >确认选择</view>
+          </view>
         </template>
 
         <!-- 性格 -->
@@ -1068,6 +1244,37 @@ onLoad(async () => {
 .bar-a { background: linear-gradient(90deg, #2b74ff, #66a3ff); }
 .bar-b { background: linear-gradient(90deg, #f78989, #f56c6c); }
 
+.plan-card {
+  margin-bottom: 18rpx;
+  padding: 18rpx;
+  border-radius: 18rpx;
+  background: linear-gradient(135deg, #f3f8ff 0%, #fff5f5 100%);
+  border: 1rpx solid #e3ecfb;
+}
+.plan-title { display: block; margin-bottom: 14rpx; font-size: 28rpx; font-weight: 600; color: #1f3760; }
+.plan-order { padding: 14rpx; border-radius: 14rpx; background: #ffffff; margin-bottom: 12rpx; }
+.plan-tag {
+  display: inline-block; padding: 4rpx 16rpx;
+  border-radius: 14rpx; font-size: 22rpx; font-weight: 600; color: #fff;
+  margin-bottom: 10rpx;
+}
+.plan-tag.a-tag { background: #2b74ff; }
+.plan-tag.b-tag { background: #f56c6c; }
+.plan-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 8rpx; }
+.chain-node {
+  padding: 6rpx 16rpx; border-radius: 16rpx;
+  font-size: 24rpx; font-weight: 600;
+  background: #f3f8ff; border: 1rpx solid #d8e6fa;
+}
+.chain-node.a-node { color: #2b74ff; }
+.chain-node.b-node { color: #f56c6c; background: #fef0f0; border-color: #fbd9d9; }
+.chain-arrow { color: #b5c8e8; font-size: 26rpx; }
+.plan-reason { display: block; margin-top: 10rpx; font-size: 22rpx; color: #5b7299; line-height: 1.6; }
+
+.plan-section { margin-top: 12rpx; }
+.plan-sub { display: block; margin-bottom: 6rpx; font-size: 22rpx; color: #7a93bb; }
+.plan-item { font-size: 24rpx; color: #1f3760; line-height: 1.7; }
+
 .side-block { margin-bottom: 18rpx; }
 .side-title { display: block; font-size: 28rpx; font-weight: 600; color: #1f3760; margin-bottom: 8rpx; }
 .side-sub { display: block; margin: 12rpx 0 6rpx; font-size: 22rpx; color: #7a93bb; }
@@ -1095,7 +1302,7 @@ onLoad(async () => {
   display: flex; align-items: flex-end;
 }
 .picker-sheet {
-  width: 100%; max-height: 80vh;
+  width: 100%; max-height: 86vh;
   background: #fff;
   border-top-left-radius: 28rpx; border-top-right-radius: 28rpx;
   display: flex; flex-direction: column;
@@ -1126,5 +1333,140 @@ onLoad(async () => {
 .picker-tip {
   padding: 60rpx 0; text-align: center;
   font-size: 24rpx; color: #b5c8e8;
+}
+
+/* 技能选择器：固定区域滑动浏览 + 预览 + 确认 */
+.skill-attr-bar {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 0 24rpx 12rpx;
+  border-bottom: 1rpx solid #f0f4fb;
+}
+.skill-attr-row {
+  display: inline-flex; align-items: center; gap: 12rpx;
+}
+.skill-attr-chip {
+  padding: 10rpx 22rpx;
+  border-radius: 999rpx;
+  background: #f3f8ff;
+  color: #45638e;
+  font-size: 24rpx;
+  white-space: nowrap;
+}
+.skill-attr-chip.active {
+  background: linear-gradient(135deg, #2b74ff 0%, #53a0ff 100%);
+  color: #ffffff;
+}
+
+.skill-picker-list {
+  flex: 1 1 auto;
+  min-height: 280rpx;
+  max-height: 42vh;      /* 固定范围，避免高度抖动导致闪烁 */
+  background: #fafcff;
+}
+.skill-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14rpx;
+  padding: 18rpx 24rpx;
+  border-bottom: 1rpx solid #f0f4fb;
+  background: #ffffff;
+}
+.skill-item.active {
+  background: linear-gradient(135deg, #ecf5ff 0%, #ffffff 100%);
+  border-left: 6rpx solid #2b74ff;
+  padding-left: 18rpx;
+}
+.skill-item-icon {
+  width: 64rpx; height: 64rpx;
+  flex: 0 0 auto;
+  border-radius: 14rpx;
+  background: #f3f8ff;
+}
+.skill-item-body {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 6rpx;
+}
+.skill-item-row {
+  display: flex; align-items: center; gap: 10rpx;
+}
+.skill-item-name {
+  font-size: 28rpx; font-weight: 600; color: #1f3760;
+}
+.skill-item-tag {
+  padding: 2rpx 12rpx; border-radius: 10rpx;
+  background: #ecf5ff; color: #2b74ff;
+  font-size: 20rpx;
+}
+.skill-item-meta {
+  font-size: 22rpx; color: #7a93bb;
+}
+.skill-item-desc {
+  font-size: 22rpx; color: #5b7299;
+  line-height: 1.5;
+  word-break: break-all;
+}
+.skill-item-check {
+  flex: 0 0 auto;
+  width: 36rpx; min-width: 36rpx;
+  font-size: 30rpx; font-weight: 700;
+  color: #2b74ff; text-align: center;
+}
+
+.skill-preview {
+  flex: 0 0 auto;
+  padding: 18rpx 24rpx;
+  border-top: 1rpx solid #f0f4fb;
+  background: #ffffff;
+}
+.skill-preview.empty { padding: 22rpx 24rpx; }
+.skill-preview-empty { font-size: 24rpx; color: #b5c8e8; }
+.skill-preview-head {
+  display: flex; align-items: center; gap: 12rpx;
+  margin-bottom: 8rpx;
+}
+.skill-preview-icon {
+  width: 56rpx; height: 56rpx; border-radius: 12rpx;
+  background: #f3f8ff;
+}
+.skill-preview-title-wrap {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 4rpx;
+}
+.skill-preview-title { font-size: 26rpx; font-weight: 600; color: #1f3760; }
+.skill-preview-meta { font-size: 22rpx; color: #7a93bb; }
+.skill-preview-desc {
+  display: block;
+  margin-top: 4rpx;
+  padding: 12rpx 14rpx;
+  background: #f6faff;
+  border-radius: 12rpx;
+  font-size: 24rpx; color: #1f3760;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.picker-foot {
+  flex: 0 0 auto;
+  display: flex; gap: 16rpx;
+  padding: 18rpx 24rpx 24rpx;
+  border-top: 1rpx solid #f0f4fb;
+  background: #ffffff;
+}
+.picker-foot-btn {
+  flex: 1;
+  height: 84rpx; line-height: 84rpx;
+  text-align: center; border-radius: 18rpx;
+  font-size: 28rpx; font-weight: 600;
+}
+.picker-foot-btn.cancel {
+  background: #f3f8ff; color: #5b7299;
+}
+.picker-foot-btn.confirm {
+  background: linear-gradient(135deg, #2b74ff, #f56c6c);
+  color: #ffffff;
+}
+.picker-foot-btn.confirm.disabled {
+  opacity: 0.5;
 }
 </style>
