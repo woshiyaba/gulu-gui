@@ -1,5 +1,7 @@
-from api.utils.media import build_friend_image_url, build_image_url, build_yise_image_url
-
+from api.utils.media import (build_friend_image_url,
+ build_image_url,
+  build_yise_image_url,
+  build_skills_image_url)
 
 def parse_egg_groups(egg_group_names: str | None) -> list[str]:
     """把标量子查询 GROUP_CONCAT 的蛋组字段还原成列表。"""
@@ -49,7 +51,7 @@ def to_skill_item(row: dict) -> dict:
         "source": row.get("source", ""),
         "consume": row["consume"],
         "desc": row["skill_desc"] or "",
-        "icon": build_image_url(row["icon"]),
+        "icon": build_skills_image_url(row["icon"]),
     }
 
 

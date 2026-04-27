@@ -22,6 +22,8 @@ PG_CONFIG = {
 
 BASE_URL = "https://rocom.game-walkthrough.com"
 
+SKILL_IMAGE_URL = "https://wikiroco.com/images/icon/skill/skill_icons_backup"
+
 STATIC_BASE_URL = os.getenv("STATIC_BASE_URL", "https://wikiroco.com")
 FRIEND_IMAGE_BASE_URL = f"{STATIC_BASE_URL}/images/friends/"
 FRIEND_IMAGE_UPLOAD_DIR = os.getenv("FRIEND_IMAGE_UPLOAD_DIR", "/var/www/images/friends").strip()

@@ -1,4 +1,4 @@
-from config import BASE_URL, FRIEND_IMAGE_BASE_URL, RESONANCE_MAGIC_ICON_BASE_URL, SKILL_ICON_BASE_URL, STATIC_BASE_URL
+from config import BASE_URL, SKILL_IMAGE_URL, FRIEND_IMAGE_BASE_URL, RESONANCE_MAGIC_ICON_BASE_URL, SKILL_ICON_BASE_URL, STATIC_BASE_URL
 
 
 def build_image_url(path: str) -> str:
@@ -15,6 +15,8 @@ def build_image_url(path: str) -> str:
     clean_path = f"{dir_part}/{filename}"
     return f"{BASE_URL}{clean_path}"
 
+def build_skills_image_url(path: str) -> str:
+    return f"{SKILL_IMAGE_URL}{path}"
 
 def build_friend_image_url(image_lc: str, fallback_path: str = "") -> str:
     """优先返回洛克素材朋友图地址，没有 image_lc 时再回退到旧图地址。"""
