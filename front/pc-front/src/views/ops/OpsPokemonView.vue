@@ -1120,7 +1120,7 @@ onBeforeUnmount(() => {
               </div>
               <select v-model="s.type">
                 <option value="原生技能">原生技能</option>
-                <option value="学习技能">学习技能</option>
+                <option value="技能石技能">技能石技能</option>
               </select>
               <input v-model.number="s.sort_order" type="number" placeholder="排序" />
               <button type="button" class="btn-text danger" @click="removeSkillRow(realIndex)">删除</button>

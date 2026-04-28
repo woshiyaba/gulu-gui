@@ -165,7 +165,7 @@ class OpsPokemonOptionsResponse(BaseModel):
     attributes: list[OpsPokemonOptionItem] = Field(default_factory=list)
     traits: list[OpsPokemonOptionItem] = Field(default_factory=list)
     skills: list[OpsPokemonOptionItem] = Field(default_factory=list)
-    skill_sources: list[str] = Field(default_factory=lambda: ["原生技能", "学习技能"])
+    skill_sources: list[str] = Field(default_factory=lambda: ["原生技能", "技能石技能"])
 
 
 class OpsEvolutionChainStepItem(BaseModel):

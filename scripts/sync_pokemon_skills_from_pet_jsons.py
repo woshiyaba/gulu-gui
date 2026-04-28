@@ -4,13 +4,13 @@
 规则：
 1. 用 JSON 根级 name 对应 pokemon.name_en，找到精灵 id。
 2. 遍历 move_pool，用技能名匹配 skill.name，生成为「原生技能」。
-3. 遍历 move_stones，用技能名匹配 skill.name，生成为「学习技能」。
+3. 遍历 move_stones，用技能名匹配 skill.name，生成为「技能石技能」。
 4. 对于成功匹配到唯一精灵的 JSON，不保留该精灵原先的 pokemon_skill，
    而是先删掉旧记录，再用 JSON 解析出的新技能全集重建。
 
 说明：
-- 你口头说的是「可学习技能」，但仓库当前业务值统一是「学习技能」；
-  脚本仍按「学习技能」写库，避免前后端枚举值不一致。
+- 仓库当前业务值统一是「技能石技能」；
+  脚本按「技能石技能」写库，避免前后端枚举值不一致。
 - 同一技能若同时出现在 move_pool 和 move_stones，优先按「原生技能」保留。
 
 用法：
@@ -38,7 +38,7 @@ from config import PG_CONFIG
 
 DEFAULT_DATA_DIR = Path(r"E:\game\洛克王国世界\plug\rocom.aoe.top-main\public\data\pets")
 NATIVE_SKILL_TYPE = "原生技能"
-LEARN_SKILL_TYPE = "学习技能"
+LEARN_SKILL_TYPE = "技能石技能"
 def pg_conn() -> psycopg2.extensions.connection:
     return psycopg2.connect(**PG_CONFIG)
 

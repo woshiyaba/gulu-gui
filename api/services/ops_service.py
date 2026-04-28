@@ -470,7 +470,7 @@ async def delete_pokemon_for_ops(user: dict, pokemon_id: int) -> None:
 async def get_pokemon_options_for_ops(user: dict) -> dict:
     ensure_role(user, {"editor", "admin"})
     result = await ops_repository.list_pokemon_options_for_ops()
-    result["skill_sources"] = ["原生技能", "学习技能"]
+    result["skill_sources"] = ["原生技能", "技能石技能"]
     return result
 
 

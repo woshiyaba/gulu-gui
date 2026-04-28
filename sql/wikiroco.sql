@@ -123,7 +123,7 @@ CREATE TABLE pokemon_skill (
     id         SERIAL PRIMARY KEY,
     pokemon_id INT    NOT NULL,
     skill_id   INT    NOT NULL,
-    type       VARCHAR(20) NOT NULL DEFAULT '原生技能', -- 技能来源：原生技能/学习技能（字典冗余一份，业务表直接存）
+    type       VARCHAR(20) NOT NULL DEFAULT '原生技能', -- 技能来源：原生技能/技能石技能（字典冗余一份，业务表直接存）
     sort_order INT    NOT NULL DEFAULT 0,
     CONSTRAINT uk_pokemon_skill UNIQUE (pokemon_id, skill_id),
     CONSTRAINT fk_ps_pokemon FOREIGN KEY (pokemon_id)

@@ -140,7 +140,7 @@ def load_or_seed_sys_dict(my_cur, pg_cur) -> dict[tuple[str, str], int]:
 
     # pokemon_skill 来源类型（冗余字典，用于下拉）
     values.append(("pokemon_skill_source", "原生技能", "原生技能", 0))
-    values.append(("pokemon_skill_source", "学习技能", "学习技能", 1))
+    values.append(("pokemon_skill_source", "技能石技能", "技能石技能", 1))
 
     _bulk_insert(
         pg_cur,
@@ -358,12 +358,12 @@ def migrate_pokemon_skill(my_cur, pg_cur, name_id: dict[str, int], skill_name_id
                 skill_source = raw_type.strip() or "原生技能"
                 if skill_source in {"原生", "原生技能"}:
                     skill_source = "原生技能"
-                elif skill_source in {"学习", "学习技能"}:
-                    skill_source = "学习技能"
+                elif skill_source in {"学习", "学习技能", "技能石技能"}:
+                    skill_source = "技能石技能"
                 else:
-                    skill_source = "学习技能"
+                    skill_source = "技能石技能"
             else:
-                skill_source = "原生技能" if int(raw_type or 0) == 0 else "学习技能"
+                skill_source = "原生技能" if int(raw_type or 0) == 0 else "技能石技能"
             values.append((pid, sid, skill_source, r.get("sort_order", 0)))
     _bulk_insert(
         pg_cur,
