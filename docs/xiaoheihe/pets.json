@@ -1,0 +1,52 @@
+{
+	"msg": "",
+	"result": {
+		"list": [{
+			"evolution_special_condition": [],
+			"id": "3056",
+			"name": "咔咔壳",
+			"icon": "https://heyboxbj.max-c.com/game/roco_kingdom/pet/big_head_icon_2/3056.png",
+			"elem_type_icons": ["https://imgheybox.max-c.com/oa/2026/04/11/3d01c2cff10d3e6fd279e4e9d0ed8cb8.png"],
+			"pictorial_book_id": 13,
+			"form": "本来的样子",
+			"bg": "#6AA9FE"
+		}, {
+			"evolution_special_condition": [],
+			"id": "3517",
+			"name": "咔咔壳",
+			"icon": "https://heyboxbj.max-c.com/game/roco_kingdom/pet/big_head_icon_2/3517.png",
+			"elem_type_icons": ["https://imgheybox.max-c.com/oa/2026/04/11/3d01c2cff10d3e6fd279e4e9d0ed8cb8.png"],
+			"pictorial_book_id": 13,
+			"form": "蜕皮时的样子",
+			"bg": "#6AA9FE"
+		}, {
+			"evolution_special_condition": [],
+			"id": "3175",
+			"name": "咔咔羽毛",
+			"icon": "https://heyboxbj.max-c.com/game/roco_kingdom/pet/big_head_icon_2/3175.png",
+			"elem_type_icons": ["https://imgheybox.max-c.com/oa/2026/04/11/14bdfe9b1f28787cf14eb50ab0b1bfdc.png", "https://imgheybox.max-c.com/oa/2026/04/11/fcb12708448e8dcd19bca22ebb8a6ef1.png"],
+			"pictorial_book_id": 96,
+			"form": "",
+			"bg": "3EC7CA"
+		}, {
+			"evolution_special_condition": [],
+			"id": "3176",
+			"name": "咔咔雀",
+			"icon": "https://heyboxbj.max-c.com/game/roco_kingdom/pet/big_head_icon_2/3176.png",
+			"elem_type_icons": ["https://imgheybox.max-c.com/oa/2026/04/11/14bdfe9b1f28787cf14eb50ab0b1bfdc.png", "https://imgheybox.max-c.com/oa/2026/04/11/fcb12708448e8dcd19bca22ebb8a6ef1.png"],
+			"pictorial_book_id": 97,
+			"form": "",
+			"bg": "3EC7CA"
+		}, {
+			"evolution_special_condition": [],
+			"id": "3177",
+			"name": "咔咔鸟",
+			"icon": "https://heyboxbj.max-c.com/game/roco_kingdom/pet/big_head_icon_2/3177.png",
+			"elem_type_icons": ["https://imgheybox.max-c.com/oa/2026/04/11/14bdfe9b1f28787cf14eb50ab0b1bfdc.png", "https://imgheybox.max-c.com/oa/2026/04/11/fcb12708448e8dcd19bca22ebb8a6ef1.png"],
+			"pictorial_book_id": 98,
+			"form": "",
+			"bg": "3EC7CA"
+		}]
+	},
+	"status": "ok"
+}
