@@ -1,1 +1,7 @@
-{"msg":"","result":{"list":[]},"status":"ok"}
+{
+    "msg": "",
+    "result": {
+        "list": []
+    },
+    "status": "ok"
+}

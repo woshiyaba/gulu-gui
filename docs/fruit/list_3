@@ -1,1 +1,188 @@
-{"msg":"","result":{"list":[{"elem_type_icons":[],"evolution_special_condition":[],"id":"108046","name":"风铃鲨果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108046.png","related_pet_id":"3115","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108047","name":"果冻果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108047.png","related_pet_id":"3118","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108048","name":"大耳帽兜果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108048.png","related_pet_id":"3121","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108049","name":"脆筒甜甜果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108049.png","related_pet_id":"3124","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108050","name":"小狮鹫果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108050.png","related_pet_id":"3127","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108051","name":"圆眼蜘蛛果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108051.png","related_pet_id":"3130","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108053","name":"毛毛果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108053.png","related_pet_id":"3136","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108054","name":"小草虫果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108054.png","related_pet_id":"3139","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108055","name":"小夜果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108055.png","related_pet_id":"3142","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108056","name":"小灵菇果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108056.png","related_pet_id":"3145","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108057","name":"空空颅果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108057.png","related_pet_id":"3148","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108058","name":"多多果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108058.png","related_pet_id":"3151","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108059","name":"裘洛果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108059.png","related_pet_id":"3154","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108061","name":"春团果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108061.png","related_pet_id":"3161","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108062","name":"伏地兽果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108062.png","related_pet_id":"3165","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108063","name":"阿布果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108063.png","related_pet_id":"3168","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108064","name":"石石果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108064.png","related_pet_id":"3170","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108065","name":"雪豆丁果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108065.png","related_pet_id":"3172","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108066","name":"咔咔羽毛果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108066.png","related_pet_id":"3175","item_quality":4},{"elem_type_icons":[],"evolution_special_condition":[],"id":"108067","name":"矮脚爬爬果实","icon":"https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108067.png","related_pet_id":"3178","item_quality":4}]},"status":"ok"}
+{
+    "msg": "",
+    "result": {
+        "list": [
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108046",
+                "name": "风铃鲨果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108046.png",
+                "related_pet_id": "3115",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108047",
+                "name": "果冻果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108047.png",
+                "related_pet_id": "3118",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108048",
+                "name": "大耳帽兜果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108048.png",
+                "related_pet_id": "3121",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108049",
+                "name": "脆筒甜甜果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108049.png",
+                "related_pet_id": "3124",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108050",
+                "name": "小狮鹫果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108050.png",
+                "related_pet_id": "3127",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108051",
+                "name": "圆眼蜘蛛果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108051.png",
+                "related_pet_id": "3130",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108053",
+                "name": "毛毛果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108053.png",
+                "related_pet_id": "3136",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108054",
+                "name": "小草虫果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108054.png",
+                "related_pet_id": "3139",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108055",
+                "name": "小夜果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108055.png",
+                "related_pet_id": "3142",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108056",
+                "name": "小灵菇果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108056.png",
+                "related_pet_id": "3145",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108057",
+                "name": "空空颅果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108057.png",
+                "related_pet_id": "3148",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108058",
+                "name": "多多果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108058.png",
+                "related_pet_id": "3151",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108059",
+                "name": "裘洛果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108059.png",
+                "related_pet_id": "3154",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108061",
+                "name": "春团果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108061.png",
+                "related_pet_id": "3161",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108062",
+                "name": "伏地兽果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108062.png",
+                "related_pet_id": "3165",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108063",
+                "name": "阿布果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108063.png",
+                "related_pet_id": "3168",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108064",
+                "name": "石石果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108064.png",
+                "related_pet_id": "3170",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108065",
+                "name": "雪豆丁果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108065.png",
+                "related_pet_id": "3172",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108066",
+                "name": "咔咔羽毛果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108066.png",
+                "related_pet_id": "3175",
+                "item_quality": 4
+            },
+            {
+                "elem_type_icons": [],
+                "evolution_special_condition": [],
+                "id": "108067",
+                "name": "矮脚爬爬果实",
+                "icon": "https://heyboxbj.max-c.com/game/roco_kingdom/fruit/icon/108067.png",
+                "related_pet_id": "3178",
+                "item_quality": 4
+            }
+        ]
+    },
+    "status": "ok"
+}
