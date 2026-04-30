@@ -95,6 +95,17 @@ onPullDownRefresh(() => {
 onUnload(() => {
   if (searchTimer) clearTimeout(searchTimer)
 })
+
+function goPokemonDetail(item: PokemonEgg) {
+  const name = item.pokemon_name?.trim()
+  if (!name) {
+    uni.showToast({ title: '该精灵蛋暂未关联宠物', icon: 'none' })
+    return
+  }
+  uni.navigateTo({
+    url: `/pages/pokemon/detail?name=${encodeURIComponent(name)}`,
+  })
+}
 </script>
 
 <template>
@@ -137,7 +148,13 @@ onUnload(() => {
         :key="colIndex"
         class="waterfall-col"
       >
-        <view v-for="item in col" :key="item.id" class="egg-card">
+        <view
+          v-for="item in col"
+          :key="item.id"
+          class="egg-card"
+          :class="{ 'egg-card--clickable': !!item.pokemon_name }"
+          @tap="goPokemonDetail(item)"
+        >
           <view class="icon-wrap">
             <image
               v-if="item.icon"
@@ -277,6 +294,15 @@ onUnload(() => {
   border-radius: 18rpx;
   background: #ffffff;
   box-shadow: 0 8rpx 20rpx rgba(64, 125, 255, 0.08);
+}
+
+.egg-card--clickable {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.egg-card--clickable:active {
+  transform: scale(0.96);
+  box-shadow: 0 4rpx 12rpx rgba(64, 125, 255, 0.18);
 }
 
 .icon-wrap {

@@ -164,6 +164,7 @@ class PokemonEggItem(BaseModel):
     icon: str = ""
     pokemon_source_id: int | None = None
     pokemon_id: int | None = None
+    pokemon_name: str = ""
     item_quality: int = 0
     created_at: str = ""
     updated_at: str = ""

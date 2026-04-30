@@ -344,12 +344,12 @@ async def count_pokemon_eggs(name: str = "") -> int:
 
 
 async def list_pokemon_eggs(name: str = "", page: int = 1, page_size: int = 30) -> list[dict]:
-    """分页查询 pokemon_egg 表全部字段，支持按名称模糊筛选。"""
+    """分页查询 pokemon_egg 表全部字段，支持按名称模糊筛选；附带对应 pokemon.name。"""
     offset = (page - 1) * page_size
     where_clause = ""
     params: list = []
     if name:
-        where_clause = "WHERE name LIKE %s"
+        where_clause = "WHERE pe.name LIKE %s"
         params.append(f"%{name}%")
 
     pool = await get_pool()
@@ -357,12 +357,14 @@ async def list_pokemon_eggs(name: str = "", page: int = 1, page_size: int = 30) 
         async with conn.cursor() as cur:
             await cur.execute(
                 f"""
-                SELECT id, source_id, name, form, icon,
-                       pokemon_source_id, pokemon_id, item_quality,
-                       created_at, updated_at
-                FROM pokemon_egg
+                SELECT pe.id, pe.source_id, pe.name, pe.form, pe.icon,
+                       pe.pokemon_source_id, pe.pokemon_id, pe.item_quality,
+                       pe.created_at, pe.updated_at,
+                       p.name AS pokemon_name
+                FROM pokemon_egg pe
+                LEFT JOIN pokemon p ON p.source_id = pe.pokemon_source_id
                 {where_clause}
-                ORDER BY id
+                ORDER BY pe.id
                 LIMIT %s OFFSET %s
                 """,
                 params + [page_size, offset],

@@ -265,6 +265,7 @@ export interface PokemonEgg {
   icon: string
   pokemon_source_id: number | null
   pokemon_id: number | null
+  pokemon_name: string
   item_quality: number
   created_at: string
   updated_at: string

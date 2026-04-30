@@ -295,6 +295,7 @@ async def get_pokemon_eggs(name: str = "", page: int = 1, page_size: int = 30) -
             "icon": build_image_url(row.get("icon") or ""),
             "pokemon_source_id": row.get("pokemon_source_id"),
             "pokemon_id": row.get("pokemon_id"),
+            "pokemon_name": row.get("pokemon_name") or "",
             "item_quality": row.get("item_quality") or 0,
             "created_at": row["created_at"].isoformat() if row.get("created_at") else "",
             "updated_at": row["updated_at"].isoformat() if row.get("updated_at") else "",
