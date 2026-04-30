@@ -287,3 +287,77 @@ CREATE TABLE IF NOT EXISTS pokemon_lineup_member (
     member_desc       TEXT NOT NULL DEFAULT '',
     CONSTRAINT uk_pokemon_lineup_member_order UNIQUE (lineup_id, sort_order)
 );
+
+
+CREATE TABLE "public"."pokemon_egg" (
+  "id" int4 NOT NULL DEFAULT nextval('pokemon_egg_id_seq'::regclass),
+  "source_id" int8 NOT NULL,
+  "name" varchar(100) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
+  "form" varchar(100) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
+  "icon" varchar(500) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
+  "pokemon_source_id" int8,
+  "pokemon_id" int4,
+  "item_quality" int2 NOT NULL DEFAULT 0,
+  "created_at" timestamp(6) NOT NULL DEFAULT now(),
+  "updated_at" timestamp(6) NOT NULL DEFAULT now(),
+  CONSTRAINT "pokemon_egg_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "uk_pe_source_id" UNIQUE ("source_id")
+)
+;
+
+ALTER TABLE "public"."pokemon_egg" 
+  OWNER TO "wikiroco";
+
+CREATE INDEX "idx_pe_item_quality" ON "public"."pokemon_egg" USING btree (
+  "item_quality" "pg_catalog"."int2_ops" ASC NULLS LAST
+);
+
+CREATE INDEX "idx_pe_name" ON "public"."pokemon_egg" USING btree (
+  "name" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+
+CREATE INDEX "idx_pe_pokemon_id" ON "public"."pokemon_egg" USING btree (
+  "pokemon_id" "pg_catalog"."int4_ops" ASC NULLS LAST
+);
+
+CREATE INDEX "idx_pe_pokemon_source_id" ON "public"."pokemon_egg" USING btree (
+  "pokemon_source_id" "pg_catalog"."int8_ops" ASC NULLS LAST
+);
+
+COMMENT ON COLUMN "public"."pokemon_egg"."source_id" IS '没用';
+
+COMMENT ON COLUMN "public"."pokemon_egg"."pokemon_source_id" IS '官方通用id';
+
+COMMENT ON COLUMN "public"."pokemon_egg"."pokemon_id" IS 'pokemon表的id';
+
+
+
+
+CREATE TABLE "public"."pokemon_fruit" (
+  "id" int4 NOT NULL DEFAULT nextval('pokemon_fruit_id_seq'::regclass),
+  "source_id" int8 NOT NULL,
+  "name" varchar(100) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
+  "icon" varchar(500) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
+  "pokemon_source_id" int8,
+  "item_quality" int2 NOT NULL DEFAULT 0,
+  "created_at" timestamp(6) NOT NULL DEFAULT now(),
+  "updated_at" timestamp(6) NOT NULL DEFAULT now(),
+  CONSTRAINT "pokemon_fruit_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "uk_pf_source_id" UNIQUE ("source_id")
+)
+;
+
+ALTER TABLE "public"."pokemon_fruit" 
+  OWNER TO "wikiroco";
+
+CREATE INDEX "idx_pf_item_quality" ON "public"."pokemon_fruit" USING btree (
+  "item_quality" "pg_catalog"."int2_ops" ASC NULLS LAST
+);
+
+CREATE INDEX "idx_pf_name" ON "public"."pokemon_fruit" USING btree (
+  "name" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+);
+
+CREATE INDEX "idx_pf_pokemon_source_id" ON "public"."pokemon_fruit" USING btree (
+  "pokemon_source_id" "pg_catalog"."int8_ops" ASC NULLS LAST
+);

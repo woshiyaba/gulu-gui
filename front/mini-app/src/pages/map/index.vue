@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
-import { fetchCategories, fetchMapPoints } from '@/api/pokemon'
+import { preloadMapData } from '@/utils/mapPreload'
 import type { Category, MapPoint } from '@/types/pokemon'
 
 const ZOOM = 11
@@ -207,10 +207,7 @@ function closePopup() {
 
 onLoad(async () => {
   try {
-    const [cats, points] = await Promise.all([
-      fetchCategories(),
-      fetchMapPoints(),
-    ])
+    const { categories: cats, points } = await preloadMapData()
     categories.value = cats
     allPoints.value = points
   } catch {

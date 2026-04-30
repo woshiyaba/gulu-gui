@@ -6,6 +6,8 @@ from api.schemas.pokemon import (
     AttributeItem,
     CategoryItem,
     PetMapPointItem,
+    PokemonEggListResponse,
+    PokemonFruitListResponse,
     PokemonEvolutionChainResponse,
     PokemonBodyMatchResponse,
     PokemonDetailResponse,
@@ -32,6 +34,8 @@ from api.services.pokemon_service import (
     get_categories as get_categories_service,
     get_egg_group_names as get_egg_group_names_service,
     get_pet_map_points as get_pet_map_points_service,
+    get_pokemon_eggs as get_pokemon_eggs_service,
+    get_pokemon_fruits as get_pokemon_fruits_service,
     get_pokemon_marks as get_pokemon_marks_service,
     get_pokemon_by_body_metrics as get_pokemon_by_body_metrics_service,
     get_pokemon as get_pokemon_service,
@@ -153,6 +157,26 @@ async def get_categories():
 async def get_pet_map_points():
     """全量返回 pet_map_point 表数据，并补 category_id 对应图标地址。"""
     return await get_pet_map_points_service()
+
+
+@router.get("/pokemon-eggs", response_model=PokemonEggListResponse)
+async def get_pokemon_eggs(
+    name: str = Query(default="", description="精灵蛋名称关键词（模糊匹配）"),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=30, ge=1, le=100),
+):
+    """分页返回 pokemon_egg 表全部字段，支持按名称模糊筛选。"""
+    return await get_pokemon_eggs_service(name=name, page=page, page_size=page_size)
+
+
+@router.get("/pokemon-fruits", response_model=PokemonFruitListResponse)
+async def get_pokemon_fruits(
+    name: str = Query(default="", description="果实名称关键词（模糊匹配）"),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=30, ge=1, le=100),
+):
+    """分页返回 pokemon_fruit 表全部字段，支持按名称模糊筛选。"""
+    return await get_pokemon_fruits_service(name=name, page=page, page_size=page_size)
 
 
 @router.get("/pokemon-marks", response_model=list[PokemonMarkItem])

@@ -51,6 +51,20 @@
 			}
 		},
 		{
+			"path": "pages/more/pokemon-eggs",
+			"style": {
+				"navigationBarTitleText": "精灵蛋查询",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
+			"path": "pages/more/pokemon-fruits",
+			"style": {
+				"navigationBarTitleText": "宠物果实查询",
+				"enablePullDownRefresh": true
+			}
+		},
+		{
 			"path": "pages/lineup/list",
 			"style": {
 				"navigationBarTitleText": "阵容推荐"

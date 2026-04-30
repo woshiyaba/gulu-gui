@@ -154,3 +154,41 @@ class PokemonDetailResponse(PokemonListItem):
     restrain: PokemonRestrain = Field(default_factory=PokemonRestrain)
     skills: list[PokemonSkill] = Field(default_factory=list)
     defensive_type_chart: DefensiveTypeChart | None = None
+
+
+class PokemonEggItem(BaseModel):
+    id: int
+    source_id: int
+    name: str = ""
+    form: str = ""
+    icon: str = ""
+    pokemon_source_id: int | None = None
+    pokemon_id: int | None = None
+    item_quality: int = 0
+    created_at: str = ""
+    updated_at: str = ""
+
+
+class PokemonEggListResponse(BaseModel):
+    total: int
+    page: int
+    page_size: int
+    items: list[PokemonEggItem] = Field(default_factory=list)
+
+
+class PokemonFruitItem(BaseModel):
+    id: int
+    source_id: int
+    name: str = ""
+    icon: str = ""
+    pokemon_source_id: int | None = None
+    item_quality: int = 0
+    created_at: str = ""
+    updated_at: str = ""
+
+
+class PokemonFruitListResponse(BaseModel):
+    total: int
+    page: int
+    page_size: int
+    items: list[PokemonFruitItem] = Field(default_factory=list)

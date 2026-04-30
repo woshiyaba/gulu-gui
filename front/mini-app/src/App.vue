@@ -1,7 +1,12 @@
 <script>
+	import { preloadMapData } from '@/utils/mapPreload'
+
 	export default {
 		onLaunch: function() {
 			console.log('App Launch')
+			setTimeout(() => {
+				preloadMapData().catch(() => {})
+			}, 1200)
 		},
 		onShow: function() {
 			console.log('App Show')

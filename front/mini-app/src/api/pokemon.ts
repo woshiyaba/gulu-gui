@@ -9,7 +9,9 @@ import type {
   PersonalityOption,
   PokemonBodyMatchResponse,
   PokemonDetail,
+  PokemonEggListResponse,
   PokemonEvolutionChain,
+  PokemonFruitListResponse,
   PokemonListResponse,
   PokemonMark,
   ResonanceMagicOption,
@@ -112,6 +114,32 @@ export function fetchMapPoints() {
 export function fetchPokemonMarks() {
   return request<PokemonMark[]>({
     url: '/api/pokemon-marks',
+  })
+}
+
+export interface PokemonEggQuery {
+  name?: string
+  page?: number
+  page_size?: number
+}
+
+export function fetchPokemonEggs(query: PokemonEggQuery = {}) {
+  return request<PokemonEggListResponse>({
+    url: '/api/pokemon-eggs',
+    data: query,
+  })
+}
+
+export interface PokemonFruitQuery {
+  name?: string
+  page?: number
+  page_size?: number
+}
+
+export function fetchPokemonFruits(query: PokemonFruitQuery = {}) {
+  return request<PokemonFruitListResponse>({
+    url: '/api/pokemon-fruits',
+    data: query,
   })
 }
 

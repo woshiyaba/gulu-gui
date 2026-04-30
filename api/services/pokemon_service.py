@@ -281,6 +281,60 @@ async def get_pokemon_by_body_metrics(height_m: float, weight_kg: float) -> dict
     }
 
 
+async def get_pokemon_eggs(name: str = "", page: int = 1, page_size: int = 30) -> dict:
+    """分页返回 pokemon_egg 表全部字段，icon 字段补全为完整 URL，支持按名称模糊筛选。"""
+    name = name.strip()
+    total = await pokemon_repository.count_pokemon_eggs(name=name)
+    rows = await pokemon_repository.list_pokemon_eggs(name=name, page=page, page_size=page_size)
+    items = [
+        {
+            "id": row["id"],
+            "source_id": row["source_id"],
+            "name": row.get("name") or "",
+            "form": row.get("form") or "",
+            "icon": build_image_url(row.get("icon") or ""),
+            "pokemon_source_id": row.get("pokemon_source_id"),
+            "pokemon_id": row.get("pokemon_id"),
+            "item_quality": row.get("item_quality") or 0,
+            "created_at": row["created_at"].isoformat() if row.get("created_at") else "",
+            "updated_at": row["updated_at"].isoformat() if row.get("updated_at") else "",
+        }
+        for row in rows
+    ]
+    return {
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "items": items,
+    }
+
+
+async def get_pokemon_fruits(name: str = "", page: int = 1, page_size: int = 30) -> dict:
+    """分页返回 pokemon_fruit 表全部字段，icon 字段补全为完整 URL，支持按名称模糊筛选。"""
+    name = name.strip()
+    total = await pokemon_repository.count_pokemon_fruits(name=name)
+    rows = await pokemon_repository.list_pokemon_fruits(name=name, page=page, page_size=page_size)
+    items = [
+        {
+            "id": row["id"],
+            "source_id": row["source_id"],
+            "name": row.get("name") or "",
+            "icon": build_image_url(row.get("icon") or ""),
+            "pokemon_source_id": row.get("pokemon_source_id"),
+            "item_quality": row.get("item_quality") or 0,
+            "created_at": row["created_at"].isoformat() if row.get("created_at") else "",
+            "updated_at": row["updated_at"].isoformat() if row.get("updated_at") else "",
+        }
+        for row in rows
+    ]
+    return {
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "items": items,
+    }
+
+
 async def get_pet_map_points() -> list[dict]:
     """返回 pet_map_point 表全量点位，并补 category_id 对应图标地址。"""
     rows = await pokemon_repository.list_pet_map_points()

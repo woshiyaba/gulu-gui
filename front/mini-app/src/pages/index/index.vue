@@ -276,6 +276,7 @@ onUnload(() => {
 .page {
   min-height: 100vh;
   padding: 24rpx;
+  padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
   background: linear-gradient(180deg, #f3f8ff 0%, #f9fbff 100%);
 }
 
@@ -443,6 +444,15 @@ onUnload(() => {
   height: 280rpx;
   border-radius: 24rpx;
   background: linear-gradient(135deg, #edf4ff 0%, #ffffff 100%);
+}
+
+/* 376px 这类窄屏继续用 3 列会把卡片挤得太窄，标签换行后容易上下错位。 */
+@media screen and (max-width: 390px) {
+  .pokemon-grid,
+  .skeleton-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20rpx;
+  }
 }
 
 .footer-status {

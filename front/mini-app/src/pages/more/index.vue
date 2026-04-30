@@ -25,6 +25,18 @@ const menuItems: MenuItem[] = [
     url: '/pages/more/pokemon-marks',
     color: '#f08b3a',
   },
+  {
+    title: '精灵蛋查询',
+    desc: '查看可孵化精灵蛋及其对应宠物',
+    url: '/pages/more/pokemon-eggs',
+    color: '#9c5bff',
+  },
+  {
+    title: '宠物果实查询',
+    desc: '查看宠物果实图鉴',
+    url: '/pages/more/pokemon-fruits',
+    color: '#ff6b9c',
+  },
 ]
 
 function goBattlePk() {

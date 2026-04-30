@@ -256,3 +256,41 @@ export interface ResonanceMagicOption {
   icon_url: string
   max_usage_count: number
 }
+
+export interface PokemonEgg {
+  id: number
+  source_id: number
+  name: string
+  form: string
+  icon: string
+  pokemon_source_id: number | null
+  pokemon_id: number | null
+  item_quality: number
+  created_at: string
+  updated_at: string
+}
+
+export interface PokemonEggListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: PokemonEgg[]
+}
+
+export interface PokemonFruit {
+  id: number
+  source_id: number
+  name: string
+  icon: string
+  pokemon_source_id: number | null
+  item_quality: number
+  created_at: string
+  updated_at: string
+}
+
+export interface PokemonFruitListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: PokemonFruit[]
+}

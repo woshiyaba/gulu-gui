@@ -327,6 +327,92 @@ async def list_pokemon_by_body_metrics(height_cm: int, weight_g: int) -> list[di
             return _dedupe_body_metric_rows(rows)
 
 
+async def count_pokemon_eggs(name: str = "") -> int:
+    """统计 pokemon_egg 表的总条数，支持按名称模糊筛选。"""
+    where_clause = ""
+    params: list = []
+    if name:
+        where_clause = "WHERE name LIKE %s"
+        params.append(f"%{name}%")
+
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(f"SELECT COUNT(*) AS cnt FROM pokemon_egg {where_clause}", params)
+            row = await cur.fetchone() or {}
+            return row.get("cnt", 0)
+
+
+async def list_pokemon_eggs(name: str = "", page: int = 1, page_size: int = 30) -> list[dict]:
+    """分页查询 pokemon_egg 表全部字段，支持按名称模糊筛选。"""
+    offset = (page - 1) * page_size
+    where_clause = ""
+    params: list = []
+    if name:
+        where_clause = "WHERE name LIKE %s"
+        params.append(f"%{name}%")
+
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT id, source_id, name, form, icon,
+                       pokemon_source_id, pokemon_id, item_quality,
+                       created_at, updated_at
+                FROM pokemon_egg
+                {where_clause}
+                ORDER BY id
+                LIMIT %s OFFSET %s
+                """,
+                params + [page_size, offset],
+            )
+            return await cur.fetchall()
+
+
+async def count_pokemon_fruits(name: str = "") -> int:
+    """统计 pokemon_fruit 表的总条数，支持按名称模糊筛选。"""
+    where_clause = ""
+    params: list = []
+    if name:
+        where_clause = "WHERE name LIKE %s"
+        params.append(f"%{name}%")
+
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(f"SELECT COUNT(*) AS cnt FROM pokemon_fruit {where_clause}", params)
+            row = await cur.fetchone() or {}
+            return row.get("cnt", 0)
+
+
+async def list_pokemon_fruits(name: str = "", page: int = 1, page_size: int = 30) -> list[dict]:
+    """分页查询 pokemon_fruit 表全部字段，支持按名称模糊筛选。"""
+    offset = (page - 1) * page_size
+    where_clause = ""
+    params: list = []
+    if name:
+        where_clause = "WHERE name LIKE %s"
+        params.append(f"%{name}%")
+
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT id, source_id, name, icon,
+                       pokemon_source_id, item_quality,
+                       created_at, updated_at
+                FROM pokemon_fruit
+                {where_clause}
+                ORDER BY id
+                LIMIT %s OFFSET %s
+                """,
+                params + [page_size, offset],
+            )
+            return await cur.fetchall()
+
+
 async def list_pet_map_points() -> list[dict]:
     """查询地图点位表的全部数据。"""
     pool = await get_pool()
