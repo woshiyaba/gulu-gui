@@ -136,6 +136,13 @@ export function fetchLineupsByIds(ids: number[]) {
   })
 }
 
+export function fetchLineups(sourceType?: string) {
+  const query = sourceType ? `?source_type=${encodeURIComponent(sourceType)}` : ''
+  return request<{ items: Lineup[] }>({
+    url: `/api/pokemon-lineups${query}`,
+  })
+}
+
 export function fetchPersonalities() {
   return request<PersonalityOption[]>({ url: '/api/personalities' })
 }

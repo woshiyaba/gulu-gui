@@ -3,6 +3,7 @@ import { computed, reactive, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import {
   fetchBloodlines,
+  fetchLineups,
   fetchPersonalities,
   fetchPokemon,
   fetchPokemonDetail,
@@ -20,6 +21,7 @@ import type {
   ResonanceMagicOption,
   Skill,
 } from '@/types/pokemon'
+import type { Lineup } from '@/types/banner'
 
 type TeamKey = 'A' | 'B'
 
@@ -107,6 +109,12 @@ const activeTeam = ref<TeamKey>('A')
 const personalities = ref<PersonalityOption[]>([])
 const bloodlines = ref<BloodlineOption[]>([])
 const resonanceMagics = ref<ResonanceMagicOption[]>([])
+const lineupOptions = ref<Lineup[]>([])
+const lineupLoading = ref(false)
+const importLineupId = reactive<Record<TeamKey, number | null>>({
+  A: null,
+  B: null,
+})
 
 const submitting = ref(false)
 const error = ref('')
@@ -163,6 +171,56 @@ let searchTimer: ReturnType<typeof setTimeout> | undefined
 
 function teamRef(key: TeamKey): TeamForm {
   return key === 'A' ? teamA : teamB
+}
+
+function applyLineupToTeam(team: TeamKey, lineup: Lineup) {
+  const t = teamRef(team)
+  t.title = lineup.title || (team === 'A' ? '我的队伍' : '对手队伍')
+  t.lineup_desc = lineup.lineup_desc || ''
+  t.resonance_magic_id = lineup.resonance_magic_id ?? null
+  t.resonance_magic_name = lineup.resonance_magic_name || ''
+  t.members = lineup.members.slice(0, 6).map((m, i) => ({
+    pokemon_id: m.pokemon_id ?? null,
+    pokemon_name: m.pokemon_name || '',
+    pokemon_image: m.pokemon_image || '',
+    pokemon_attrs: [],
+    sort_order: i + 1,
+    bloodline_dict_id: m.bloodline_dict_id ?? null,
+    bloodline_label: m.bloodline_label || '',
+    personality_id: m.personality_id ?? null,
+    personality_name_zh: m.personality_name_zh || '',
+    qual_1: m.qual_1 || '',
+    qual_2: m.qual_2 || '',
+    qual_3: m.qual_3 || '',
+    skills: [
+      { name: m.skill_1_name || '', image: m.skill_1_image || '' },
+      { name: m.skill_2_name || '', image: m.skill_2_image || '' },
+      { name: m.skill_3_name || '', image: m.skill_3_image || '' },
+      { name: m.skill_4_name || '', image: m.skill_4_image || '' },
+    ],
+    member_desc: m.member_desc || '',
+  }))
+  if (!t.members.length) t.members = [emptyMember(1)]
+}
+
+function importPresetLineup(team: TeamKey) {
+  const lineupId = importLineupId[team]
+  if (!lineupId) {
+    const msg = `请先为${team === 'A' ? '我方' : '对手'}选择阵容`
+    error.value = msg
+    uni.showToast({ title: msg, icon: 'none' })
+    return
+  }
+  const picked = lineupOptions.value.find((item) => item.id === lineupId)
+  if (!picked) {
+    const msg = '阵容不存在或已失效，请重新选择'
+    error.value = msg
+    uni.showToast({ title: msg, icon: 'none' })
+    return
+  }
+  applyLineupToTeam(team, picked)
+  error.value = ''
+  uni.showToast({ title: '已导入阵容', icon: 'none' })
 }
 
 const personalityById = computed(() => {
@@ -532,14 +590,18 @@ function winnerLabel(w: string): string {
 }
 
 onLoad(async () => {
-  const [p, b, r] = await Promise.allSettled([
+  lineupLoading.value = true
+  const [p, b, r, l] = await Promise.allSettled([
     fetchPersonalities(),
     fetchBloodlines(),
     fetchResonanceMagics(),
+    fetchLineups(),
   ])
   if (p.status === 'fulfilled') personalities.value = p.value
   if (b.status === 'fulfilled') bloodlines.value = b.value
   if (r.status === 'fulfilled') resonanceMagics.value = r.value
+  if (l.status === 'fulfilled') lineupOptions.value = l.value.items || []
+  lineupLoading.value = false
 })
 </script>
 
@@ -583,6 +645,34 @@ onLoad(async () => {
           placeholder="队伍名称"
           @input="onInputValue(v => teamRef(activeTeam).title = v)($event)"
         />
+      </view>
+
+      <view class="form-row">
+        <text class="form-label">导入阵容</text>
+        <view class="import-wrap">
+          <picker
+            mode="selector"
+            :range="lineupOptions"
+            range-key="title"
+            :disabled="lineupLoading || !lineupOptions.length"
+            @change="(e) => {
+              const idx = Number(e?.detail?.value ?? -1)
+              importLineupId[activeTeam] = idx >= 0 ? (lineupOptions[idx]?.id ?? null) : null
+            }"
+          >
+            <view class="picker-box">
+              <text class="picker-text">
+                {{
+                  lineupLoading
+                    ? '加载阵容中...'
+                    : (lineupOptions.find((l) => l.id === importLineupId[activeTeam])?.title || '点击选择已有阵容')
+                }}
+              </text>
+              <text class="value-arrow">›</text>
+            </view>
+          </picker>
+          <view class="import-btn" @tap="importPresetLineup(activeTeam)">一键导入</view>
+        </view>
       </view>
 
       <view class="form-row" @tap="openResonancePicker(activeTeam)">
@@ -1106,6 +1196,32 @@ onLoad(async () => {
   font-size: 28rpx; color: #1f3760;
   padding: 6rpx 0;
   text-align: right;
+}
+.import-wrap {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; gap: 12rpx;
+}
+.picker-box {
+  flex: 1; min-width: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 18rpx;
+  height: 68rpx;
+  border-radius: 14rpx;
+  background: #f3f8ff;
+}
+.picker-text {
+  flex: 1; min-width: 0;
+  font-size: 24rpx; color: #1f3760;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.import-btn {
+  flex: 0 0 auto;
+  padding: 0 18rpx;
+  height: 68rpx; line-height: 68rpx;
+  border-radius: 14rpx;
+  background: #ecf5ff;
+  color: #2b74ff;
+  font-size: 24rpx;
 }
 .form-value {
   flex: 1; min-width: 0;
