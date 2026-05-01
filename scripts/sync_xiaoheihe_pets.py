@@ -1,9 +1,9 @@
 """
-从小黑盒（xiaoheihe）API 同步精灵基础信息与血脉技能到 PostgreSQL。
+从小黑盒（xiaoheihe）API 同步精灵基础信息与技能到 PostgreSQL。
 
 数据流：
   pet/list  → 按 name（form）匹配 pokemon → 更新 pokemon.source_id / pokemon.avatar
-  pet/detail → 取 skill_list.blood → 按 name 匹配 skill → 写入 pokemon_skill (type=血脉技能)
+  pet/detail → 取 skill_list.level/blood/machine → 按 name 匹配 skill → 写入 pokemon_skill
   匹配不到的技能：先落库到 skill 表（attr_id=NULL），再写入 pokemon_skill，并打印日志。
 
 匹配规则：
@@ -17,6 +17,8 @@
     uv run python scripts/sync_xiaoheihe_pets.py --max-pets 10
     uv run python scripts/sync_xiaoheihe_pets.py --only-ids-file docs/xiaoheihe/single_todo.txt
     uv run python scripts/sync_xiaoheihe_pets.py --skill-only-ids 3225,3226,3454,3455,3456
+    uv run python scripts/sync_xiaoheihe_pets.py --skill-only-ids 3225,3226 --replace-blood-skills
+    uv run python scripts/sync_xiaoheihe_pets.py --skill-only-ids 3225,3226 --replace-blood-skills all
 """
 
 from __future__ import annotations
@@ -40,8 +42,21 @@ from config import PG_CONFIG
 LIST_URL = "https://api.xiaoheihe.cn/game/roco_kingdom/pet/list"
 DETAIL_URL = "https://api.xiaoheihe.cn/game/roco_kingdom/pet/detail"
 PAGE_SIZE = 20
+NATIVE_SKILL_TYPE = "原生技能"
 BLOOD_SKILL_TYPE = "血脉技能"
+MACHINE_SKILL_TYPE = "技能石技能"
 FUZZY_MATCH_MODE = "name_fuzzy"
+
+# 同一只精灵同一技能只能保存一条关联，优先保留更具体的来源。
+SKILL_SYNC_SOURCES = (
+    ("blood", BLOOD_SKILL_TYPE),
+    ("level", NATIVE_SKILL_TYPE),
+    ("machine", MACHINE_SKILL_TYPE),
+)
+REPLACE_SKILL_TYPES_BY_MODE = {
+    "blood": [BLOOD_SKILL_TYPE],
+    "all": [NATIVE_SKILL_TYPE, BLOOD_SKILL_TYPE, MACHINE_SKILL_TYPE],
+}
 
 LIST_QUERY = {
     "app": "heybox",
@@ -52,9 +67,9 @@ LIST_QUERY = {
     "x_os_type": "iOS",
     "x_client_version": "1.3.386",
     "version": "999.0.4",
-    "hkey": "XI70T28",
-    "_time": "1777393482",
-    "nonce": "21680E789BC8A58B809061DAA315542D",
+    "hkey": "7TY0D94",
+    "_time": "1777607783",
+    "nonce": "09BC9AE8AAE114CEF58E32B9A88FBE8D",
 }
 
 DETAIL_QUERY = {
@@ -66,9 +81,9 @@ DETAIL_QUERY = {
     "x_os_type": "iOS",
     "x_client_version": "1.3.386",
     "version": "999.0.4",
-    "hkey": "ZT03I48",
-    "_time": "1777393547",
-    "nonce": "0F903865FD59A54161228641E345D555",
+    "hkey": "TU2SY18",
+    "_time": "1777607876",
+    "nonce": "F97001435E948742E80B8DAE2A10ADAC",
 }
 
 COMMON_HEADERS = {
@@ -217,6 +232,12 @@ def parse_pet_ids(value: str) -> set[str]:
     return ids
 
 
+def resolve_replace_skill_types(mode: str | None) -> list[str]:
+    if not mode:
+        return []
+    return REPLACE_SKILL_TYPES_BY_MODE[mode]
+
+
 def filter_pets_by_ids(
     pets: list[dict[str, Any]], pet_ids: set[str]
 ) -> tuple[list[dict[str, Any]], list[str]]:
@@ -339,6 +360,23 @@ def _insert_missing_skill(cur, entry: dict[str, Any]) -> int:
     return int(cur.fetchone()["id"])
 
 
+def _delete_existing_skills(
+    cur, pokemon_ids: list[int], skill_source_types: list[str]
+) -> int:
+    if not pokemon_ids or not skill_source_types:
+        return 0
+
+    cur.execute(
+        """
+        DELETE FROM pokemon_skill
+         WHERE pokemon_id = ANY(%s)
+           AND type = ANY(%s)
+        """,
+        (pokemon_ids, skill_source_types),
+    )
+    return int(cur.rowcount or 0)
+
+
 def update_pokemon_source(
     cur, pets: list[dict[str, Any]], *, fuzzy_pet_ids: set[str] | None = None
 ) -> tuple[int, list[str], list[str]]:
@@ -380,7 +418,7 @@ def update_pokemon_source(
     return updated, missing, ambiguous
 
 
-def sync_blood_skills(
+def sync_pet_skills(
     cur,
     session: requests.Session,
     pets: list[dict[str, Any]],
@@ -388,19 +426,25 @@ def sync_blood_skills(
     sleep_seconds: float,
     fuzzy_pet_ids: set[str] | None = None,
     allow_multi_pokemon: bool = False,
+    replace_skill_types: list[str] | None = None,
 ) -> dict[str, Any]:
-    """对每个 pet 拉取详情，处理 skill_list.blood，写入 pokemon_skill。"""
+    """对每个 pet 拉取详情，处理 skill_list 三类技能，写入 pokemon_skill。"""
     pokemon_index = _load_pokemon_index(cur)
     skill_index = _load_skill_index(cur)
     fuzzy_pet_ids = fuzzy_pet_ids or set()
+    replace_skill_types = replace_skill_types or []
 
     stats = {
         "processed": 0,
         "skipped_no_pokemon": 0,
         "skipped_detail_failed": 0,
+        "skill_total": 0,
+        "skill_matched": 0,
+        "skill_inserted": 0,
+        "level_total": 0,
         "blood_total": 0,
-        "blood_matched": 0,
-        "blood_inserted_skill": 0,
+        "machine_total": 0,
+        "pokemon_skill_deleted": 0,
         "pokemon_skill_inserted": 0,
         "pokemon_skill_existing": 0,
     }
@@ -408,8 +452,10 @@ def sync_blood_skills(
         "missing_skill_inserted": [],
         "ambiguous_pokemon": [],
         "ambiguous_skill": [],
+        "duplicate_skill_source": [],
         "detail_failed": [],
-        "no_blood_section": [],
+        "invalid_skill_section": [],
+        "no_skill_section": [],
     }
 
     total = len(pets)
@@ -451,53 +497,95 @@ def sync_blood_skills(
             time.sleep(sleep_seconds)
             continue
 
-        blood_list = ((detail.get("skill_list") or {}).get("blood")) or []
-        if not blood_list:
-            warnings["no_blood_section"].append(f"pet_id={pet_id} {match_key}")
+        skill_list = detail.get("skill_list") or {}
+        if not isinstance(skill_list, dict):
+            warnings["invalid_skill_section"].append(f"pet_id={pet_id} {match_key} skill_list 不是对象")
             time.sleep(sleep_seconds)
             continue
 
-        for sort_order, entry in enumerate(blood_list, start=1):
-            skill_name = _clean_str(entry.get("name"))
-            if not skill_name:
+        if replace_skill_types:
+            stats["pokemon_skill_deleted"] += _delete_existing_skills(
+                cur, pokemon_ids, replace_skill_types
+            )
+
+        has_any_skill = False
+        planned_skill_ids: set[int] = set()
+        for source_key, source_type in SKILL_SYNC_SOURCES:
+            entries = skill_list.get(source_key) or []
+            if not entries:
                 continue
-            stats["blood_total"] += 1
-
-            matched = skill_index.get(skill_name) or []
-            if len(matched) > 1:
-                warnings["ambiguous_skill"].append(
-                    f"pet_id={pet_id} skill={skill_name!r} skill_ids=[{','.join(map(str, matched))}]"
+            if not isinstance(entries, list):
+                warnings["invalid_skill_section"].append(
+                    f"pet_id={pet_id} {match_key} skill_list.{source_key} 不是数组"
                 )
                 continue
 
-            if matched:
-                skill_id = matched[0]
-                stats["blood_matched"] += 1
-            else:
-                skill_id = _insert_missing_skill(cur, entry)
-                skill_index[skill_name] = [skill_id]
-                stats["blood_inserted_skill"] += 1
-                warnings["missing_skill_inserted"].append(
-                    f"pet_id={pet_id} pokemon_ids={pokemon_ids} skill={skill_name!r} new_skill_id={skill_id}"
-                )
+            has_any_skill = True
+            for sort_order, entry in enumerate(entries, start=1):
+                if not isinstance(entry, dict):
+                    warnings["invalid_skill_section"].append(
+                        f"pet_id={pet_id} {match_key} skill_list.{source_key}[{sort_order}] 不是对象"
+                    )
+                    continue
 
-            for pokemon_id in pokemon_ids:
-                cur.execute(
-                    """
-                    INSERT INTO pokemon_skill (pokemon_id, skill_id, type, sort_order)
-                    VALUES (%s, %s, %s, %s)
-                    ON CONFLICT (pokemon_id, skill_id) DO UPDATE
-                      SET type       = EXCLUDED.type,
-                          sort_order = EXCLUDED.sort_order
-                    RETURNING xmax
-                    """,
-                    (pokemon_id, skill_id, BLOOD_SKILL_TYPE, sort_order),
-                )
-                row = cur.fetchone()
-                if row and int(row["xmax"]) == 0:
-                    stats["pokemon_skill_inserted"] += 1
+                skill_name = _clean_str(entry.get("name"))
+                if not skill_name:
+                    continue
+                stats["skill_total"] += 1
+                stats[f"{source_key}_total"] += 1
+
+                matched = skill_index.get(skill_name) or []
+                if len(matched) > 1:
+                    warnings["ambiguous_skill"].append(
+                        f"pet_id={pet_id} skill={skill_name!r} skill_ids=[{','.join(map(str, matched))}]"
+                    )
+                    continue
+
+                if matched:
+                    skill_id = matched[0]
+                    matched_existing_skill = True
                 else:
-                    stats["pokemon_skill_existing"] += 1
+                    skill_id = _insert_missing_skill(cur, entry)
+                    skill_index[skill_name] = [skill_id]
+                    matched_existing_skill = False
+                    warnings["missing_skill_inserted"].append(
+                        f"pet_id={pet_id} pokemon_ids={pokemon_ids} "
+                        f"source={source_key} skill={skill_name!r} new_skill_id={skill_id}"
+                    )
+
+                if skill_id in planned_skill_ids:
+                    warnings["duplicate_skill_source"].append(
+                        f"pet_id={pet_id} skill={skill_name!r} source={source_key} "
+                        "已在更高优先级技能来源中写入"
+                    )
+                    continue
+
+                if matched_existing_skill:
+                    stats["skill_matched"] += 1
+                else:
+                    stats["skill_inserted"] += 1
+                planned_skill_ids.add(skill_id)
+
+                for pokemon_id in pokemon_ids:
+                    cur.execute(
+                        """
+                        INSERT INTO pokemon_skill (pokemon_id, skill_id, type, sort_order)
+                        VALUES (%s, %s, %s, %s)
+                        ON CONFLICT (pokemon_id, skill_id) DO UPDATE
+                          SET type       = EXCLUDED.type,
+                              sort_order = EXCLUDED.sort_order
+                        RETURNING xmax
+                        """,
+                        (pokemon_id, skill_id, source_type, sort_order),
+                    )
+                    row = cur.fetchone()
+                    if row and int(row["xmax"]) == 0:
+                        stats["pokemon_skill_inserted"] += 1
+                    else:
+                        stats["pokemon_skill_existing"] += 1
+
+        if not has_any_skill:
+            warnings["no_skill_section"].append(f"pet_id={pet_id} {match_key}")
 
         time.sleep(sleep_seconds)
 
@@ -509,7 +597,7 @@ def main() -> None:
 
     parser = argparse.ArgumentParser(description="同步 xiaoheihe pet 数据到 PostgreSQL")
     parser.add_argument("--dry-run", action="store_true", help="执行后回滚，不真正写库")
-    parser.add_argument("--skip-detail", action="store_true", help="只同步 source_id/avatar，跳过血脉技能")
+    parser.add_argument("--skip-detail", action="store_true", help="只同步 source_id/avatar，跳过技能")
     parser.add_argument("--max-pets", type=int, default=None, help="最多处理多少只精灵（用于联调）")
     parser.add_argument("--sleep", type=float, default=0.3, help="每次详情请求间的休眠秒数")
     parser.add_argument(
@@ -534,7 +622,15 @@ def main() -> None:
         "--skill-only-ids",
         type=str,
         default=None,
-        help="只同步指定 xiaoheihe pet id 的 blood 技能，多个 id 用逗号分隔；模糊命中多条 pokemon 时全部写入",
+        help="只同步指定 xiaoheihe pet id 的技能，多个 id 用逗号分隔；模糊命中多条 pokemon 时全部写入",
+    )
+    parser.add_argument(
+        "--replace-blood-skills",
+        nargs="?",
+        const="blood",
+        choices=("blood", "all"),
+        default=None,
+        help="同步前先删旧关联再重写；不带值只删血脉技能，传 all 删除原生/血脉/技能石三类",
     )
     args = parser.parse_args()
     file_pet_ids = load_pet_ids(args.only_ids_file) if args.only_ids_file else set()
@@ -543,11 +639,15 @@ def main() -> None:
     )
     only_pet_ids = file_pet_ids | skill_only_pet_ids
     skill_only_mode = bool(skill_only_pet_ids)
+    replace_skill_types = resolve_replace_skill_types(args.replace_blood_skills)
 
     total_start = time.time()
     print("=" * 60)
     print("  同步 xiaoheihe pet 数据 → PostgreSQL")
-    print(f"  dry_run={args.dry_run} skip_detail={args.skip_detail} max_pets={args.max_pets}")
+    print(
+        f"  dry_run={args.dry_run} skip_detail={args.skip_detail} "
+        f"replace_blood_skills={args.replace_blood_skills or '-'} max_pets={args.max_pets}"
+    )
     if args.only_ids_file:
         print(
             f"  only_ids_file={args.only_ids_file} "
@@ -568,6 +668,9 @@ def main() -> None:
         sys.exit(1)
     if skill_only_mode and args.skip_detail:
         print("[error] --skill-only-ids 需要同步详情，不能同时使用 --skip-detail。", flush=True)
+        sys.exit(1)
+    if args.replace_blood_skills and args.skip_detail:
+        print("[error] --replace-blood-skills 需要同步详情，不能同时使用 --skip-detail。", flush=True)
         sys.exit(1)
 
     session = _build_session()
@@ -631,33 +734,38 @@ def main() -> None:
             _warn_list("匹配到多个 pokemon 的 pet（已跳过）", ambiguous)
 
         if args.skip_detail:
-            print("\n[skip] --skip-detail 已开启，跳过血脉技能同步", flush=True)
-            blood_result: dict[str, Any] | None = None
+            print("\n[skip] --skip-detail 已开启，跳过技能同步", flush=True)
+            skill_result: dict[str, Any] | None = None
         else:
-            t = _step("同步 pet/detail 血脉技能 → pokemon_skill")
-            blood_result = sync_blood_skills(
+            t = _step("同步 pet/detail 三类技能 → pokemon_skill")
+            skill_result = sync_pet_skills(
                 cur,
                 session,
                 pets,
                 sleep_seconds=args.sleep,
                 fuzzy_pet_ids=only_pet_ids,
                 allow_multi_pokemon=skill_only_mode,
+                replace_skill_types=replace_skill_types,
             )
-            stats = blood_result["stats"]
+            stats = skill_result["stats"]
             _done(
-                f"processed={stats['processed']} blood={stats['blood_total']} "
-                f"matched={stats['blood_matched']} inserted_skill={stats['blood_inserted_skill']} "
+                f"processed={stats['processed']} skills={stats['skill_total']} "
+                f"level={stats['level_total']} blood={stats['blood_total']} machine={stats['machine_total']} "
+                f"matched={stats['skill_matched']} inserted_skill={stats['skill_inserted']} "
+                f"link_deleted={stats['pokemon_skill_deleted']} "
                 f"link_inserted={stats['pokemon_skill_inserted']} link_updated={stats['pokemon_skill_existing']} "
                 f"({time.time() - t:.2f}s)"
             )
-            warnings = blood_result["warnings"]
+            warnings = skill_result["warnings"]
             _warn_list("详情接口失败", warnings["detail_failed"])
-            _warn_list("无 blood 节点", warnings["no_blood_section"])
+            _warn_list("无 level/blood/machine 技能节点", warnings["no_skill_section"])
+            _warn_list("无效技能节点", warnings["invalid_skill_section"])
             _warn_list(
                 "精灵名命中多条 pokemon 记录（已跳过）",
                 warnings["ambiguous_pokemon"],
             )
             _warn_list("技能名命中多条 skill 记录（已跳过）", warnings["ambiguous_skill"])
+            _warn_list("同一技能出现在多个来源（已按优先级去重）", warnings["duplicate_skill_source"])
             _warn_list("未匹配到 skill 已新建并落库", warnings["missing_skill_inserted"])
 
         if args.dry_run:
