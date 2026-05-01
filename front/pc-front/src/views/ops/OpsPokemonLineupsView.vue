@@ -16,6 +16,7 @@ import {
   updateOpsPokemonLineup,
   type OpsDictItem,
   type OpsPersonalityItem,
+  type OpsPersonalityStat,
   type OpsPokemonLineupListItem,
   type OpsResonanceMagicItem,
   type OpsPokemonLineupSearchItem,
@@ -41,6 +42,15 @@ interface MemberForm {
 const STAT_DICT_TYPE = 'pokemon_stat'
 const BLOODLINE_DICT_TYPE = 'pet_bloodline'
 const LINEUP_TYPE_DICT = 'pokemon_lineup_type'
+
+const PERSONALITY_MOD_COL: Record<OpsPersonalityStat, keyof OpsPersonalityItem> = {
+  hp: 'hp_mod_pct',
+  phy_atk: 'phy_atk_mod_pct',
+  mag_atk: 'mag_atk_mod_pct',
+  phy_def: 'phy_def_mod_pct',
+  mag_def: 'mag_def_mod_pct',
+  spd: 'spd_mod_pct',
+}
 
 const loading = ref(false)
 const saving = ref(false)
@@ -121,6 +131,49 @@ function sourceTypeLabel(value: string): string {
 
 function skillKey(memberIndex: number, skillIndex: number): string {
   return `${memberIndex}-${skillIndex}`
+}
+
+function statLabel(code: string | null | undefined): string {
+  if (!code) return ''
+  const hit = statOptions.value.find((s) => s.value === code)
+  return hit?.label || code
+}
+
+function personalitySelectLabel(p: OpsPersonalityItem): string {
+  const base = (p.name || '').trim() || `性格#${p.id}`
+  if (p.is_neutral || (!p.buff_stat && !p.nerf_stat)) {
+    return `${base}（平衡）`
+  }
+  const b = p.buff_stat ? statLabel(p.buff_stat) : ''
+  const n = p.nerf_stat ? statLabel(p.nerf_stat) : ''
+  const parts: string[] = []
+  if (b) parts.push(`+${b}`)
+  if (n) parts.push(`-${n}`)
+  if (!parts.length) return base
+  return `${base}（${parts.join(' ')}）`
+}
+
+function personalityOptionTitle(p: OpsPersonalityItem): string {
+  const line = personalitySelectLabel(p)
+  if (p.is_neutral || (!p.buff_stat && !p.nerf_stat)) {
+    return `${line}，全项无百分比修正`
+  }
+  const fmtPct = (key: OpsPersonalityStat) => {
+    const raw = Number(p[PERSONALITY_MOD_COL[key]] ?? 0)
+    if (!raw) return ''
+    const pct = Math.round(raw * 100)
+    return `${statLabel(key)} ${pct > 0 ? '+' : ''}${pct}%`
+  }
+  const bits: string[] = []
+  if (p.buff_stat) {
+    const s = fmtPct(p.buff_stat)
+    if (s) bits.push(s)
+  }
+  if (p.nerf_stat) {
+    const s = fmtPct(p.nerf_stat)
+    if (s) bits.push(s)
+  }
+  return bits.length ? `${line}｜${bits.join('，')}` : line
 }
 
 async function loadOptions() {
@@ -647,9 +700,16 @@ onMounted(async () => {
               </label>
               <label class="form-row">
                 <span>性格</span>
-                <select v-model="member.personality_id">
+                <select v-model="member.personality_id" class="personality-select">
                   <option :value="null">未设置</option>
-                  <option v-for="opt in personalityOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
+                  <option
+                    v-for="opt in personalityOptions"
+                    :key="opt.id"
+                    :value="opt.id"
+                    :title="personalityOptionTitle(opt)"
+                  >
+                    {{ personalitySelectLabel(opt) }}
+                  </option>
                 </select>
               </label>
             </div>

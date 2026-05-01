@@ -51,6 +51,7 @@ const skills = ref<OpsPokemonOptionItem[]>([])
 const eggGroupOptions = ref<string[]>([])
 const typeOptions = ref<Array<{ code: string; label: string }>>([])
 const formOptions = ref<Array<{ code: string; label: string }>>([])
+const skillSourceOptions = ref<Array<{ code: string; label: string }>>([])
 
 const skillPage = ref(1)
 const skillPageSize = 8
@@ -341,6 +342,7 @@ async function openEditModal(id: number) {
     resetPendingFriend()
     resetPendingYise()
     Object.assign(form, detail)
+    normalizePokemonSkillTypes()
     evolutionChainId.value = chain.chain_id
     evolutionSteps.value = (chain.steps || []).map((step) => ({
       ...step,
@@ -541,12 +543,31 @@ function closeSkillSelector() {
   skillSelectorVisible.value = false
 }
 
+function primarySkillSourceCode(): string {
+  return skillSourceOptions.value[0]?.code ?? ''
+}
+
+function normalizePokemonSkillTypes() {
+  const opts = skillSourceOptions.value
+  if (!opts.length) return
+  for (const s of form.skills) {
+    const t = (s.type || '').trim()
+    if (!t) {
+      s.type = primarySkillSourceCode()
+      continue
+    }
+    if (opts.some((o) => o.code === t)) continue
+    const byLabel = opts.find((o) => o.label === t)
+    if (byLabel) s.type = byLabel.code
+  }
+}
+
 function addSkillBySelect(skillId: number) {
   if (form.skills.some((s) => s.skill_id === skillId)) {
     showOpsToast('该技能已在列表中', 'info')
     return
   }
-  form.skills.push({ skill_id: skillId, type: '原生技能', sort_order: form.skills.length + 1 })
+  form.skills.push({ skill_id: skillId, type: primarySkillSourceCode(), sort_order: form.skills.length + 1 })
   skillPage.value = skillTotalPages.value
   skillSelectorVisible.value = false
 }
@@ -575,11 +596,12 @@ function toggleAttribute(attrId: number) {
 }
 
 async function loadOptions() {
-  const [result, eggGroupDict, typeDict, formDict] = await Promise.all([
+  const [result, eggGroupDict, typeDict, formDict, skillSourceDict] = await Promise.all([
     fetchOpsPokemonOptions(),
     fetchOpsDicts({ dict_type: 'egg_group' }),
     fetchOpsDicts({ dict_type: 'pokemon_type' }),
     fetchOpsDicts({ dict_type: 'pokemon_form' }),
+    fetchOpsDicts({ dict_type: 'pokemon_skill_source' }),
   ])
   traits.value = result.traits
   attributes.value = result.attributes
@@ -589,6 +611,10 @@ async function loadOptions() {
     .filter((x): x is string => !!x)
   typeOptions.value = typeDict.items.map((item) => ({ code: item.code, label: item.label }))
   formOptions.value = formDict.items.map((item) => ({ code: item.code, label: item.label }))
+  skillSourceOptions.value = skillSourceDict.items.map((item) => ({
+    code: item.code,
+    label: item.label,
+  }))
   applyTypeLabel()
   applyFormLabel()
 }
@@ -710,7 +736,11 @@ async function submit() {
       egg_group: form.egg_groups[0] || '',
       skills: form.skills
         .filter((x) => x.skill_id > 0)
-        .map((x: OpsPokemonSkillItem) => ({ skill_id: x.skill_id, type: x.type || '原生技能', sort_order: x.sort_order || 0 })),
+        .map((x: OpsPokemonSkillItem) => ({
+          skill_id: x.skill_id,
+          type: (x.type || '').trim() || primarySkillSourceCode(),
+          sort_order: x.sort_order || 0,
+        })),
     }
     let savedId: number
     if (editingId.value) {
@@ -788,6 +818,9 @@ watch(skillTotalPages, (newVal) => {
   if (skillPage.value > newVal) {
     skillPage.value = newVal
   }
+})
+watch(skillSourceOptions, () => {
+  if (modalVisible.value) normalizePokemonSkillTypes()
 })
 
 onMounted(async () => {
@@ -1119,8 +1152,7 @@ onBeforeUnmount(() => {
                 <span>{{ skillName || `技能ID: ${s.skill_id}` }}</span>
               </div>
               <select v-model="s.type">
-                <option value="原生技能">原生技能</option>
-                <option value="技能石技能">技能石技能</option>
+                <option v-for="opt in skillSourceOptions" :key="opt.code" :value="opt.code">{{ opt.label }}</option>
               </select>
               <input v-model.number="s.sort_order" type="number" placeholder="排序" />
               <button type="button" class="btn-text danger" @click="removeSkillRow(realIndex)">删除</button>

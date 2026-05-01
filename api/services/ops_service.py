@@ -470,7 +470,8 @@ async def delete_pokemon_for_ops(user: dict, pokemon_id: int) -> None:
 async def get_pokemon_options_for_ops(user: dict) -> dict:
     ensure_role(user, {"editor", "admin"})
     result = await ops_repository.list_pokemon_options_for_ops()
-    result["skill_sources"] = ["原生技能", "技能石技能"]
+    rows = await ops_repository.list_dicts_all(dict_type="pokemon_skill_source")
+    result["skill_sources"] = [str(r.get("code") or "").strip() for r in rows if str(r.get("code") or "").strip()]
     return result
 
 
