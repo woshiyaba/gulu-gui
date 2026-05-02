@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import {
+  fetchAttributes,
   fetchBattlePkRandomPokemonModes,
   fetchBloodlines,
   fetchLineups,
@@ -11,6 +12,7 @@ import {
   submitBattlePk,
 } from '@/api/pokemon'
 import type {
+  Attribute,
   BattlePkMember,
   BattlePkRandomPokemonOption,
   BattlePkResponse,
@@ -107,6 +109,7 @@ const teamA = reactive<TeamForm>(emptyTeam('我的队伍'))
 const teamB = reactive<TeamForm>(emptyTeam('对手队伍'))
 const personalities = ref<PersonalityOption[]>([])
 const bloodlines = ref<BloodlineOption[]>([])
+const attributes = ref<Attribute[]>([])
 const resonanceMagics = ref<ResonanceMagicOption[]>([])
 const lineupOptions = ref<Lineup[]>([])
 const lineupLoading = ref(false)
@@ -326,6 +329,7 @@ function pickRandomPkOption(team: TeamKey, mi: number, opt: BattlePkRandomPokemo
     if (bl) {
       m.bloodline_dict_id = bl.id
       m.bloodline_label = bl.label
+      m.pokemon_image = attrImageUrlForBloodlineLabel(bl.label)
     }
   }
   const k = petKey(team, mi)
@@ -493,20 +497,47 @@ function winnerLabel(w: string): string {
   return '势均力敌'
 }
 
+function normalizeAttrToken(s: string): string {
+  return s.replace(/系$/u, '').trim()
+}
+
+/** 血脉标签（如「水系」）与 /api/attributes 的 attr_name 对齐，取属性图标 URL */
+function attrImageUrlForBloodlineLabel(label: string): string {
+  const attrs = attributes.value
+  if (!label || !attrs.length) return ''
+  const lb = label.trim()
+  const lbNorm = normalizeAttrToken(lb)
+  for (const a of attrs) {
+    const name = a.attr_name.trim()
+    const nameNorm = normalizeAttrToken(name)
+    if (
+      name === lb ||
+      nameNorm === lbNorm ||
+      lb.includes(name) ||
+      name.includes(lbNorm)
+    ) {
+      return a.attr_image || ''
+    }
+  }
+  return ''
+}
+
 onMounted(async () => {
   lineupLoading.value = true
-  const [p, b, r, l, rm] = await Promise.allSettled([
+  const [p, b, r, l, rm, attr] = await Promise.allSettled([
     fetchPersonalities(),
     fetchBloodlines(),
     fetchResonanceMagics(),
     fetchLineups('shining_contest'),
     fetchBattlePkRandomPokemonModes(),
+    fetchAttributes(),
   ])
   if (p.status === 'fulfilled') personalities.value = p.value
   if (b.status === 'fulfilled') bloodlines.value = b.value
   if (r.status === 'fulfilled') resonanceMagics.value = r.value
   if (l.status === 'fulfilled') lineupOptions.value = l.value.items || []
   if (rm.status === 'fulfilled') randomPokemonModes.value = rm.value
+  if (attr.status === 'fulfilled') attributes.value = attr.value
   lineupLoading.value = false
 })
 </script>
