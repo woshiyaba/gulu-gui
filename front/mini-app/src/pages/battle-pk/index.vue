@@ -29,6 +29,12 @@ import type { Lineup } from '@/types/banner'
 
 type TeamKey = 'A' | 'B'
 
+interface PickerChangeEvent {
+  detail?: {
+    value?: string | number | Array<string | number>
+  }
+}
+
 interface MemberForm {
   pokemon_id: number | null
   pokemon_name: string
@@ -232,6 +238,11 @@ function importPresetLineup(team: TeamKey) {
   applyLineupToTeam(team, picked)
   error.value = ''
   uni.showToast({ title: '已导入阵容', icon: 'none' })
+}
+
+function onImportLineupChange(team: TeamKey, e: PickerChangeEvent) {
+  const idx = Number(e.detail?.value ?? -1)
+  importLineupId[team] = idx >= 0 ? (lineupOptions.value[idx]?.id ?? null) : null
 }
 
 const personalityById = computed(() => {
@@ -761,10 +772,7 @@ onLoad(async () => {
             :range="lineupOptions"
             range-key="title"
             :disabled="lineupLoading || !lineupOptions.length"
-            @change="(e) => {
-              const idx = Number(e?.detail?.value ?? -1)
-              importLineupId[activeTeam] = idx >= 0 ? (lineupOptions[idx]?.id ?? null) : null
-            }"
+            @change="onImportLineupChange(activeTeam, $event)"
           >
             <view class="picker-box">
               <text class="picker-text">

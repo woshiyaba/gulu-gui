@@ -1,3 +1,5 @@
+import { getStoredUserId } from '@/utils/auth'
+
 interface RequestOptions {
   url: string
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
@@ -36,11 +38,15 @@ function normalizeRequestData(data: unknown) {
 }
 
 export function request<T>({ url, method = 'GET', data, timeout = DEFAULT_REQUEST_TIMEOUT }: RequestOptions): Promise<T> {
+  const userId = getStoredUserId()
+  const header = userId ? { Authorization: userId } : undefined
+
   return new Promise((resolve, reject) => {
     uni.request({
       url: `${API_BASE_URL}${url}`,
       method,
       data: normalizeRequestData(data),
+      header,
       timeout,
       success: (response) => {
         const { statusCode, data: body } = response

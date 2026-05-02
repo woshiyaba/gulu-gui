@@ -1,9 +1,11 @@
 <script>
+	import { silentLogin } from '@/utils/auth'
 	import { preloadMapData } from '@/utils/mapPreload'
 
 	export default {
 		onLaunch: function() {
 			console.log('App Launch')
+			silentLogin()
 			setTimeout(() => {
 				preloadMapData().catch(() => {})
 			}, 1200)

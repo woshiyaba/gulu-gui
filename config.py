@@ -38,3 +38,7 @@ SKILL_ICON_UPLOAD_DIR = os.getenv("SKILL_ICON_UPLOAD_DIR", "/var/www/images/icon
 # 共鸣魔法图标
 RESONANCE_MAGIC_ICON_BASE_URL = f"{STATIC_BASE_URL}/images/resonance-magic/"
 RESONANCE_MAGIC_ICON_UPLOAD_DIR = os.getenv("RESONANCE_MAGIC_ICON_UPLOAD_DIR", "/var/www/images/resonance-magic").strip()
+
+# 微信小程序配置
+WX_MINI_APPID = os.getenv("WX_MINI_APPID", "").strip()
+WX_MINI_SECRET = os.getenv("WX_MINI_SECRET", "").strip()

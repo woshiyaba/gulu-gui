@@ -5,8 +5,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes.ops import router as ops_router
 from api.routes.pokemon import router as pokemon_router
+from api.routes.wx import router as wx_router
 from api.routes.ws_route import router as ws_router
 from api.services.ops_service import ensure_ops_bootstrap
+from api.services.wx_service import ensure_wx_auth_tables
 from db.connection import close_pool, get_pool
 
 
@@ -15,6 +17,7 @@ async def lifespan(app: FastAPI):
     """应用启动时初始化连接池，关闭时释放。"""
     await get_pool()
     await ensure_ops_bootstrap()
+    await ensure_wx_auth_tables()
     yield
     await close_pool()
 
@@ -31,6 +34,7 @@ app.add_middleware(
 
 app.include_router(pokemon_router)
 app.include_router(ops_router)
+app.include_router(wx_router)
 app.include_router(ws_router)
 
 
