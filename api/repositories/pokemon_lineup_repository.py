@@ -1,5 +1,5 @@
 from db.connection import get_pool
-from api.utils.media import build_friend_image_url, build_resonance_magic_icon_url, build_skill_icon_url
+from api.utils.media import build_friend_image_url, build_resonance_magic_icon_url, build_skill_icon_url, build_skills_image_url
 from api.utils.pokemon_mapper import to_attribute_item
 
 
@@ -116,16 +116,16 @@ def _build_member_row(row: dict) -> dict:
         "qual_3": row.get("qual_3") or "",
         "skill_1_id": row.get("skill_1_id"),
         "skill_1_name": row.get("skill_1_name") or "",
-        "skill_1_image": build_skill_icon_url((row.get("skill_1_icon") or "").strip()),
+        "skill_1_image": build_skills_image_url((row.get("skill_1_icon") or "").strip()),
         "skill_2_id": row.get("skill_2_id"),
         "skill_2_name": row.get("skill_2_name") or "",
-        "skill_2_image": build_skill_icon_url((row.get("skill_2_icon") or "").strip()),
+        "skill_2_image": build_skills_image_url((row.get("skill_2_icon") or "").strip()),
         "skill_3_id": row.get("skill_3_id"),
         "skill_3_name": row.get("skill_3_name") or "",
-        "skill_3_image": build_skill_icon_url((row.get("skill_3_icon") or "").strip()),
+        "skill_3_image": build_skills_image_url((row.get("skill_3_icon") or "").strip()),
         "skill_4_id": row.get("skill_4_id"),
         "skill_4_name": row.get("skill_4_name") or "",
-        "skill_4_image": build_skill_icon_url((row.get("skill_4_icon") or "").strip()),
+        "skill_4_image": build_skills_image_url((row.get("skill_4_icon") or "").strip()),
         "member_desc": row.get("member_desc") or "",
     }
 

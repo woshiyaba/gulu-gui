@@ -12,6 +12,7 @@ interface ApiErrorPayload {
 
 const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://wikiroco.com'
 const API_BASE_URL = DEFAULT_API_BASE_URL.replace(/\/+$/, '')
+const DEFAULT_REQUEST_TIMEOUT = 5 * 60 * 1000
 
 function isOmittableQueryValue(value: unknown): boolean {
   if (value === undefined || value === null) return true
@@ -34,7 +35,7 @@ function normalizeRequestData(data: unknown) {
   ) as any
 }
 
-export function request<T>({ url, method = 'GET', data, timeout = 10000 }: RequestOptions): Promise<T> {
+export function request<T>({ url, method = 'GET', data, timeout = DEFAULT_REQUEST_TIMEOUT }: RequestOptions): Promise<T> {
   return new Promise((resolve, reject) => {
     uni.request({
       url: `${API_BASE_URL}${url}`,

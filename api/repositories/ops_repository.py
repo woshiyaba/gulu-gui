@@ -1,7 +1,7 @@
 from psycopg import AsyncConnection
 
 from db.connection import get_pool
-from api.utils.media import build_friend_image_url, build_image_url, build_resonance_magic_icon_url, build_skill_icon_url
+from api.utils.media import build_friend_image_url, build_image_url, build_resonance_magic_icon_url, build_skill_icon_url, build_skills_image_url
 
 
 OPS_TABLES_SQL = """
@@ -1054,7 +1054,7 @@ def _skill_row_to_item(row: dict) -> dict:
         "consume": int(row.get("consume") or 0),
         "skill_desc": row.get("skill_desc") or "",
         "icon": icon,
-        "icon_url": build_skill_icon_url(icon),
+        "icon_url": build_skills_image_url(icon),
     }
 
 
