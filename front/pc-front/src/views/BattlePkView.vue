@@ -499,7 +499,7 @@ onMounted(async () => {
     fetchPersonalities(),
     fetchBloodlines(),
     fetchResonanceMagics(),
-    fetchLineups(),
+    fetchLineups('shining_contest'),
     fetchBattlePkRandomPokemonModes(),
   ])
   if (p.status === 'fulfilled') personalities.value = p.value
@@ -529,7 +529,7 @@ onMounted(async () => {
           </div>
 
           <div class="team-import-row">
-            <span class="resonance-label">导入阵容</span>
+            <span class="resonance-label" title="仅可选择闪耀大赛分类下的启用阵容">导入阵容</span>
             <select v-model="importLineupId[team]" :disabled="lineupLoading">
               <option :value="null">{{ lineupLoading ? '加载阵容中...' : '请选择已有阵容' }}</option>
               <option v-for="lineup in lineupOptions" :key="lineup.id" :value="lineup.id">

@@ -279,6 +279,7 @@ function removeMember(team: TeamKey, index: number) {
 // ── 弹层打开器 ─────────────────────────────────────────
 function openPokemonPicker(team: TeamKey, mi: number) {
   if (!guardMemberEditable(team, mi)) return
+  pickerLoading.value = false
   pickerKind.value = 'pokemon'
   pickerCtx.value = { team, memberIndex: mi }
   pickerKeyword.value = ''
@@ -395,6 +396,7 @@ function openQualPicker(team: TeamKey, mi: number, qualIndex: 1 | 2 | 3) {
 }
 
 function closePicker() {
+  pickerLoading.value = false
   pickerKind.value = 'none'
   pickerCtx.value = null
   pickerKeyword.value = ''
@@ -421,6 +423,7 @@ async function runPokemonSearch() {
   const kw = pickerKeyword.value.trim()
   if (!kw) {
     pokemonHits.value = []
+    pickerLoading.value = false
     return
   }
   pickerLoading.value = true
@@ -440,6 +443,7 @@ async function runSkillSearch() {
   // 关键字与属性筛选都为空时，避免一次拉全量技能
   if (!kw && !attr) {
     skillHits.value = []
+    pickerLoading.value = false
     return
   }
   pickerLoading.value = true
@@ -670,7 +674,7 @@ onLoad(async () => {
     fetchPersonalities(),
     fetchBloodlines(),
     fetchResonanceMagics(),
-    fetchLineups(),
+    fetchLineups('shining_contest'),
     fetchBattlePkRandomPokemonModes(),
   ])
   if (p.status === 'fulfilled') personalities.value = p.value

@@ -4,6 +4,9 @@ from api.repositories import ops_repository, personality_repository, pokemon_lin
 from api.services.ops_service import ensure_role
 
 LINEUP_TYPE_DICT = "pokemon_lineup_type"
+# 与 sys_dict pokemon_lineup_type 中「闪耀大赛」条目的 label 一致，用于强制 6 只（不依赖 code 具体字符串）
+SHINING_CONTEST_LABEL = "闪耀大赛"
+
 
 async def _load_valid_stat_keys() -> set[str]:
     rows = await ops_repository.list_dicts_all(dict_type="pokemon_stat")
@@ -13,6 +16,18 @@ async def _load_valid_stat_keys() -> set[str]:
 async def _load_valid_lineup_types() -> set[str]:
     rows = await ops_repository.list_dicts_all(dict_type=LINEUP_TYPE_DICT)
     return {str(row.get("code", "")).strip() for row in rows if str(row.get("code", "")).strip()}
+
+
+async def _lineup_type_requires_exactly_six_members(source_type: str) -> bool:
+    """按字典 label 识别闪耀大赛（避免前端 code 与常量不一致导致校验被跳过）。"""
+    st = (source_type or "").strip()
+    if not st:
+        return False
+    rows = await ops_repository.list_dicts_all(dict_type=LINEUP_TYPE_DICT)
+    for row in rows:
+        if str(row.get("code") or "").strip() == st:
+            return str(row.get("label") or "").strip() == SHINING_CONTEST_LABEL
+    return False
 
 
 async def _validate_member(member: dict, index: int, valid_stat_keys: set[str]) -> dict:
@@ -74,6 +89,11 @@ async def _normalize_payload(payload: dict) -> dict:
 
     valid_stat_keys = await _load_valid_stat_keys()
     source_type = (payload.get("source_type") or "").strip()
+    if await _lineup_type_requires_exactly_six_members(source_type) and len(members) != 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="闪耀大赛阵容必须包含 6 只精灵",
+        )
     if source_type:
         valid_lineup_types = await _load_valid_lineup_types()
         if source_type not in valid_lineup_types:

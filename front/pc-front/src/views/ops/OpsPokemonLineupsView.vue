@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import {
   clearOpsToken,
   createOpsPokemonLineup,
@@ -42,6 +42,8 @@ interface MemberForm {
 const STAT_DICT_TYPE = 'pokemon_stat'
 const BLOODLINE_DICT_TYPE = 'pet_bloodline'
 const LINEUP_TYPE_DICT = 'pokemon_lineup_type'
+/** 与 sys_dict 中阵容分类 label「闪耀大赛」对应（按 label 识别，code 可为任意合法值） */
+const SHINING_LINEUP_LABEL = '闪耀大赛'
 
 const PERSONALITY_MOD_COL: Record<OpsPersonalityStat, keyof OpsPersonalityItem> = {
   hp: 'hp_mod_pct',
@@ -81,6 +83,14 @@ const form = reactive({
   sort_order: 1,
   is_active: true,
   members: [] as MemberForm[],
+})
+
+/** 当前分类是否为字典里的「闪耀大赛」（必须 6 只） */
+const requiresSixSlotsLineup = computed(() => {
+  const st = String(form.source_type ?? '').trim()
+  if (!st) return false
+  const hit = lineupTypeOptions.value.find((o) => String(o.code ?? '').trim() === st)
+  return (hit?.label ?? '').trim() === SHINING_LINEUP_LABEL
 })
 
 const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize)))
@@ -231,7 +241,6 @@ async function editItem(item: OpsPokemonLineupListItem) {
     editingId.value = detail.id
     form.title = detail.title
     form.lineup_desc = detail.lineup_desc
-    form.source_type = detail.source_type
     form.resonance_magic_id = detail.resonance_magic_id
     form.sort_order = detail.sort_order || 1
     form.is_active = detail.is_active
@@ -255,6 +264,10 @@ async function editItem(item: OpsPokemonLineupListItem) {
           member_desc: m.member_desc,
         }))
       : [emptyMember(1)]
+    // 必须在 members 赋值之后再写 source_type，否则依赖分类的槽位逻辑会读到旧 members
+    form.source_type = detail.source_type || ''
+    await nextTick()
+    ensureShiningContestMemberSlots()
     drawerVisible.value = true
   } catch (err: any) {
     showOpsToast(err?.response?.data?.detail || '加载详情失败', 'error')
@@ -263,12 +276,31 @@ async function editItem(item: OpsPokemonLineupListItem) {
   }
 }
 
+function ensureShiningContestMemberSlots() {
+  if (!requiresSixSlotsLineup.value) return
+  while (form.members.length < 6) {
+    form.members.push(emptyMember(form.members.length + 1))
+  }
+  if (form.members.length > 6) {
+    form.members.splice(6)
+  }
+  form.members.forEach((member, idx) => { member.sort_order = idx + 1 })
+}
+
+async function onLineupSourceTypeChange() {
+  // 与 v-model 同一 tick 内先触发 change，需等 DOM/模型更新后再读 form.source_type
+  await nextTick()
+  ensureShiningContestMemberSlots()
+}
+
 function addMember() {
+  if (requiresSixSlotsLineup.value) return
   if (form.members.length >= 6) return
   form.members.push(emptyMember(form.members.length + 1))
 }
 
 function removeMember(index: number) {
+  if (requiresSixSlotsLineup.value) return
   form.members.splice(index, 1)
   form.members.forEach((member, idx) => { member.sort_order = idx + 1 })
 }
@@ -430,6 +462,10 @@ async function submitForm() {
     showOpsToast('至少需要配置 1 只精灵', 'error')
     return
   }
+  if (requiresSixSlotsLineup.value && form.members.length !== 6) {
+    showOpsToast('闪耀大赛阵容必须包含 6 只精灵', 'error')
+    return
+  }
   for (const [index, member] of form.members.entries()) {
     const message = validateMember(member, index)
     if (message) {
@@ -444,7 +480,7 @@ async function submitForm() {
     const payload = {
       title: form.title.trim(),
       lineup_desc: form.lineup_desc,
-      source_type: form.source_type.trim(),
+      source_type: String(form.source_type ?? '').trim(),
       resonance_magic_id: form.resonance_magic_id,
       sort_order: Number(form.sort_order || 1),
       is_active: form.is_active,
@@ -616,7 +652,7 @@ onMounted(async () => {
             </label>
             <label class="form-row">
               <span>分类</span>
-              <select v-model="form.source_type">
+              <select v-model="form.source_type" @change="onLineupSourceTypeChange">
                 <option value="">未设置</option>
                 <option v-for="opt in lineupTypeOptions" :key="opt.id" :value="opt.code">{{ opt.label }}</option>
               </select>
@@ -643,7 +679,13 @@ onMounted(async () => {
 
           <div class="section-title">
             <span>阵容成员</span>
-            <button v-if="form.members.length < 6" type="button" class="btn-small" @click="addMember">+ 添加精灵</button>
+            <span v-if="requiresSixSlotsLineup" class="section-hint">闪耀大赛须固定 6 只精灵</span>
+            <button
+              v-if="!requiresSixSlotsLineup && form.members.length < 6"
+              type="button"
+              class="btn-small"
+              @click="addMember"
+            >+ 添加精灵</button>
           </div>
 
           <div v-for="(member, mi) in form.members" :key="mi" class="pet-card">
@@ -658,7 +700,12 @@ onMounted(async () => {
                   <small>第 {{ mi + 1 }} 只</small>
                 </div>
               </div>
-              <button v-if="form.members.length > 1" type="button" class="text-btn danger" @click="removeMember(mi)">移除</button>
+              <button
+                v-if="!requiresSixSlotsLineup && form.members.length > 1"
+                type="button"
+                class="text-btn danger"
+                @click="removeMember(mi)"
+              >移除</button>
             </div>
 
             <div class="pet-grid">
@@ -946,7 +993,14 @@ input:disabled, select:disabled, textarea:disabled {
   margin-top: 20px; margin-bottom: 12px;
   padding-bottom: 8px; border-bottom: 1px solid #ebeef5;
 }
-.section-title span { font-size: 14px; font-weight: 600; color: #303133; }
+.section-title span:first-child { font-size: 14px; font-weight: 600; color: #303133; }
+.section-hint {
+  flex: 1;
+  margin-left: 12px;
+  font-size: 12px;
+  font-weight: normal;
+  color: #909399;
+}
 
 .section-subtitle { margin: 14px 0 8px; font-size: 13px; font-weight: 600; color: #606266; }
 
