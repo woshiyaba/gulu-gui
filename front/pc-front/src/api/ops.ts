@@ -660,7 +660,9 @@ export type OpsPokemonLineupStatKey = string
 
 export interface OpsPokemonLineupMember {
   id?: number
-  pokemon_id: number
+  pokemon_id: number | null
+  /** sys_dict battle_pk_random_pokemon；与 pokemon_id 二选一 */
+  random_pk_dict_id?: number | null
   pokemon_name: string
   pokemon_image: string
   sort_order: number
@@ -719,7 +721,8 @@ export interface OpsPokemonLineupListResponse {
 }
 
 export interface OpsPokemonLineupMemberPayload {
-  pokemon_id: number
+  pokemon_id: number | null
+  random_pk_dict_id?: number | null
   sort_order: number
   bloodline_dict_id: number | null
   personality_id: number | null

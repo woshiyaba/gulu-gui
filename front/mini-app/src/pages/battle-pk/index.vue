@@ -209,7 +209,7 @@ function applyLineupToTeam(team: TeamKey, lineup: Lineup) {
       { name: m.skill_4_name || '', image: m.skill_4_image || '' },
     ],
     member_desc: m.member_desc || '',
-    random_pk_dict_id: null,
+    random_pk_dict_id: m.random_pk_dict_id ?? null,
   }))
   if (!t.members.length) t.members = [emptyMember(1)]
 }
@@ -594,7 +594,7 @@ function statLabel(value: string) {
 // ── 提交 ─────────────────────────────────────────────
 function toPayload(team: TeamForm): BattlePkTeam {
   const members: BattlePkMember[] = team.members
-    .filter((m) => m.pokemon_name.trim())
+    .filter((m) => m.pokemon_name.trim() || m.random_pk_dict_id !== null)
     .map((m, i) => ({
       pokemon_id: m.pokemon_id,
       pokemon_name: m.pokemon_name,

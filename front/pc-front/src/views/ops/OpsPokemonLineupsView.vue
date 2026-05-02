@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+import { fetchAttributes, fetchBattlePkRandomPokemonModes } from '@/api/pokemon'
 import {
   clearOpsToken,
   createOpsPokemonLineup,
@@ -22,11 +23,14 @@ import {
   type OpsPokemonLineupSearchItem,
   type OpsPokemonLineupStatKey,
 } from '@/api/ops'
+import type { Attribute, BattlePkRandomPokemonOption } from '@/types'
 
 type StatKey = OpsPokemonLineupStatKey | ''
 
 interface MemberForm {
   pokemon_id: number | null
+  /** sys_dict battle_pk_random_pokemon */
+  random_pk_dict_id: number | null
   pokemon_name: string
   pokemon_image: string
   sort_order: number
@@ -70,6 +74,8 @@ const bloodlineOptions = ref<OpsDictItem[]>([])
 const personalityOptions = ref<OpsPersonalityItem[]>([])
 const lineupTypeOptions = ref<OpsDictItem[]>([])
 const resonanceMagicOptions = ref<OpsResonanceMagicItem[]>([])
+const randomPokemonModes = ref<BattlePkRandomPokemonOption[]>([])
+const attributes = ref<Attribute[]>([])
 
 const keyword = ref('')
 const sourceTypeFilter = ref('')
@@ -117,6 +123,7 @@ let skillSearchTimer: ReturnType<typeof setTimeout> | undefined
 function emptyMember(sortOrder: number): MemberForm {
   return {
     pokemon_id: null,
+    random_pk_dict_id: null,
     pokemon_name: '',
     pokemon_image: '',
     sort_order: sortOrder,
@@ -141,6 +148,67 @@ function sourceTypeLabel(value: string): string {
 
 function skillKey(memberIndex: number, skillIndex: number): string {
   return `${memberIndex}-${skillIndex}`
+}
+
+function normalizeAttrToken(s: string): string {
+  return s.replace(/系$/u, '').trim()
+}
+
+function attrImageUrlForBloodlineLabel(label: string): string {
+  const attrs = attributes.value
+  if (!label || !attrs.length) return ''
+  const lb = label.trim()
+  const lbNorm = normalizeAttrToken(lb)
+  for (const a of attrs) {
+    const name = a.attr_name.trim()
+    const nameNorm = normalizeAttrToken(name)
+    if (name === lb || nameNorm === lbNorm || lb.includes(name) || name.includes(lbNorm)) {
+      return a.attr_image || ''
+    }
+  }
+  return ''
+}
+
+function randomPkModesForInput(kwRaw: string): BattlePkRandomPokemonOption[] {
+  const modes = randomPokemonModes.value
+  const kw = kwRaw.trim()
+  if (!kw) return modes
+  return modes.filter((o) => o.label.includes(kw))
+}
+
+function randomPkLabel(member: MemberForm): string {
+  if (member.random_pk_dict_id === null) return ''
+  return randomPokemonModes.value.find((o) => o.id === member.random_pk_dict_id)?.label ?? ''
+}
+
+function pickRandomPkOption(memberIndex: number, opt: BattlePkRandomPokemonOption) {
+  const member = form.members[memberIndex]
+  if (!member) return
+  member.random_pk_dict_id = opt.id
+  member.pokemon_id = null
+  member.pokemon_name = opt.label
+  member.pokemon_image = ''
+  member.personality_id = null
+  member.qual_1 = ''
+  member.qual_2 = ''
+  member.qual_3 = ''
+  member.skills = [
+    { id: null, name: '', image: '' },
+    { id: null, name: '', image: '' },
+    { id: null, name: '', image: '' },
+    { id: null, name: '', image: '' },
+  ]
+  if (opt.kind === 'any') {
+    member.bloodline_dict_id = null
+  } else if (opt.kind === 'attr' && opt.bloodline_code) {
+    const bl = bloodlineOptions.value.find((x) => x.code === opt.bloodline_code)
+    if (bl) {
+      member.bloodline_dict_id = bl.id
+      member.pokemon_image = attrImageUrlForBloodlineLabel(bl.label)
+    }
+  }
+  pokemonSearchKeyword.value[memberIndex] = ''
+  pokemonSearchVisible.value[memberIndex] = false
 }
 
 function statLabel(code: string | null | undefined): string {
@@ -193,12 +261,16 @@ async function loadOptions() {
     fetchOpsDicts({ dict_type: STAT_DICT_TYPE, page: 1, page_size: 100 }),
     fetchOpsDicts({ dict_type: LINEUP_TYPE_DICT, page: 1, page_size: 100 }),
     fetchOpsResonanceMagics({ page: 1, page_size: 200 }),
+    fetchAttributes(),
+    fetchBattlePkRandomPokemonModes(),
   ])
 
   if (results[0].status === 'fulfilled') bloodlineOptions.value = results[0].value.items
   if (results[1].status === 'fulfilled') personalityOptions.value = results[1].value.items
   if (results[3].status === 'fulfilled') lineupTypeOptions.value = results[3].value.items
   if (results[4].status === 'fulfilled') resonanceMagicOptions.value = results[4].value.items
+  if (results[5].status === 'fulfilled') attributes.value = results[5].value
+  if (results[6].status === 'fulfilled') randomPokemonModes.value = results[6].value
 
   if (results[2].status === 'fulfilled') {
     statOptions.value = results[2].value.items.map((item) => ({
@@ -247,6 +319,7 @@ async function editItem(item: OpsPokemonLineupListItem) {
     form.members = detail.members.length > 0
       ? detail.members.map((m, i) => ({
           pokemon_id: m.pokemon_id,
+          random_pk_dict_id: m.random_pk_dict_id ?? null,
           pokemon_name: m.pokemon_name,
           pokemon_image: m.pokemon_image,
           sort_order: i + 1,
@@ -311,7 +384,7 @@ function onPokemonSearchInput(memberIndex: number) {
     const kw = (pokemonSearchKeyword.value[memberIndex] || '').trim()
     if (!kw) {
       pokemonSearchResults.value[memberIndex] = []
-      pokemonSearchVisible.value[memberIndex] = false
+      pokemonSearchVisible.value[memberIndex] = randomPkModesForInput('').length > 0
       return
     }
     try {
@@ -322,10 +395,21 @@ function onPokemonSearchInput(memberIndex: number) {
   }, 300)
 }
 
+function openPokemonDropdown(memberIndex: number) {
+  const kw = (pokemonSearchKeyword.value[memberIndex] || '').trim()
+  if (!kw) {
+    pokemonSearchResults.value[memberIndex] = []
+    pokemonSearchVisible.value[memberIndex] = randomPkModesForInput('').length > 0
+    return
+  }
+  onPokemonSearchInput(memberIndex)
+}
+
 function selectPokemon(memberIndex: number, item: OpsPokemonLineupSearchItem) {
   const member = form.members[memberIndex]
   if (!member) return
   member.pokemon_id = item.id
+  member.random_pk_dict_id = null
   member.pokemon_name = item.name
   member.pokemon_image = item.image || ''
   pokemonSearchKeyword.value[memberIndex] = ''
@@ -336,6 +420,7 @@ function clearPokemon(memberIndex: number) {
   const member = form.members[memberIndex]
   if (!member) return
   member.pokemon_id = null
+  member.random_pk_dict_id = null
   member.pokemon_name = ''
   member.pokemon_image = ''
   member.skills = member.skills.map(() => ({ id: null, name: '', image: '' }))
@@ -398,10 +483,14 @@ function hideSkillSearch(memberIndex: number, skillIndex: number) {
 }
 
 function validateMember(member: MemberForm, index: number): string {
-  if (!member.pokemon_id) return `第 ${index + 1} 只精灵未选择`
+  const hasPokemon = member.pokemon_id != null
+  const hasRandom = member.random_pk_dict_id != null
+  if (!hasPokemon && !hasRandom) return `第 ${index + 1} 只精灵未选择`
+  if (hasPokemon && hasRandom) return `第 ${index + 1} 只不能同时选择具体精灵与随机精灵`
   const stats = [member.qual_1, member.qual_2, member.qual_3].filter(Boolean)
   if (new Set(stats).size !== stats.length) return `第 ${index + 1} 只精灵资质属性不能重复`
   const skillIds = member.skills.map((skill) => skill.id).filter(Boolean)
+  if (hasRandom && skillIds.length) return `第 ${index + 1} 只随机精灵不能配置技能`
   if (new Set(skillIds).size !== skillIds.length) return `第 ${index + 1} 只精灵技能不能重复`
   return ''
 }
@@ -485,7 +574,8 @@ async function submitForm() {
       sort_order: Number(form.sort_order || 1),
       is_active: form.is_active,
       members: form.members.map((member, index) => ({
-        pokemon_id: member.pokemon_id!,
+        pokemon_id: member.pokemon_id,
+        random_pk_dict_id: member.random_pk_dict_id,
         sort_order: index + 1,
         bloodline_dict_id: member.bloodline_dict_id || null,
         personality_id: member.personality_id || null,
@@ -696,7 +786,7 @@ onMounted(async () => {
                   <span v-else>#{{ mi + 1 }}</span>
                 </div>
                 <div class="pet-title">
-                  <strong>{{ member.pokemon_name || `精灵 ${mi + 1}` }}</strong>
+                  <strong>{{ member.pokemon_name || randomPkLabel(member) || `精灵 ${mi + 1}` }}</strong>
                   <small>第 {{ mi + 1 }} 只</small>
                 </div>
               </div>
@@ -711,29 +801,53 @@ onMounted(async () => {
             <div class="pet-grid">
               <div class="form-row search-field">
                 <span>精灵</span>
-                <div v-if="member.pokemon_id" class="selected-item">
+                <div v-if="member.pokemon_id || member.random_pk_dict_id !== null" class="selected-item">
                   <img v-if="member.pokemon_image" :src="member.pokemon_image" class="selected-img" alt="" />
-                  <span>{{ member.pokemon_name }}</span>
+                  <span>{{ member.pokemon_name || randomPkLabel(member) }}</span>
                   <button type="button" class="clear-btn" @click="clearPokemon(mi)">&times;</button>
                 </div>
                 <div v-else class="search-input-wrap">
                   <input
                     v-model="pokemonSearchKeyword[mi]"
                     type="text"
-                    placeholder="输入精灵名称搜索..."
+                    placeholder="搜索精灵或选择随机项..."
                     @input="onPokemonSearchInput(mi)"
-                    @focus="onPokemonSearchInput(mi)"
+                    @focus="openPokemonDropdown(mi)"
                     @blur="hidePokemonSearch(mi)"
                   />
-                  <div v-if="pokemonSearchVisible[mi] && pokemonSearchResults[mi]?.length" class="dropdown">
+                  <div v-if="pokemonSearchVisible[mi]" class="dropdown">
                     <div
-                      v-for="opt in pokemonSearchResults[mi]"
-                      :key="opt.id"
-                      class="dropdown-item"
-                      @mousedown.prevent="selectPokemon(mi, opt)"
+                      v-for="opt in randomPkModesForInput(pokemonSearchKeyword[mi] || '')"
+                      :key="`rand-${opt.id}`"
+                      class="dropdown-item dropdown-item-random"
+                      @mousedown.prevent="pickRandomPkOption(mi, opt)"
                     >
-                      <img v-if="opt.image" :src="opt.image" class="dropdown-img" alt="" />
-                      <span>{{ opt.name }}</span>
+                      <span>{{ opt.label }}</span>
+                    </div>
+                    <template v-if="(pokemonSearchKeyword[mi] || '').trim()">
+                      <div
+                        v-for="opt in pokemonSearchResults[mi]"
+                        :key="opt.id"
+                        class="dropdown-item"
+                        @mousedown.prevent="selectPokemon(mi, opt)"
+                      >
+                        <img v-if="opt.image" :src="opt.image" class="dropdown-img" alt="" />
+                        <span>{{ opt.name }}</span>
+                      </div>
+                    </template>
+                    <div
+                      v-if="
+                        !randomPkModesForInput(pokemonSearchKeyword[mi] || '').length
+                          && (!(pokemonSearchKeyword[mi] || '').trim()
+                            || !(pokemonSearchResults[mi]?.length))
+                      "
+                      class="dropdown-item dropdown-hint"
+                    >
+                      {{
+                        !(pokemonSearchKeyword[mi] || '').trim()
+                          ? '暂无随机选项（请先在后端 seed 字典）'
+                          : '没有匹配的精灵或随机项'
+                      }}
                     </div>
                   </div>
                 </div>
@@ -1069,6 +1183,9 @@ input:disabled, select:disabled, textarea:disabled {
   font-size: 13px; color: #303133;
 }
 .dropdown-item:hover { background: #f5f7fa; }
+.dropdown-item-random { color: #e6a23c; }
+.dropdown-hint { color: #909399; cursor: default; font-size: 12px; }
+.dropdown-hint:hover { background: #fff; }
 .dropdown-img { width: 28px; height: 28px; border-radius: 4px; object-fit: contain; background: #fff; }
 
 .selected-item {

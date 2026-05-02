@@ -1,11 +1,13 @@
 from db.connection import get_pool
 from api.utils.media import build_friend_image_url, build_resonance_magic_icon_url, build_skill_icon_url
+from api.utils.pokemon_mapper import to_attribute_item
 
 
 _MEMBER_JOIN_SQL = """
     SELECT
         plm.id,
         plm.pokemon_id,
+        plm.random_pk_dict_id,
         plm.sort_order,
         plm.bloodline_dict_id,
         plm.personality_id,
@@ -29,10 +31,12 @@ _MEMBER_JOIN_SQL = """
         s3.name AS skill_3_name,
         s3.icon AS skill_3_icon,
         s4.name AS skill_4_name,
-        s4.icon AS skill_4_icon
+        s4.icon AS skill_4_icon,
+        dr.label AS random_pk_label
     FROM pokemon_lineup_member plm
-    JOIN pokemon p ON p.id = plm.pokemon_id
+    LEFT JOIN pokemon p ON p.id = plm.pokemon_id
     LEFT JOIN sys_dict d ON d.id = plm.bloodline_dict_id
+    LEFT JOIN sys_dict dr ON dr.id = plm.random_pk_dict_id
     LEFT JOIN personality per ON per.id = plm.personality_id
     LEFT JOIN skill s1 ON s1.id = plm.skill_1_id
     LEFT JOIN skill s2 ON s2.id = plm.skill_2_id
@@ -43,12 +47,65 @@ _MEMBER_JOIN_SQL = """
 """
 
 
+def _normalize_attr_token(s: str) -> str:
+    s = (s or "").strip()
+    if s.endswith("系"):
+        return s[:-1].strip()
+    return s
+
+
+def _match_attribute_image_url(bloodline_label: str, attrs: list[dict]) -> str:
+    if not bloodline_label or not attrs:
+        return ""
+    lb = bloodline_label.strip()
+    ln = _normalize_attr_token(lb)
+    for a in attrs:
+        name = (a.get("attr_name") or "").strip()
+        nn = _normalize_attr_token(name)
+        img = (a.get("attr_image") or "").strip()
+        if name == lb or nn == ln or lb in name or name in ln:
+            return img
+    return ""
+
+
+async def _enrich_random_member_images(members: list[dict]) -> None:
+    from api.repositories.pokemon_repository import list_attributes
+
+    need = [
+        m
+        for m in members
+        if m.get("pokemon_id") is None and (m.get("bloodline_label") or "").strip()
+    ]
+    if not need:
+        return
+    rows = await list_attributes()
+    attrs = [to_attribute_item(r) for r in rows]
+    for m in members:
+        if m.get("pokemon_id") is not None:
+            continue
+        label = (m.get("bloodline_label") or "").strip()
+        if not label:
+            continue
+        img = _match_attribute_image_url(label, attrs)
+        if img:
+            m["pokemon_image"] = img
+
+
 def _build_member_row(row: dict) -> dict:
+    pid = row.get("pokemon_id")
+    random_pk_dict_id = row.get("random_pk_dict_id")
+    if pid is not None:
+        pokemon_name = row.get("pokemon_name") or ""
+        pokemon_image = build_friend_image_url(row.get("pokemon_image_lc") or "", row.get("pokemon_image_raw") or "")
+    else:
+        pokemon_name = (row.get("random_pk_label") or "").strip()
+        pokemon_image = ""
     return {
         "id": row["id"],
-        "pokemon_id": row["pokemon_id"],
-        "pokemon_name": row.get("pokemon_name", ""),
-        "pokemon_image": build_friend_image_url(row.get("pokemon_image_lc") or "", row.get("pokemon_image_raw") or ""),
+        "pokemon_id": pid,
+        "random_pk_dict_id": random_pk_dict_id,
+        "pokemon_name": pokemon_name,
+        "pokemon_image": pokemon_image,
         "sort_order": row["sort_order"],
         "bloodline_dict_id": row.get("bloodline_dict_id"),
         "bloodline_label": row.get("bloodline_label") or "",
@@ -76,7 +133,9 @@ def _build_member_row(row: dict) -> dict:
 async def _fetch_members(cur, lineup_id: int) -> list[dict]:
     await cur.execute(_MEMBER_JOIN_SQL, (lineup_id,))
     rows = await cur.fetchall()
-    return [_build_member_row(row) for row in rows]
+    members = [_build_member_row(row) for row in rows]
+    await _enrich_random_member_images(members)
+    return members
 
 
 async def get_lineup_by_id(lineup_id: int) -> dict | None:
@@ -208,16 +267,17 @@ async def create_lineup(payload: dict) -> dict:
                 await cur.execute(
                     """
                     INSERT INTO pokemon_lineup_member (
-                        lineup_id, sort_order, pokemon_id, bloodline_dict_id, personality_id,
+                        lineup_id, sort_order, pokemon_id, random_pk_dict_id, bloodline_dict_id, personality_id,
                         qual_1, qual_2, qual_3,
                         skill_1_id, skill_2_id, skill_3_id, skill_4_id, member_desc
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """,
                     (
                         lineup_id,
                         member["sort_order"],
-                        member["pokemon_id"],
+                        member.get("pokemon_id"),
+                        member.get("random_pk_dict_id"),
                         member.get("bloodline_dict_id"),
                         member.get("personality_id"),
                         member.get("qual_1", ""),
@@ -266,16 +326,17 @@ async def update_lineup(lineup_id: int, payload: dict) -> dict | None:
                 await cur.execute(
                     """
                     INSERT INTO pokemon_lineup_member (
-                        lineup_id, sort_order, pokemon_id, bloodline_dict_id, personality_id,
+                        lineup_id, sort_order, pokemon_id, random_pk_dict_id, bloodline_dict_id, personality_id,
                         qual_1, qual_2, qual_3,
                         skill_1_id, skill_2_id, skill_3_id, skill_4_id, member_desc
                     )
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """,
                     (
                         lineup_id,
                         member["sort_order"],
-                        member["pokemon_id"],
+                        member.get("pokemon_id"),
+                        member.get("random_pk_dict_id"),
                         member.get("bloodline_dict_id"),
                         member.get("personality_id"),
                         member.get("qual_1", ""),

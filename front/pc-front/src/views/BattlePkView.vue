@@ -228,7 +228,7 @@ function applyLineupToTeam(team: TeamKey, lineup: Lineup) {
       { name: m.skill_4_name || '', image: m.skill_4_image || '' },
     ],
     member_desc: m.member_desc || '',
-    random_pk_dict_id: null,
+    random_pk_dict_id: m.random_pk_dict_id ?? null,
   }))
   if (!t.members.length) {
     t.members = [emptyMember(1)]
@@ -308,7 +308,7 @@ function pickRandomPkOption(team: TeamKey, mi: number, opt: BattlePkRandomPokemo
   if (!m) return
   m.random_pk_dict_id = opt.id
   m.pokemon_id = null
-  m.pokemon_name = ''
+  m.pokemon_name = opt.label
   m.pokemon_image = ''
   m.personality_id = null
   m.personality_name_zh = ''
@@ -400,7 +400,7 @@ function onResonanceChange(team: TeamKey, magicId: number | null) {
 
 function toPayload(team: TeamForm): BattlePkTeam {
   const members: BattlePkMember[] = team.members
-    .filter((m) => m.pokemon_name.trim())
+    .filter((m) => m.pokemon_name.trim() || m.random_pk_dict_id !== null)
     .map((m, i) => ({
       pokemon_id: m.pokemon_id,
       pokemon_name: m.pokemon_name,

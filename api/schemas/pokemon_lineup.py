@@ -1,8 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class PokemonLineupMemberInput(BaseModel):
-    pokemon_id: int
+    pokemon_id: int | None = None
+    random_pk_dict_id: int | None = None
     sort_order: int = 1
     bloodline_dict_id: int | None = None
     personality_id: int | None = None
@@ -15,10 +16,19 @@ class PokemonLineupMemberInput(BaseModel):
     skill_4_id: int | None = None
     member_desc: str = ""
 
+    @model_validator(mode="after")
+    def pokemon_or_random(self) -> "PokemonLineupMemberInput":
+        has_p = self.pokemon_id not in (None, 0)
+        has_r = self.random_pk_dict_id not in (None, 0)
+        if has_p == has_r:
+            raise ValueError("成员必须且仅能指定 pokemon_id（具体精灵）或 random_pk_dict_id（随机精灵）之一")
+        return self
+
 
 class PokemonLineupMemberItem(BaseModel):
     id: int
-    pokemon_id: int
+    pokemon_id: int | None = None
+    random_pk_dict_id: int | None = None
     pokemon_name: str = ""
     pokemon_image: str = ""
     sort_order: int = 1

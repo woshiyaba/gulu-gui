@@ -6,6 +6,7 @@ from api.services.ops_service import ensure_role
 LINEUP_TYPE_DICT = "pokemon_lineup_type"
 # 与 sys_dict pokemon_lineup_type 中「闪耀大赛」条目的 label 一致，用于强制 6 只（不依赖 code 具体字符串）
 SHINING_CONTEST_LABEL = "闪耀大赛"
+BATTLE_PK_RANDOM_DICT = "battle_pk_random_pokemon"
 
 
 async def _load_valid_stat_keys() -> set[str]:
@@ -31,8 +32,15 @@ async def _lineup_type_requires_exactly_six_members(source_type: str) -> bool:
 
 
 async def _validate_member(member: dict, index: int, valid_stat_keys: set[str]) -> dict:
-    if not member.get("pokemon_id"):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"第 {index} 只精灵不能为空")
+    pid = member.get("pokemon_id")
+    rid = member.get("random_pk_dict_id")
+    has_pokemon = pid not in (None, "", 0)
+    has_random = rid not in (None, "", 0)
+    if has_pokemon == has_random:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"第 {index} 只须选择具体精灵或随机精灵模式其一",
+        )
 
     stat_keys = [
         (member.get("qual_1") or "").strip(),
@@ -51,6 +59,11 @@ async def _validate_member(member: dict, index: int, valid_stat_keys: set[str]) 
     non_empty_skills = [sid for sid in skill_ids if sid]
     if len(non_empty_skills) != len(set(non_empty_skills)):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"第 {index} 只精灵技能不能重复")
+    if has_random and non_empty_skills:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"第 {index} 仅随机精灵时不应配置技能 ID（请先改为具体精灵后再选技能）",
+        )
 
     bloodline_dict_id = member.get("bloodline_dict_id")
     if bloodline_dict_id is not None:
@@ -64,8 +77,14 @@ async def _validate_member(member: dict, index: int, valid_stat_keys: set[str]) 
         if not personality:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"第 {index} 只精灵性格不存在")
 
+    if has_random:
+        rnd = await ops_repository.get_dict_by_id(int(rid))
+        if not rnd or rnd.get("dict_type") != BATTLE_PK_RANDOM_DICT:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"第 {index} 只随机精灵选项无效")
+
     return {
-        "pokemon_id": int(member["pokemon_id"]),
+        "pokemon_id": int(pid) if has_pokemon else None,
+        "random_pk_dict_id": int(rid) if has_random else None,
         "sort_order": index,
         "bloodline_dict_id": int(bloodline_dict_id) if bloodline_dict_id is not None else None,
         "personality_id": int(personality_id) if personality_id is not None else None,

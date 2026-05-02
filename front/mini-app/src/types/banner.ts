@@ -11,7 +11,8 @@ export interface Banner {
 
 export interface LineupMember {
   id: number
-  pokemon_id: number
+  pokemon_id: number | null
+  random_pk_dict_id?: number | null
   pokemon_name: string
   pokemon_image: string
   sort_order: number
