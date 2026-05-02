@@ -249,6 +249,15 @@ export interface BloodlineOption {
   label: string
 }
 
+/** sys_dict battle_pk_random_pokemon */
+export interface BattlePkRandomPokemonOption {
+  id: number
+  code: string
+  label: string
+  kind: string
+  bloodline_code: string | null
+}
+
 export interface ResonanceMagicOption {
   id: number
   name: string

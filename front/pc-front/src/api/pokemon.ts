@@ -1,6 +1,7 @@
 import axios from 'axios'
 import type {
   Attribute,
+  BattlePkRandomPokemonOption,
   BattlePkRequest,
   BattlePkResponse,
   BloodlineOption,
@@ -141,6 +142,10 @@ export function fetchPersonalities(): Promise<PersonalityOption[]> {
 
 export function fetchBloodlines(): Promise<BloodlineOption[]> {
   return http.get<BloodlineOption[]>('/api/bloodlines').then((r) => r.data)
+}
+
+export function fetchBattlePkRandomPokemonModes(): Promise<BattlePkRandomPokemonOption[]> {
+  return http.get<BattlePkRandomPokemonOption[]>('/api/battle-pk/random-pokemon-modes').then((r) => r.data)
 }
 
 export function fetchResonanceMagics(): Promise<ResonanceMagicOption[]> {

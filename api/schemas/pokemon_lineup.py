@@ -188,6 +188,19 @@ class BloodlineOption(BaseModel):
     label: str = ""
 
 
+class BattlePkRandomPokemonOption(BaseModel):
+    """阵容 PK 随机精灵下拉（sys_dict dict_type=battle_pk_random_pokemon）。"""
+
+    id: int
+    code: str = ""
+    label: str = ""
+    kind: str = Field(description="any=纯随机意向；attr=按系别随机意向（血脉默认同系）")
+    bloodline_code: str | None = Field(
+        default=None,
+        description="与 pet_bloodline.code 一致，kind=attr 时有值",
+    )
+
+
 class ResonanceMagicOption(BaseModel):
     id: int
     name: str

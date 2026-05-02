@@ -2,6 +2,7 @@
 import { computed, reactive, ref } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
 import {
+  fetchBattlePkRandomPokemonModes,
   fetchBloodlines,
   fetchLineups,
   fetchPersonalities,
@@ -13,6 +14,7 @@ import {
 } from '@/api/pokemon'
 import type {
   BattlePkMember,
+  BattlePkRandomPokemonOption,
   BattlePkResponse,
   BattlePkTeam,
   BloodlineOption,
@@ -40,6 +42,7 @@ interface MemberForm {
   qual_3: string
   skills: Array<{ name: string; image: string }>
   member_desc: string
+  random_pk_dict_id: number | null
 }
 
 interface TeamForm {
@@ -89,6 +92,7 @@ function emptyMember(sort: number): MemberForm {
       { name: '', image: '' },
     ],
     member_desc: '',
+    random_pk_dict_id: null,
   }
 }
 
@@ -115,6 +119,8 @@ const importLineupId = reactive<Record<TeamKey, number | null>>({
   A: null,
   B: null,
 })
+
+const randomPokemonModes = ref<BattlePkRandomPokemonOption[]>([])
 
 const submitting = ref(false)
 const error = ref('')
@@ -199,6 +205,7 @@ function applyLineupToTeam(team: TeamKey, lineup: Lineup) {
       { name: m.skill_4_name || '', image: m.skill_4_image || '' },
     ],
     member_desc: m.member_desc || '',
+    random_pk_dict_id: null,
   }))
   if (!t.members.length) t.members = [emptyMember(1)]
 }
@@ -271,6 +278,7 @@ function removeMember(team: TeamKey, index: number) {
 
 // ── 弹层打开器 ─────────────────────────────────────────
 function openPokemonPicker(team: TeamKey, mi: number) {
+  if (!guardMemberEditable(team, mi)) return
   pickerKind.value = 'pokemon'
   pickerCtx.value = { team, memberIndex: mi }
   pickerKeyword.value = ''
@@ -278,6 +286,7 @@ function openPokemonPicker(team: TeamKey, mi: number) {
 }
 
 async function openSkillPicker(team: TeamKey, mi: number, si: number) {
+  if (!guardMemberEditable(team, mi)) return
   const member = teamRef(team).members[mi]
   if (!member?.pokemon_name) {
     uni.showToast({ title: '请先选择精灵', icon: 'none' })
@@ -303,12 +312,73 @@ async function openSkillPicker(team: TeamKey, mi: number, si: number) {
   }
 }
 
+function randomPkLabel(m: MemberForm): string {
+  if (m.random_pk_dict_id === null) return ''
+  const opt = randomPokemonModes.value.find((o) => o.id === m.random_pk_dict_id)
+  return opt?.label ?? ''
+}
+
+function isMemberRandomLocked(m: MemberForm): boolean {
+  return m.random_pk_dict_id !== null
+}
+
+const randomPkModesForPickerKeyword = computed(() => {
+  const t = pickerKeyword.value.trim()
+  if (!t) return randomPokemonModes.value
+  return randomPokemonModes.value.filter((o) => o.label.includes(t))
+})
+
+function guardMemberEditable(team: TeamKey, mi: number): boolean {
+  const m = teamRef(team).members[mi]
+  if (m && isMemberRandomLocked(m)) {
+    uni.showToast({ title: '随机精灵模式下仅可填写备注', icon: 'none' })
+    return false
+  }
+  return true
+}
+
+function pickRandomPkOption(opt: BattlePkRandomPokemonOption) {
+  const ctx = pickerCtx.value
+  if (!ctx) return
+  const m = teamRef(ctx.team).members[ctx.memberIndex]
+  if (!m) return
+  m.random_pk_dict_id = opt.id
+  m.pokemon_id = null
+  m.pokemon_name = ''
+  m.pokemon_image = ''
+  m.pokemon_attrs = []
+  m.personality_id = null
+  m.personality_name_zh = ''
+  m.qual_1 = ''
+  m.qual_2 = ''
+  m.qual_3 = ''
+  m.skills = [
+    { name: '', image: '' },
+    { name: '', image: '' },
+    { name: '', image: '' },
+    { name: '', image: '' },
+  ]
+  if (opt.kind === 'any') {
+    m.bloodline_dict_id = null
+    m.bloodline_label = ''
+  } else if (opt.kind === 'attr' && opt.bloodline_code) {
+    const bl = bloodlines.value.find((x) => x.code === opt.bloodline_code)
+    if (bl) {
+      m.bloodline_dict_id = bl.id
+      m.bloodline_label = bl.label
+    }
+  }
+  closePicker()
+}
+
 function openPersonalityPicker(team: TeamKey, mi: number) {
+  if (!guardMemberEditable(team, mi)) return
   pickerKind.value = 'personality'
   pickerCtx.value = { team, memberIndex: mi }
 }
 
 function openBloodlinePicker(team: TeamKey, mi: number) {
+  if (!guardMemberEditable(team, mi)) return
   pickerKind.value = 'bloodline'
   pickerCtx.value = { team, memberIndex: mi }
 }
@@ -319,6 +389,7 @@ function openResonancePicker(team: TeamKey) {
 }
 
 function openQualPicker(team: TeamKey, mi: number, qualIndex: 1 | 2 | 3) {
+  if (!guardMemberEditable(team, mi)) return
   pickerKind.value = 'qual'
   pickerCtx.value = { team, memberIndex: mi, qualIndex }
 }
@@ -401,6 +472,7 @@ function pickPokemon(item: Pokemon) {
   if (!ctx) return
   const m = teamRef(ctx.team).members[ctx.memberIndex]
   if (!m) return
+  m.random_pk_dict_id = null
   const idNum = Number(item.no)
   m.pokemon_id = Number.isFinite(idNum) ? idNum : null
   m.pokemon_name = item.name
@@ -422,7 +494,7 @@ function confirmSkillPick() {
     return
   }
   const m = teamRef(ctx.team).members[ctx.memberIndex]
-  if (!m) return
+  if (!m || isMemberRandomLocked(m)) return
   m.skills[ctx.skillIndex] = { name: skill.name, image: skill.icon }
   closePicker()
 }
@@ -431,7 +503,7 @@ function pickPersonality(p: PersonalityOption | null) {
   const ctx = pickerCtx.value
   if (!ctx) return
   const m = teamRef(ctx.team).members[ctx.memberIndex]
-  if (!m) return
+  if (!m || isMemberRandomLocked(m)) return
   m.personality_id = p?.id ?? null
   m.personality_name_zh = p?.name ?? ''
   closePicker()
@@ -441,7 +513,8 @@ function pickBloodline(b: BloodlineOption | null) {
   const ctx = pickerCtx.value
   if (!ctx) return
   const m = teamRef(ctx.team).members[ctx.memberIndex]
-  if (!m) return
+  if (!m || isMemberRandomLocked(m)) return
+  m.random_pk_dict_id = null
   m.bloodline_dict_id = b?.id ?? null
   m.bloodline_label = b?.label ?? ''
   closePicker()
@@ -460,7 +533,7 @@ function pickQual(value: string) {
   const ctx = pickerCtx.value
   if (!ctx || ctx.qualIndex === undefined) return
   const m = teamRef(ctx.team).members[ctx.memberIndex]
-  if (!m) return
+  if (!m || isMemberRandomLocked(m)) return
   if (ctx.qualIndex === 1) m.qual_1 = value
   if (ctx.qualIndex === 2) m.qual_2 = value
   if (ctx.qualIndex === 3) m.qual_3 = value
@@ -477,11 +550,13 @@ function clearPokemon(team: TeamKey, mi: number) {
   m.pokemon_id = null
   m.pokemon_name = ''
   m.pokemon_image = ''
+  m.pokemon_attrs = []
+  m.random_pk_dict_id = null
 }
 
 function clearSkill(team: TeamKey, mi: number, si: number) {
   const m = teamRef(team).members[mi]
-  if (!m) return
+  if (!m || isMemberRandomLocked(m)) return
   m.skills[si] = { name: '', image: '' }
 }
 
@@ -591,16 +666,18 @@ function winnerLabel(w: string): string {
 
 onLoad(async () => {
   lineupLoading.value = true
-  const [p, b, r, l] = await Promise.allSettled([
+  const [p, b, r, l, rm] = await Promise.allSettled([
     fetchPersonalities(),
     fetchBloodlines(),
     fetchResonanceMagics(),
     fetchLineups(),
+    fetchBattlePkRandomPokemonModes(),
   ])
   if (p.status === 'fulfilled') personalities.value = p.value
   if (b.status === 'fulfilled') bloodlines.value = b.value
   if (r.status === 'fulfilled') resonanceMagics.value = r.value
   if (l.status === 'fulfilled') lineupOptions.value = l.value.items || []
+  if (rm.status === 'fulfilled') randomPokemonModes.value = rm.value
   lineupLoading.value = false
 })
 </script>
@@ -703,6 +780,7 @@ onLoad(async () => {
         v-for="(member, mi) in teamRef(activeTeam).members"
         :key="mi"
         class="pet-card"
+        :class="{ 'pet-card-random-lock': isMemberRandomLocked(member) }"
       >
         <view class="pet-head">
           <view class="pet-head-left">
@@ -711,7 +789,7 @@ onLoad(async () => {
               <text v-else class="avatar-no">#{{ mi + 1 }}</text>
             </view>
             <view class="pet-title-wrap">
-              <text class="pet-name">{{ member.pokemon_name || `精灵 ${mi + 1}` }}</text>
+              <text class="pet-name">{{ member.pokemon_name || randomPkLabel(member) || `精灵 ${mi + 1}` }}</text>
               <text class="pet-sub">第 {{ mi + 1 }} 只 · 上场顺序 {{ mi + 1 }}</text>
             </view>
           </view>
@@ -728,11 +806,11 @@ onLoad(async () => {
           <text class="form-label">精灵</text>
           <view class="form-value">
             <image v-if="member.pokemon_image" :src="member.pokemon_image" class="value-img" mode="aspectFit" />
-            <text :class="['value-text', !member.pokemon_name ? 'placeholder' : '']">
-              {{ member.pokemon_name || '点击搜索精灵' }}
+            <text :class="['value-text', !(member.pokemon_name || randomPkLabel(member)) ? 'placeholder' : '']">
+              {{ member.pokemon_name || randomPkLabel(member) || '点击选择精灵' }}
             </text>
             <text
-              v-if="member.pokemon_name"
+              v-if="member.pokemon_name || member.random_pk_dict_id !== null"
               class="value-clear"
               @tap.stop="clearPokemon(activeTeam, mi)"
             >×</text>
@@ -954,7 +1032,7 @@ onLoad(async () => {
             <input
               class="picker-search-input"
               :value="pickerKeyword"
-              placeholder="输入精灵名称"
+              placeholder="搜索精灵名称"
               @input="onPickerKeywordInput"
             />
           </view>
@@ -962,16 +1040,41 @@ onLoad(async () => {
             <view v-if="pickerLoading" class="picker-tip">搜索中...</view>
             <template v-else>
               <view
-                v-for="opt in pokemonHits"
-                :key="opt.no"
-                class="picker-item"
-                @tap="pickPokemon(opt)"
+                v-for="opt in randomPkModesForPickerKeyword"
+                :key="`rand-${opt.id}`"
+                class="picker-item picker-item-random"
+                @tap="pickRandomPkOption(opt)"
               >
-                <image v-if="opt.image_url" :src="opt.image_url" class="picker-img" mode="aspectFit" />
-                <text class="picker-item-text">{{ opt.name }}</text>
+                <text class="picker-item-text">{{ opt.label }}</text>
               </view>
-              <view v-if="!pokemonHits.length && pickerKeyword" class="picker-tip">没有匹配的精灵</view>
-              <view v-else-if="!pickerKeyword" class="picker-tip">输入关键字开始搜索</view>
+              <template v-if="pickerKeyword.trim()">
+                <view
+                  v-for="opt in pokemonHits"
+                  :key="opt.no"
+                  class="picker-item"
+                  @tap="pickPokemon(opt)"
+                >
+                  <image v-if="opt.image_url" :src="opt.image_url" class="picker-img" mode="aspectFit" />
+                  <text class="picker-item-text">{{ opt.name }}</text>
+                </view>
+              </template>
+              <view
+                v-if="
+                  !randomPkModesForPickerKeyword.length
+                    && (!pickerKeyword.trim() || !pokemonHits.length)
+                "
+                class="picker-tip"
+              >
+                {{
+                  !pickerKeyword.trim()
+                    ? '暂无随机选项，请先在后端 seed 字典'
+                    : '没有匹配的精灵或随机项'
+                }}
+              </view>
+              <view
+                v-else-if="!pickerKeyword.trim() && randomPkModesForPickerKeyword.length"
+                class="picker-tip picker-tip-muted"
+              >或在上框输入关键字搜索具体精灵</view>
             </template>
           </scroll-view>
         </template>
@@ -1449,6 +1552,15 @@ onLoad(async () => {
 .picker-tip {
   padding: 60rpx 0; text-align: center;
   font-size: 24rpx; color: #b5c8e8;
+}
+.picker-tip-muted {
+  padding: 20rpx 0 40rpx;
+  font-size: 22rpx; color: #8aa4cc;
+}
+.picker-item-random .picker-item-text { font-weight: 600; }
+
+.pet-card-random-lock {
+  border-left: 6rpx solid #a8c4ff;
 }
 
 /* 技能选择器：固定区域滑动浏览 + 预览 + 确认 */

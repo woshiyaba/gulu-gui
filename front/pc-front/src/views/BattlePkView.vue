@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import {
+  fetchBattlePkRandomPokemonModes,
   fetchBloodlines,
   fetchLineups,
   fetchPersonalities,
@@ -11,6 +12,7 @@ import {
 } from '@/api/pokemon'
 import type {
   BattlePkMember,
+  BattlePkRandomPokemonOption,
   BattlePkResponse,
   BattlePkTeam,
   BloodlineOption,
@@ -37,6 +39,8 @@ interface MemberForm {
   qual_3: string
   skills: Array<{ name: string; image: string }>
   member_desc: string
+  /** sys_dict battle_pk_random_pokemon；仅 UI，提交 PK 不带此项 */
+  random_pk_dict_id: number | null
 }
 
 interface TeamForm {
@@ -85,6 +89,7 @@ function emptyMember(sort: number): MemberForm {
       { name: '', image: '' },
     ],
     member_desc: '',
+    random_pk_dict_id: null,
   }
 }
 
@@ -109,6 +114,8 @@ const importLineupId = reactive<Record<TeamKey, number | null>>({
   A: null,
   B: null,
 })
+/** sys_dict battle_pk_random_pokemon */
+const randomPokemonModes = ref<BattlePkRandomPokemonOption[]>([])
 
 // 性格描述：以"加 X / 降 Y"或修饰百分比形式拼描述，hover 时显示。
 function personalityDesc(p: PersonalityOption): string {
@@ -166,6 +173,23 @@ function teamRef(key: TeamKey): TeamForm {
 function petKey(team: TeamKey, mi: number) {
   return `${team}-${mi}`
 }
+
+function randomPkLabel(m: MemberForm): string {
+  if (m.random_pk_dict_id === null) return ''
+  return randomPokemonModes.value.find((o) => o.id === m.random_pk_dict_id)?.label ?? ''
+}
+
+/** 已选字典「随机精灵」且尚未指定具体精灵：除备注外锁定编辑 */
+function isMemberRandomLocked(m: MemberForm): boolean {
+  return m.random_pk_dict_id !== null
+}
+
+/** 下拉内随机项：关键字为空显示全部；有关键字时对 label 做包含匹配（类 SQL LIKE %kw%） */
+function randomPkModesForInput(kwRaw: string): BattlePkRandomPokemonOption[] {
+  const t = (kwRaw || '').trim()
+  if (!t) return randomPokemonModes.value
+  return randomPokemonModes.value.filter((o) => o.label.includes(t))
+}
 function skillCellKey(team: TeamKey, mi: number, si: number) {
   return `${team}-${mi}-${si}`
 }
@@ -201,6 +225,7 @@ function applyLineupToTeam(team: TeamKey, lineup: Lineup) {
       { name: m.skill_4_name || '', image: m.skill_4_image || '' },
     ],
     member_desc: m.member_desc || '',
+    random_pk_dict_id: null,
   }))
   if (!t.members.length) {
     t.members = [emptyMember(1)]
@@ -229,6 +254,11 @@ function removeMember(team: TeamKey, index: number) {
   t.members.forEach((m, i) => { m.sort_order = i + 1 })
 }
 
+function openPokemonDropdown(team: TeamKey, mi: number) {
+  pokemonOpen.value[petKey(team, mi)] = true
+  searchPokemon(team, mi)
+}
+
 function searchPokemon(team: TeamKey, mi: number) {
   if (pokemonTimer) clearTimeout(pokemonTimer)
   const k = petKey(team, mi)
@@ -236,7 +266,7 @@ function searchPokemon(team: TeamKey, mi: number) {
     const kw = (pokemonKw.value[k] || '').trim()
     if (!kw) {
       pokemonHits.value[k] = []
-      pokemonOpen.value[k] = false
+      pokemonOpen.value[k] = true
       return
     }
     try {
@@ -250,6 +280,7 @@ function searchPokemon(team: TeamKey, mi: number) {
 function pickPokemon(team: TeamKey, mi: number, item: Pokemon) {
   const m = teamRef(team).members[mi]
   if (!m) return
+  m.random_pk_dict_id = null
   // 后端 BattlePkMember.pokemon_id 是可空 int，这里图鉴号 no 做 fallback。
   const idNum = Number(item.no)
   m.pokemon_id = Number.isFinite(idNum) ? idNum : null
@@ -266,6 +297,40 @@ function clearPokemon(team: TeamKey, mi: number) {
   m.pokemon_id = null
   m.pokemon_name = ''
   m.pokemon_image = ''
+  m.random_pk_dict_id = null
+}
+
+function pickRandomPkOption(team: TeamKey, mi: number, opt: BattlePkRandomPokemonOption) {
+  const m = teamRef(team).members[mi]
+  if (!m) return
+  m.random_pk_dict_id = opt.id
+  m.pokemon_id = null
+  m.pokemon_name = ''
+  m.pokemon_image = ''
+  m.personality_id = null
+  m.personality_name_zh = ''
+  m.qual_1 = ''
+  m.qual_2 = ''
+  m.qual_3 = ''
+  m.skills = [
+    { name: '', image: '' },
+    { name: '', image: '' },
+    { name: '', image: '' },
+    { name: '', image: '' },
+  ]
+  if (opt.kind === 'any') {
+    m.bloodline_dict_id = null
+    m.bloodline_label = ''
+  } else if (opt.kind === 'attr' && opt.bloodline_code) {
+    const bl = bloodlines.value.find((b) => b.code === opt.bloodline_code)
+    if (bl) {
+      m.bloodline_dict_id = bl.id
+      m.bloodline_label = bl.label
+    }
+  }
+  const k = petKey(team, mi)
+  pokemonKw.value[k] = ''
+  pokemonOpen.value[k] = false
 }
 
 function searchSkill(team: TeamKey, mi: number, si: number) {
@@ -288,7 +353,7 @@ function searchSkill(team: TeamKey, mi: number, si: number) {
 
 function pickSkill(team: TeamKey, mi: number, si: number, item: Skill) {
   const m = teamRef(team).members[mi]
-  if (!m) return
+  if (!m || isMemberRandomLocked(m)) return
   m.skills[si] = { name: item.name, image: item.icon }
   const k = skillCellKey(team, mi, si)
   skillKw.value[k] = ''
@@ -297,7 +362,7 @@ function pickSkill(team: TeamKey, mi: number, si: number, item: Skill) {
 
 function clearSkill(team: TeamKey, mi: number, si: number) {
   const m = teamRef(team).members[mi]
-  if (!m) return
+  if (!m || isMemberRandomLocked(m)) return
   m.skills[si] = { name: '', image: '' }
 }
 
@@ -310,14 +375,15 @@ function hideSkill(team: TeamKey, mi: number, si: number) {
 
 function onPersonalityChange(team: TeamKey, mi: number, pid: number | null) {
   const m = teamRef(team).members[mi]
-  if (!m) return
+  if (!m || isMemberRandomLocked(m)) return
   m.personality_id = pid
   m.personality_name_zh = pid !== null ? personalityById.value.get(pid)?.name || '' : ''
 }
 
 function onBloodlineChange(team: TeamKey, mi: number, dictId: number | null) {
   const m = teamRef(team).members[mi]
-  if (!m) return
+  if (!m || isMemberRandomLocked(m)) return
+  m.random_pk_dict_id = null
   m.bloodline_dict_id = dictId
   m.bloodline_label = dictId !== null ? bloodlines.value.find((b) => b.id === dictId)?.label || '' : ''
 }
@@ -429,16 +495,18 @@ function winnerLabel(w: string): string {
 
 onMounted(async () => {
   lineupLoading.value = true
-  const [p, b, r, l] = await Promise.allSettled([
+  const [p, b, r, l, rm] = await Promise.allSettled([
     fetchPersonalities(),
     fetchBloodlines(),
     fetchResonanceMagics(),
     fetchLineups(),
+    fetchBattlePkRandomPokemonModes(),
   ])
   if (p.status === 'fulfilled') personalities.value = p.value
   if (b.status === 'fulfilled') bloodlines.value = b.value
   if (r.status === 'fulfilled') resonanceMagics.value = r.value
   if (l.status === 'fulfilled') lineupOptions.value = l.value.items || []
+  if (rm.status === 'fulfilled') randomPokemonModes.value = rm.value
   lineupLoading.value = false
 })
 </script>
@@ -495,14 +563,19 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div v-for="(member, mi) in teamRef(team).members" :key="mi" class="pet-card">
+          <div
+            v-for="(member, mi) in teamRef(team).members"
+            :key="mi"
+            class="pet-card"
+            :class="{ 'pet-card-random-lock': isMemberRandomLocked(member) }"
+          >
             <div class="pet-header">
               <div class="pet-avatar">
                 <img v-if="member.pokemon_image" :src="member.pokemon_image" alt="" />
                 <span v-else>#{{ mi + 1 }}</span>
               </div>
               <div class="pet-title">
-                <strong>{{ member.pokemon_name || `精灵 ${mi + 1}` }}</strong>
+                <strong>{{ member.pokemon_name || randomPkLabel(member) || `精灵 ${mi + 1}` }}</strong>
                 <small>第 {{ mi + 1 }} 只 · 上场顺序 {{ mi + 1 }}</small>
               </div>
               <button v-if="teamRef(team).members.length > 1" type="button" class="text-btn danger" @click="removeMember(team, mi)">移除</button>
@@ -511,29 +584,53 @@ onMounted(async () => {
             <div class="form-grid">
               <div class="form-row search-field">
                 <span>精灵</span>
-                <div v-if="member.pokemon_name" class="selected-item">
+                <div v-if="member.pokemon_name || member.random_pk_dict_id !== null" class="selected-item">
                   <img v-if="member.pokemon_image" :src="member.pokemon_image" class="selected-img" alt="" />
-                  <span>{{ member.pokemon_name }}</span>
+                  <span>{{ member.pokemon_name || randomPkLabel(member) }}</span>
                   <button type="button" class="clear-btn" @click="clearPokemon(team, mi)">&times;</button>
                 </div>
                 <div v-else class="search-input-wrap">
                   <input
                     v-model="pokemonKw[petKey(team, mi)]"
                     type="text"
-                    placeholder="输入精灵名称搜索..."
+                    placeholder="搜索精灵名称"
                     @input="searchPokemon(team, mi)"
-                    @focus="searchPokemon(team, mi)"
+                    @focus="openPokemonDropdown(team, mi)"
                     @blur="hidePokemon(team, mi)"
                   />
-                  <div v-if="pokemonOpen[petKey(team, mi)] && pokemonHits[petKey(team, mi)]?.length" class="dropdown">
+                  <div v-if="pokemonOpen[petKey(team, mi)]" class="dropdown">
                     <div
-                      v-for="opt in pokemonHits[petKey(team, mi)]"
-                      :key="opt.no"
-                      class="dropdown-item"
-                      @mousedown.prevent="pickPokemon(team, mi, opt)"
+                      v-for="opt in randomPkModesForInput(pokemonKw[petKey(team, mi)] || '')"
+                      :key="`rand-${opt.id}`"
+                      class="dropdown-item dropdown-item-random"
+                      @mousedown.prevent="pickRandomPkOption(team, mi, opt)"
                     >
-                      <img v-if="opt.image_url" :src="opt.image_url" class="dropdown-img" alt="" />
-                      <span>{{ opt.name }}</span>
+                      <span>{{ opt.label }}</span>
+                    </div>
+                    <template v-if="(pokemonKw[petKey(team, mi)] || '').trim()">
+                      <div
+                        v-for="opt in pokemonHits[petKey(team, mi)] || []"
+                        :key="opt.no"
+                        class="dropdown-item"
+                        @mousedown.prevent="pickPokemon(team, mi, opt)"
+                      >
+                        <img v-if="opt.image_url" :src="opt.image_url" class="dropdown-img" alt="" />
+                        <span>{{ opt.name }}</span>
+                      </div>
+                    </template>
+                    <div
+                      v-if="
+                        !randomPkModesForInput(pokemonKw[petKey(team, mi)] || '').length
+                          && (!(pokemonKw[petKey(team, mi)] || '').trim()
+                            || !(pokemonHits[petKey(team, mi)]?.length))
+                      "
+                      class="dropdown-item dropdown-hint"
+                    >
+                      {{
+                        !(pokemonKw[petKey(team, mi)] || '').trim()
+                          ? '暂无随机选项（请先在后端 seed 字典）'
+                          : '没有匹配的精灵或随机项'
+                      }}
                     </div>
                   </div>
                 </div>
@@ -544,6 +641,7 @@ onMounted(async () => {
                 <div class="personality-wrap">
                   <select
                     :value="member.personality_id ?? ''"
+                    :disabled="isMemberRandomLocked(member)"
                     :title="member.personality_id !== null && personalityById.get(member.personality_id) ? personalityDesc(personalityById.get(member.personality_id)!) : '将鼠标悬停可查看加/降属性'"
                     @change="onPersonalityChange(team, mi, ($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null)"
                   >
@@ -566,6 +664,7 @@ onMounted(async () => {
                 <span>血脉</span>
                 <select
                   :value="member.bloodline_dict_id ?? ''"
+                  :disabled="isMemberRandomLocked(member)"
                   @change="onBloodlineChange(team, mi, ($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null)"
                 >
                   <option value="">未设置</option>
@@ -576,15 +675,15 @@ onMounted(async () => {
 
             <div class="section-subtitle">三项资质（不能重复）</div>
             <div class="quality-grid">
-              <select v-model="member.qual_1">
+              <select v-model="member.qual_1" :disabled="isMemberRandomLocked(member)">
                 <option value="">未设置</option>
                 <option v-for="opt in STAT_OPTIONS" :key="`q1-${opt.value}`" :value="opt.value">{{ opt.label }}</option>
               </select>
-              <select v-model="member.qual_2">
+              <select v-model="member.qual_2" :disabled="isMemberRandomLocked(member)">
                 <option value="">未设置</option>
                 <option v-for="opt in STAT_OPTIONS" :key="`q2-${opt.value}`" :value="opt.value">{{ opt.label }}</option>
               </select>
-              <select v-model="member.qual_3">
+              <select v-model="member.qual_3" :disabled="isMemberRandomLocked(member)">
                 <option value="">未设置</option>
                 <option v-for="opt in STAT_OPTIONS" :key="`q3-${opt.value}`" :value="opt.value">{{ opt.label }}</option>
               </select>
@@ -597,13 +696,19 @@ onMounted(async () => {
                 <div v-if="member.skills[si - 1]?.name" class="selected-item">
                   <img v-if="member.skills[si - 1]?.image" :src="member.skills[si - 1]?.image" class="selected-img" alt="" />
                   <span>{{ member.skills[si - 1]!.name }}</span>
-                  <button type="button" class="clear-btn" @click="clearSkill(team, mi, si - 1)">&times;</button>
+                  <button
+                    type="button"
+                    class="clear-btn"
+                    :disabled="isMemberRandomLocked(member)"
+                    @click="clearSkill(team, mi, si - 1)"
+                  >&times;</button>
                 </div>
                 <div v-else class="search-input-wrap">
                   <input
                     v-model="skillKw[skillCellKey(team, mi, si - 1)]"
                     type="text"
                     placeholder="搜索技能名..."
+                    :disabled="isMemberRandomLocked(member)"
                     @input="searchSkill(team, mi, si - 1)"
                     @focus="searchSkill(team, mi, si - 1)"
                     @blur="hideSkill(team, mi, si - 1)"
@@ -916,7 +1021,16 @@ input:focus, select:focus, textarea:focus {
 .dropdown-item:hover { background: var(--color-hover); }
 .dropdown-item em { color: var(--color-muted); font-style: normal; font-size: 12px; }
 .dropdown-img { width: 24px; height: 24px; object-fit: contain; }
+.dropdown-item-random { font-weight: 500; }
+.dropdown-hint {
+  color: var(--color-muted); font-size: 12px; cursor: default;
+}
+.dropdown-hint:hover { background: transparent; }
 
+.pet-card-random-lock .form-row select:disabled,
+.pet-card-random-lock .form-row input:disabled {
+  opacity: 0.65; cursor: not-allowed;
+}
 .selected-item {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 4px 8px; background: rgba(64, 158, 255, 0.12);

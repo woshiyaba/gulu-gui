@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 from fastapi import APIRouter, HTTPException, Query
 
@@ -19,6 +20,7 @@ from api.schemas.pokemon import (
 from api.schemas.banner import BannerItem
 from api.schemas.personality import PersonalityItem
 from api.schemas.pokemon_lineup import (
+    BattlePkRandomPokemonOption,
     BattlePkRequest,
     BattlePkResponse,
     BloodlineOption,
@@ -109,6 +111,42 @@ async def get_bloodlines():
         {"id": row["id"], "code": row.get("code") or "", "label": row.get("label") or ""}
         for row in rows
     ]
+
+
+def _parse_battle_pk_random_pokemon_rows(rows: list[dict]) -> list[BattlePkRandomPokemonOption]:
+    items: list[BattlePkRandomPokemonOption] = []
+    for row in rows:
+        extra_s = (row.get("extra") or "").strip()
+        kind: str = "any"
+        bloodline_code: str | None = None
+        if extra_s:
+            try:
+                data = json.loads(extra_s)
+                if data.get("k") == "a":
+                    kind = "any"
+                elif data.get("k") == "t":
+                    kind = "attr"
+                    c = (data.get("c") or "").strip()
+                    bloodline_code = c or None
+            except json.JSONDecodeError:
+                kind = "any"
+        items.append(
+            BattlePkRandomPokemonOption(
+                id=row["id"],
+                code=row.get("code") or "",
+                label=row.get("label") or "",
+                kind=kind,
+                bloodline_code=bloodline_code,
+            )
+        )
+    return items
+
+
+@router.get("/battle-pk/random-pokemon-modes", response_model=list[BattlePkRandomPokemonOption])
+async def get_battle_pk_random_pokemon_modes():
+    """阵容 PK 随机精灵下拉：sys_dict dict_type=battle_pk_random_pokemon，需先执行 seed 脚本。"""
+    rows = await ops_repository.list_dicts_all(dict_type="battle_pk_random_pokemon")
+    return _parse_battle_pk_random_pokemon_rows(rows)
 
 
 @router.get("/resonance-magics", response_model=list[ResonanceMagicOption])

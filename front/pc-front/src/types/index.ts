@@ -289,6 +289,16 @@ export interface BloodlineOption {
   label: string
 }
 
+/** sys_dict battle_pk_random_pokemon，阵容 PK 随机精灵下拉 */
+export interface BattlePkRandomPokemonOption {
+  id: number
+  code: string
+  label: string
+  /** any：纯随机；attr：按系别随机，bloodline_code 对应血脉 */
+  kind: string
+  bloodline_code: string | null
+}
+
 export interface ResonanceMagicOption {
   id: number
   name: string

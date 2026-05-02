@@ -1,6 +1,7 @@
 import { request } from '@/utils/request'
 import type {
   Attribute,
+  BattlePkRandomPokemonOption,
   BattlePkRequest,
   BattlePkResponse,
   BloodlineOption,
@@ -177,6 +178,12 @@ export function fetchPersonalities() {
 
 export function fetchBloodlines() {
   return request<BloodlineOption[]>({ url: '/api/bloodlines' })
+}
+
+export function fetchBattlePkRandomPokemonModes() {
+  return request<BattlePkRandomPokemonOption[]>({
+    url: '/api/battle-pk/random-pokemon-modes',
+  })
 }
 
 export function fetchResonanceMagics() {
