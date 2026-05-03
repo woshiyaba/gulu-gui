@@ -198,3 +198,26 @@ export function submitBattlePk(payload: BattlePkRequest) {
     timeout: 120000,
   })
 }
+
+export interface MerchantProduct {
+  name: string
+  icon_url: string
+  start_time: number | null
+  end_time: number | null
+  time_label: string
+}
+
+export interface MerchantInfo {
+  title: string
+  subtitle: string
+  start_time: number | null
+  end_time: number | null
+  product_count: number
+  products: MerchantProduct[]
+}
+
+export function fetchMerchantInfo() {
+  return request<MerchantInfo>({
+    url: '/api/third/merchant',
+  })
+}

@@ -2,7 +2,14 @@
 import { computed, ref, watch } from 'vue'
 import { onLoad, onPullDownRefresh, onReachBottom, onUnload } from '@dcloudio/uni-app'
 import PokemonCard from '@/components/PokemonCard.vue'
-import { fetchAttributes, fetchBanners, fetchPokemon, type PokemonQuery } from '@/api/pokemon'
+import {
+  fetchAttributes,
+  fetchBanners,
+  fetchMerchantInfo,
+  fetchPokemon,
+  type MerchantInfo,
+  type PokemonQuery,
+} from '@/api/pokemon'
 import type { Attribute, Pokemon } from '@/types/pokemon'
 import type { Banner } from '@/types/banner'
 
@@ -19,7 +26,14 @@ const selectedAttr = ref('')
 const currentPage = ref(1)
 const pageSize = 30
 
+const merchantInfo = ref<MerchantInfo | null>(null)
+const merchantLoading = ref(false)
+const merchantError = ref('')
+const nowMs = ref(Date.now())
+
 let searchTimer: ReturnType<typeof setTimeout> | undefined
+let merchantTimer: ReturnType<typeof setInterval> | undefined
+let merchantRefreshScheduled = false
 
 const isInitialLoading = computed(() => loading.value && pokemons.value.length === 0)
 const hasMore = computed(() => pokemons.value.length < total.value)
@@ -100,8 +114,63 @@ function navigateToDetail(name: string) {
   })
 }
 
-function goBattlePk() {
-  uni.navigateTo({ url: '/pages/battle-pk/index' })
+const visibleMerchantProducts = computed(() => {
+  const products = merchantInfo.value?.products ?? []
+  return products.filter((p) => !p.end_time || p.end_time > nowMs.value)
+})
+
+function formatCountdown(endTime: number | null): string {
+  if (!endTime) return '全天供应'
+  const remaining = endTime - nowMs.value
+  if (remaining <= 0) return '已结束'
+  const totalSeconds = Math.floor(remaining / 1000)
+  const days = Math.floor(totalSeconds / 86400)
+  const hours = Math.floor((totalSeconds % 86400) / 3600)
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+  const seconds = totalSeconds % 60
+  const pad = (n: number) => String(n).padStart(2, '0')
+  if (days > 0) return `${days}天 ${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+  return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`
+}
+
+async function loadMerchant() {
+  if (merchantLoading.value) return
+  merchantLoading.value = true
+  merchantError.value = ''
+  try {
+    merchantInfo.value = await fetchMerchantInfo()
+    merchantRefreshScheduled = false
+  } catch (err) {
+    merchantError.value = err instanceof Error ? err.message : '远行商人加载失败'
+  } finally {
+    merchantLoading.value = false
+  }
+}
+
+function startMerchantTimer() {
+  stopMerchantTimer()
+  merchantTimer = setInterval(() => {
+    nowMs.value = Date.now()
+    if (merchantRefreshScheduled) return
+    const products = merchantInfo.value?.products ?? []
+    const expired = products.some((p) => p.end_time && p.end_time <= nowMs.value)
+    if (expired) {
+      merchantRefreshScheduled = true
+      void loadMerchant()
+    }
+  }, 1000)
+}
+
+function stopMerchantTimer() {
+  if (merchantTimer) {
+    clearInterval(merchantTimer)
+    merchantTimer = undefined
+  }
+}
+
+function refreshMerchant() {
+  if (merchantLoading.value) return
+  void loadMerchant()
 }
 
 function onBannerTap(index: number) {
@@ -124,7 +193,8 @@ async function loadBanners() {
 }
 
 async function initializePage() {
-  await Promise.all([loadBanners(), loadAttributes()])
+  await Promise.all([loadBanners(), loadAttributes(), loadMerchant()])
+  startMerchantTimer()
   await resetAndLoadPokemon()
 }
 
@@ -158,6 +228,7 @@ onUnload(() => {
   if (searchTimer) {
     clearTimeout(searchTimer)
   }
+  stopMerchantTimer()
 })
 </script>
 
@@ -197,12 +268,50 @@ onUnload(() => {
       </view>
     </view>
 
-    <view class="pk-banner" @tap="goBattlePk">
-      <view class="pk-banner-content">
-        <text class="pk-banner-title">阵容 PK · 模拟对战</text>
-        <text class="pk-banner-desc">配两套队伍，一键看胜率与回合推演</text>
+    <view class="merchant-card">
+      <view class="merchant-head">
+        <view class="merchant-head-text">
+          <text class="merchant-title">{{ merchantInfo?.title || '远行商人' }}</text>
+          <text v-if="merchantInfo?.subtitle" class="merchant-subtitle">{{ merchantInfo.subtitle }}</text>
+        </view>
+        <view
+          class="merchant-refresh"
+          :class="{ rotating: merchantLoading }"
+          @tap="refreshMerchant"
+        >
+          <text class="merchant-refresh-icon">⟳</text>
+        </view>
       </view>
-      <text class="pk-banner-arrow">›</text>
+
+      <view v-if="merchantError" class="merchant-status merchant-status-error">{{ merchantError }}</view>
+      <view
+        v-else-if="merchantLoading && visibleMerchantProducts.length === 0"
+        class="merchant-status"
+      >商品加载中...</view>
+      <view
+        v-else-if="visibleMerchantProducts.length === 0"
+        class="merchant-status"
+      >当前轮次暂无商品</view>
+      <scroll-view v-else class="merchant-scroll" scroll-x>
+        <view class="merchant-list">
+          <view
+            v-for="product in visibleMerchantProducts"
+            :key="`${product.name}-${product.end_time ?? 'all'}`"
+            class="merchant-item"
+          >
+            <view class="merchant-item-icon-wrap">
+              <image
+                v-if="product.icon_url"
+                class="merchant-item-icon"
+                :src="product.icon_url"
+                mode="aspectFit"
+              />
+            </view>
+            <text class="merchant-item-name">{{ product.name }}</text>
+            <text class="merchant-item-countdown">{{ formatCountdown(product.end_time) }}</text>
+          </view>
+        </view>
+      </scroll-view>
     </view>
 
     <view class="filter-card">
@@ -295,20 +404,128 @@ onUnload(() => {
   padding: 28rpx;
 }
 
-.pk-banner {
+.merchant-card {
+  margin-bottom: 20rpx;
+  padding: 14rpx 18rpx 16rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #6f4dff 0%, #2b74ff 100%);
+  box-shadow: 0 8rpx 20rpx rgba(43, 116, 255, 0.2);
+}
+
+.merchant-head {
   display: flex;
   align-items: center;
-  gap: 14rpx;
-  margin-bottom: 24rpx;
-  padding: 22rpx 26rpx;
-  border-radius: 24rpx;
-  background: linear-gradient(135deg, #2b74ff 0%, #f56c6c 100%);
-  box-shadow: 0 12rpx 28rpx rgba(43, 116, 255, 0.22);
+  gap: 12rpx;
+  margin-bottom: 10rpx;
 }
-.pk-banner-content { flex: 1; min-width: 0; }
-.pk-banner-title { display: block; font-size: 30rpx; font-weight: 700; color: #fff; }
-.pk-banner-desc { display: block; margin-top: 4rpx; font-size: 22rpx; color: rgba(255,255,255,0.85); }
-.pk-banner-arrow { font-size: 40rpx; color: rgba(255,255,255,0.85); }
+
+.merchant-head-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+}
+
+.merchant-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.merchant-subtitle {
+  font-size: 20rpx;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.merchant-refresh {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.merchant-refresh-icon {
+  font-size: 24rpx;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.merchant-refresh.rotating .merchant-refresh-icon {
+  animation: merchant-spin 0.9s linear infinite;
+}
+
+@keyframes merchant-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.merchant-status {
+  padding: 12rpx 4rpx 4rpx;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.merchant-status-error {
+  color: #ffd6d6;
+}
+
+.merchant-scroll {
+  white-space: nowrap;
+}
+
+.merchant-list {
+  display: inline-flex;
+  align-items: stretch;
+  gap: 10rpx;
+  padding: 2rpx 0;
+}
+
+.merchant-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  width: 116rpx;
+  padding: 10rpx 8rpx;
+  border-radius: 14rpx;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.merchant-item-icon-wrap {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 12rpx;
+  background: #f3f6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.merchant-item-icon {
+  width: 56rpx;
+  height: 56rpx;
+}
+
+.merchant-item-name {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #1f3460;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.merchant-item-countdown {
+  font-size: 20rpx;
+  color: #c14b4b;
+  font-variant-numeric: tabular-nums;
+}
 
 .banner-swiper {
   height: 280rpx;

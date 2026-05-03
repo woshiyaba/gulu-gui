@@ -42,3 +42,10 @@ RESONANCE_MAGIC_ICON_UPLOAD_DIR = os.getenv("RESONANCE_MAGIC_ICON_UPLOAD_DIR", "
 # 微信小程序配置
 WX_MINI_APPID = os.getenv("WX_MINI_APPID", "").strip()
 WX_MINI_SECRET = os.getenv("WX_MINI_SECRET", "").strip()
+
+# 远行商人接口
+MERCHANT_API_URL = os.getenv(
+    "MERCHANT_API_URL",
+    "https://wegame.shallow.ink/api/v1/games/rocom/merchant/info",
+).strip()
+MERCHANT_API_KEY = os.getenv("MERCHANT_API_KEY", "").strip()
