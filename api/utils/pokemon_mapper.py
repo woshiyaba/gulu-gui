@@ -29,6 +29,7 @@ def to_attribute_item(row: dict) -> dict:
 
 def to_pokemon_list_item(row: dict) -> dict:
     return {
+        "id": row["id"],
         "no": row["no"],
         "name": row["name"],
         "image_url": build_friend_image_url(row.get("image_lc", ""), row.get("image", "")),
@@ -58,6 +59,7 @@ def to_skill_item(row: dict) -> dict:
 def to_pokemon_detail(base: dict, detail: dict, skills_raw: list[dict]) -> dict:
     """把基础信息、详情、技能拼成详情接口响应。"""
     return {
+        "id": base["id"],
         "no": base["no"],
         "name": base["name"],
         "image_url": build_friend_image_url(base.get("image_lc", ""), base.get("image", "")),

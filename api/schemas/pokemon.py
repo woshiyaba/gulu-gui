@@ -15,6 +15,7 @@ class CategoryItem(BaseModel):
 
 
 class PokemonListItem(BaseModel):
+    id: int
     no: str
     name: str
     image_url: str

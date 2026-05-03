@@ -199,6 +199,40 @@ export function submitBattlePk(payload: BattlePkRequest) {
   })
 }
 
+export interface AiPkSubmitRequest extends BattlePkRequest {
+  user_id: string
+}
+
+export interface AiPkSubmitResponse {
+  task_id: string
+}
+
+export interface AiPkTaskStatusResponse {
+  task_id: string
+  user_id: string
+  status: 'pending' | 'running' | 'completed' | 'failed' | string
+  result: BattlePkResponse | null
+  error: string
+  created_at: string | null
+  updated_at: string | null
+}
+
+export function submitAiPkBattle(payload: AiPkSubmitRequest) {
+  return request<AiPkSubmitResponse>({
+    url: '/api/ai-pk/battle-pk',
+    method: 'POST',
+    data: payload,
+    timeout: 30000,
+  })
+}
+
+export function fetchAiPkTask(taskId: string) {
+  return request<AiPkTaskStatusResponse>({
+    url: `/api/ai-pk/tasks/${encodeURIComponent(taskId)}`,
+    timeout: 30000,
+  })
+}
+
 export interface MerchantProduct {
   name: string
   icon_url: string

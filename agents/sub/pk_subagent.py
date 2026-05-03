@@ -8,12 +8,14 @@
 
 from __future__ import annotations
 
+import asyncio
 import json
 import re
 from typing import Any
 from uuid import uuid4
 
 from agents.tools.api_tool import call_api
+from common.utils.json_parser import extract_json_object
 from common.utils.llm_utils import (
     DEFAULT_SKILLS_DIR,
     PROJECT_ROOT,
@@ -21,6 +23,7 @@ from common.utils.llm_utils import (
     create_app_deep_agent,
     create_chat_model,
 )
+from common.utils.writer import stream_agent_collect
 
 # ---------------------------------------------------------------------------
 # 1) 聊天场景使用的子智能体（保持原行为，文本输出）
@@ -89,7 +92,6 @@ BATTLE_ANALYZER_PROMPT = """你是洛克王国世界的顶级阵容 PK 分析师
 2. 最终输出控制在 800 字以内，适合前端直接展示。
 3. 不要输出 Markdown 表格，不要返回 JSON，不要编造未提供的具体数值。"""
 
-
 battle_analyzer = {
     "name": "battle-analyzer",
     "description": (
@@ -100,7 +102,6 @@ battle_analyzer = {
     "skills": ["/skills/pokemon-guide/"],
     "model": create_chat_model(),
 }
-
 
 # ---------------------------------------------------------------------------
 # 2) 独立 PK Agent（后端 PK 接口直接调用，结构化 JSON 输出）
@@ -294,10 +295,10 @@ def _parse_json(text: str) -> dict:
 
 
 def analyze_battle(
-    team_a: dict,
-    team_b: dict,
-    *,
-    thread_id: str | None = None,
+        team_a: dict,
+        team_b: dict,
+        *,
+        thread_id: str | None = None,
 ) -> dict:
     """同步入口：传两套阵容，返回结构化对战分析。
 
@@ -314,8 +315,8 @@ def analyze_battle(
 
     payload = {"team_a": _slim(team_a), "team_b": _slim(team_b)}
     user_msg = (
-        "请按系统提示分析以下两套阵容并输出严格 JSON：\n"
-        + json.dumps(payload, ensure_ascii=False)
+            "请按系统提示分析以下两套阵容并输出严格 JSON：\n"
+            + json.dumps(payload, ensure_ascii=False)
     )
 
     agent = _get_battle_pk_agent()
@@ -332,6 +333,73 @@ def analyze_battle(
         return {"error": f"解析模型输出失败: {exc}", "raw": raw}
 
 
+async def analyze_battle2(
+        team_a: dict,
+        team_b: dict,
+        *,
+        thread_id: str | None = None,
+) -> dict:
+    """同步入口：传两套阵容，返回结构化对战分析。
+
+    Args:
+        team_a / team_b: 队伍 JSON，结构与 PokemonLineupDetail 对齐。
+        thread_id: 可选，传入则复用对话上下文（后端一般每次新建即可）。
+
+    Returns:
+        与 BATTLE_PK_PROMPT 中约定的 JSON 结构一致的 dict；
+        解析失败时返回 {"error": "...", "raw": "..."}，由上层兜底。
+    """
+    if not isinstance(team_a, dict) or not isinstance(team_b, dict):
+        raise TypeError("team_a / team_b 必须是 dict")
+
+    payload = {"team_a": _slim(team_a), "team_b": _slim(team_b)}
+    user_msg = (
+            "请按系统提示分析以下两套阵容并输出严格 JSON：\n"
+            + json.dumps(payload, ensure_ascii=False)
+    )
+
+    agent = _get_battle_pk_agent()
+    result = await stream_agent_collect(agent, user_msg, thread_id=thread_id or uuid4().hex, node_name="pk")
+    return extract_json_object(result)
+
+
+async def stream_analyze_battle(
+        team_a: dict,
+        team_b: dict,
+        *,
+        user_id: str,
+        task_id: str,
+        thread_id: str | None = None,
+) -> tuple[dict, str]:
+    """流式入口：传两套阵容 + user_id + task_id，过程中通过 ws 推送 token，
+    最终返回 (parsed_dict, raw_text)。
+
+    解析失败时返回 ({"error": "...", "raw": raw}, raw)，由调用方决定如何持久化。
+    """
+    if not isinstance(team_a, dict) or not isinstance(team_b, dict):
+        raise TypeError("team_a / team_b 必须是 dict")
+
+    payload = {"team_a": _slim(team_a), "team_b": _slim(team_b)}
+    user_msg = (
+            "请按系统提示分析以下两套阵容并输出严格 JSON：\n"
+            + json.dumps(payload, ensure_ascii=False)
+    )
+
+    agent = _get_battle_pk_agent()
+    raw = await stream_agent_collect(
+        agent,
+        user_msg,
+        thread_id=thread_id or uuid4().hex,
+        node_name="pk",
+        user_id=user_id,
+        task_id=task_id,
+    )
+    try:
+        return extract_json_object(raw), raw
+    except Exception as exc:
+        return {"error": f"解析模型输出失败: {exc}", "raw": raw}, raw
+
+
 # ---------------------------------------------------------------------------
 # 3) CLI 自测：python -m agents.sub.pk_subagent path/to/pk_input.json
 # ---------------------------------------------------------------------------
@@ -339,16 +407,566 @@ def analyze_battle(
 def _cli() -> None:
     import sys
     from pathlib import Path
-
-    if len(sys.argv) < 2:
-        print("用法: python -m agents.sub.pk_subagent <pk_input.json>")
-        print('文件格式: {"team_a": {...}, "team_b": {...}}')
-        sys.exit(1)
-
-    data = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+    msg = """
+{
+    "team_a": {
+        "title": "^虫^且^队",
+        "lineup_desc": "BY^：^哔^哩^哔^哩^：^俱^心^哀^意",
+        "source_type": "user_pk",
+        "resonance_magic_id": 2,
+        "resonance_magic_name": "^进^化^之^力",
+        "members": [
+            {
+                "pokemon_id": 289,
+                "pokemon_name": "^铠^甲^虫",
+                "sort_order": 1,
+                "bloodline_dict_id": 47,
+                "bloodline_label": "^翼",
+                "personality_id": 13,
+                "personality_name_zh": "^害^羞",
+                "qual_1": "hp",
+                "qual_2": "phy_def",
+                "qual_3": "mag_def",
+                "skill_1_id": null,
+                "skill_1_name": "^飞^断",
+                "skill_2_id": null,
+                "skill_2_name": "^虫^结^阵",
+                "skill_3_id": null,
+                "skill_3_name": "^吓^退",
+                "skill_4_id": null,
+                "skill_4_name": "^啃^咬",
+                "member_desc": ""
+            },
+            {
+                "pokemon_id": 303,
+                "pokemon_name": "^食^尘^短^绒",
+                "sort_order": 2,
+                "bloodline_dict_id": 47,
+                "bloodline_label": "^翼",
+                "personality_id": 9,
+                "personality_name_zh": "^平^和",
+                "qual_1": "hp",
+                "qual_2": "phy_def",
+                "qual_3": "spd",
+                "skill_1_id": null,
+                "skill_1_name": "^地^刺",
+                "skill_2_id": null,
+                "skill_2_name": "^虫^结^阵",
+                "skill_3_id": null,
+                "skill_3_name": "^飞^断",
+                "skill_4_id": null,
+                "skill_4_name": "^虫^群^过^境",
+                "member_desc": ""
+            },
+            {
+                "pokemon_id": 324,
+                "pokemon_name": "^陨^星^虫",
+                "sort_order": 3,
+                "bloodline_dict_id": 47,
+                "bloodline_label": "^翼",
+                "personality_id": 2,
+                "personality_name_zh": "^开^朗",
+                "qual_1": "hp",
+                "qual_2": "phy_atk",
+                "qual_3": "spd",
+                "skill_1_id": null,
+                "skill_1_name": "^虫^群",
+                "skill_2_id": null,
+                "skill_2_name": "^吓^退",
+                "skill_3_id": null,
+                "skill_3_name": "^羽^翼^庇^护",
+                "skill_4_id": null,
+                "skill_4_name": "^假^寐",
+                "member_desc": ""
+            },
+            {
+                "pokemon_id": 106,
+                "pokemon_name": "^花^衣^蝶",
+                "sort_order": 4,
+                "bloodline_dict_id": 37,
+                "bloodline_label": "^火",
+                "personality_id": 9,
+                "personality_name_zh": "^平^和",
+                "qual_1": "hp",
+                "qual_2": "phy_def",
+                "qual_3": "mag_def",
+                "skill_1_id": null,
+                "skill_1_name": "^虫^群^智^慧",
+                "skill_2_id": null,
+                "skill_2_name": "^虫^结^阵",
+                "skill_3_id": null,
+                "skill_3_name": "^晒^太^阳",
+                "skill_4_id": null,
+                "skill_4_name": "^虫^群",
+                "member_desc": ""
+            },
+            {
+                "pokemon_id": 39,
+                "pokemon_name": "^化^蝶^（^平^常^的^样^子^）",
+                "sort_order": 5,
+                "bloodline_dict_id": 44,
+                "bloodline_label": "^毒",
+                "personality_id": 29,
+                "personality_name_zh": "^聪^明",
+                "qual_1": "mag_atk",
+                "qual_2": "mag_def",
+                "qual_3": "spd",
+                "skill_1_id": null,
+                "skill_1_name": "^破^罐^破^摔",
+                "skill_2_id": null,
+                "skill_2_name": "^毒^孢^子",
+                "skill_3_id": null,
+                "skill_3_name": "^晒^太^阳",
+                "skill_4_id": null,
+                "skill_4_name": "^棘^刺",
+                "member_desc": ""
+            },
+            {
+                "pokemon_id": 89,
+                "pokemon_name": "^花^魁^蜂^后",
+                "sort_order": 6,
+                "bloodline_dict_id": 53,
+                "bloodline_label": "^首^领",
+                "personality_id": 2,
+                "personality_name_zh": "^开^朗",
+                "qual_1": "hp",
+                "qual_2": "phy_atk",
+                "qual_3": "spd",
+                "skill_1_id": null,
+                "skill_1_name": "^热^身^运^动",
+                "skill_2_id": null,
+                "skill_2_name": "^虫^群",
+                "skill_3_id": null,
+                "skill_3_name": "^有^效^预^防",
+                "skill_4_id": null,
+                "skill_4_name": "^快^速^移^动",
+                "member_desc": ""
+            }
+        ]
+    },
+    "team_b": {
+        "title": "^火^神^圣^剑^队",
+        "lineup_desc": "",
+        "source_type": "user_pk",
+        "resonance_magic_id": 2,
+        "resonance_magic_name": "^进^化^之^力",
+        "members": [
+            {
+                "pokemon_id": 7,
+                "pokemon_name": "^火^神",
+                "sort_order": 1,
+                "bloodline_dict_id": 53,
+                "bloodline_label": "^首^领",
+                "personality_id": 2,
+                "personality_name_zh": "^开^朗",
+                "qual_1": "hp",
+                "qual_2": "phy_atk",
+                "qual_3": "spd",
+                "skill_1_id": null,
+                "skill_1_name": "^吹^火",
+                "skill_2_id": null,
+                "skill_2_name": "^暗^突^袭",
+                "skill_3_id": null,
+                "skill_3_name": "^火^云^车",
+                "skill_4_id": null,
+                "skill_4_name": "^山^火",
+                "member_desc": ""
+            },
+            {
+                "pokemon_id": 157,
+                "pokemon_name": "^圣^羽^翼^王",
+                "sort_order": 2,
+                "bloodline_dict_id": 41,
+                "bloodline_label": "^冰",
+                "personality_id": 2,
+                "personality_name_zh": "^开^朗",
+                "qual_1": "spd",
+                "qual_2": "phy_atk",
+                "qual_3": "hp",
+                "skill_1_id": null,
+                "skill_1_name": "^水^刃",
+                "skill_2_id": null,
+                "skill_2_name": "^闪^击",
+                "skill_3_id": null,
+                "skill_3_name": "^力^量^增^效",
+                "skill_4_id": null,
+                "skill_4_name": "^光^之^矛",
+                "member_desc": ""
+            },
+            {
+                "pokemon_id": 295,
+                "pokemon_name": "^寂^灭^骨^龙",
+                "sort_order": 3,
+                "bloodline_dict_id": 37,
+                "bloodline_label": "^火",
+                "personality_id": 1,
+                "personality_name_zh": "^固^执",
+                "qual_1": "hp",
+                "qual_2": "phy_atk",
+                "qual_3": "spd",
+                "skill_1_id": null,
+                "skill_1_name": "^电^弧",
+                "skill_2_id": null,
+                "skill_2_name": "^隼^鳞",
+                "skill_3_id": null,
+                "skill_3_name": "^吓^退",
+                "skill_4_id": null,
+                "skill_4_name": "^幻^象",
+                "member_desc": ""
+            },
+            {
+                "pokemon_id": 267,
+                "pokemon_name": "^帕^帕^斯^卡",
+                "sort_order": 4,
+                "bloodline_dict_id": 43,
+                "bloodline_label": "^电",
+                "personality_id": 1,
+                "personality_name_zh": "^固^执",
+                "qual_1": "hp",
+                "qual_2": "phy_atk",
+                "qual_3": "spd",
+                "skill_1_id": null,
+                "skill_1_name": "^钢^铁^洪^流",
+                "skill_2_id": null,
+                "skill_2_name": "^轴^承^支^撑",
+                "skill_3_id": null,
+                "skill_3_name": "^超^级^糖^果",
+                "skill_4_id": null,
+                "skill_4_name": "^倾^泻",
+                "member_desc": ""
+            },
+            {
+                "pokemon_id": 362,
+                "pokemon_name": "^岚^鸟^（^春^天^的^样^子^）",
+                "sort_order": 5,
+                "bloodline_dict_id": 41,
+                "bloodline_label": "^冰",
+                "personality_id": 2,
+                "personality_name_zh": "^开^朗",
+                "qual_1": "hp",
+                "qual_2": "phy_def",
+                "qual_3": "spd",
+                "skill_1_id": null,
+                "skill_1_name": "^龙^卷^风",
+                "skill_2_id": null,
+                "skill_2_name": "^水^刃",
+                "skill_3_id": null,
+                "skill_3_name": "^冰^爪",
+                "skill_4_id": null,
+                "skill_4_name": "^筛^管^奔^流",
+                "member_desc": ""
+            },
+            {
+                "pokemon_id": 291,
+                "pokemon_name": "^圣^剑-X",
+                "sort_order": 6,
+                "bloodline_dict_id": 53,
+                "bloodline_label": "^首^领",
+                "personality_id": 1,
+                "personality_name_zh": "^固^执",
+                "qual_1": "hp",
+                "qual_2": "phy_atk",
+                "qual_3": "mag_def",
+                "skill_1_id": null,
+                "skill_1_name": "^轴^承^支^撑",
+                "skill_2_id": null,
+                "skill_2_name": "^齿^轮^扭^矩",
+                "skill_3_id": null,
+                "skill_3_name": "^齿^轮^切^开",
+                "skill_4_id": null,
+                "skill_4_name": "^啮^合^传^递",
+                "member_desc": ""
+            }
+        ]
+    }
+}
+"""
+    data = json.loads(msg)
     output = analyze_battle(data["team_a"], data["team_b"])
     print(json.dumps(output, ensure_ascii=False, indent=2))
 
 
+async def _cli2():
+    import sys
+    from pathlib import Path
+    msg = """
+    {
+        "team_a": {
+            "title": "^虫^且^队",
+            "lineup_desc": "BY^：^哔^哩^哔^哩^：^俱^心^哀^意",
+            "source_type": "user_pk",
+            "resonance_magic_id": 2,
+            "resonance_magic_name": "^进^化^之^力",
+            "members": [
+                {
+                    "pokemon_id": 289,
+                    "pokemon_name": "^铠^甲^虫",
+                    "sort_order": 1,
+                    "bloodline_dict_id": 47,
+                    "bloodline_label": "^翼",
+                    "personality_id": 13,
+                    "personality_name_zh": "^害^羞",
+                    "qual_1": "hp",
+                    "qual_2": "phy_def",
+                    "qual_3": "mag_def",
+                    "skill_1_id": null,
+                    "skill_1_name": "^飞^断",
+                    "skill_2_id": null,
+                    "skill_2_name": "^虫^结^阵",
+                    "skill_3_id": null,
+                    "skill_3_name": "^吓^退",
+                    "skill_4_id": null,
+                    "skill_4_name": "^啃^咬",
+                    "member_desc": ""
+                },
+                {
+                    "pokemon_id": 303,
+                    "pokemon_name": "^食^尘^短^绒",
+                    "sort_order": 2,
+                    "bloodline_dict_id": 47,
+                    "bloodline_label": "^翼",
+                    "personality_id": 9,
+                    "personality_name_zh": "^平^和",
+                    "qual_1": "hp",
+                    "qual_2": "phy_def",
+                    "qual_3": "spd",
+                    "skill_1_id": null,
+                    "skill_1_name": "^地^刺",
+                    "skill_2_id": null,
+                    "skill_2_name": "^虫^结^阵",
+                    "skill_3_id": null,
+                    "skill_3_name": "^飞^断",
+                    "skill_4_id": null,
+                    "skill_4_name": "^虫^群^过^境",
+                    "member_desc": ""
+                },
+                {
+                    "pokemon_id": 324,
+                    "pokemon_name": "^陨^星^虫",
+                    "sort_order": 3,
+                    "bloodline_dict_id": 47,
+                    "bloodline_label": "^翼",
+                    "personality_id": 2,
+                    "personality_name_zh": "^开^朗",
+                    "qual_1": "hp",
+                    "qual_2": "phy_atk",
+                    "qual_3": "spd",
+                    "skill_1_id": null,
+                    "skill_1_name": "^虫^群",
+                    "skill_2_id": null,
+                    "skill_2_name": "^吓^退",
+                    "skill_3_id": null,
+                    "skill_3_name": "^羽^翼^庇^护",
+                    "skill_4_id": null,
+                    "skill_4_name": "^假^寐",
+                    "member_desc": ""
+                },
+                {
+                    "pokemon_id": 106,
+                    "pokemon_name": "^花^衣^蝶",
+                    "sort_order": 4,
+                    "bloodline_dict_id": 37,
+                    "bloodline_label": "^火",
+                    "personality_id": 9,
+                    "personality_name_zh": "^平^和",
+                    "qual_1": "hp",
+                    "qual_2": "phy_def",
+                    "qual_3": "mag_def",
+                    "skill_1_id": null,
+                    "skill_1_name": "^虫^群^智^慧",
+                    "skill_2_id": null,
+                    "skill_2_name": "^虫^结^阵",
+                    "skill_3_id": null,
+                    "skill_3_name": "^晒^太^阳",
+                    "skill_4_id": null,
+                    "skill_4_name": "^虫^群",
+                    "member_desc": ""
+                },
+                {
+                    "pokemon_id": 39,
+                    "pokemon_name": "^化^蝶^（^平^常^的^样^子^）",
+                    "sort_order": 5,
+                    "bloodline_dict_id": 44,
+                    "bloodline_label": "^毒",
+                    "personality_id": 29,
+                    "personality_name_zh": "^聪^明",
+                    "qual_1": "mag_atk",
+                    "qual_2": "mag_def",
+                    "qual_3": "spd",
+                    "skill_1_id": null,
+                    "skill_1_name": "^破^罐^破^摔",
+                    "skill_2_id": null,
+                    "skill_2_name": "^毒^孢^子",
+                    "skill_3_id": null,
+                    "skill_3_name": "^晒^太^阳",
+                    "skill_4_id": null,
+                    "skill_4_name": "^棘^刺",
+                    "member_desc": ""
+                },
+                {
+                    "pokemon_id": 89,
+                    "pokemon_name": "^花^魁^蜂^后",
+                    "sort_order": 6,
+                    "bloodline_dict_id": 53,
+                    "bloodline_label": "^首^领",
+                    "personality_id": 2,
+                    "personality_name_zh": "^开^朗",
+                    "qual_1": "hp",
+                    "qual_2": "phy_atk",
+                    "qual_3": "spd",
+                    "skill_1_id": null,
+                    "skill_1_name": "^热^身^运^动",
+                    "skill_2_id": null,
+                    "skill_2_name": "^虫^群",
+                    "skill_3_id": null,
+                    "skill_3_name": "^有^效^预^防",
+                    "skill_4_id": null,
+                    "skill_4_name": "^快^速^移^动",
+                    "member_desc": ""
+                }
+            ]
+        },
+        "team_b": {
+            "title": "^火^神^圣^剑^队",
+            "lineup_desc": "",
+            "source_type": "user_pk",
+            "resonance_magic_id": 2,
+            "resonance_magic_name": "^进^化^之^力",
+            "members": [
+                {
+                    "pokemon_id": 7,
+                    "pokemon_name": "^火^神",
+                    "sort_order": 1,
+                    "bloodline_dict_id": 53,
+                    "bloodline_label": "^首^领",
+                    "personality_id": 2,
+                    "personality_name_zh": "^开^朗",
+                    "qual_1": "hp",
+                    "qual_2": "phy_atk",
+                    "qual_3": "spd",
+                    "skill_1_id": null,
+                    "skill_1_name": "^吹^火",
+                    "skill_2_id": null,
+                    "skill_2_name": "^暗^突^袭",
+                    "skill_3_id": null,
+                    "skill_3_name": "^火^云^车",
+                    "skill_4_id": null,
+                    "skill_4_name": "^山^火",
+                    "member_desc": ""
+                },
+                {
+                    "pokemon_id": 157,
+                    "pokemon_name": "^圣^羽^翼^王",
+                    "sort_order": 2,
+                    "bloodline_dict_id": 41,
+                    "bloodline_label": "^冰",
+                    "personality_id": 2,
+                    "personality_name_zh": "^开^朗",
+                    "qual_1": "spd",
+                    "qual_2": "phy_atk",
+                    "qual_3": "hp",
+                    "skill_1_id": null,
+                    "skill_1_name": "^水^刃",
+                    "skill_2_id": null,
+                    "skill_2_name": "^闪^击",
+                    "skill_3_id": null,
+                    "skill_3_name": "^力^量^增^效",
+                    "skill_4_id": null,
+                    "skill_4_name": "^光^之^矛",
+                    "member_desc": ""
+                },
+                {
+                    "pokemon_id": 295,
+                    "pokemon_name": "^寂^灭^骨^龙",
+                    "sort_order": 3,
+                    "bloodline_dict_id": 37,
+                    "bloodline_label": "^火",
+                    "personality_id": 1,
+                    "personality_name_zh": "^固^执",
+                    "qual_1": "hp",
+                    "qual_2": "phy_atk",
+                    "qual_3": "spd",
+                    "skill_1_id": null,
+                    "skill_1_name": "^电^弧",
+                    "skill_2_id": null,
+                    "skill_2_name": "^隼^鳞",
+                    "skill_3_id": null,
+                    "skill_3_name": "^吓^退",
+                    "skill_4_id": null,
+                    "skill_4_name": "^幻^象",
+                    "member_desc": ""
+                },
+                {
+                    "pokemon_id": 267,
+                    "pokemon_name": "^帕^帕^斯^卡",
+                    "sort_order": 4,
+                    "bloodline_dict_id": 43,
+                    "bloodline_label": "^电",
+                    "personality_id": 1,
+                    "personality_name_zh": "^固^执",
+                    "qual_1": "hp",
+                    "qual_2": "phy_atk",
+                    "qual_3": "spd",
+                    "skill_1_id": null,
+                    "skill_1_name": "^钢^铁^洪^流",
+                    "skill_2_id": null,
+                    "skill_2_name": "^轴^承^支^撑",
+                    "skill_3_id": null,
+                    "skill_3_name": "^超^级^糖^果",
+                    "skill_4_id": null,
+                    "skill_4_name": "^倾^泻",
+                    "member_desc": ""
+                },
+                {
+                    "pokemon_id": 362,
+                    "pokemon_name": "^岚^鸟^（^春^天^的^样^子^）",
+                    "sort_order": 5,
+                    "bloodline_dict_id": 41,
+                    "bloodline_label": "^冰",
+                    "personality_id": 2,
+                    "personality_name_zh": "^开^朗",
+                    "qual_1": "hp",
+                    "qual_2": "phy_def",
+                    "qual_3": "spd",
+                    "skill_1_id": null,
+                    "skill_1_name": "^龙^卷^风",
+                    "skill_2_id": null,
+                    "skill_2_name": "^水^刃",
+                    "skill_3_id": null,
+                    "skill_3_name": "^冰^爪",
+                    "skill_4_id": null,
+                    "skill_4_name": "^筛^管^奔^流",
+                    "member_desc": ""
+                },
+                {
+                    "pokemon_id": 291,
+                    "pokemon_name": "^圣^剑-X",
+                    "sort_order": 6,
+                    "bloodline_dict_id": 53,
+                    "bloodline_label": "^首^领",
+                    "personality_id": 1,
+                    "personality_name_zh": "^固^执",
+                    "qual_1": "hp",
+                    "qual_2": "phy_atk",
+                    "qual_3": "mag_def",
+                    "skill_1_id": null,
+                    "skill_1_name": "^轴^承^支^撑",
+                    "skill_2_id": null,
+                    "skill_2_name": "^齿^轮^扭^矩",
+                    "skill_3_id": null,
+                    "skill_3_name": "^齿^轮^切^开",
+                    "skill_4_id": null,
+                    "skill_4_name": "^啮^合^传^递",
+                    "member_desc": ""
+                }
+            ]
+        }
+    }
+    """
+    data = json.loads(msg)
+    output = await analyze_battle2(data["team_a"], data["team_b"])
+    print(json.dumps(output, ensure_ascii=False, indent=2))
+
+
 if __name__ == "__main__":
-    _cli()
+    asyncio.run(_cli2())

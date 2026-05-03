@@ -27,3 +27,17 @@ async def websocket_endpoint(websocket: WebSocket):
             await handle_qq_message(data)
     except WebSocketDisconnect:
         manager.disconnect("napcat-qq", websocket)
+
+
+@router.websocket("/ws/{user_id}")
+async def websocket_user_endpoint(websocket: WebSocket, user_id: str):
+    """前端用户 WebSocket：以 user_id 为键注册连接，接收后端流式事件。
+
+    前端目前只读不写；保持 receive 循环以维护连接，收到的内容暂时忽略。
+    """
+    await manager.connect(user_id=user_id, websocket=websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(user_id, websocket)

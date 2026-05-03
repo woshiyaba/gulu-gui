@@ -4,6 +4,7 @@ export interface Attribute {
 }
 
 export interface Pokemon {
+  id: number
   no: string
   name: string
   image_url: string

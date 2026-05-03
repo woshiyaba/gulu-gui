@@ -367,7 +367,7 @@ onUnload(() => {
     <view v-else class="pokemon-grid">
       <PokemonCard
         v-for="pokemon in pokemons"
-        :key="pokemon.no || pokemon.name"
+        :key="pokemon.id"
         :pokemon="pokemon"
         @select="navigateToDetail"
       />

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
-import { onLoad } from '@dcloudio/uni-app'
+import { computed, nextTick, onBeforeUnmount, reactive, ref } from 'vue'
+import { onLoad, onUnload } from '@dcloudio/uni-app'
 import {
+  fetchAiPkTask,
   fetchAttributes,
   fetchBattlePkRandomPokemonModes,
   fetchBloodlines,
@@ -11,8 +12,10 @@ import {
   fetchPokemonDetail,
   fetchResonanceMagics,
   fetchSkills,
-  submitBattlePk,
+  submitAiPkBattle,
 } from '@/api/pokemon'
+import { getStoredUserId } from '@/utils/auth'
+import { connectPkStream, type PkStreamConnection } from '@/utils/ws'
 import type {
   Attribute,
   BattlePkMember,
@@ -660,6 +663,125 @@ function validate(): string {
   return ''
 }
 
+// ── 流式 PK 状态 ────────────────────────────────────
+const thinkingActive = ref(false)
+const thinkingCollapsed = ref(false)
+const thinkingText = ref('')
+const thinkingStatus = ref<'idle' | 'connecting' | 'streaming' | 'finalizing' | 'done' | 'error'>('idle')
+const thinkingScrollTop = ref(0)
+const currentTaskId = ref('')
+
+let pkStream: PkStreamConnection | null = null
+let pendingResolve: (() => void) | null = null
+let pendingReject: ((err: Error) => void) | null = null
+
+// 流式渲染缓冲：避免每个 token 都触发响应式更新，小程序渲染卡顿
+const FLUSH_INTERVAL_MS = 200
+const FLUSH_BYTE_THRESHOLD = 80
+let chunkBuffer = ''
+let flushTimer: ReturnType<typeof setTimeout> | null = null
+
+function flushChunkBuffer() {
+  if (flushTimer) {
+    clearTimeout(flushTimer)
+    flushTimer = null
+  }
+  if (!chunkBuffer) return
+  thinkingText.value += chunkBuffer
+  chunkBuffer = ''
+  nextTick(() => {
+    thinkingScrollTop.value = 1_000_000 + Math.random()
+  })
+}
+
+function scheduleChunkFlush() {
+  if (flushTimer) return
+  flushTimer = setTimeout(() => {
+    flushTimer = null
+    flushChunkBuffer()
+  }, FLUSH_INTERVAL_MS)
+}
+
+function appendChunk(chunk: string) {
+  if (!chunk) return
+  chunkBuffer += chunk
+  if (chunkBuffer.length >= FLUSH_BYTE_THRESHOLD) {
+    flushChunkBuffer()
+  } else {
+    scheduleChunkFlush()
+  }
+}
+
+function clearChunkBuffer() {
+  if (flushTimer) {
+    clearTimeout(flushTimer)
+    flushTimer = null
+  }
+  chunkBuffer = ''
+}
+
+function teardownStream(closeSocket = true) {
+  pendingResolve = null
+  pendingReject = null
+  clearChunkBuffer()
+  if (closeSocket && pkStream) {
+    pkStream.close()
+    pkStream = null
+  }
+}
+
+function settleStream(err: Error | null) {
+  const resolve = pendingResolve
+  const reject = pendingReject
+  pendingResolve = null
+  pendingReject = null
+  if (err) {
+    reject?.(err)
+    return
+  }
+  resolve?.()
+}
+
+function ensureStream(userId: string): PkStreamConnection {
+  if (pkStream) return pkStream
+  pkStream = connectPkStream(userId, {
+    onStart: () => {
+      thinkingStatus.value = 'streaming'
+    },
+    onChunk: (chunk, ev) => {
+      if (ev.task_id && ev.task_id !== currentTaskId.value) return
+      appendChunk(chunk)
+    },
+    onEnd: (ev) => {
+      if (ev.task_id && ev.task_id !== currentTaskId.value) return
+      // 流式 token 已结束，把缓冲里没刷出去的内容补上，再转入"整理中"状态
+      flushChunkBuffer()
+      thinkingStatus.value = 'finalizing'
+    },
+    onDone: (_rawResult, ev) => {
+      if (ev.task_id && ev.task_id !== currentTaskId.value) return
+      flushChunkBuffer()
+      // done 事件只作为"任务已结束"信号，结果统一走 REST 接口拉
+      settleStream(null)
+    },
+    onError: (msg, ev) => {
+      if (ev.task_id && ev.task_id !== currentTaskId.value) return
+      flushChunkBuffer()
+      thinkingStatus.value = 'error'
+      settleStream(new Error(msg))
+    },
+    onClose: () => {
+      pkStream = null
+      if (pendingReject) {
+        flushChunkBuffer()
+        thinkingStatus.value = 'error'
+        settleStream(new Error('WebSocket 已断开'))
+      }
+    },
+  })
+  return pkStream
+}
+
 async function runBattle() {
   if (submitting.value) return
   const message = validate()
@@ -668,24 +790,81 @@ async function runBattle() {
     uni.showToast({ title: message, icon: 'none' })
     return
   }
+
+  const userId = getStoredUserId()
+  if (!userId) {
+    const msg = '尚未登录，无法启动模拟分析'
+    error.value = msg
+    uni.showToast({ title: msg, icon: 'none' })
+    return
+  }
+
   submitting.value = true
   error.value = ''
   result.value = null
-  uni.showLoading({ title: '正在模拟对战...', mask: true })
+  thinkingActive.value = true
+  thinkingCollapsed.value = false
+  thinkingText.value = ''
+  thinkingStatus.value = 'connecting'
+  currentTaskId.value = ''
+
   try {
-    const data = await submitBattlePk({
+    const stream = ensureStream(userId)
+    await stream.whenOpen
+
+    const finished = new Promise<void>((resolve, reject) => {
+      pendingResolve = resolve
+      pendingReject = reject
+    })
+
+    const submitResp = await submitAiPkBattle({
+      user_id: userId,
       team_a: toPayload(teamA),
       team_b: toPayload(teamB),
     })
+    currentTaskId.value = submitResp.task_id
+
+    uni.pageScrollTo({ selector: '.thinking-card', duration: 200 })
+
+    // 等流式 done 事件 / 出错；任意情况下都走 REST 拉最终结果
+    let streamErr: Error | null = null
+    try {
+      await finished
+    } catch (e) {
+      streamErr = e instanceof Error ? e : new Error(String(e))
+    }
+
+    let data: BattlePkResponse
+    try {
+      data = await fetchTaskWhenReady(submitResp.task_id)
+    } catch (fetchErr) {
+      throw streamErr || fetchErr
+    }
+
     result.value = data
+    thinkingStatus.value = 'done'
+    thinkingCollapsed.value = true
     uni.pageScrollTo({ selector: '.result-card', duration: 300 })
   } catch (err) {
-    error.value = err instanceof Error ? err.message : '分析失败，请稍后重试'
+    error.value = err instanceof Error ? err.message : '模拟失败，请稍后重试'
+    thinkingStatus.value = 'error'
     uni.showToast({ title: error.value, icon: 'none' })
   } finally {
     submitting.value = false
-    uni.hideLoading()
+    pendingResolve = null
+    pendingReject = null
+    flushChunkBuffer()
   }
+}
+
+async function fetchTaskWhenReady(taskId: string, maxAttempts = 12): Promise<BattlePkResponse> {
+  for (let i = 0; i < maxAttempts; i++) {
+    const row = await fetchAiPkTask(taskId)
+    if (row.status === 'completed' && row.result) return row.result
+    if (row.status === 'failed') throw new Error(row.error || '任务失败')
+    await new Promise((r) => setTimeout(r, 400))
+  }
+  throw new Error('任务超时未完成')
 }
 
 function resetAll() {
@@ -694,7 +873,36 @@ function resetAll() {
   result.value = null
   error.value = ''
   activeTeam.value = 'A'
+  thinkingActive.value = false
+  thinkingCollapsed.value = false
+  thinkingText.value = ''
+  thinkingStatus.value = 'idle'
+  currentTaskId.value = ''
+  clearChunkBuffer()
 }
+
+function toggleThinking() {
+  thinkingCollapsed.value = !thinkingCollapsed.value
+}
+
+function statusLabel(s: string): string {
+  switch (s) {
+    case 'connecting': return '正在建立连接…'
+    case 'streaming': return '模拟中…'
+    case 'finalizing': return '整理结果中…'
+    case 'done': return '已完成'
+    case 'error': return '出错了'
+    default: return ''
+  }
+}
+
+onUnload(() => {
+  teardownStream(true)
+})
+
+onBeforeUnmount(() => {
+  teardownStream(true)
+})
 
 function winnerLabel(w: string): string {
   if (w === 'A') return '我方更优'
@@ -953,10 +1161,34 @@ onLoad(async () => {
 
     <view v-if="error" class="error-box">{{ error }}</view>
 
+    <!-- 模拟过程（流式） -->
+    <view v-if="thinkingActive" class="thinking-card">
+      <view class="thinking-header" @tap="toggleThinking">
+        <text class="thinking-title">模拟过程</text>
+        <view class="thinking-header-right">
+          <text :class="['thinking-status', `status-${thinkingStatus}`]">{{ statusLabel(thinkingStatus) }}</text>
+          <text class="thinking-toggle">{{ thinkingCollapsed ? '展开 ▾' : '收起 ▴' }}</text>
+        </view>
+      </view>
+      <scroll-view
+        v-if="!thinkingCollapsed"
+        class="thinking-stream"
+        scroll-y
+        :scroll-top="thinkingScrollTop"
+        :scroll-with-animation="false"
+      >
+        <text class="thinking-text">{{ thinkingText || '正在准备模拟…' }}</text>
+        <view
+          v-if="thinkingStatus === 'streaming' || thinkingStatus === 'connecting'"
+          class="thinking-cursor"
+        />
+      </scroll-view>
+    </view>
+
     <!-- 结果 -->
     <view v-if="result" class="result-card">
       <view v-if="result.error" class="error-box">
-        AI 输出解析失败：{{ result.error }}
+        模拟结果解析失败：{{ result.error }}
       </view>
       <template v-else>
         <view
@@ -981,7 +1213,7 @@ onLoad(async () => {
         </view>
 
         <view v-if="result.plan" class="plan-card">
-          <text class="plan-title">AI 推荐的最优出战计划</text>
+          <text class="plan-title">推荐的最优出战计划</text>
 
           <view class="plan-order plan-a">
             <text class="plan-tag a-tag">我方 最优顺序</text>
@@ -1467,6 +1699,49 @@ onLoad(async () => {
   margin-bottom: 16rpx; padding: 14rpx; border-radius: 14rpx;
   background: #fff7eb; color: #b88230; font-size: 22rpx;
 }
+
+.thinking-card {
+  margin-bottom: 24rpx; padding: 24rpx;
+  border-radius: 24rpx; background: #fff;
+  box-shadow: 0 8rpx 32rpx rgba(43, 116, 255, 0.08);
+  border: 1rpx solid #e5edfb;
+}
+.thinking-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+.thinking-header-right {
+  display: flex; align-items: center; gap: 12rpx;
+}
+.thinking-title {
+  font-size: 28rpx; font-weight: 600; color: #1f3760;
+}
+.thinking-toggle {
+  font-size: 22rpx; color: #6b7c99;
+}
+.thinking-status {
+  font-size: 22rpx; padding: 4rpx 14rpx;
+  border-radius: 20rpx; background: #ecf5ff; color: #2b74ff;
+}
+.thinking-status.status-error { background: #fef0f0; color: #c45656; }
+.thinking-status.status-done { background: #ecfaf0; color: #3aa367; }
+.thinking-status.status-finalizing { background: #fff7eb; color: #b88230; }
+.thinking-stream {
+  max-height: 540rpx; padding: 16rpx 18rpx;
+  border-radius: 18rpx; background: #f6faff;
+  border: 1rpx solid #e5edfb;
+}
+.thinking-text {
+  font-size: 24rpx; line-height: 1.7; color: #314466;
+  white-space: pre-wrap; word-break: break-all;
+}
+.thinking-cursor {
+  display: inline-block; width: 8rpx; height: 26rpx;
+  margin-left: 4rpx; vertical-align: middle;
+  background: #2b74ff; border-radius: 2rpx;
+  animation: blink 1s steps(2, start) infinite;
+}
+@keyframes blink { to { visibility: hidden; } }
 
 .result-card {
   background: #fff; border-radius: 28rpx;

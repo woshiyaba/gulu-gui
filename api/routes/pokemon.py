@@ -1,4 +1,3 @@
-import asyncio
 import json
 
 from fastapi import APIRouter, HTTPException, Query
@@ -21,8 +20,6 @@ from api.schemas.banner import BannerItem
 from api.schemas.personality import PersonalityItem
 from api.schemas.pokemon_lineup import (
     BattlePkRandomPokemonOption,
-    BattlePkRequest,
-    BattlePkResponse,
     BloodlineOption,
     PokemonLineupDetail,
     PokemonLineupPublicList,
@@ -88,19 +85,6 @@ async def get_pokemon_lineup_detail(lineup_id: int):
     if not lineup:
         raise HTTPException(status_code=404, detail="阵容不存在或未启用")
     return lineup
-
-
-@router.post("/battle-pk", response_model=BattlePkResponse)
-async def battle_pk(payload: BattlePkRequest):
-    """用户提交两套阵容，由 PK 子智能体按经典回合制规则模拟对战并返回结构化分析。"""
-    if not payload.team_a.members or not payload.team_b.members:
-        raise HTTPException(status_code=400, detail="双方阵容均需至少配置 1 只精灵")
-
-    from agents.sub.pk_subagent import analyze_battle
-
-    team_a = payload.team_a.model_dump()
-    team_b = payload.team_b.model_dump()
-    return await asyncio.to_thread(analyze_battle, team_a, team_b)
 
 
 @router.get("/bloodlines", response_model=list[BloodlineOption])

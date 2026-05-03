@@ -279,7 +279,7 @@ async def list_pokemon(
             await cur.execute(
                 f"""
                 SELECT
-                    p.no, p.name, p.image, p.image_lc, p.image_yise, p.type, p.type_name, p.form, p.form_name,
+                    p.id, p.no, p.name, p.image, p.image_lc, p.image_yise, p.type, p.type_name, p.form, p.form_name,
                     string_agg(a.name, ',' ORDER BY pa.id) AS attr_names,
                     string_agg(a.image, '|||' ORDER BY pa.id) AS attr_images,
                     (SELECT string_agg(peg.group_name, ',' ORDER BY peg.id)
@@ -437,7 +437,7 @@ async def get_pokemon_base(name: str) -> dict | None:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
-                SELECT p.no, p.name, p.image, p.image_lc, p.image_yise, p.type, p.type_name, p.form, p.form_name,
+                SELECT p.id, p.no, p.name, p.image, p.image_lc, p.image_yise, p.type, p.type_name, p.form, p.form_name,
                        string_agg(a.name, ',' ORDER BY pa.id) AS attr_names,
                        string_agg(a.image, '|||' ORDER BY pa.id) AS attr_images,
                        (SELECT string_agg(peg.group_name, ',' ORDER BY peg.id)
