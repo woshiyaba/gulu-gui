@@ -7,8 +7,12 @@ from db.connection import get_pool
 WX_AUTH_TABLES_SQL = """
 CREATE TABLE IF NOT EXISTS "user" (
     id BIGSERIAL PRIMARY KEY,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    last_login_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE "user"
+ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMP NOT NULL DEFAULT NOW();
 
 CREATE TABLE IF NOT EXISTS social_member (
     id BIGSERIAL PRIMARY KEY,
@@ -84,17 +88,24 @@ async def bind_wx_session(session_data: dict[str, Any]) -> dict[str, Any]:
             )
             bind = await cur.fetchone()
             if bind:
+                await cur.execute(
+                    """
+                    UPDATE "user"
+                    SET last_login_at = NOW()
+                    WHERE id = %s
+                    """,
+                    (bind["user_id"],),
+                )
                 await conn.commit()
                 return {
                     "user_id": bind["user_id"],
                     "social_member_id": social_member["id"],
                     "openid": social_member["openid"],
-                    "session_key": social_member["session_key"],
                     "unionid": social_member["unionid"] or "",
                     "is_new_user": False,
                 }
 
-            await cur.execute('INSERT INTO "user" DEFAULT VALUES RETURNING id')
+            await cur.execute('INSERT INTO "user" (last_login_at) VALUES (NOW()) RETURNING id')
             user = await cur.fetchone()
             await cur.execute(
                 """
@@ -109,7 +120,6 @@ async def bind_wx_session(session_data: dict[str, Any]) -> dict[str, Any]:
         "user_id": user["id"],
         "social_member_id": social_member["id"],
         "openid": social_member["openid"],
-        "session_key": social_member["session_key"],
         "unionid": social_member["unionid"] or "",
         "is_new_user": True,
     }
