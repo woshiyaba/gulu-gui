@@ -14,7 +14,9 @@
       "Bash(npx vue-tsc *)",
       "Bash(curl -s \"https://wikiroco.com/api/pokemon/categories\")",
       "Bash(curl -sI \"https://wikiroco.com/images/icon/17310030067.png\")",
-      "Bash(grep -E \"\\\\.\\(py\\)$\")"
+      "Bash(grep -E \"\\\\.\\(py\\)$\")",
+      "Bash(xargs grep *)",
+      "Bash(python -m py_compile scripts/migrate_urls_to_oss.py)"
     ]
   }
 }
