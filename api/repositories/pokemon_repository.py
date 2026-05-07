@@ -53,6 +53,7 @@ def _build_filters(
     name: str = "",
     attrs: list[str] | None = None,
     egg_groups: list[str] | None = None,
+    shiny_only: bool = False,
 ) -> tuple[str, list]:
     """构建列表查询的 WHERE 条件与参数。"""
     conditions: list[str] = []
@@ -92,6 +93,9 @@ def _build_filters(
             ")"
         )
         params.extend(egg_groups)
+
+    if shiny_only:
+        conditions.append("COALESCE(TRIM(p.image_yise), '') <> ''")
 
     where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
     return where_clause, params
@@ -245,9 +249,10 @@ async def count_pokemon(
     name: str = "",
     attrs: list[str] | None = None,
     egg_groups: list[str] | None = None,
+    shiny_only: bool = False,
 ) -> int:
     """查询符合条件的精灵总数。"""
-    where_clause, params = _build_filters(name=name, attrs=attrs, egg_groups=egg_groups)
+    where_clause, params = _build_filters(name=name, attrs=attrs, egg_groups=egg_groups, shiny_only=shiny_only)
     pool = await get_pool()
     async with pool.connection() as conn:
         async with conn.cursor() as cur:
@@ -263,13 +268,14 @@ async def list_pokemon(
     name: str = "",
     attrs: list[str] | None = None,
     egg_groups: list[str] | None = None,
+    shiny_only: bool = False,
     order_by: str = "no",
     order_dir: str = "asc",
     page: int = 1,
     page_size: int = 30,
 ) -> list[dict]:
     """分页查询精灵基础信息与属性。"""
-    where_clause, params = _build_filters(name=name, attrs=attrs, egg_groups=egg_groups)
+    where_clause, params = _build_filters(name=name, attrs=attrs, egg_groups=egg_groups, shiny_only=shiny_only)
     order_clause = _build_order_clause(order_by=order_by, order_dir=order_dir)
     offset = (page - 1) * page_size
 

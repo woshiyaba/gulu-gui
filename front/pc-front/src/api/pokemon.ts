@@ -36,6 +36,7 @@ export interface PokemonQuery {
   name?: string
   attr?: string[]
   egg_group?: string[]
+  shiny_only?: boolean
   order_by?: 'no' | 'total_stats' | 'hp' | 'atk' | 'matk' | 'def_val' | 'mdef' | 'spd'
   order_dir?: 'asc' | 'desc'
   page?: number
@@ -70,6 +71,7 @@ export function fetchPokemon(query: PokemonQuery = {}): Promise<PokemonListRespo
   if (query.name) params.append('name', query.name)
   if (query.page !== undefined) params.append('page', String(query.page))
   if (query.page_size !== undefined) params.append('page_size', String(query.page_size))
+  if (query.shiny_only) params.append('shiny_only', 'true')
   if (query.order_by) params.append('order_by', query.order_by)
   if (query.order_dir) params.append('order_dir', query.order_dir)
   for (const attr of query.attr || []) {

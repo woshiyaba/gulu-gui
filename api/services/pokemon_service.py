@@ -208,6 +208,7 @@ async def get_pokemon(
         name: str = "",
         attrs: list[str] | None = None,
         egg_groups: list[str] | None = None,
+        shiny_only: bool = False,
         order_by: str = "no",
         order_dir: str = "asc",
         page: int = 1,
@@ -219,11 +220,13 @@ async def get_pokemon(
         name=name,
         attrs=attrs,
         egg_groups=egg_groups,
+        shiny_only=shiny_only,
     )
     rows = await pokemon_repository.list_pokemon(
         name=name,
         attrs=attrs,
         egg_groups=egg_groups,
+        shiny_only=shiny_only,
         order_by=order_by,
         order_dir=order_dir,
         page=page,

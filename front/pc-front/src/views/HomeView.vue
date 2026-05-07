@@ -18,6 +18,7 @@ const error = ref('')
 const searchName = ref('')
 const selectedAttrs = ref<string[]>([])
 const selectedEggGroups = ref<string[]>([])
+const shinyOnly = ref(false)
 const selectedSortBy = ref<'no' | 'total_stats' | 'hp' | 'atk' | 'matk' | 'def_val' | 'mdef' | 'spd'>('no')
 const selectedSortDir = ref<'asc' | 'desc'>('asc')
 const currentPage = ref(1)
@@ -79,6 +80,7 @@ async function loadPokemon(reset = false) {
       name: searchName.value || undefined,
       attr: selectedAttrs.value.length ? selectedAttrs.value : undefined,
       egg_group: selectedEggGroups.value.length ? selectedEggGroups.value : undefined,
+      shiny_only: shinyOnly.value,
       order_by: selectedSortBy.value,
       order_dir: selectedSortDir.value,
       page: currentPage.value,
@@ -144,6 +146,10 @@ watch(selectedEggGroups, () => {
 })
 
 watch([selectedSortBy, selectedSortDir], () => {
+  void resetAndLoadPokemon()
+})
+
+watch(shinyOnly, () => {
   void resetAndLoadPokemon()
 })
 
@@ -219,6 +225,10 @@ onBeforeUnmount(() => {
         <span v-else-if="loading">加载中...</span>
         <span v-else>共 0 只精灵</span>
         <div class="sort-controls">
+          <label class="shiny-toggle">
+            <input v-model="shinyOnly" type="checkbox" />
+            仅筛选异色精灵
+          </label>
           <label class="sort-label" for="sort-by">排序</label>
           <select id="sort-by" v-model="selectedSortBy" class="sort-select">
             <option v-for="opt in SORT_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
@@ -374,7 +384,20 @@ onBeforeUnmount(() => {
 .sort-controls {
   display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
+}
+
+.shiny-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text);
+  font-size: 12px;
+}
+
+.shiny-toggle input {
+  margin: 0;
 }
 
 .sort-label {
