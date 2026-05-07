@@ -1,7 +1,6 @@
 from psycopg import AsyncConnection
 
 from db.connection import get_pool
-from api.utils.media import build_friend_image_url, build_image_url, build_resonance_magic_icon_url, build_skill_icon_url, build_skills_image_url
 
 
 OPS_TABLES_SQL = """
@@ -310,7 +309,7 @@ async def list_dicts(
             items = [
                 {
                     **row,
-                    "icon_url": build_resonance_magic_icon_url((row.get("icon") or "").strip()),
+                    "icon_url": (row.get("icon") or "").strip(),
                 }
                 for row in rows
             ]
@@ -445,7 +444,7 @@ async def list_pokemon_marks_for_ops(
             )
             rows = await cur.fetchall()
             items = [
-                {**row, "image_url": build_image_url((row.get("image") or "").strip())}
+                {**row, "image_url": (row.get("image") or "").strip()}
                 for row in rows
             ]
             return total, items
@@ -465,7 +464,7 @@ async def get_pokemon_mark_by_id(mark_id: int) -> dict | None:
             row = await cur.fetchone()
             if not row:
                 return None
-            row["image_url"] = build_image_url((row.get("image") or "").strip())
+            row["image_url"] = (row.get("image") or "").strip()
             return row
 
 
@@ -511,7 +510,7 @@ async def create_pokemon_mark(payload: dict) -> dict:
             )
             row = await cur.fetchone()
         await conn.commit()
-        row["image_url"] = build_image_url((row.get("image") or "").strip())
+        row["image_url"] = (row.get("image") or "").strip()
         return row
 
 
@@ -539,7 +538,7 @@ async def update_pokemon_mark(mark_id: int, payload: dict) -> dict | None:
         await conn.commit()
         if not row:
             return None
-        row["image_url"] = build_image_url((row.get("image") or "").strip())
+        row["image_url"] = (row.get("image") or "").strip()
         return row
 
 
@@ -857,7 +856,7 @@ async def list_pokemon_options_for_ops() -> dict:
                 "attributes": [{"id": row["id"], "name": row["name"]} for row in attrs],
                 "traits": [{"id": row["id"], "name": row["name"]} for row in traits],
                 "skills": [
-                    {"id": row["id"], "name": row["name"], "icon": build_image_url(row.get("icon") or "")}
+                    {"id": row["id"], "name": row["name"], "icon": row.get("icon") or ""}
                     for row in skills
                 ],
             }
@@ -1054,7 +1053,7 @@ def _skill_row_to_item(row: dict) -> dict:
         "consume": int(row.get("consume") or 0),
         "skill_desc": row.get("skill_desc") or "",
         "icon": icon,
-        "icon_url": build_skills_image_url(icon),
+        "icon_url": icon,
     }
 
 
@@ -1286,7 +1285,7 @@ def _skill_stone_row_to_item(row: dict) -> dict:
         "skill_attr": row.get("skill_attr") or "",
         "skill_type": row.get("skill_type") or "",
         "skill_icon": icon,
-        "skill_icon_url": build_skill_icon_url(icon),
+        "skill_icon_url": icon,
         "obtain_method": row.get("obtain_method") or "",
     }
 
@@ -1443,7 +1442,7 @@ async def list_available_skills_for_stone(keyword: str = "", limit: int = 30) ->
                 "attr": row.get("attr") or "",
                 "type": row.get("type") or "",
                 "icon": icon,
-                "icon_url": build_skill_icon_url(icon),
+                "icon_url": icon,
             }
         )
     return items
@@ -1497,7 +1496,7 @@ async def get_resonance_magic_for_ops(magic_id: int) -> dict | None:
                 return None
             return {
                 **row,
-                "icon_url": build_resonance_magic_icon_url((row.get("icon") or "").strip()),
+                "icon_url": (row.get("icon") or "").strip(),
             }
 
 
@@ -1534,7 +1533,7 @@ async def create_resonance_magic_for_ops(payload: dict) -> dict:
         await conn.commit()
         return {
             **row,
-            "icon_url": build_resonance_magic_icon_url((row.get("icon") or "").strip()),
+            "icon_url": (row.get("icon") or "").strip(),
         }
 
 
@@ -1564,7 +1563,7 @@ async def update_resonance_magic_for_ops(magic_id: int, payload: dict) -> dict |
             return None
         return {
             **row,
-            "icon_url": build_resonance_magic_icon_url((row.get("icon") or "").strip()),
+            "icon_url": (row.get("icon") or "").strip(),
         }
 
 
@@ -1720,7 +1719,7 @@ async def _enrich_evolution_steps(conn: AsyncConnection, steps: list[dict]) -> l
         await cur.execute(sql, names)
         rows = await cur.fetchall()
     mapping = {
-        (row.get("name") or "").strip(): build_friend_image_url(row.get("image_lc", ""), row.get("image", ""))
+        (row.get("name") or "").strip(): (row.get("image_lc") or row.get("image") or "")
         for row in rows
     }
     enriched: list[dict] = []

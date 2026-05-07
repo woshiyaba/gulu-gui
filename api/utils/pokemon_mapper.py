@@ -1,8 +1,3 @@
-from api.utils.media import (build_friend_image_url,
- build_image_url,
-  build_yise_image_url,
-  build_skills_image_url)
-
 def parse_egg_groups(egg_group_names: str | None) -> list[str]:
     """把标量子查询 GROUP_CONCAT 的蛋组字段还原成列表。"""
     if not egg_group_names:
@@ -15,7 +10,7 @@ def build_attributes(attr_names: str | None, attr_images: str | None) -> list[di
     names = attr_names.split(",") if attr_names else []
     images = attr_images.split("|||") if attr_images else []
     return [
-        {"attr_name": name, "attr_image": build_image_url(image)}
+        {"attr_name": name, "attr_image": image or ""}
         for name, image in zip(names, images)
     ]
 
@@ -23,7 +18,7 @@ def build_attributes(attr_names: str | None, attr_images: str | None) -> list[di
 def to_attribute_item(row: dict) -> dict:
     return {
         "attr_name": row["attr_name"],
-        "attr_image": build_image_url(row["attr_image"]),
+        "attr_image": row.get("attr_image") or "",
     }
 
 
@@ -32,8 +27,8 @@ def to_pokemon_list_item(row: dict) -> dict:
         "id": row["id"],
         "no": row["no"],
         "name": row["name"],
-        "image_url": build_friend_image_url(row.get("image_lc", ""), row.get("image", "")),
-        "image_yise_url": build_yise_image_url(row.get("image_yise", "")),
+        "image_url": row.get("image_lc") or row.get("image") or "",
+        "image_yise_url": row.get("image_yise") or "",
         "type": row["type"],
         "type_name": row["type_name"],
         "form": row["form"],
@@ -52,7 +47,7 @@ def to_skill_item(row: dict) -> dict:
         "source": row.get("source", ""),
         "consume": row["consume"],
         "desc": row["skill_desc"] or "",
-        "icon": build_skills_image_url(row["icon"]),
+        "icon": row.get("icon") or "",
     }
 
 
@@ -62,8 +57,8 @@ def to_pokemon_detail(base: dict, detail: dict, skills_raw: list[dict]) -> dict:
         "id": base["id"],
         "no": base["no"],
         "name": base["name"],
-        "image_url": build_friend_image_url(base.get("image_lc", ""), base.get("image", "")),
-        "image_yise_url": build_yise_image_url(base.get("image_yise", "")),
+        "image_url": base.get("image_lc") or base.get("image") or "",
+        "image_yise_url": base.get("image_yise") or "",
         "type": base["type"],
         "type_name": base["type_name"],
         "form": base["form"],

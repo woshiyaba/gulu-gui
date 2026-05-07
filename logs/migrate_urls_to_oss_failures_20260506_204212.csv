@@ -1,0 +1,2 @@
+scope,pk,raw_value,src_url,error
+pokemon_egg_icon,696,https://heyboxbj.max-c.com/game/roco_kingdom/egg/icon/93000016.png,https://heyboxbj.max-c.com/game/roco_kingdom/egg/icon/93000016.png,RuntimeError('下载远程文件失败: https://heyboxbj.max-c.com/game/roco_kingdom/egg/icon/93000016.png')

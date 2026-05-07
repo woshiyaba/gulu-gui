@@ -191,8 +191,8 @@ async function submitForm() {
     if (pendingIconFile.value) {
       try {
         const data = await uploadOpsSkillIcon(pendingIconFile.value)
-        form.icon = data.icon
-        form.icon_url = data.preview_url
+        form.icon = data.url
+        form.icon_url = data.url
         revokePendingIcon()
       } catch (err: any) {
         showOpsToast(err?.response?.data?.detail || '图标上传失败', 'error')

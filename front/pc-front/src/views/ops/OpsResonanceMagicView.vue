@@ -188,8 +188,8 @@ async function submit() {
     let icon = form.icon.trim()
     if (pendingIconFile.value) {
       const result = await uploadOpsResonanceMagicIcon(pendingIconFile.value)
-      icon = result.icon
-      form.icon_url = result.preview_url
+      icon = result.url
+      form.icon_url = result.url
     }
     const payload = {
       name: form.name.trim(),

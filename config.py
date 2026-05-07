@@ -3,15 +3,6 @@ import os
 
 load_dotenv()
 
-DB_CONFIG = {
-    "host": os.getenv("MYSQL_HOST", "localhost"),
-    "port": int(os.getenv("MYSQL_PORT", 3306)),
-    "database": os.getenv("MYSQL_DATABASE", "zlkwg_gui"),
-    "user": os.getenv("MYSQL_USER", "root"),
-    "password": os.getenv("MYSQL_PASSWORD", ""),
-    "charset": "utf8mb4",
-}
-
 PG_CONFIG = {
     "host": os.getenv("PG_HOST", "localhost"),
     "port": int(os.getenv("PG_PORT", 5432)),
@@ -22,12 +13,9 @@ PG_CONFIG = {
 
 BASE_URL = "https://rocom.game-walkthrough.com"
 
-SKILL_IMAGE_URL = "https://wikiroco.com/images/icon/skill/skill_icons_backup"
-
 STATIC_BASE_URL = os.getenv("STATIC_BASE_URL", "https://wikiroco.com")
 FRIEND_IMAGE_BASE_URL = f"{STATIC_BASE_URL}/images/friends/"
 FRIEND_IMAGE_UPLOAD_DIR = os.getenv("FRIEND_IMAGE_UPLOAD_DIR", "/var/www/images/friends").strip()
-CATEGORY_ICON_BASE_URL = f"{STATIC_BASE_URL}/images/icon"
 # 异色立绘
 YISE_IMAGE_BASE_URL = f"{STATIC_BASE_URL}/images/yise/friends/"
 YISE_IMAGE_UPLOAD_DIR = os.getenv("YISE_IMAGE_UPLOAD_DIR", "/var/www/images/yise/friends").strip()

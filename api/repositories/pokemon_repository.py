@@ -144,7 +144,7 @@ async def list_categories() -> list[dict]:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
-                SELECT id, category_id, description, type
+                SELECT id, category_id, description, type, category_image_url
                 FROM category
                 ORDER BY category_id, id
                 """
@@ -422,9 +422,18 @@ async def list_pet_map_points() -> list[dict]:
         async with conn.cursor() as cur:
             await cur.execute(
                 """
-                SELECT id, source_id, map_id, title, latitude, longitude, category_id
-                FROM pet_map_point
-                ORDER BY id
+                SELECT
+                    pmp.id,
+                    pmp.source_id,
+                    pmp.map_id,
+                    pmp.title,
+                    pmp.latitude,
+                    pmp.longitude,
+                    pmp.category_id,
+                    c.category_image_url AS category_image_url
+                FROM pet_map_point AS pmp
+                LEFT JOIN category AS c ON c.category_id = pmp.category_id
+                ORDER BY pmp.id
                 """
             )
             return await cur.fetchall()

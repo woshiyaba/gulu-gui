@@ -152,14 +152,13 @@ async def get_battle_pk_random_pokemon_modes():
 async def get_resonance_magics_public():
     """公开返回共鸣魔法列表，供用户配置阵容时使用。"""
     _, rows = await ops_repository.list_resonance_magics_for_ops(page=1, page_size=200)
-    from api.utils.media import build_resonance_magic_icon_url
 
     return [
         {
             "id": row["id"],
             "name": row.get("name") or "",
             "description": row.get("description") or "",
-            "icon_url": build_resonance_magic_icon_url((row.get("icon") or "").strip()),
+            "icon_url": (row.get("icon") or "").strip(),
             "max_usage_count": int(row.get("max_usage_count") or 0),
         }
         for row in rows

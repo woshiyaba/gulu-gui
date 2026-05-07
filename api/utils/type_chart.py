@@ -5,7 +5,7 @@ from fractions import Fraction
 
 
 def _fraction_from_db(value) -> Fraction:
-    """把 MySQL DECIMAL / str / float 安全转为 Fraction。"""
+    """把 DECIMAL / str / float 安全转为 Fraction。"""
     if value is None:
         return Fraction(1, 1)
     if isinstance(value, Fraction):

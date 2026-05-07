@@ -1,7 +1,7 @@
 """
 导出 skill 表所有技能图标的完整 URL，生成一个可在服务器运行的 wget 备份脚本。
 
-URL 拼接规则与 api/utils/media.py 的 build_image_url 完全一致：
+URL 拼接规则（用于回放历史 BASE_URL 时代的源地址）：
     - 空值跳过
     - 已是 http(s) 开头则原样使用
     - 否则把文件名前的 "数字_" 前缀去掉后，再拼 BASE_URL

@@ -2,7 +2,6 @@ from decimal import Decimal
 from fractions import Fraction
 
 from api.repositories import attribute_matchup_repository, pokemon_repository
-from api.utils.media import build_friend_image_url, build_image_url
 from api.utils.pokemon_mapper import (
     to_attribute_item,
     to_pokemon_detail,
@@ -10,8 +9,6 @@ from api.utils.pokemon_mapper import (
     to_skill_item,
 )
 from api.utils.type_chart import build_defensive_type_chart_payload, combine_defensive_multipliers
-
-from config import CATEGORY_ICON_BASE_URL as _CATEGORY_ICON_BASE_URL
 
 
 class PokemonNotFoundError(Exception):
@@ -35,7 +32,7 @@ def _build_fallback_evolution_chain(base: dict) -> dict:
                 "items": [
                     {
                         "name": base["name"],
-                        "image_url": build_friend_image_url(base.get("image_lc", ""), ""),
+                        "image_url": base.get("image_lc") or "",
                     }
                 ],
             }
@@ -57,7 +54,7 @@ def _group_variants_by_base_name(variant_rows: list[dict]) -> dict[str, list[dic
         grouped.setdefault(name, []).append(
             {
                 "name": name,
-                "image_url": build_friend_image_url(row.get("image_lc", ""), ""),
+                "image_url": row.get("image_lc") or "",
             }
         )
         base_name = _strip_variant_suffix(name)
@@ -67,7 +64,7 @@ def _group_variants_by_base_name(variant_rows: list[dict]) -> dict[str, list[dic
         grouped.setdefault(base_name, []).append(
             {
                 "name": name,
-                "image_url": build_friend_image_url(row.get("image_lc", ""), ""),
+                "image_url": row.get("image_lc") or "",
             }
         )
 
@@ -148,10 +145,10 @@ async def get_egg_group_names() -> list[str]:
 
 
 async def get_categories() -> list[dict]:
-    """返回 category 表的全量映射数据，并补 category_id 对应图标地址。"""
+    """返回 category 表的全量映射数据。"""
     rows = await pokemon_repository.list_categories()
     return [
-        {**row, "category_image_url": f"{_CATEGORY_ICON_BASE_URL}/{row['category_id']}.png"}
+        {**row, "category_image_url": row.get("category_image_url") or ""}
         for row in rows
     ]
 
@@ -161,7 +158,7 @@ async def get_skill_types() -> list[str]:
 
 
 async def get_pokemon_marks() -> list[dict]:
-    """返回 pokemon_mark 表的全部词条，图标路径补全为绝对地址。"""
+    """返回 pokemon_mark 表的全部词条。"""
     rows = await pokemon_repository.list_pokemon_marks()
     return [
         {
@@ -170,7 +167,7 @@ async def get_pokemon_marks() -> list[dict]:
             "zh_name": row["zh_name"],
             "zh_description": row.get("zh_description", ""),
             "sort_order": row["sort_order"],
-            "image": build_image_url(row.get("image", "")),
+            "image": row.get("image") or "",
         }
         for row in rows
     ]
@@ -200,7 +197,7 @@ async def get_skill_stones(skill_name: str = "") -> dict:
             {
                 "skill_name": row["skill_name"],
                 "obtain_method": row["obtain_method"],
-                "icon": build_image_url(row.get("icon", "")),
+                "icon": row.get("icon") or "",
             }
             for row in rows
         ],
@@ -274,7 +271,7 @@ async def get_pokemon_by_body_metrics(height_m: float, weight_kg: float) -> dict
         "items": [
             {
                 "pet_name": r["pokemon_name"],
-                "image_url": build_image_url(r.get("image", "")),
+                "image_url": r.get("image") or "",
             }
             for r in rows
         ],
@@ -282,7 +279,7 @@ async def get_pokemon_by_body_metrics(height_m: float, weight_kg: float) -> dict
 
 
 async def get_pokemon_eggs(name: str = "", page: int = 1, page_size: int = 30) -> dict:
-    """分页返回 pokemon_egg 表全部字段，icon 字段补全为完整 URL，支持按名称模糊筛选。"""
+    """分页返回 pokemon_egg 表全部字段，支持按名称模糊筛选。"""
     name = name.strip()
     total = await pokemon_repository.count_pokemon_eggs(name=name)
     rows = await pokemon_repository.list_pokemon_eggs(name=name, page=page, page_size=page_size)
@@ -292,7 +289,7 @@ async def get_pokemon_eggs(name: str = "", page: int = 1, page_size: int = 30) -
             "source_id": row["source_id"],
             "name": row.get("name") or "",
             "form": row.get("form") or "",
-            "icon": build_image_url(row.get("icon") or ""),
+            "icon": row.get("icon") or "",
             "pokemon_source_id": row.get("pokemon_source_id"),
             "pokemon_id": row.get("pokemon_id"),
             "pokemon_name": row.get("pokemon_name") or "",
@@ -311,7 +308,7 @@ async def get_pokemon_eggs(name: str = "", page: int = 1, page_size: int = 30) -
 
 
 async def get_pokemon_fruits(name: str = "", page: int = 1, page_size: int = 30) -> dict:
-    """分页返回 pokemon_fruit 表全部字段，icon 字段补全为完整 URL，支持按名称模糊筛选。"""
+    """分页返回 pokemon_fruit 表全部字段，支持按名称模糊筛选。"""
     name = name.strip()
     total = await pokemon_repository.count_pokemon_fruits(name=name)
     rows = await pokemon_repository.list_pokemon_fruits(name=name, page=page, page_size=page_size)
@@ -320,7 +317,7 @@ async def get_pokemon_fruits(name: str = "", page: int = 1, page_size: int = 30)
             "id": row["id"],
             "source_id": row["source_id"],
             "name": row.get("name") or "",
-            "icon": build_image_url(row.get("icon") or ""),
+            "icon": row.get("icon") or "",
             "pokemon_source_id": row.get("pokemon_source_id"),
             "item_quality": row.get("item_quality") or 0,
             "created_at": row["created_at"].isoformat() if row.get("created_at") else "",
@@ -337,7 +334,7 @@ async def get_pokemon_fruits(name: str = "", page: int = 1, page_size: int = 30)
 
 
 async def get_pet_map_points() -> list[dict]:
-    """返回 pet_map_point 表全量点位，并补 category_id 对应图标地址。"""
+    """返回 pet_map_point 表全量点位。"""
     rows = await pokemon_repository.list_pet_map_points()
     return [
         {
@@ -348,7 +345,7 @@ async def get_pet_map_points() -> list[dict]:
             "latitude": float(row["latitude"]),
             "longitude": float(row["longitude"]),
             "category_id": row["category_id"],
-            "category_image_url": f"{_CATEGORY_ICON_BASE_URL}/{row['category_id']}.png",
+            "category_image_url": row.get("category_image_url") or "",
         }
         for row in rows
     ]

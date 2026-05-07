@@ -1,5 +1,4 @@
 from db.connection import get_pool
-from api.utils.media import build_friend_image_url, build_resonance_magic_icon_url, build_skill_icon_url, build_skills_image_url
 from api.utils.pokemon_mapper import to_attribute_item
 
 
@@ -96,7 +95,7 @@ def _build_member_row(row: dict) -> dict:
     random_pk_dict_id = row.get("random_pk_dict_id")
     if pid is not None:
         pokemon_name = row.get("pokemon_name") or ""
-        pokemon_image = build_friend_image_url(row.get("pokemon_image_lc") or "", row.get("pokemon_image_raw") or "")
+        pokemon_image = row.get("pokemon_image_lc") or row.get("pokemon_image_raw") or ""
     else:
         pokemon_name = (row.get("random_pk_label") or "").strip()
         pokemon_image = ""
@@ -116,16 +115,16 @@ def _build_member_row(row: dict) -> dict:
         "qual_3": row.get("qual_3") or "",
         "skill_1_id": row.get("skill_1_id"),
         "skill_1_name": row.get("skill_1_name") or "",
-        "skill_1_image": build_skills_image_url((row.get("skill_1_icon") or "").strip()),
+        "skill_1_image": (row.get("skill_1_icon") or "").strip(),
         "skill_2_id": row.get("skill_2_id"),
         "skill_2_name": row.get("skill_2_name") or "",
-        "skill_2_image": build_skills_image_url((row.get("skill_2_icon") or "").strip()),
+        "skill_2_image": (row.get("skill_2_icon") or "").strip(),
         "skill_3_id": row.get("skill_3_id"),
         "skill_3_name": row.get("skill_3_name") or "",
-        "skill_3_image": build_skills_image_url((row.get("skill_3_icon") or "").strip()),
+        "skill_3_image": (row.get("skill_3_icon") or "").strip(),
         "skill_4_id": row.get("skill_4_id"),
         "skill_4_name": row.get("skill_4_name") or "",
-        "skill_4_image": build_skills_image_url((row.get("skill_4_icon") or "").strip()),
+        "skill_4_image": (row.get("skill_4_icon") or "").strip(),
         "member_desc": row.get("member_desc") or "",
     }
 
@@ -167,7 +166,7 @@ async def get_lineup_by_id(lineup_id: int) -> dict | None:
             return {
                 **lineup,
                 "resonance_magic_name": lineup.get("resonance_magic_name") or "",
-                "resonance_magic_icon": build_resonance_magic_icon_url((lineup.get("resonance_magic_icon_raw") or "").strip()),
+                "resonance_magic_icon": (lineup.get("resonance_magic_icon_raw") or "").strip(),
                 "members": members,
             }
 
@@ -234,7 +233,7 @@ async def list_lineups_paginated(
                 {
                     **row,
                     "resonance_magic_name": row.get("resonance_magic_name") or "",
-                    "resonance_magic_icon": build_resonance_magic_icon_url((row.get("resonance_magic_icon_raw") or "").strip()),
+                    "resonance_magic_icon": (row.get("resonance_magic_icon_raw") or "").strip(),
                 }
                 for row in rows
             ]
@@ -402,7 +401,7 @@ async def list_active_lineups(source_type: str = "", ids: list[int] | None = Non
                     {
                         **lineup,
                         "resonance_magic_name": lineup.get("resonance_magic_name") or "",
-                        "resonance_magic_icon": build_resonance_magic_icon_url((lineup.get("resonance_magic_icon_raw") or "").strip()),
+                        "resonance_magic_icon": (lineup.get("resonance_magic_icon_raw") or "").strip(),
                         "members": members,
                     }
                 )
@@ -428,7 +427,7 @@ async def search_pokemon(keyword: str, limit: int = 20) -> list[dict]:
                 {
                     "id": row["id"],
                     "name": row["name"],
-                    "image": build_friend_image_url(row.get("image_lc") or "", row.get("image") or ""),
+                    "image": row.get("image_lc") or row.get("image") or "",
                 }
                 for row in rows
             ]
@@ -473,7 +472,7 @@ async def search_skills(
                 {
                     "id": row["id"],
                     "name": row["name"],
-                    "image": build_skill_icon_url((row.get("icon") or "").strip()),
+                    "image": (row.get("icon") or "").strip(),
                 }
                 for row in rows
             ]

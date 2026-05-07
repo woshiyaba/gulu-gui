@@ -1,5 +1,5 @@
 """
-从 docs/pets/personalities.json 导入精灵性格字典。
+从 docs/pets/personalities.json 导入精灵性格字典到 PostgreSQL。
 
 性格规则：
 - 每个性格对六维（HP / 物攻 / 魔攻 / 物防 / 魔防 / 速度）做乘法修正；
@@ -7,15 +7,9 @@
 - 六维两两组合（加/减不同项）共 30 种。
 - 最终战斗属性：floor(base_stat * (1 + mod_pct))
 
-写入目标：
-- MySQL.personality（与其它 import_* 脚本对齐，落 MySQL 源头）
-- PostgreSQL.personality（纯字典表，直接同步到 PG，无需 migrate 脚本中转）
-
 用法：
     uv run python scripts/import_personalities.py
     uv run python scripts/import_personalities.py --dry-run
-    uv run python scripts/import_personalities.py --only mysql
-    uv run python scripts/import_personalities.py --only pg
 """
 
 from __future__ import annotations
@@ -30,32 +24,16 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import pymysql
 import psycopg2
 import psycopg2.extras
 
-from config import DB_CONFIG, PG_CONFIG
+from config import PG_CONFIG
 
 
 JSON_PATH = Path(__file__).resolve().parent.parent / "docs" / "pets" / "personalities.json"
 
 
 # ── DDL ──────────────────────────────────────────────────────
-
-MYSQL_DDL = """
-CREATE TABLE IF NOT EXISTS personality (
-    id              SMALLINT       NOT NULL COMMENT '性格ID，来源 personalities.json',
-    name            VARCHAR(32)    NOT NULL COMMENT '名称',
-    hp_mod_pct      DECIMAL(3, 2)  NOT NULL DEFAULT 0 COMMENT 'HP修正：+0.10/-0.10/0',
-    phy_atk_mod_pct DECIMAL(3, 2)  NOT NULL DEFAULT 0 COMMENT '物攻修正',
-    mag_atk_mod_pct DECIMAL(3, 2)  NOT NULL DEFAULT 0 COMMENT '魔攻修正',
-    phy_def_mod_pct DECIMAL(3, 2)  NOT NULL DEFAULT 0 COMMENT '物防修正',
-    mag_def_mod_pct DECIMAL(3, 2)  NOT NULL DEFAULT 0 COMMENT '魔防修正',
-    spd_mod_pct     DECIMAL(3, 2)  NOT NULL DEFAULT 0 COMMENT '速度修正',
-    PRIMARY KEY (id),
-    UNIQUE KEY uk_personality_name (name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='精灵性格字典（六维乘法修正）';
-"""
 
 PG_DDL = """
 CREATE TABLE IF NOT EXISTS personality (
@@ -101,47 +79,6 @@ def _load_rows() -> list[tuple]:
         ))
     rows.sort(key=lambda r: r[0])
     return rows
-
-
-# ── MySQL ────────────────────────────────────────────────────
-
-def mysql_conn() -> pymysql.connections.Connection:
-    return pymysql.connect(
-        host=DB_CONFIG["host"],
-        port=DB_CONFIG["port"],
-        database=DB_CONFIG["database"],
-        user=DB_CONFIG["user"],
-        password=DB_CONFIG["password"],
-        charset=DB_CONFIG["charset"],
-        cursorclass=pymysql.cursors.DictCursor,
-        autocommit=False,
-    )
-
-
-def write_mysql(rows: list[tuple], dry_run: bool) -> None:
-    t = time.time()
-    print("\n[>>] 写入 MySQL.personality ...", flush=True)
-    conn = mysql_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute("DROP TABLE IF EXISTS personality")
-            cur.execute(MYSQL_DDL)
-            cur.executemany(
-                """INSERT INTO personality
-                   (id, name,
-                    hp_mod_pct, phy_atk_mod_pct, mag_atk_mod_pct,
-                    phy_def_mod_pct, mag_def_mod_pct, spd_mod_pct)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s)""",
-                rows,
-            )
-        if dry_run:
-            conn.rollback()
-            print(f"    [dry-run] MySQL 已回滚 ({time.time()-t:.2f}s)", flush=True)
-        else:
-            conn.commit()
-            print(f"    [ok] MySQL 写入 {len(rows)} 条 ({time.time()-t:.2f}s)", flush=True)
-    finally:
-        conn.close()
 
 
 # ── PostgreSQL ───────────────────────────────────────────────
@@ -209,14 +146,8 @@ def write_pg(rows: list[tuple], dry_run: bool) -> None:
 # ── 主流程 ───────────────────────────────────────────────────
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="导入精灵性格字典到 MySQL/PG")
+    parser = argparse.ArgumentParser(description="导入精灵性格字典到 PG")
     parser.add_argument("--dry-run", action="store_true", help="执行后回滚，不实际写入")
-    parser.add_argument(
-        "--only",
-        choices=("mysql", "pg", "both"),
-        default="pg",
-        help="仅写入指定库（默认仅写 PG）",
-    )
     args = parser.parse_args()
 
     rows = _load_rows()
@@ -225,10 +156,7 @@ def main() -> None:
     print(f"  导入性格字典: {len(rows)} 条，来源 {JSON_PATH}")
     print("=" * 60)
 
-    if args.only in ("mysql", "both"):
-        write_mysql(rows, args.dry_run)
-    if args.only in ("pg", "both"):
-        write_pg(rows, args.dry_run)
+    write_pg(rows, args.dry_run)
 
     print(f"\n完成，总耗时 {time.time() - total:.2f}s")
 

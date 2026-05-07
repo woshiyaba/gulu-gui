@@ -4,7 +4,7 @@
 
 当前项目主要包含 4 条线：
 
-- 数据采集与迁移：`scraper/`、`main.py`、`scripts/` 从外部站点或本地数据源导入 MySQL，再迁移或同步到 PostgreSQL。
+- 数据采集与同步：`scraper/`、`scripts/` 从外部站点或本地数据源直接导入并同步到 PostgreSQL。
 - 后端 API：`api/` 基于 FastAPI，对外提供图鉴、技能、地图、阵容等公共接口，也提供运营后台接口。
 - 前端页面：`front/pc-front/` 是 Vue 3 + Vite 的 PC Web；`front/mini-app/` 是 uni-app，可跑 H5 和微信小程序等端。
 - 智能问答：`agents/` + `ws/` 通过 WebSocket 接入 QQ 消息，并让 Agent 调用后端 API 回答游戏问题。
@@ -19,9 +19,9 @@ gulu-gui/
 │  ├─ repositories/             # PostgreSQL 数据访问
 │  ├─ schemas/                  # Pydantic 响应/请求模型
 │  └─ utils/                    # 转换、媒体地址、属性计算等工具
-├─ db/                          # MySQL 写库逻辑 + PostgreSQL 连接池
+├─ db/                          # PostgreSQL 异步连接池
 ├─ scraper/                     # 外部站点数据抓取
-├─ scripts/                     # 导入、迁移、同步、初始化脚本
+├─ scripts/                     # 导入、同步、初始化、迁移脚本（直接落 PG）
 ├─ sql/                         # PostgreSQL 表结构和补充 SQL
 ├─ front/
 │  ├─ pc-front/                 # Vue 3 + TypeScript + Vite PC Web
@@ -29,7 +29,6 @@ gulu-gui/
 ├─ agents/                      # LangChain/LangGraph 问答 Agent
 ├─ ws/                          # WebSocket 连接与 QQ 消息处理
 ├─ config.py                    # 环境变量和基础配置
-├─ main.py                      # MySQL 侧初始化和部分导入脚本编排
 └─ pyproject.toml               # Python 依赖
 ```
 
@@ -39,9 +38,7 @@ gulu-gui/
 %%{init: {"theme": "base", "themeVariables": {"background": "#111827", "primaryColor": "#1f2937", "primaryTextColor": "#f9fafb", "primaryBorderColor": "#60a5fa", "lineColor": "#93c5fd", "secondaryColor": "#172554", "tertiaryColor": "#0f172a"}}}%%
 flowchart LR
   source["外部站点/本地数据"] --> scraper["scraper 与 scripts"]
-  scraper --> mysql[("MySQL<br/>采集和中间库")]
-  mysql --> migrate["迁移/同步脚本"]
-  migrate --> pg[("PostgreSQL<br/>API 主库")]
+  scraper --> pg[("PostgreSQL<br/>主库")]
   pg --> repo["api/repositories"]
   repo --> service["api/services"]
   service --> route["api/routes"]
@@ -50,7 +47,7 @@ flowchart LR
   route --> ws["WebSocket / QQ Agent"]
 ```
 
-简单理解：MySQL 更像采集和整理数据时的中间库，FastAPI 正式查询走 PostgreSQL。前端不要直接连数据库，只请求后端接口。
+简单理解：采集脚本直接写入 PostgreSQL，FastAPI 查询同一个 PG 库。前端不要直接连数据库，只请求后端接口。
 
 ## 后端说明
 
@@ -137,10 +134,7 @@ Swagger 文档启动后访问 `http://localhost:8000/docs`。
 
 ## 数据库说明
 
-项目同时使用 MySQL 和 PostgreSQL：
-
-- MySQL：给采集、初始化、部分导入脚本使用，连接来自 `MYSQL_*` 环境变量。
-- PostgreSQL：给 FastAPI 查询和运营后台使用，连接来自 `PG_*` 环境变量。
+项目使用 PostgreSQL 作为唯一存储：采集脚本、FastAPI 查询和运营后台都连同一个库，连接信息来自 `PG_*` 环境变量。
 
 核心 SQL 文件：
 
@@ -162,7 +156,6 @@ Swagger 文档启动后访问 `http://localhost:8000/docs`。
 
 - Python `>= 3.13`
 - `uv`
-- MySQL `8.x`
 - PostgreSQL `12+`
 
 前端：
@@ -175,12 +168,6 @@ Swagger 文档启动后访问 `http://localhost:8000/docs`。
 根目录创建 `.env`，至少配置数据库连接：
 
 ```env
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_DATABASE=zlkwg_gui
-MYSQL_USER=root
-MYSQL_PASSWORD=your_mysql_password
-
 PG_HOST=localhost
 PG_PORT=5432
 PG_DATABASE=wikiroco
@@ -218,25 +205,7 @@ uv sync
 
 ### 2. 准备数据库
 
-先准备 MySQL 和 PostgreSQL，并填写 `.env`。
-
-如果需要从 MySQL 迁移到 PostgreSQL，推荐使用当前对齐 `sql/wikiroco.sql` 的脚本：
-
-```bash
-uv run python scripts/migrate_mysql_to_pg_wikiroco.py
-```
-
-只想预检查迁移逻辑时可以加 `--dry-run`：
-
-```bash
-uv run python scripts/migrate_mysql_to_pg_wikiroco.py --dry-run
-```
-
-`main.py` 会初始化 MySQL 表，并运行部分导入脚本。代码里完整抓取精灵列表、详情、技能的步骤目前是注释状态，需要全量刷新外部数据时再按需打开。
-
-```bash
-uv run python main.py
-```
+先准备 PostgreSQL，并填写 `.env`。表结构参考 `sql/wikiroco.sql`，可在新建库后导入。需要补充数据时按需运行 `scripts/` 下的 `import_*` / `sync_*` / `seed_*` 脚本，每个脚本都是独立可执行的。
 
 ### 3. 启动后端 API
 
@@ -279,8 +248,7 @@ npm run dev:mp-weixin
 
 ```bash
 uv run uvicorn api.main:app --reload --port 8000
-uv run python main.py
-uv run python scripts/migrate_mysql_to_pg_wikiroco.py --dry-run
+uv run python scripts/<script>.py
 uv run python -m compileall api
 uv run python agents/main_agent.py
 ```
@@ -308,14 +276,13 @@ npm run type-check
 
 第一次本地运行建议按这个顺序：
 
-1. 创建 MySQL 和 PostgreSQL 数据库。
+1. 创建 PostgreSQL 数据库，并按 `sql/wikiroco.sql` 初始化表结构。
 2. 填写根目录 `.env`。
 3. 执行 `uv sync`。
-4. 根据数据来源执行 `uv run python main.py` 或相关 `scripts/` 导入脚本。
-5. 执行 `uv run python scripts/migrate_mysql_to_pg_wikiroco.py`，把 MySQL 数据迁移到 PostgreSQL。
-6. 执行 `uv run uvicorn api.main:app --reload --port 8000`。
-7. 进入 `front/pc-front`，执行 `npm install && npm run dev`。
-8. 打开 `http://localhost:5173`。
+4. 根据数据来源执行 `scripts/` 下相关的导入/同步脚本。
+5. 执行 `uv run uvicorn api.main:app --reload --port 8000`。
+6. 进入 `front/pc-front`，执行 `npm install && npm run dev`。
+7. 打开 `http://localhost:5173`。
 
 ## 自测用例
 
@@ -353,11 +320,7 @@ npm run type-check
 
 ### 列表为空
 
-通常是 PostgreSQL 主库没有数据。先确认 MySQL 侧是否导入成功，再执行：
-
-```bash
-uv run python scripts/migrate_mysql_to_pg_wikiroco.py
-```
+通常是 PostgreSQL 主库没有数据。按 `sql/wikiroco.sql` 建好表后，运行 `scripts/` 下相关的 `import_*` / `sync_*` / `seed_*` 脚本补齐数据。
 
 ### 运营后台无法登录
 

@@ -16,7 +16,20 @@
       "Bash(curl -sI \"https://wikiroco.com/images/icon/17310030067.png\")",
       "Bash(grep -E \"\\\\.\\(py\\)$\")",
       "Bash(xargs grep *)",
-      "Bash(python -m py_compile scripts/migrate_urls_to_oss.py)"
+      "Bash(python -m py_compile scripts/migrate_urls_to_oss.py)",
+      "Bash(find \"E:\\\\\\\\game\\\\\\\\洛克王国世界\\\\\\\\wikiroco\\\\\\\\gulu-gui\" -maxdepth 1 -type f -o -type d)",
+      "Bash(find \"E:\\\\\\\\game\\\\\\\\洛克王国世界\\\\\\\\wikiroco\\\\\\\\gulu-gui\\\\\\\\scripts\" -type f -name \"*.py\")",
+      "Bash(find E:\\\\\\\\game\\\\\\\\洛克王国世界\\\\\\\\wikiroco\\\\\\\\gulu-gui\\\\\\\\sql *)",
+      "Bash(grep -E \"\\\\.py$\")",
+      "Bash(find E:\\\\\\\\game\\\\\\\\洛克王国世界\\\\\\\\wikiroco\\\\\\\\gulu-gui\\\\\\\\scraper *)",
+      "Bash(head *)",
+      "Bash(grep -r \"import pymysql\\\\|from pymysql\\\\|import aiomysql\\\\|from aiomysql\\\\|import mysql\\\\|from mysql\\\\|MySQLdb\" \"E:\\\\\\\\game\\\\\\\\洛克王国世界\\\\\\\\wikiroco\\\\\\\\gulu-gui\" --include=\"*.py\")",
+      "Bash(wc *)",
+      "Bash(grep -r \"DB_CONFIG\\\\|get_conn\" \"E:\\\\\\\\game\\\\\\\\洛克王国世界\\\\\\\\wikiroco\\\\\\\\gulu-gui\" --include=\"*.py\" --include=\"*.md\")",
+      "Bash(uv lock *)",
+      "Bash(Get-ChildItem -Path . -Directory)",
+      "Bash(Select-Object Name)",
+      "PowerShell(Remove-Item *)"
     ]
   }
 }

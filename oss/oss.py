@@ -193,5 +193,5 @@ class COSClient:
             f.write(response["Body"].get_raw_stream().read())
 if __name__ == '__main__':
     cos = COSClient()
-    url = cos.upload_from_url("https://rocom.game-walkthrough.com/attrs/guang.webp")
+    url = cos.upload_from_url("https://heyboxbj.max-c.com/game/roco_kingdom/egg/icon/93000016.png")
     print(url)

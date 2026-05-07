@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-洛克王国精灵图鉴 (Roco Kingdom Pokédex) — a full-stack app that scrapes game data from an external site, imports it into MySQL, migrates to PostgreSQL for the API layer, and serves it via a FastAPI backend + Vue 3 frontend. Includes a LangChain-based chatbot agent accessible via WebSocket (QQ bot integration).
+洛克王国精灵图鉴 (Roco Kingdom Pokédex) — a full-stack app that scrapes game data from external sources, imports it into PostgreSQL, and serves it via a FastAPI backend + Vue 3 frontend. Includes a LangChain-based chatbot agent accessible via WebSocket (QQ bot integration).
 
 ## Common Commands
 
@@ -13,8 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 uv sync                                              # Install/sync dependencies
 uv run uvicorn api.main:app --reload --port 8000     # Start API dev server (Swagger at /docs)
-uv run python main.py                                # Run full scrape+import pipeline
-uv run python scripts/<script>.py                    # Run a single import/migration script
+uv run python scripts/<script>.py                    # Run a single import/sync script
 uv run python agents/main_agent.py                   # Run chatbot agent CLI
 uv run python -m compileall api                      # Syntax check (there is no test suite)
 ```
@@ -49,7 +48,7 @@ npm run type-check       # vue-tsc --noEmit
 ### Data Flow
 
 ```
-External game site → scraper/ → main.py → MySQL → migration scripts → PostgreSQL
+External game sites → scraper/ + scripts/ → PostgreSQL
 PostgreSQL → api/repositories → api/services → api/routes → Vue frontend
                                                          → WebSocket → QQ bot (via agents/)
 ```
@@ -67,16 +66,16 @@ CORS is fully open (`allow_origins=["*"]`) — keep this in mind before deployin
 
 ### Database (db/)
 
-- `db/connection.py` — Dual connection strategy: synchronous `pymysql` (MySQL) for scraper/import scripts, async `psycopg` pool (PostgreSQL) for the API
-- `db/schema.py` — DDL table creation (MySQL)
-- `db/repository.py` — Sync upsert functions used by the import pipeline (MySQL)
+- `db/connection.py` — Async `psycopg` (PostgreSQL) connection pool for the API; scripts open their own connections via `psycopg2` and `config.PG_CONFIG`
 - `sql/wikiroco.sql` — PostgreSQL schema reference
 
-### Import Pipeline
+### Import / Sync Pipeline
 
-`main.py` is the orchestrator: it runs `db.schema.init_db()` for table setup, then invokes `scripts/*.py` as subprocesses for each domain (egg groups/hatch, attribute matchups, obtain methods, etc.). Many scrape-and-upsert steps inside `main.py` are currently commented out — re-enable them when a full refresh from the external source is needed. Each script in `scripts/` is independently runnable.
-
-Migration scripts (`scripts/migrate_mysql_to_pg*.py`) move data from MySQL to PostgreSQL. Other `scripts/sync_*` scripts sync specific data slices incrementally without a full re-migration.
+There is no top-level orchestrator. Each script in `scripts/` is independently runnable and writes directly to PostgreSQL:
+- `scripts/import_*.py` — Pull data (xiaoheihe API, JSON files, etc.) and upsert into PG
+- `scripts/sync_*.py` — Incremental syncs for specific data slices
+- `scripts/seed_*.py` — Seed dictionary tables
+- `scripts/create_*.py` / `scripts/migrate_*.py` — One-off DDL / schema migrations on PG
 
 ### Chatbot Agent (agents/)
 
@@ -94,10 +93,9 @@ LangChain/LangGraph-based agent (`agents/main_agent.py`) answers game questions 
 ## Key Configuration
 
 - `.env` (root, gitignored) — read by `config.py` via `python-dotenv`.
-  - MySQL: `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_DATABASE`, `MYSQL_USER`, `MYSQL_PASSWORD`
   - PostgreSQL: `PG_HOST`, `PG_PORT`, `PG_DATABASE`, `PG_USER`, `PG_PASSWORD`
   - Static assets (optional, default to `https://wikiroco.com/...`): `STATIC_BASE_URL`, `FRIEND_IMAGE_UPLOAD_DIR`, `YISE_IMAGE_UPLOAD_DIR`, `SKILL_ICON_UPLOAD_DIR`, `RESONANCE_MAGIC_ICON_UPLOAD_DIR`
-- `config.py` — Exports `DB_CONFIG` (MySQL), `PG_CONFIG` (PostgreSQL), `BASE_URL` (scraping target, currently hardcoded), and the static-asset URL/upload-dir constants used when serving/uploading images.
+- `config.py` — Exports `PG_CONFIG` (PostgreSQL), `BASE_URL` (scraping target, currently hardcoded), and the static-asset URL/upload-dir constants used when serving/uploading images.
 - Frontend API base URL lives in `front/pc-front/.env.development` / `.env.production` — update there rather than hardcoding in components.
 
 ## Conventions

@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-`api/` contains the FastAPI service: `routes/` defines endpoints, `services/` holds business logic, `repositories/` wraps database access, and `schemas/` defines response models. `db/` manages connections and schema helpers. `scraper/` and the root `main.py` handle data collection and import flows. Batch migration and sync utilities live in `scripts/`, with SQL assets in `sql/` and reference data in `docs/`.
+`api/` contains the FastAPI service: `routes/` defines endpoints, `services/` holds business logic, `repositories/` wraps database access, and `schemas/` defines response models. `db/` exposes the PostgreSQL async connection pool. `scraper/` provides scraping helpers; data collection and sync flows live in standalone scripts under `scripts/`, with SQL assets in `sql/` and reference data in `docs/`.
 
 Frontend code is split by target. `front/pc-front/` is the Vue 3 + Vite desktop web app. `front/mini-app/` is the uni-app client for H5 and WeChat Mini Program builds.
 
@@ -11,11 +11,10 @@ Backend setup and run from the repo root:
 ```bash
 uv sync
 uv run uvicorn api.main:app --reload --port 8000
-uv run python main.py
 uv run python -m compileall api
 ```
 
-Use `main.py` for initial data import or refreshes. Use `compileall` as a quick syntax check when changing Python modules.
+Run individual scripts under `scripts/` for data refreshes (each is independently runnable). Use `compileall` as a quick syntax check when changing Python modules.
 
 Desktop frontend:
 
@@ -51,4 +50,4 @@ Recent history uses short, task-focused messages, often with Conventional Commit
 PRs should include a brief summary, impacted areas (`api`, `front/pc-front`, `scripts`, etc.), setup or migration notes, and screenshots for UI changes. Link related issues and note any required `.env` or database updates.
 
 ## Security & Configuration Tips
-Keep secrets in `.env`; never commit real database credentials. Backend config currently reads both MySQL and PostgreSQL settings from environment variables in `config.py`. When changing API hosts for frontends, update the environment-specific files under each frontend package rather than hardcoding endpoints in components.
+Keep secrets in `.env`; never commit real database credentials. Backend config reads PostgreSQL settings (`PG_HOST`, `PG_PORT`, `PG_DATABASE`, `PG_USER`, `PG_PASSWORD`) from environment variables in `config.py`. When changing API hosts for frontends, update the environment-specific files under each frontend package rather than hardcoding endpoints in components.

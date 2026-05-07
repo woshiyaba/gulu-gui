@@ -148,14 +148,11 @@ export interface OpsPokemonOptionsResponse {
   skill_sources: string[]
 }
 
-export interface OpsFriendImageUploadResponse {
-  image_lc: string
-  preview_url: string
-}
-
-export interface OpsYiseImageUploadResponse {
-  image_yise: string
-  preview_url: string
+export interface OpsFileUploadResponse {
+  url: string
+  filename: string
+  size: number
+  content_type?: string
 }
 
 export interface OpsPokemonUpsertPayload {
@@ -324,20 +321,19 @@ export function fetchOpsPokemonOptions(): Promise<OpsPokemonOptionsResponse> {
   return http.get<OpsPokemonOptionsResponse>('/api/ops/pokemon/options').then((r) => r.data)
 }
 
-export function uploadOpsFriendImage(file: File): Promise<OpsFriendImageUploadResponse> {
+export function uploadOpsFile(file: File, prefix = ''): Promise<OpsFileUploadResponse> {
   const body = new FormData()
   body.append('file', file)
-  return httpUpload
-    .post<OpsFriendImageUploadResponse>('/api/ops/pokemon/friend-image', body)
-    .then((r) => r.data)
+  if (prefix) body.append('prefix', prefix)
+  return httpUpload.post<OpsFileUploadResponse>('/api/file/upload', body).then((r) => r.data)
 }
 
-export function uploadOpsYiseImage(file: File): Promise<OpsYiseImageUploadResponse> {
-  const body = new FormData()
-  body.append('file', file)
-  return httpUpload
-    .post<OpsYiseImageUploadResponse>('/api/ops/pokemon/yise-image', body)
-    .then((r) => r.data)
+export function uploadOpsFriendImage(file: File): Promise<OpsFileUploadResponse> {
+  return uploadOpsFile(file, 'images/friends')
+}
+
+export function uploadOpsYiseImage(file: File): Promise<OpsFileUploadResponse> {
+  return uploadOpsFile(file, 'images/yise/friends')
 }
 
 export function createOpsPokemon(payload: OpsPokemonUpsertPayload): Promise<OpsPokemonDetail> {
@@ -413,11 +409,6 @@ export interface OpsSkillOptionsResponse {
   types: string[]
 }
 
-export interface OpsSkillIconUploadResponse {
-  icon: string
-  preview_url: string
-}
-
 export function fetchOpsSkills(params: {
   keyword?: string
   attr?: string
@@ -452,12 +443,8 @@ export function deleteOpsSkill(id: number, force = false): Promise<void> {
   return http.delete(`/api/ops/skills/${id}`, { params: force ? { force: 1 } : {} }).then(() => undefined)
 }
 
-export function uploadOpsSkillIcon(file: File): Promise<OpsSkillIconUploadResponse> {
-  const body = new FormData()
-  body.append('file', file)
-  return httpUpload
-    .post<OpsSkillIconUploadResponse>('/api/ops/skills/icon', body)
-    .then((r) => r.data)
+export function uploadOpsSkillIcon(file: File): Promise<OpsFileUploadResponse> {
+  return uploadOpsFile(file, 'images/skills')
 }
 
 // ---------- 技能石维护 ----------
@@ -829,11 +816,6 @@ export interface OpsResonanceMagicPayload {
   sort_order: number
 }
 
-export interface OpsResonanceMagicIconUploadResponse {
-  icon: string
-  preview_url: string
-}
-
 export function fetchOpsResonanceMagics(params: {
   keyword?: string
   page?: number
@@ -854,12 +836,8 @@ export function deleteOpsResonanceMagic(id: number): Promise<void> {
   return http.delete(`/api/ops/resonance-magics/${id}`).then(() => undefined)
 }
 
-export function uploadOpsResonanceMagicIcon(file: File): Promise<OpsResonanceMagicIconUploadResponse> {
-  const body = new FormData()
-  body.append('file', file)
-  return httpUpload
-    .post<OpsResonanceMagicIconUploadResponse>('/api/ops/resonance-magics/icon', body)
-    .then((r) => r.data)
+export function uploadOpsResonanceMagicIcon(file: File): Promise<OpsFileUploadResponse> {
+  return uploadOpsFile(file, 'images/resonance-magic')
 }
 
 // ── 名词解释（pokemon-marks） ────────────────────────────

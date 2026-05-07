@@ -711,7 +711,7 @@ async function submit() {
     if (pendingFriendFile.value) {
       try {
         const data = await uploadOpsFriendImage(pendingFriendFile.value)
-        form.image_lc = data.image_lc
+        form.image_lc = data.url
         resetPendingFriend()
       } catch (err: any) {
         showOpsToast(err?.response?.data?.detail || '立绘上传失败', 'error')
@@ -721,7 +721,7 @@ async function submit() {
     if (pendingYiseFile.value) {
       try {
         const data = await uploadOpsYiseImage(pendingYiseFile.value)
-        form.image_yise = data.image_yise
+        form.image_yise = data.url
         resetPendingYise()
       } catch (err: any) {
         showOpsToast(err?.response?.data?.detail || '异色立绘上传失败', 'error')

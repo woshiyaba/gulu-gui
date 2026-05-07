@@ -1,24 +1,9 @@
-import pymysql
 from psycopg.rows import dict_row
 from psycopg_pool import AsyncConnectionPool
 
-from config import DB_CONFIG, PG_CONFIG
+from config import PG_CONFIG
 
 _pool: AsyncConnectionPool | None = None
-
-
-def get_conn() -> pymysql.connections.Connection:
-    """给脚本和初始化逻辑使用的同步连接（仍连 MySQL）。"""
-    return pymysql.connect(
-        host=DB_CONFIG["host"],
-        port=DB_CONFIG["port"],
-        database=DB_CONFIG["database"],
-        user=DB_CONFIG["user"],
-        password=DB_CONFIG["password"],
-        charset=DB_CONFIG["charset"],
-        cursorclass=pymysql.cursors.DictCursor,
-        autocommit=False,
-    )
 
 
 def _build_conninfo() -> str:
