@@ -456,6 +456,7 @@ onUnload(() => {
         v-for="pokemon in pokemons"
         :key="pokemon.id"
         :pokemon="pokemon"
+        :default-shiny="shinyOnly"
         @select="navigateToDetail"
       />
     </view>

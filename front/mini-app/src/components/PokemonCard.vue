@@ -1,16 +1,27 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { Pokemon } from '@/types/pokemon'
 
-const props = defineProps<{
-  pokemon: Pokemon
-}>()
+const props = withDefaults(
+  defineProps<{
+    pokemon: Pokemon
+    defaultShiny?: boolean
+  }>(),
+  { defaultShiny: false },
+)
 
 const emit = defineEmits<{
   select: [name: string]
 }>()
 
-const showYise = ref(false)
+const showYise = ref(props.defaultShiny && !!props.pokemon.image_yise_url)
+
+watch(
+  () => props.defaultShiny,
+  (val) => {
+    showYise.value = val && !!props.pokemon.image_yise_url
+  },
+)
 
 const displayImage = computed(() =>
   showYise.value && props.pokemon.image_yise_url
