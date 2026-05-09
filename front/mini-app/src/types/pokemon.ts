@@ -23,6 +23,16 @@ export interface PokemonListResponse {
   items: Pokemon[]
 }
 
+export interface PokemonFilterOption {
+  id: number
+  code: string
+  label: string
+  filter_type: string
+  order_by: string
+  order_dir: string
+  sort_order: number
+}
+
 export interface PokemonBodyMatchItem {
   pet_name: string
 }

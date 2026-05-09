@@ -8,6 +8,7 @@ from api.schemas.pokemon import (
     CategoryItem,
     PetMapPointItem,
     PokemonEggListResponse,
+    PokemonFilterOption,
     PokemonFruitListResponse,
     PokemonEvolutionChainResponse,
     PokemonBodyMatchResponse,
@@ -46,6 +47,7 @@ from api.services.pokemon_service import (
     get_skill_stones as get_skill_stones_service,
     get_skill_types as get_skill_types_service,
     get_skills as get_skills_service,
+    list_pokemon_filter_options as list_pokemon_filter_options_service,
 )
 from api.services import banner_service, personality_service
 
@@ -221,6 +223,12 @@ async def get_pokemon_marks():
     return await get_pokemon_marks_service()
 
 
+@router.get("/pokemon-filter-options", response_model=list[PokemonFilterOption])
+async def get_pokemon_filter_options():
+    """返回小程序图鉴页可用的筛选/排序按钮列表。后台 pokemon_filter_option 表统一维护。"""
+    return await list_pokemon_filter_options_service()
+
+
 @router.get("/skill-stones", response_model=SkillStoneListResponse)
 async def get_skill_stones(
     skill_name: str = Query(default="", description="技能名关键词；为空时返回全部技能石"),
@@ -253,6 +261,10 @@ async def get_pokemon(
     shiny_only: bool = Query(default=False, description="是否仅返回有异色立绘的精灵"),
     order_by: str = Query(default="no", description="排序字段：no/total_stats/hp/atk/matk/def_val/mdef/spd"),
     order_dir: str = Query(default="asc", description="排序方向：asc/desc"),
+    filter_code: list[str] | None = Query(
+        default=None,
+        description="筛选项 code 列表（来自 /api/pokemon-filter-options）；命中条目将覆盖 shiny_only / order_by / order_dir",
+    ),
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=30, ge=1, le=100),
 ):
@@ -267,6 +279,7 @@ async def get_pokemon(
         shiny_only=shiny_only,
         order_by=order_by,
         order_dir=order_dir,
+        filter_codes=filter_code,
         page=page,
         page_size=page_size,
     )

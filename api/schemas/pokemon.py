@@ -148,6 +148,16 @@ class PokemonMarkItem(BaseModel):
     image: str = ""
 
 
+class PokemonFilterOption(BaseModel):
+    id: int
+    code: str
+    label: str
+    filter_type: str
+    order_by: str = ""
+    order_dir: str = ""
+    sort_order: int = 0
+
+
 class PokemonDetailResponse(PokemonListItem):
     obtain_method: str = ""
     stats: PokemonStats = Field(default_factory=PokemonStats)

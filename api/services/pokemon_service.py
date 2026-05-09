@@ -1,7 +1,11 @@
 from decimal import Decimal
 from fractions import Fraction
 
-from api.repositories import attribute_matchup_repository, pokemon_repository
+from api.repositories import (
+    attribute_matchup_repository,
+    pokemon_filter_repository,
+    pokemon_repository,
+)
 from api.utils.pokemon_mapper import (
     to_attribute_item,
     to_pokemon_detail,
@@ -204,6 +208,56 @@ async def get_skill_stones(skill_name: str = "") -> dict:
     }
 
 
+async def list_pokemon_filter_options() -> list[dict]:
+    """返回小程序图鉴页可用的筛选/排序按钮，由 pokemon_filter_option 表统一维护。"""
+    rows = await pokemon_filter_repository.list_active_filter_options()
+    return [
+        {
+            "id": row["id"],
+            "code": row.get("code") or "",
+            "label": row.get("label") or "",
+            "filter_type": row.get("filter_type") or "",
+            "order_by": row.get("order_by") or "",
+            "order_dir": row.get("order_dir") or "",
+            "sort_order": int(row.get("sort_order") or 0),
+        }
+        for row in rows
+    ]
+
+
+async def _resolve_filter_codes(
+        filter_codes: list[str] | None,
+        *,
+        shiny_only: bool,
+        order_by: str,
+        order_dir: str,
+) -> tuple[bool, str, str]:
+    """根据 filter_code 列表覆盖 shiny_only / order_by / order_dir。多个 sort 类按顺序后者覆盖前者。"""
+    if not filter_codes:
+        return shiny_only, order_by, order_dir
+    codes = [c.strip() for c in filter_codes if c and c.strip()]
+    if not codes:
+        return shiny_only, order_by, order_dir
+    rows = await pokemon_filter_repository.get_filter_options_by_codes(codes)
+    by_code = {row["code"]: row for row in rows}
+    # 按用户请求顺序应用，保持"后者覆盖前者"
+    for code in codes:
+        row = by_code.get(code)
+        if not row:
+            continue
+        ftype = (row.get("filter_type") or "").strip()
+        if ftype == "shiny":
+            shiny_only = True
+        elif ftype == "sort":
+            ob = (row.get("order_by") or "").strip()
+            od = (row.get("order_dir") or "").strip()
+            if ob:
+                order_by = ob
+            if od:
+                order_dir = od
+    return shiny_only, order_by, order_dir
+
+
 async def get_pokemon(
         name: str = "",
         attrs: list[str] | None = None,
@@ -211,11 +265,18 @@ async def get_pokemon(
         shiny_only: bool = False,
         order_by: str = "no",
         order_dir: str = "asc",
+        filter_codes: list[str] | None = None,
         page: int = 1,
         page_size: int = 30,
 ) -> dict:
     attrs = _normalize_multi_filter(attrs)
     egg_groups = _normalize_multi_filter(egg_groups)
+    shiny_only, order_by, order_dir = await _resolve_filter_codes(
+        filter_codes,
+        shiny_only=shiny_only,
+        order_by=order_by,
+        order_dir=order_dir,
+    )
     total = await pokemon_repository.count_pokemon(
         name=name,
         attrs=attrs,

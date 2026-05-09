@@ -12,6 +12,7 @@ import type {
   PokemonDetail,
   PokemonEggListResponse,
   PokemonEvolutionChain,
+  PokemonFilterOption,
   PokemonFruitListResponse,
   PokemonListResponse,
   PokemonMark,
@@ -23,6 +24,10 @@ import type {
 export interface PokemonQuery {
   name?: string
   attr?: string
+  filter_code?: string
+  shiny_only?: boolean
+  order_by?: 'no' | 'total_stats' | 'hp' | 'atk' | 'matk' | 'def_val' | 'mdef' | 'spd'
+  order_dir?: 'asc' | 'desc'
   page?: number
   page_size?: number
 }
@@ -115,6 +120,12 @@ export function fetchMapPoints() {
 export function fetchPokemonMarks() {
   return request<PokemonMark[]>({
     url: '/api/pokemon-marks',
+  })
+}
+
+export function fetchPokemonFilterOptions() {
+  return request<PokemonFilterOption[]>({
+    url: '/api/pokemon-filter-options',
   })
 }
 

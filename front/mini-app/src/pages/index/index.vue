@@ -13,6 +13,25 @@ import {
 import type { Attribute, Pokemon } from '@/types/pokemon'
 import type { Banner } from '@/types/banner'
 
+type SortByValue = NonNullable<PokemonQuery['order_by']>
+type SortDirValue = NonNullable<PokemonQuery['order_dir']>
+
+const SORT_OPTIONS: ReadonlyArray<{ value: SortByValue; label: string }> = [
+  { value: 'no', label: '图鉴编号' },
+  { value: 'total_stats', label: '总种族值' },
+  { value: 'spd', label: '速度' },
+  { value: 'atk', label: '物攻' },
+  { value: 'matk', label: '魔攻' },
+  { value: 'def_val', label: '物防' },
+  { value: 'mdef', label: '魔防' },
+  { value: 'hp', label: 'HP' },
+]
+
+const SORT_DIR_OPTIONS: ReadonlyArray<{ value: SortDirValue; label: string }> = [
+  { value: 'asc', label: '升序' },
+  { value: 'desc', label: '降序' },
+]
+
 const banners = ref<Banner[]>([])
 const attributes = ref<Attribute[]>([])
 const pokemons = ref<Pokemon[]>([])
@@ -23,8 +42,21 @@ const error = ref('')
 
 const searchName = ref('')
 const selectedAttr = ref('')
+const shinyOnly = ref(false)
+const selectedSortByIndex = ref(0)
+const selectedSortDirIndex = ref(0)
 const currentPage = ref(1)
 const pageSize = 30
+
+const sortByLabels = computed(() => SORT_OPTIONS.map((opt) => opt.label))
+const sortDirLabels = computed(() => SORT_DIR_OPTIONS.map((opt) => opt.label))
+
+const selectedSortBy = computed<SortByValue>(
+  () => SORT_OPTIONS[selectedSortByIndex.value]?.value ?? 'no',
+)
+const selectedSortDir = computed<SortDirValue>(
+  () => SORT_DIR_OPTIONS[selectedSortDirIndex.value]?.value ?? 'asc',
+)
 
 const merchantInfo = ref<MerchantInfo | null>(null)
 const merchantLoading = ref(false)
@@ -49,6 +81,22 @@ async function loadAttributes() {
   }
 }
 
+function onSortByPickerChange(event: { detail: { value: number | string } }) {
+  const idx = Number(event.detail.value)
+  selectedSortByIndex.value =
+    Number.isFinite(idx) && idx >= 0 && idx < SORT_OPTIONS.length ? idx : 0
+}
+
+function onSortDirPickerChange(event: { detail: { value: number | string } }) {
+  const idx = Number(event.detail.value)
+  selectedSortDirIndex.value =
+    Number.isFinite(idx) && idx >= 0 && idx < SORT_DIR_OPTIONS.length ? idx : 0
+}
+
+function toggleShinyOnly() {
+  shinyOnly.value = !shinyOnly.value
+}
+
 async function loadPokemon(reset = false) {
   if (loading.value) return
 
@@ -62,7 +110,7 @@ async function loadPokemon(reset = false) {
   error.value = ''
 
   try {
-    // 仅在有筛选条件时带上 name/attr，首屏请求即为 /api/pokemon?page=1&page_size=30
+    // 仅在有筛选条件时带上 name/attr/filter_code，首屏请求即为 /api/pokemon?page=1&page_size=30
     const query: PokemonQuery = {
       page: currentPage.value,
       page_size: pageSize,
@@ -70,6 +118,9 @@ async function loadPokemon(reset = false) {
     const trimmedName = searchName.value.trim()
     if (trimmedName) query.name = trimmedName
     if (selectedAttr.value) query.attr = selectedAttr.value
+    if (shinyOnly.value) query.shiny_only = true
+    query.order_by = selectedSortBy.value
+    query.order_dir = selectedSortDir.value
 
     const response = await fetchPokemon(query)
 
@@ -212,6 +263,10 @@ watch(selectedAttr, () => {
   void resetAndLoadPokemon()
 })
 
+watch([shinyOnly, selectedSortByIndex, selectedSortDirIndex], () => {
+  void resetAndLoadPokemon()
+})
+
 onLoad(() => {
   void initializePage()
 })
@@ -318,6 +373,38 @@ onUnload(() => {
       <view class="section-head">
         <text class="section-title">属性筛选</text>
         <text class="section-tip" v-if="selectedAttr">当前：{{ selectedAttr }}</text>
+      </view>
+      <view class="sort-bar">
+        <view
+          class="shiny-toggle"
+          :class="{ active: shinyOnly }"
+          @tap="toggleShinyOnly"
+        >
+          <text class="shiny-toggle-box">{{ shinyOnly ? '✓' : '' }}</text>
+          <text class="shiny-toggle-label">仅异色</text>
+        </view>
+        <picker
+          mode="selector"
+          :range="sortByLabels"
+          :value="selectedSortByIndex"
+          @change="onSortByPickerChange"
+        >
+          <view class="filter-picker">
+            <text class="filter-picker-label">{{ sortByLabels[selectedSortByIndex] }}</text>
+            <text class="filter-picker-arrow">▾</text>
+          </view>
+        </picker>
+        <picker
+          mode="selector"
+          :range="sortDirLabels"
+          :value="selectedSortDirIndex"
+          @change="onSortDirPickerChange"
+        >
+          <view class="filter-picker">
+            <text class="filter-picker-label">{{ sortDirLabels[selectedSortDirIndex] }}</text>
+            <text class="filter-picker-arrow">▾</text>
+          </view>
+        </picker>
       </view>
 
       <scroll-view class="attr-scroll" scroll-x>
@@ -578,6 +665,77 @@ onUnload(() => {
 .section-tip {
   font-size: 22rpx;
   color: #5a81c9;
+}
+
+.sort-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.shiny-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: #eef4ff;
+  color: #45638e;
+  font-size: 22rpx;
+}
+
+.shiny-toggle.active {
+  background: linear-gradient(135deg, #2b74ff 0%, #53a0ff 100%);
+  color: #ffffff;
+}
+
+.shiny-toggle-box {
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 6rpx;
+  background: #ffffff;
+  border: 2rpx solid #b9cdee;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+  line-height: 1;
+  color: #2b74ff;
+}
+
+.shiny-toggle.active .shiny-toggle-box {
+  border-color: #ffffff;
+  color: #2b74ff;
+}
+
+.shiny-toggle-label {
+  line-height: 1;
+}
+
+.filter-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: #eef4ff;
+  color: #214887;
+  font-size: 22rpx;
+  max-width: 260rpx;
+}
+
+.filter-picker-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filter-picker-arrow {
+  font-size: 20rpx;
+  color: #5a81c9;
+  line-height: 1;
 }
 
 .attr-scroll {
