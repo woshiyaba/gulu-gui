@@ -91,3 +91,139 @@ async def get_filter_options_by_codes(codes: list[str]) -> list[dict]:
                 codes,
             )
             return await cur.fetchall()
+
+
+_OPS_SELECT_COLUMNS = (
+    "id, code, label, filter_type, order_by, order_dir, sort_order, is_active"
+)
+
+
+async def list_filter_options_for_ops(
+    keyword: str = "",
+    page: int = 1,
+    page_size: int = 10,
+) -> tuple[int, list[dict]]:
+    pool = await get_pool()
+    conditions: list[str] = []
+    params: list = []
+    kw = keyword.strip()
+    if kw:
+        conditions.append("(code ILIKE %s OR label ILIKE %s)")
+        params.extend([f"%{kw}%", f"%{kw}%"])
+    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    offset = (page - 1) * page_size
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"SELECT COUNT(*) AS cnt FROM pokemon_filter_option {where_clause}",
+                params,
+            )
+            total_row = await cur.fetchone() or {}
+            total = int(total_row.get("cnt", 0))
+
+            await cur.execute(
+                f"""
+                SELECT {_OPS_SELECT_COLUMNS}
+                FROM pokemon_filter_option
+                {where_clause}
+                ORDER BY sort_order, id
+                LIMIT %s OFFSET %s
+                """,
+                [*params, page_size, offset],
+            )
+            return total, await cur.fetchall()
+
+
+async def get_filter_option_by_id(option_id: int) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"SELECT {_OPS_SELECT_COLUMNS} FROM pokemon_filter_option WHERE id = %s",
+                (option_id,),
+            )
+            return await cur.fetchone()
+
+
+async def get_filter_option_by_code(code: str) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"SELECT {_OPS_SELECT_COLUMNS} FROM pokemon_filter_option WHERE code = %s",
+                (code,),
+            )
+            return await cur.fetchone()
+
+
+async def create_filter_option(payload: dict) -> dict:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                INSERT INTO pokemon_filter_option
+                    (code, label, filter_type, order_by, order_dir, sort_order, is_active)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING {_OPS_SELECT_COLUMNS}
+                """,
+                (
+                    payload["code"],
+                    payload["label"],
+                    payload["filter_type"],
+                    payload.get("order_by", ""),
+                    payload.get("order_dir", ""),
+                    payload.get("sort_order", 0),
+                    payload.get("is_active", True),
+                ),
+            )
+            row = await cur.fetchone()
+        await conn.commit()
+        return row
+
+
+async def update_filter_option(option_id: int, payload: dict) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                UPDATE pokemon_filter_option
+                SET code = %s,
+                    label = %s,
+                    filter_type = %s,
+                    order_by = %s,
+                    order_dir = %s,
+                    sort_order = %s,
+                    is_active = %s,
+                    updated_at = NOW()
+                WHERE id = %s
+                RETURNING {_OPS_SELECT_COLUMNS}
+                """,
+                (
+                    payload["code"],
+                    payload["label"],
+                    payload["filter_type"],
+                    payload.get("order_by", ""),
+                    payload.get("order_dir", ""),
+                    payload.get("sort_order", 0),
+                    payload.get("is_active", True),
+                    option_id,
+                ),
+            )
+            row = await cur.fetchone()
+        await conn.commit()
+        return row
+
+
+async def delete_filter_option(option_id: int) -> bool:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "DELETE FROM pokemon_filter_option WHERE id = %s",
+                (option_id,),
+            )
+            deleted = cur.rowcount > 0
+        await conn.commit()
+        return deleted

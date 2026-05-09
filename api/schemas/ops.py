@@ -363,3 +363,31 @@ class OpsMarkUpsertRequest(BaseModel):
     zh_description: str = ""
     image: str = ""
     sort_order: int = 0
+
+
+class OpsPokemonFilterOptionItem(BaseModel):
+    id: int
+    code: str
+    label: str
+    filter_type: str
+    order_by: str = ""
+    order_dir: str = ""
+    sort_order: int = 0
+    is_active: bool = True
+
+
+class OpsPokemonFilterOptionListResponse(BaseModel):
+    total: int
+    page: int = 1
+    page_size: int = 10
+    items: list[OpsPokemonFilterOptionItem] = Field(default_factory=list)
+
+
+class OpsPokemonFilterOptionUpsertRequest(BaseModel):
+    code: str
+    label: str
+    filter_type: str
+    order_by: str = ""
+    order_dir: str = ""
+    sort_order: int = 0
+    is_active: bool = True

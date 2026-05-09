@@ -907,3 +907,66 @@ export function updateOpsMark(id: number, payload: OpsMarkPayload): Promise<OpsM
 export function deleteOpsMark(id: number): Promise<void> {
   return http.delete(`/api/ops/marks/${id}`).then(() => undefined)
 }
+
+// ── 图鉴筛选项（pokemon-filter-options） ────────────────
+
+export type OpsPokemonFilterType = 'shiny' | 'sort'
+
+export interface OpsPokemonFilterOptionItem {
+  id: number
+  code: string
+  label: string
+  filter_type: OpsPokemonFilterType
+  order_by: string
+  order_dir: string
+  sort_order: number
+  is_active: boolean
+}
+
+export interface OpsPokemonFilterOptionListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsPokemonFilterOptionItem[]
+}
+
+export interface OpsPokemonFilterOptionPayload {
+  code: string
+  label: string
+  filter_type: OpsPokemonFilterType
+  order_by: string
+  order_dir: string
+  sort_order: number
+  is_active: boolean
+}
+
+export function fetchOpsPokemonFilterOptions(params: {
+  keyword?: string
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsPokemonFilterOptionListResponse> {
+  return http
+    .get<OpsPokemonFilterOptionListResponse>('/api/ops/pokemon-filter-options', { params })
+    .then((r) => r.data)
+}
+
+export function createOpsPokemonFilterOption(
+  payload: OpsPokemonFilterOptionPayload,
+): Promise<OpsPokemonFilterOptionItem> {
+  return http
+    .post<OpsPokemonFilterOptionItem>('/api/ops/pokemon-filter-options', payload)
+    .then((r) => r.data)
+}
+
+export function updateOpsPokemonFilterOption(
+  id: number,
+  payload: OpsPokemonFilterOptionPayload,
+): Promise<OpsPokemonFilterOptionItem> {
+  return http
+    .put<OpsPokemonFilterOptionItem>(`/api/ops/pokemon-filter-options/${id}`, payload)
+    .then((r) => r.data)
+}
+
+export function deleteOpsPokemonFilterOption(id: number): Promise<void> {
+  return http.delete(`/api/ops/pokemon-filter-options/${id}`).then(() => undefined)
+}

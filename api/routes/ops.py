@@ -40,6 +40,9 @@ from api.schemas.ops import (
     OpsMarkItem,
     OpsMarkListResponse,
     OpsMarkUpsertRequest,
+    OpsPokemonFilterOptionItem,
+    OpsPokemonFilterOptionListResponse,
+    OpsPokemonFilterOptionUpsertRequest,
 )
 from api.schemas.banner import BannerItem, BannerListResponse, BannerUpsertRequest
 from api.schemas.personality import (
@@ -735,4 +738,50 @@ async def delete_ops_mark(
     current_user: dict = Depends(get_current_ops_user),
 ):
     await ops_service.delete_mark_for_ops(current_user, mark_id)
+    return Response(status_code=204)
+
+
+# ---------- 图鉴筛选项维护 ----------
+
+
+@router.get("/pokemon-filter-options", response_model=OpsPokemonFilterOptionListResponse)
+async def list_ops_pokemon_filter_options(
+    keyword: str = Query(default=""),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.list_pokemon_filter_options_for_ops(
+        current_user,
+        keyword=keyword,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.post("/pokemon-filter-options", response_model=OpsPokemonFilterOptionItem)
+async def create_ops_pokemon_filter_option(
+    payload: OpsPokemonFilterOptionUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.create_pokemon_filter_option_for_ops(current_user, payload.model_dump())
+
+
+@router.put("/pokemon-filter-options/{option_id}", response_model=OpsPokemonFilterOptionItem)
+async def update_ops_pokemon_filter_option(
+    option_id: int,
+    payload: OpsPokemonFilterOptionUpsertRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.update_pokemon_filter_option_for_ops(
+        current_user, option_id, payload.model_dump()
+    )
+
+
+@router.delete("/pokemon-filter-options/{option_id}", status_code=204)
+async def delete_ops_pokemon_filter_option(
+    option_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    await ops_service.delete_pokemon_filter_option_for_ops(current_user, option_id)
     return Response(status_code=204)

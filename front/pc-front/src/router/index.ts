@@ -97,6 +97,10 @@ const router = createRouter({
           path: 'marks',
           component: () => import('@/views/ops/OpsMarksView.vue'),
         },
+        {
+          path: 'pokemon-filter-options',
+          component: () => import('@/views/ops/OpsPokemonFilterOptionsView.vue'),
+        },
       ],
     },
   ],

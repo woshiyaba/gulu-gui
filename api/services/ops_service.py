@@ -11,7 +11,7 @@ from uuid import uuid4
 
 from fastapi import HTTPException, UploadFile, status
 
-from api.repositories import ops_repository
+from api.repositories import ops_repository, pokemon_filter_repository
 
 OPS_TOKEN_SECRET = os.getenv("OPS_TOKEN_SECRET", "ops-dev-secret")
 OPS_TOKEN_TTL_SECONDS = int(os.getenv("OPS_TOKEN_TTL_SECONDS", "43200"))
@@ -1255,6 +1255,153 @@ async def delete_mark_for_ops(user: dict, mark_id: int) -> None:
         user_id=user["id"],
         resource_type="pokemon_mark",
         resource_id=str(mark_id),
+        action="delete",
+        before_json=before,
+        after_json=None,
+    )
+
+
+# ---------- 图鉴筛选项（pokemon_filter_option）维护 ----------
+
+
+_ALLOWED_FILTER_TYPES = {"shiny", "sort"}
+_ALLOWED_FILTER_ORDER_BY = {
+    "",
+    "no",
+    "total_stats",
+    "hp",
+    "atk",
+    "matk",
+    "def_val",
+    "mdef",
+    "spd",
+}
+_ALLOWED_FILTER_ORDER_DIR = {"", "asc", "desc"}
+
+
+def _normalize_filter_option_payload(payload: dict) -> dict:
+    code = (payload.get("code") or "").strip()
+    label = (payload.get("label") or "").strip()
+    filter_type = (payload.get("filter_type") or "").strip()
+    if not code:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="code 不能为空")
+    if len(code) > 50:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="code 不能超过 50 字符")
+    if not label:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="label 不能为空")
+    if len(label) > 100:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="label 不能超过 100 字符")
+    if filter_type not in _ALLOWED_FILTER_TYPES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"filter_type 必须是 {sorted(_ALLOWED_FILTER_TYPES)} 之一",
+        )
+
+    order_by = (payload.get("order_by") or "").strip()
+    order_dir = (payload.get("order_dir") or "").strip().lower()
+    if order_by not in _ALLOWED_FILTER_ORDER_BY:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"order_by 必须是 {sorted(_ALLOWED_FILTER_ORDER_BY)} 之一",
+        )
+    if order_dir not in _ALLOWED_FILTER_ORDER_DIR:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="order_dir 必须为 asc / desc 或空",
+        )
+    if filter_type == "sort":
+        if not order_by:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="排序类筛选必须指定 order_by",
+            )
+        if not order_dir:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="排序类筛选必须指定 order_dir",
+            )
+
+    return {
+        "code": code,
+        "label": label,
+        "filter_type": filter_type,
+        "order_by": order_by,
+        "order_dir": order_dir,
+        "sort_order": int(payload.get("sort_order") or 0),
+        "is_active": bool(payload.get("is_active", True)),
+    }
+
+
+async def list_pokemon_filter_options_for_ops(
+    user: dict,
+    keyword: str = "",
+    page: int = 1,
+    page_size: int = 10,
+) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    safe_page = max(page or 1, 1)
+    safe_page_size = max(1, min(page_size or 10, 100))
+    total, items = await pokemon_filter_repository.list_filter_options_for_ops(
+        keyword=keyword,
+        page=safe_page,
+        page_size=safe_page_size,
+    )
+    return {"total": total, "page": safe_page, "page_size": safe_page_size, "items": items}
+
+
+async def create_pokemon_filter_option_for_ops(user: dict, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    normalized = _normalize_filter_option_payload(payload)
+    if await pokemon_filter_repository.get_filter_option_by_code(normalized["code"]):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="code 已存在")
+    created = await pokemon_filter_repository.create_filter_option(normalized)
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="pokemon_filter_option",
+        resource_id=str(created["id"]),
+        action="create",
+        before_json=None,
+        after_json=created,
+    )
+    return created
+
+
+async def update_pokemon_filter_option_for_ops(user: dict, option_id: int, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    before = await pokemon_filter_repository.get_filter_option_by_id(option_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="筛选项不存在")
+    normalized = _normalize_filter_option_payload(payload)
+    if normalized["code"] != before["code"]:
+        exists = await pokemon_filter_repository.get_filter_option_by_code(normalized["code"])
+        if exists and int(exists["id"]) != option_id:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="code 已存在")
+    updated = await pokemon_filter_repository.update_filter_option(option_id, normalized)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="筛选项不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="pokemon_filter_option",
+        resource_id=str(option_id),
+        action="update",
+        before_json=before,
+        after_json=updated,
+    )
+    return updated
+
+
+async def delete_pokemon_filter_option_for_ops(user: dict, option_id: int) -> None:
+    ensure_role(user, {"editor", "admin"})
+    before = await pokemon_filter_repository.get_filter_option_by_id(option_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="筛选项不存在")
+    deleted = await pokemon_filter_repository.delete_filter_option(option_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="筛选项不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="pokemon_filter_option",
+        resource_id=str(option_id),
         action="delete",
         before_json=before,
         after_json=None,
