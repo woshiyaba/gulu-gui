@@ -1,0 +1,763 @@
+[
+    {
+      "_id": "66f7c0faa2df66f0080adb93",
+      "avatar_url": "https://game.gtimg.cn/images/rocom/web202407/home/part4/part-4-sprite-5.png",
+      "favorite_food": [
+        "袋袋面包",
+        "布丁奶茶"
+      ],
+      "feature_list": [
+        4
+      ],
+      "is_show": true,
+      "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9t9854VJT7e6nRVD9K9AfxTTocmL1U3zGOObvkeJhP3C8wKGOvDXC9ibb45G793biaxNwklD6NzKOEA/640?wx_fmt=png&amp;from=appmsg",
+      "max_height": 0.78,
+      "max_weight": 7,
+      "mf": 105,
+      "mg": 80,
+      "min_height": 0.54,
+      "min_weight": 5.5,
+      "name": "迪莫",
+      "pet_id": 1,
+      "position": "通过剧情获得",
+      "real_pet_id": "1-1",
+      "sd": 92,
+      "sm": 120,
+      "source_link": "https://rocom.qq.com;https://www.bilibili.com/opus/964744427493916678",
+      "title_name": "永远的伙伴",
+      "type_list": [
+        6
+      ],
+      "web_pet_id": 137,
+      "wf": 105,
+      "wg": 80,
+      "is_deleted": false,
+      "evolution_stage": 0,
+      "comment_total": 86,
+      "like_total": 73,
+      "collection_total": 151,
+      "visit_total": 190207,
+      "updated_at": 1777438028051,
+      "is_public": true,
+      "created_at": 1743036348496,
+      "highest": false,
+      "main_id_list": [],
+      "pre_ids": [],
+      "main_id": 0,
+      "is_highest": false,
+      "is_catch": false,
+      "last_uid": "66f667ea77f6ba7e27409758",
+      "last_updated_at": 1774323557739,
+      "subject_skill_stone": [
+        {
+          "name": "闪光",
+          "count": 1,
+          "id": "66f57b7460f84340ce326905"
+        },
+        {
+          "name": "光刃",
+          "count": 1,
+          "id": "67ecea5716dfbe360c75a2d9"
+        }
+      ],
+      "egg_type_list": [
+        999
+      ],
+      "egg_info": {
+        "max_weight": 0,
+        "min_height": 0,
+        "max_height": 0,
+        "min_weight": 0
+      },
+      "is_tc_egg": false
+    },
+    {
+      "_id": "66f7c0faa2df66f0080adb9d",
+      "gosanke": true,
+      "avatar_url": "",
+      "favorite_food": [
+        "草果多",
+        "哇哇板塘"
+      ],
+      "feature_list": [
+        1
+      ],
+      "is_show": true,
+      "main_id": 1724487044,
+      "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9tGPsrBkDxnaCQgZeAZdtFGaIUib9HWzNy25rLpkicLUP4MzuhcRFoL7AfgeKfyVa3anTNYUgE3BHYA/640?wx_fmt=png&amp;from=appmsg",
+      "max_height": 0.75,
+      "max_weight": 4.6,
+      "mf": 91,
+      "mg": 66,
+      "min_height": 0.53,
+      "min_weight": 3.62,
+      "name": "喵喵",
+      "pet_id": 2,
+      "position": "",
+      "real_pet_id": "2-1",
+      "sd": 33,
+      "sm": 65,
+      "source_link": "https://www.bilibili.com/opus/964373123477536853",
+      "title_name": "草猫精灵",
+      "type_list": [
+        4
+      ],
+      "web_pet_id": 1,
+      "wf": 49,
+      "wg": 66,
+      "is_deleted": false,
+      "evolution_stage": 1,
+      "comment_total": 16,
+      "main_id_list": [
+        1724487044
+      ],
+      "collection_total": 36,
+      "visit_total": 58169,
+      "updated_at": 1777438033332,
+      "like_total": 36,
+      "is_public": true,
+      "created_at": 1743036348829,
+      "is_highest": false,
+      "is_catch": false,
+      "last_uid": "6900eb4d14fbd5918822ee83",
+      "last_updated_at": 1774517713809,
+      "egg_type_list": [
+        5,
+        8
+      ],
+      "egg_info": {
+        "max_weight": 1.84,
+        "min_height": 0.23,
+        "max_height": 0.31,
+        "min_weight": 1.271
+      },
+      "is_tc_egg": true,
+      "is_special": true
+    },
+    {
+      "_id": "66f7c0faa2df66f0080adba0",
+      "gosanke": true,
+      "avatar_url": "",
+      "favorite_food": [
+        "草果多",
+        "哇哇板塘"
+      ],
+      "feature_list": [
+        1
+      ],
+      "is_show": true,
+      "main_id": 1724487044,
+      "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9tGPsrBkDxnaCQgZeAZdtFGCrhsnExo07ggkbts24vzK7cr5KeK7Mq0slMLcwWZ7tYPdVWgPHClDA/640?wx_fmt=png&amp;from=appmsg",
+      "max_height": 0.92,
+      "max_weight": 15.6,
+      "mf": 121,
+      "mg": 87,
+      "min_height": 0.65,
+      "min_weight": 14.2,
+      "name": "喵呜",
+      "pet_id": 3,
+      "position": "",
+      "pre_ids": [
+        "2-1"
+      ],
+      "real_pet_id": "3-1",
+      "sd": 44,
+      "sm": 86,
+      "source_link": "https://www.bilibili.com/opus/964373123477536853",
+      "title_name": "草猫精灵",
+      "type_list": [
+        4
+      ],
+      "web_pet_id": 2,
+      "wf": 65,
+      "wg": 87,
+      "is_deleted": false,
+      "evolution_stage": 2,
+      "comment_total": 8,
+      "main_id_list": [
+        1724487044
+      ],
+      "visit_total": 14113,
+      "updated_at": 1777438034686,
+      "is_public": true,
+      "like_total": 18,
+      "created_at": 1743036348922,
+      "collection_total": 12,
+      "is_highest": false,
+      "is_catch": false,
+      "last_uid": "6900eb4d14fbd5918822ee83",
+      "last_updated_at": 1774517786707,
+      "egg_type_list": [
+        5,
+        8
+      ],
+      "is_tc_egg": false
+    },
+    {
+      "_id": "66f7c0faa2df66f0080adba1",
+      "gosanke": true,
+      "avatar_url": "",
+      "favorite_food": [
+        "草果多",
+        "哇哇板塘"
+      ],
+      "feature_list": [
+        1
+      ],
+      "highest": true,
+      "is_show": true,
+      "main_id": 1724487044,
+      "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9tGPsrBkDxnaCQgZeAZdtFG1st8ficshFgZLfrWOEkDmUj5otKVFI01TmWc5I0w6a02ZhIZ9BQ1h2w/640?wx_fmt=png&amp;from=appmsg",
+      "max_height": 2.15,
+      "max_weight": 125,
+      "mf": 151,
+      "mg": 109,
+      "min_height": 1.5,
+      "min_weight": 105,
+      "name": "魔力猫",
+      "pet_id": 4,
+      "position": "",
+      "pre_ids": [
+        "3-1"
+      ],
+      "real_pet_id": "4-1",
+      "sd": 55,
+      "sm": 108,
+      "source_link": "https://www.bilibili.com/opus/964373123477536853",
+      "title_name": "草猫精灵",
+      "type_list": [
+        4
+      ],
+      "web_pet_id": 3,
+      "wf": 81,
+      "wg": 109,
+      "is_deleted": false,
+      "evolution_stage": 3,
+      "comment_total": 67,
+      "main_id_list": [
+        1724487044
+      ],
+      "visit_total": 109695,
+      "updated_at": 1777438035083,
+      "collection_total": 83,
+      "is_public": true,
+      "like_total": 26,
+      "created_at": 1743036348999,
+      "is_highest": true,
+      "is_catch": false,
+      "last_uid": "6899ce55ac6b4af5dcdfd544",
+      "last_updated_at": 1774517914132,
+      "subject_skill_stone": [
+        {
+          "count": 2,
+          "id": "67f3ad4038a6188e107e6940",
+          "name": "棘突"
+        },
+        {
+          "count": 3,
+          "id": "66f57b7460f84340ce3268df",
+          "name": "光合作用"
+        }
+      ],
+      "egg_type_list": [
+        5,
+        8
+      ],
+      "is_tc": true,
+      "is_tc_egg": false
+    },
+    {
+      "_id": "66f7c0faa2df66f0080adb9e",
+      "gosanke": true,
+      "avatar_url": "",
+      "favorite_food": [
+        "火果多",
+        "霸王麦芽糖"
+      ],
+      "feature_list": [
+        2
+      ],
+      "is_show": true,
+      "main_id": 1724836818,
+      "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9t9854VJT7e6nRVD9K9AfxTgpSJObxjthDRrVf24CTdxdMMPhyibQ7x5w370s87zhn95A1l6JBvwtw/640?wx_fmt=png&amp;from=appmsg",
+      "max_height": 0.71,
+      "max_weight": 8.5,
+      "mf": 43,
+      "mg": 37,
+      "min_height": 0.53,
+      "min_weight": 7.6,
+      "name": "火花",
+      "pet_id": 5,
+      "position": "",
+      "real_pet_id": "5-1",
+      "sd": 78,
+      "sm": 70,
+      "source_link": "https://www.bilibili.com/opus/964373123477536853",
+      "title_name": "火元素精灵",
+      "type_list": [
+        9
+      ],
+      "web_pet_id": 4,
+      "wf": 56,
+      "wg": 84,
+      "is_deleted": false,
+      "evolution_stage": 1,
+      "comment_total": 11,
+      "main_id_list": [
+        1724836818
+      ],
+      "collection_total": 29,
+      "visit_total": 38468,
+      "updated_at": 1777438033812,
+      "like_total": 13,
+      "is_public": true,
+      "created_at": 1743036349080,
+      "is_highest": false,
+      "is_catch": false,
+      "egg_type_list": [
+        1,
+        11
+      ],
+      "egg_info": {
+        "max_weight": 3.4,
+        "min_height": 0.23,
+        "max_height": 0.29,
+        "min_weight": 2.71
+      },
+      "is_tc_egg": true,
+      "is_special": true
+    },
+    {
+      "_id": "66f7c0faa2df66f0080adba4",
+      "gosanke": true,
+      "avatar_url": "",
+      "favorite_food": "",
+      "feature_list": [
+        2
+      ],
+      "is_show": true,
+      "main_id": 1724836818,
+      "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vgfj1vMWwS9v7libnVwdOsT7mC676exZcPFWRrYV1OYd40UrOTbQbFia5hCzI8J08Nfh4nGuyF17cg/640?wx_fmt=png&from=appmsg",
+      "max_height": 1.1,
+      "max_weight": 30.7,
+      "mf": 58,
+      "mg": 49,
+      "min_height": 0.82,
+      "min_weight": 21,
+      "name": "焰火",
+      "pet_id": 6,
+      "position": "行迹不明",
+      "pre_ids": [
+        "5-1"
+      ],
+      "real_pet_id": "6-1",
+      "sd": 104,
+      "sm": 93,
+      "source_link": "https://www.bilibili.com/video/BV1FDsWeWEKc/",
+      "title_name": "火元素精灵",
+      "type_list": [
+        9
+      ],
+      "web_pet_id": 5,
+      "wf": 75,
+      "wg": 111,
+      "is_deleted": false,
+      "evolution_stage": 2,
+      "comment_total": 6,
+      "main_id_list": [
+        1724836818
+      ],
+      "visit_total": 17456,
+      "collection_total": 20,
+      "is_public": true,
+      "like_total": 11,
+      "created_at": 1743036349157,
+      "updated_at": 1777438036284,
+      "is_highest": false,
+      "is_catch": false,
+      "egg_type_list": [
+        1,
+        11
+      ],
+      "is_tc_egg": false
+    },
+    {
+      "_id": "66f7c0faa2df66f0080adba5",
+      "gosanke": true,
+      "avatar_url": "",
+      "favorite_food": "",
+      "feature_list": [
+        2
+      ],
+      "highest": true,
+      "is_show": true,
+      "main_id": 1724836818,
+      "main_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/火神_1774319588819_0.png?expire_at=1774320189&er_sign=b4cca88a012a076474614525e170be3e",
+      "max_height": 2.18,
+      "max_weight": 110,
+      "mf": 72,
+      "mg": 61,
+      "min_height": 1.52,
+      "min_weight": 90.5,
+      "name": "火神",
+      "pet_id": 7,
+      "position": "行迹不明",
+      "pre_ids": [
+        "6-1"
+      ],
+      "real_pet_id": "7-1",
+      "sd": 130,
+      "sm": 117,
+      "source_link": "https://www.bilibili.com/video/BV1FDsWeWEKc/",
+      "title_name": "火焰之灵",
+      "type_list": [
+        9
+      ],
+      "web_pet_id": 6,
+      "wf": 94,
+      "wg": 139,
+      "is_deleted": false,
+      "evolution_stage": 3,
+      "comment_total": 51,
+      "main_id_list": [
+        1724836818
+      ],
+      "like_total": 40,
+      "visit_total": 142885,
+      "updated_at": 1777438036737,
+      "is_public": true,
+      "collection_total": 132,
+      "created_at": 1743036349242,
+      "is_highest": true,
+      "last_uid": "67ed7260032a57e1a29432b1",
+      "last_updated_at": 1774066158313,
+      "is_catch": false,
+      "subject_skill_stone": [
+        {
+          "count": 2,
+          "id": "67dcd36c032a57e1a2acc62f",
+          "name": "持续高温"
+        },
+        {
+          "count": 2,
+          "id": "67ececc31b5df7e766bc7c4f",
+          "name": "怒火"
+        }
+      ],
+      "egg_type_list": [
+        1,
+        11
+      ],
+      "is_tc": true,
+      "is_tc_egg": false
+    },
+    {
+      "_id": "66f7c0faa2df66f0080adb9f",
+      "gosanke": true,
+      "avatar_url": "",
+      "favorite_food": [
+        "水果多",
+        "妙妙冰淇淋"
+      ],
+      "feature_list": [
+        3
+      ],
+      "is_show": true,
+      "main_id": 1724837839,
+      "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9t9854VJT7e6nRVD9K9AfxTbPPfj1BfyajwFm6gL298iat1zyic2W1lnXnTRjlaEyCicR5CFF5G6iamXA/640?wx_fmt=png&amp;from=appmsg",
+      "max_height": 0.65,
+      "max_weight": 4.205,
+      "mf": 79,
+      "mg": 76,
+      "min_height": 0.45,
+      "min_weight": 2.85,
+      "name": "水蓝蓝",
+      "pet_id": 8,
+      "position": "",
+      "real_pet_id": "8-1",
+      "sd": 51,
+      "sm": 75,
+      "source_link": "https://www.bilibili.com/opus/964373123477536853",
+      "title_name": "水元素精灵",
+      "type_list": [
+        10
+      ],
+      "web_pet_id": 7,
+      "wf": 56,
+      "wg": 35,
+      "is_deleted": false,
+      "evolution_stage": 1,
+      "comment_total": 11,
+      "main_id_list": [
+        1724837839
+      ],
+      "visit_total": 31760,
+      "updated_at": 1777438034269,
+      "is_public": true,
+      "like_total": 12,
+      "collection_total": 31,
+      "created_at": 1743036349320,
+      "is_highest": false,
+      "is_catch": false,
+      "egg_type_list": [
+        11
+      ],
+      "egg_info": {
+        "max_weight": 1.334,
+        "min_height": 0.19,
+        "max_height": 0.27,
+        "min_weight": 1.039
+      },
+      "is_tc_egg": true,
+      "is_special": true
+    },
+    {
+      "_id": "66f7c0faa2df66f0080adba6",
+      "gosanke": true,
+      "avatar_url": "",
+      "favorite_food": "",
+      "feature_list": [
+        3
+      ],
+      "is_show": true,
+      "main_id": 1724837839,
+      "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9tGPsrBkDxnaCQgZeAZdtFGBUjOTInOLxdBbRh7aumdBibVh03iad56S1FLJGeqxG7Irs2Hc4v694Kw/640?wx_fmt=png&from=appmsg",
+      "max_height": 1.03,
+      "max_weight": 34,
+      "mf": 106,
+      "mg": 102,
+      "min_height": 0.72,
+      "min_weight": 29.5,
+      "name": "波波拉",
+      "pet_id": 9,
+      "position": "行迹不明",
+      "pre_ids": [
+        "8-1"
+      ],
+      "real_pet_id": "9-1",
+      "sd": 68,
+      "sm": 100,
+      "source_link": "https://www.bilibili.com/video/BV1FDsWeWEKc/",
+      "title_name": "水元素精灵",
+      "type_list": [
+        10
+      ],
+      "web_pet_id": 8,
+      "wf": 75,
+      "wg": 46,
+      "is_deleted": false,
+      "evolution_stage": 2,
+      "comment_total": 2,
+      "main_id_list": [
+        1724837839
+      ],
+      "visit_total": 12688,
+      "updated_at": 1777438037188,
+      "is_public": true,
+      "like_total": 13,
+      "created_at": 1743036349401,
+      "collection_total": 20,
+      "is_highest": false,
+      "is_catch": false,
+      "egg_type_list": [
+        11
+      ],
+      "is_tc_egg": false
+    },
+    {
+      "_id": "66f7c0faa2df66f0080adba7",
+      "gosanke": true,
+      "avatar_url": "",
+      "favorite_food": "",
+      "feature_list": [
+        3
+      ],
+      "highest": true,
+      "is_show": true,
+      "main_id": 1724837839,
+      "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9tGPsrBkDxnaCQgZeAZdtFGaCQBbrvcu4t889hCw3bUTaEOKJ54nZYCzUhDYK30A7Mkia2S1wbaQdw/640?wx_fmt=png&amp;from=appmsg",
+      "max_height": 1.54,
+      "max_weight": 85.5,
+      "mf": 132,
+      "mg": 127,
+      "min_height": 1.08,
+      "min_weight": 77,
+      "name": "水灵",
+      "pet_id": 10,
+      "position": "行迹不明",
+      "pre_ids": [
+        "9-1"
+      ],
+      "real_pet_id": "10-1",
+      "sd": 85,
+      "sm": 125,
+      "source_link": "https://www.bilibili.com/video/BV1FDsWeWEKc/",
+      "title_name": "水之灵",
+      "type_list": [
+        10
+      ],
+      "web_pet_id": 9,
+      "wf": 94,
+      "wg": 58,
+      "is_deleted": false,
+      "evolution_stage": 3,
+      "comment_total": 23,
+      "main_id_list": [
+        1724837839
+      ],
+      "visit_total": 95799,
+      "updated_at": 1777438037623,
+      "like_total": 28,
+      "is_public": true,
+      "collection_total": 103,
+      "created_at": 1743036349477,
+      "is_leader": false,
+      "is_highest": true,
+      "last_uid": "69bb91f7599120be6c6c63b0",
+      "last_updated_at": 1773936869902,
+      "is_catch": false,
+      "subject_skill_stone": [
+        {
+          "count": 2,
+          "id": "66f57b7460f84340ce3268f9",
+          "name": "水炮"
+        },
+        {
+          "count": 2,
+          "id": "67f3ad55037a4b0affe2c29d",
+          "name": "潮汐"
+        }
+      ],
+      "egg_type_list": [
+        11
+      ],
+      "is_tc": true,
+      "is_tc_egg": false
+    },
+    {
+      "_id": "66f7c0faa2df66f0080adba2",
+      "avatar_url": "https://game.gtimg.cn/images/rocom/web202407/home/part4/part-4-sprite-4.png",
+      "feature_list": [
+        6
+      ],
+      "form_name": "蓬松的样子",
+      "is_show": true,
+      "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vgfj1vMWwS9v7libnVwdOsTRKoC5oF5onqcZmJLicWj8hfHhFevpHfsz196t96wvF7Q6I3uL0LAwiaQ/640?wx_fmt=png&from=appmsg",
+      "max_height": 0.94,
+      "max_weight": 17.6,
+      "mf": 45,
+      "mg": 35,
+      "min_height": 0.65,
+      "min_weight": 14.6,
+      "name": "鸭吉吉",
+      "pet_id": 11,
+      "position": "主要出没旧飞艇航道，轻风山、风眠圣所、咕咕浅滩也能发现踪迹。",
+      "real_pet_id": "11-1",
+      "sd": 105,
+      "sm": 136,
+      "source_link": "https://rocom.qq.com",
+      "title_name": "鸭仔精灵",
+      "type_list": [
+        5
+      ],
+      "web_pet_id": 1032,
+      "wf": 55,
+      "wg": 95,
+      "is_deleted": false,
+      "evolution_stage": 1,
+      "comment_total": 20,
+      "visit_total": 82438,
+      "updated_at": 1777438035492,
+      "like_total": 16,
+      "is_public": true,
+      "collection_total": 30,
+      "created_at": 1743036349636,
+      "is_catch": true,
+      "is_highest": true,
+      "last_uid": "690e2679b693b936d06ca846",
+      "last_updated_at": 1773362868934,
+      "subject_skill_stone": [
+        {
+          "count": 1,
+          "id": "66f57b7460f84340ce3268c8",
+          "name": "防御"
+        },
+        {
+          "count": 1,
+          "id": "66f57b7460f84340ce3268bf",
+          "name": "伺机而动"
+        },
+        {
+          "count": 1,
+          "id": "67f3ac48f9a2858b65289683",
+          "name": "吓退"
+        }
+      ],
+      "egg_type_list": [
+        4
+      ],
+      "egg_info": {
+        "max_weight": 7.079,
+        "min_height": 0.28,
+        "max_height": 0.4,
+        "min_weight": 5.11
+      },
+      "is_tc_egg": false
+    },
+    {
+      "_id": "66f7c0faa2df66f0080adbd7",
+      "avatar_url": "",
+      "favorite_food": "",
+      "feature_list": [
+        15
+      ],
+      "is_show": true,
+      "main_id": 1724920343,
+      "main_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/JL_banbanke_1777531196043_0.png?expire_at=1777531799&er_sign=b795ecffb9525d8fb615d405c3a11b93",
+      "max_height": 0.76,
+      "max_weight": 10.5,
+      "mf": 81,
+      "mg": 72,
+      "min_height": 0.53,
+      "min_weight": 7.5,
+      "name": "板板壳",
+      "pet_id": 12,
+      "position": "",
+      "real_pet_id": "39-1",
+      "sd": 45,
+      "sm": 67,
+      "source_link": "",
+      "title_name": "硬壳精灵",
+      "type_list": [
+        10
+      ],
+      "web_pet_id": 16,
+      "wf": 64,
+      "wg": 28,
+      "is_deleted": false,
+      "evolution_stage": 1,
+      "comment_total": 5,
+      "main_id_list": [
+        1724920343
+      ],
+      "visit_total": 35446,
+      "updated_at": 1777531200381,
+      "is_public": true,
+      "collection_total": 24,
+      "created_at": 1743036354024,
+      "like_total": 12,
+      "is_catch": true,
+      "is_highest": false,
+      "form_name": "本来的样子",
+      "egg_type_list": [
+        2
+      ],
+      "egg_info": {
+        "max_height": 0.32,
+        "max_weight": 4.2,
+        "min_height": 0.21,
+        "min_weight": 2.632
+      },
+      "is_tc_egg": true
+    }
+  ]
