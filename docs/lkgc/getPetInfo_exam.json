@@ -1,0 +1,5687 @@
+[
+  {
+    "_id": "66f7c0faa2df66f0080adc45",
+    "avatar_url": "",
+    "desc": "常在半山腰处被发现，独立生活，会收集细小的石头筑巢。背上的石头是体内生长出来的一种分泌物，喜欢钻到石头堆里蹭背，可以把背上的石头打磨得更锋利。",
+    "favorite_food": "",
+    "feature_list": [
+      {
+        "_id": "66f57a0114d9e2960c20278b",
+        "desc": "每受到1次攻击，对攻击自己的精灵造成50威力物理伤害。",
+        "feature_id": 37,
+        "name": "刺肤",
+        "is_deleted": false,
+        "icon_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9sRZBW4MATSHYfYJlD2vmNkxahzcJUt9jculbXQ6ewEceg06vltTIxZfcSFZItmEw9FM9AqNAUreA/640?wx_fmt=png&fro"
+      }
+    ],
+    "is_show": true,
+    "main_id": 0,
+    "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9siaa8qTJCj8JcPx7AKSCBzbtP0FMxcN0G6ugm0jKydnO54XO2FLUCECICxSw4oomvKjbl5lxyTGNQ/640?wx_fmt=png&from=appmsg",
+    "max_height": 0.7,
+    "max_weight": 34,
+    "mf": 45,
+    "mg": 53,
+    "min_height": 0.49,
+    "min_weight": 21,
+    "name": "石肤蜥",
+    "pet_id": 24,
+    "position": "",
+    "real_pet_id": "127-1",
+    "sd": 57,
+    "sm": 69,
+    "source_link": "",
+    "title_name": "蜥蜴精灵",
+    "type_list": [
+      18
+    ],
+    "web_pet_id": 606,
+    "wf": 65,
+    "wg": 54,
+    "is_deleted": false,
+    "evolution_stage": 1,
+    "comment_total": 5,
+    "main_id_list": [],
+    "visit_total": 31124,
+    "like_total": 6,
+    "updated_at": 1777530263924,
+    "is_public": true,
+    "collection_total": 8,
+    "created_at": 1743036363635,
+    "form_name": "本来的样子",
+    "pre_ids": [],
+    "is_catch": true,
+    "is_highest": false,
+    "egg_type_list": [
+      2,
+      10
+    ],
+    "egg_info": {
+      "max_weight": 13.569,
+      "min_height": 0.21,
+      "max_height": 0.29,
+      "min_weight": 6.86
+    },
+    "is_tc_egg": true,
+    "web_pet": {
+      "_id": "563f33cc624a8a3904423f6a1f0a97e8",
+      "AD": 60,
+      "AP": 60,
+      "ability_score": null,
+      "alias": null,
+      "bloodline_id": -1,
+      "bloodline_props": null,
+      "catch_way": "在轻风山，战斗概率出现。",
+      "color": "绿",
+      "created_at": 1562640087,
+      "debuff": [],
+      "defense_sum_ad_ap": 120,
+      "energy": 60,
+      "exp_type": 100,
+      "face_rate": null,
+      "face_score": null,
+      "group_id": "201809",
+      "height": 0.8,
+      "highest": 0,
+      "hobby": "期望被人关注",
+      "img_url": "https://232e4b9c-bcd6-4055-a342-247f57c33539.cdn.bspapp.com/VKCEYUGU-232e4b9c-bcd6-4055-a342-247f57c33539/afe2d9f8-a13f-4733-90eb-9547103fdeaa.png",
+      "introduction": "拥有非常帅气的外形，生活在与世隔绝的山林中，等待着一个有缘人，或许就永远的守望在孤独之中。",
+      "magic_defense": 60,
+      "main_id": 1634795988,
+      "name": "火刺眼蜥蜴",
+      "paradise_props": null,
+      "physical_defense": 60,
+      "pre_ids": [],
+      "race_id": [
+        "779"
+      ],
+      "rebirth_props": null,
+      "recommend_character": "暂无",
+      "recommend_recruit": "暂无",
+      "skill_pet_id": 606,
+      "speed": 60,
+      "sum_ad_ap": 120,
+      "tags": [
+        86
+      ],
+      "total": 360,
+      "weight": 88.3,
+      "media_id": "LeW69lEFPn7FBe8JVrBwNGu_yj5c4FUXjZ1WdRYwE5Ha8B9vhccwxOpN05iI3F32",
+      "delete": false,
+      "is_open": true,
+      "ladder_magic_value": 1,
+      "top": 0,
+      "top_2": 0,
+      "collection_total": 88,
+      "comment_total": 29,
+      "like_total": 15,
+      "visit_total": 51547,
+      "is_public": true,
+      "updated_at": 1763105135099,
+      "related_pet_list": [],
+      "like_at": 1778509864225
+    },
+    "form_list": [
+      "127-1",
+      "1743697990742"
+    ],
+    "has_yise": null,
+    "yise_obj_list": [],
+    "skill_list": {
+      "base": [
+        {
+          "_id": "66f57b7460f84340ce3268c8",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤70%，应对攻击。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hnvm8f2-ycZmRoNwVFMmdHkhcBXHro9ZOUCL5fTiuNWl",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2DBOqgllbqHaObjTLPaLkIlWOZWB2ibYf2BPyV4VCPzuMPt0dDCydoIQ/0?wx_fmt=png",
+          "name": "防御",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 1,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 19319,
+          "is_public": true,
+          "updated_at": 1777137121990,
+          "last_uid": "69b87798d2176ed4903e0739",
+          "last_updated_at": 1773709374560,
+          "comment_total": 1,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "11-1",
+              "count": 1,
+              "name": "鸭吉吉"
+            }
+          ],
+          "rank": 1,
+          "from": 0
+        },
+        {
+          "_id": "67f3ad47037a4b0affe2c219",
+          "category_id": 1,
+          "created_at": 1744022857615,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "泥巴喷射",
+          "power": 60,
+          "take_energy": 1,
+          "type_id": 18,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/地_(1)_1744024478885_0.png?expire_at=1744025077&er_sign=775879e171ab2b7ba3b924636c5b07fa",
+          "is_stone": true,
+          "updated_at": 1744024478770,
+          "visit_total": 610,
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1762152781506",
+              "count": 1,
+              "name": "绒光优优"
+            }
+          ],
+          "rank": 1,
+          "from": 0
+        },
+        {
+          "_id": "67f3ad5fd2cf512251640d55",
+          "category_id": 3,
+          "created_at": 1744022881761,
+          "damage_id": -1,
+          "desc": "自己获得物防+160%和魔防-60%。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "石肤术",
+          "power": null,
+          "take_energy": 3,
+          "type_id": 18,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/地_(17)_1744024626386_0.png?expire_at=1744025225&er_sign=0af272578e8de65b97630f316ee1a747",
+          "is_stone": true,
+          "updated_at": 1744024626912,
+          "visit_total": 2204,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743444064582",
+              "count": 2,
+              "name": "九幽菇"
+            }
+          ],
+          "rank": 6,
+          "from": 0
+        },
+        {
+          "_id": "67f3a4d15c8679990b625ea8",
+          "category_id": 1,
+          "created_at": 1744020691624,
+          "damage_id": 2,
+          "desc": "造成魔伤，1连击。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/普通_101071_1744020690264_0.png?expire_at=1744021289&er_sign=19def3a0a00753a8ed6bee342d0e067c",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": false,
+          "name": "音波弹",
+          "power": 60,
+          "tag_id": [],
+          "take_energy": 1,
+          "type_id": 5,
+          "visit_total": 5101,
+          "comment_total": 1,
+          "updated_at": 3,
+          "collection_total": 1,
+          "rank": 8,
+          "from": 0
+        },
+        {
+          "_id": "67ee22b71b5df7e766c61821",
+          "category_id": 3,
+          "created_at": 1743659703306,
+          "damage_id": -1,
+          "desc": "自己获得物防+140%和速度-30。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/708015_1743659700629_0.png?expire_at=1743660301&er_sign=56ed01a61daa72ef543d95a04c80fe8a",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "钧势",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 18,
+          "visit_total": 5427,
+          "is_stone": true,
+          "updated_at": 1744024642310,
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "59-1",
+              "count": 2,
+              "name": "罗隐"
+            }
+          ],
+          "rank": 10,
+          "from": 0
+        },
+        {
+          "_id": "67f3ad64574f08bac3f0af76",
+          "category_id": 1,
+          "created_at": 1744022886400,
+          "damage_id": 1,
+          "desc": "造成物伤，1连击。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "落石",
+          "power": 55,
+          "take_energy": 1,
+          "type_id": 18,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/地_(17)_1744024538489_0.png?expire_at=1744025137&er_sign=6551086b01ff6083ce54dc3e63b21664",
+          "is_stone": true,
+          "updated_at": 1744024538464,
+          "visit_total": 3648,
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "137-1",
+              "count": 1,
+              "name": "仪式巨像"
+            }
+          ],
+          "collection_total": 1,
+          "rank": 12,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce32691f",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤90%，若上次使用攻击技则本技能能耗-2，应对攻击。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hlp0Go2rw9LylJ4225_0k2GlgW5XVWsIN49yH4BdSFOU",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2ReF1WUHD672WKWDzNQjzN0cD470WINEOslfWPDcv8JnwX7IsXiabzoA/0?wx_fmt=png",
+          "name": "硬化",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 2,
+          "type_id": 18,
+          "is_deleted": false,
+          "visit_total": 6815,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1777137121992,
+          "comment_total": 3,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1762152781506",
+              "count": 1,
+              "name": "绒光优优"
+            }
+          ],
+          "rank": 21,
+          "from": 0
+        },
+        {
+          "_id": "67ee02eb38a6188e10271abc",
+          "category_id": 1,
+          "created_at": 1743651563154,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/107027_1743651561553_0.png?expire_at=1743652162&er_sign=c83e7efb3338802213bece41f6aee8fa",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "陨石",
+          "power": 100,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 18,
+          "visit_total": 4301,
+          "is_stone": true,
+          "updated_at": 1744024548233,
+          "comment_total": 1,
+          "collection_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1762147763080",
+              "count": 2,
+              "name": "流浪鼠"
+            }
+          ],
+          "rank": 30,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce326917",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "造成物伤，敌方3回合无法更换精灵。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hl0T7nSUdtZL0LHUqj9yvHP7zj2OtXpif1aFlHTCp0id",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2LlaQV7SVvbqFbmUxumbUVBVpykW5UmX9VBficDxTDhbZF0coAgFvrkw/0?wx_fmt=png",
+          "name": "石锁",
+          "power": 50,
+          "tag_id": -1,
+          "take_energy": 3,
+          "type_id": 18,
+          "is_deleted": false,
+          "visit_total": 5707,
+          "is_public": true,
+          "updated_at": 2,
+          "is_stone": false,
+          "rank": 35,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce326921",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤50%并脱离，应对攻击。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hvtdiUMnsv9MGcxfQMk0V1zVUNLEbU5uN-h2VxWlTYfH",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2lccz2On4MUDHB2Xx7j1SvMvBsJ8qcB7m10YVvGReKHQvbZDuQlWOag/0?wx_fmt=png",
+          "name": "遁地",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 3,
+          "type_id": 18,
+          "is_deleted": false,
+          "visit_total": 13944,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1777137121992,
+          "comment_total": 2,
+          "collection_total": 1,
+          "like_total": 0,
+          "term_list": [
+            {
+              "_id": "67ecf926133c6c516fe48194",
+              "desc": "精灵离场，并选择队伍里一只其他精灵替换入场。本回合入场的精灵免疫此效果。",
+              "icon_url": "",
+              "name": "脱离",
+              "type": 6
+            },
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743491786001",
+              "count": 1,
+              "name": "鳗尾兽"
+            }
+          ],
+          "rank": 36,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268a3",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "造成物伤，回合结束时，本技能能耗永久-1。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hn_BKhto0bIeQmIh8uEP1Q8NWVtknTptafQLSbvVmiYJ",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2EicBEU0WAKej9liceFDlTcibmzdthGiaWXLhdNIs5r6dcSaFOFpuyP5J5g/0?wx_fmt=png",
+          "name": "冲撞",
+          "power": 135,
+          "tag_id": -1,
+          "take_energy": 7,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 2244,
+          "is_public": true,
+          "updated_at": 6,
+          "last_updated_at": 1774933634473,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "129-1",
+              "count": 2,
+              "name": "石冠王蜥"
+            }
+          ],
+          "rank": 37,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce326916",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "造成物伤，每被攻击1次。本技能能耗永久-1。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hiGVqx8tJqSfab8P3pimcgAAt_gLyi33mnAeMpDk0A6e",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2LQLnwicLCtuJDfGayeEfaZwriaYNxyEDzd8TKSJA1lQZdsO0lsLiaXicicw/0?wx_fmt=png",
+          "name": "岩土暴击",
+          "power": 140,
+          "tag_id": -1,
+          "take_energy": 8,
+          "type_id": 18,
+          "is_deleted": false,
+          "visit_total": 7860,
+          "is_public": true,
+          "comment_total": 2,
+          "is_stone": true,
+          "updated_at": 1744024421979,
+          "last_updated_at": 1774933637084,
+          "collection_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "162-1",
+              "count": 2,
+              "name": "波多西"
+            }
+          ],
+          "rank": 38,
+          "from": 0
+        },
+        {
+          "_id": "67f3a40f032a57e1a2d9bcad",
+          "category_id": 2,
+          "created_at": 1744020497224,
+          "damage_id": -1,
+          "desc": "减伤60%，应对攻击：本回合受到致命伤害时，保留1生命值。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776422450746.png",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "血气",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 2,
+          "type_id": 5,
+          "visit_total": 7692,
+          "comment_total": 3,
+          "updated_at": 1777137121993,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776433859514,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743497595410",
+              "count": 1,
+              "name": "古卷匣魔像"
+            }
+          ],
+          "collection_total": 1,
+          "rank": 41,
+          "from": 0
+        },
+        {
+          "_id": "67e0bb0a38a6188e105cd6ec",
+          "category_id": 1,
+          "created_at": 1742781194286,
+          "created_by": "",
+          "damage_id": 1,
+          "desc": "造成物伤，自己获得物防+70%，应对状态：本次技能威力翻倍，且物防额外+70%。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/铲地_1742781038073_0.png?expire_at=1742781639&er_sign=7b568cbc3f7cb1bfb38544145e4cedf5",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "地陷",
+          "power": 80,
+          "tag_id": [],
+          "take_energy": 5,
+          "type_id": 18,
+          "visit_total": 6230,
+          "comment_total": 1,
+          "updated_at": 1777137118562,
+          "last_updated_at": 1774933637178,
+          "is_stone": true,
+          "collection_total": 2,
+          "term_list": [
+            {
+              "_id": "67ecfa9016dfbe360c7629ee",
+              "desc": "若敌方使用状态技能，则本技能应对成功，本次行动必定先手，且触发应对效果。",
+              "icon_url": "",
+              "name": "应对状态",
+              "note_desc": "应对效果：技能描述中“应对状态：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "129-1",
+              "count": 3,
+              "name": "石冠王蜥"
+            }
+          ],
+          "rank": 47,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce32691e",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤70%，应对攻击：敌方获得物攻-70%。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04huFD4HD3GTm-YtFNkSXzPf-_VOSGkt96o6qaxLkos0C1",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2PpcP6hTY7xf2AIQyUqibhYuT70maautxhldKLyibyQMxseLF6Gj8BLMQ/0?wx_fmt=png",
+          "name": "刺盾",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 2,
+          "type_id": 18,
+          "is_deleted": false,
+          "visit_total": 3278,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1777137121991,
+          "comment_total": 4,
+          "collection_total": 1,
+          "last_updated_at": 1774933637280,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "129-1",
+              "count": 2,
+              "name": "石冠王蜥"
+            }
+          ],
+          "rank": 50,
+          "from": 0
+        }
+      ],
+      "bloodline": [
+        {
+          "_id": "67ecfe80133c6c516fe4b471",
+          "category_id": 1,
+          "created_at": 1743584896477,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/普通_101073_1743584896096_0.png?expire_at=1743585496&er_sign=44743a8dfe5ac92857523b03126dd5d1",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "星星撞击",
+          "power": 90,
+          "tag_id": [],
+          "take_energy": 2,
+          "type_id": 5,
+          "visit_total": 2502,
+          "updated_at": 3,
+          "last_updated_at": 1774933630826,
+          "is_stone": false,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce3268e2",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "<p>减伤80%，应对攻击：回复3能量。</p>",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hhiTFP2LSRPm2euMFuRnVpon5oKt5a2eeRc4E5qD0Y0e",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2GntU1HHaOw3WiatI8lI5T8zyRwS4GIp97lKLIyS1ODV1XxNOUGgnn4g/0?wx_fmt=png",
+          "name": "蜡质膜",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 2,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 6664,
+          "is_public": true,
+          "updated_at": 1777137121991,
+          "last_updated_at": 1774945765493,
+          "last_uid": "69c5e83c88accd79a8dfadd3",
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743444064582",
+              "count": 2,
+              "name": "九幽菇"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce3268f3",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "<p>减伤70%，应对攻击：敌方获得6层灼烧。</p>",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hioSCtffGwLobxAnaZv9Hu_B_MYDmJ1u-6aMCVzLe6TL",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2O8iceU6FtGsEnXIKqgB0MwpMhFMzzup6sbkibFSYpo0d1qeJX0GTtrVw/0?wx_fmt=png",
+          "name": "火焰护盾",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 2,
+          "type_id": 9,
+          "is_deleted": false,
+          "visit_total": 10532,
+          "is_public": true,
+          "comment_total": 1,
+          "updated_at": 1777137121991,
+          "last_uid": "69b87798d2176ed4903e0739",
+          "last_updated_at": 1774609217022,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "6760f198fae75ca7cd71055a",
+              "desc": "回合结束时，造成2%生命的火系伤害，并衰减一半层数。（火系精灵免疫此效果）",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_110_1777025582067_0.png?expire_at=1777026184&er_sign=663c6e87b21deaf6a526fecea4049c6c",
+              "name": "灼烧",
+              "type": 2
+            },
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1021-2",
+              "count": 2,
+              "name": "熔岩布丁"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326901",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "<p>减伤80%，应对攻击：自己获得魔攻+70%。</p>",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hvJ7MtFcsbNwDoRpGGWubrkL_toW_ys23a61Ks7bS54v",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2EQ1acFJahHJyWX7Mia3YjVgm1UXSSmdjsYd16pTianBpsF9zpJoxxgLw/0?wx_fmt=png",
+          "name": "水泡盾",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 2,
+          "type_id": 10,
+          "is_deleted": false,
+          "visit_total": 8047,
+          "is_public": true,
+          "updated_at": 1777137121991,
+          "last_uid": "69c6624647db6ed1b707bc8d",
+          "last_updated_at": 1774709818648,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "41-1",
+              "count": 2,
+              "name": "水泡壳"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67ea471ff9a2858b65b90a51",
+          "category_id": 1,
+          "created_at": 1743406878062,
+          "created_by": "",
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776416250090.png",
+          "is_deleted": false,
+          "name": "虹光冲击",
+          "power": 100,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 6,
+          "is_public": true,
+          "visit_total": 7846,
+          "updated_at": 2,
+          "is_stone": false,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776420800317,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ad63574f08bac3f0af6b",
+          "category_id": 1,
+          "created_at": 1744022886080,
+          "damage_id": 2,
+          "desc": "造成魔伤，本技能位于3号位时威力+40，传动1。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "离子震荡",
+          "power": 90,
+          "take_energy": 3,
+          "type_id": 14,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/机械_(4)_1744042514908_0.png?expire_at=1744043113&er_sign=184dd1264d6c7c5e3cae36afa5ef561b",
+          "is_stone": true,
+          "updated_at": 1777169782034,
+          "visit_total": 15377,
+          "comment_total": 1,
+          "last_updated_at": 1774946715472,
+          "last_uid": "67b412dde850203c2723f88b",
+          "term_list": [
+            {
+              "_id": "67ecfb5c20776526c2fc3267",
+              "name": "传动",
+              "icon_url": "",
+              "type": 6,
+              "desc": "回合开始时，带有“传动X”的技能会向下移动X个位置，该效果可叠加。",
+              "note_desc": "技能顺序从上到下依次计数。",
+              "order_weight": 0
+            }
+          ],
+          "test_desc": "<p><br></p>",
+          "stone_from_list": [
+            {
+              "real_pet_id": "222-1",
+              "count": 1,
+              "name": "权杖-V"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ad6516dfbe360cc3e39f",
+          "category_id": 2,
+          "created_at": 1744022887337,
+          "damage_id": -1,
+          "desc": "减伤70%，应对攻击：回复能量，回复值等于被应对技能能耗的2倍。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "雪替身",
+          "power": null,
+          "take_energy": 2,
+          "type_id": 11,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776423686952.png",
+          "updated_at": 1777137121993,
+          "visit_total": 10191,
+          "is_stone": true,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776433813984,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "126-1",
+              "count": 2,
+              "name": "雪巨人"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326931",
+          "category_id": 1,
+          "damage_id": 2,
+          "desc": "蓄力，对敌方造成魔法伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hutkbZr-Ezfk9zqM0q_CCI9KegDT3HABX9-Yt1ZfYSqK",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2ibnbDQYM7Cf8LROQ9vEf87jH99pyITiaw5FtNyhCYH9vniac6scwgm92w/0?wx_fmt=png",
+          "name": "升龙咆哮",
+          "power": 200,
+          "tag_id": -1,
+          "take_energy": 3,
+          "type_id": 15,
+          "is_deleted": false,
+          "visit_total": 11745,
+          "is_public": true,
+          "comment_total": 0,
+          "updated_at": 1777137115172,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "6760f1c62f00b587adad8e7c",
+              "desc": "该技能需要先蓄力1回合，下回合才能释放。蓄力期间免疫所有离场效果。",
+              "icon_url": "",
+              "name": "蓄力",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "166-1",
+              "count": 1,
+              "name": "伊兰亚龙"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326940",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤80%，应对攻击：自己回合结束返场。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hlAnnLl-RB7a0HzgV5HipQ8UL8xp0n56_1HixokHSkxK",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2EZibWUK7CmASibkGTtw566Xz9OunE8pPPtPOtH2VRibHDQtA7xGOH7SHg/0?wx_fmt=png",
+          "name": "集中",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 2,
+          "type_id": 12,
+          "is_deleted": false,
+          "visit_total": 3784,
+          "is_public": true,
+          "updated_at": 1777137124099,
+          "last_updated_at": 1774933633767,
+          "is_stone": false,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            },
+            {
+              "_id": "67ecfb0316dfbe360c762d8c",
+              "desc": "精灵离场，并立即入场。本回合入场的精灵免疫此效果。",
+              "icon_url": "",
+              "name": "返场",
+              "type": 6
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ad3d1b5df7e766fd4f7b",
+          "category_id": 1,
+          "created_at": 1744022847594,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "溃烂触碰",
+          "power": 60,
+          "take_energy": 1,
+          "type_id": 7,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/毒_(2)_1744042558617_0.png?expire_at=1744043157&er_sign=856965bcceb00fcbf9ccc11d0285ebb1",
+          "is_stone": false,
+          "updated_at": 1744042558961,
+          "visit_total": 811,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326958",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤70%，紧急脱离，应对攻击：下个入场精灵获得减伤。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hgUkVb2NzDHtxj6TLqqJM4YdqDxcrrqctDTMzvNi432H",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2shyOVGIrfEjuUYZNHPjIQavZRw8K9ibIoicetibet5iaTNR2tuicM5HuicQA/0?wx_fmt=png",
+          "name": "掩护",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 2,
+          "type_id": 8,
+          "is_deleted": false,
+          "visit_total": 17367,
+          "is_public": true,
+          "like_total": 1,
+          "updated_at": 1777137804057,
+          "comment_total": 1,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "name": "应对攻击",
+              "icon_url": "",
+              "type": 6,
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "order_weight": 0
+            },
+            {
+              "_id": "67ecfb1116dfbe360c762df3",
+              "name": "紧急脱离",
+              "icon_url": "",
+              "type": 6,
+              "desc": "精灵离场，并随机选择队伍里一只其他精灵替换入场。本回合入场的精灵免疫此效果。",
+              "note_desc": "",
+              "order_weight": 0
+            }
+          ],
+          "test_desc": "<p><br></p>",
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743496843211",
+              "count": 1,
+              "name": "陨星虫"
+            }
+          ],
+          "collection_total": 1,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce32695e",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "造成物伤，2连击，若后手攻击，改为3连击。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hmUq7VyE1FsLb6jF4EoQDBP2R-ednSa29oMl0f0FfoUW",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz29aWZLJ8K2p0GFtt2d9g0dicCR4Lv7y5br5CLOZbmhAR7l1NDESx3tQA/0?wx_fmt=png",
+          "name": "反击拳",
+          "power": 25,
+          "tag_id": 2,
+          "take_energy": 2,
+          "type_id": 17,
+          "is_deleted": false,
+          "visit_total": 4639,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1744026066107,
+          "comment_total": 2,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743497238656",
+              "count": 2,
+              "name": "画间沉铁兽"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce32696f",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤50%，迅捷，应对攻击。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hlL6lOFCYD5rPqKde5HKffyf-fcuGRc8smYTmczYCWrH",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2icp1lAazzOnVmWibaJwLWgAHhChYXgmoibibxicBUD729Fq3Oh2kaQs9HdQ/0?wx_fmt=png",
+          "name": "风墙",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 2,
+          "type_id": 2,
+          "is_deleted": false,
+          "visit_total": 30535,
+          "is_public": true,
+          "comment_total": 3,
+          "updated_at": 1777137121992,
+          "is_stone": false,
+          "term_list": [
+            {
+              "_id": "6760ee67327bfab2b1815e09",
+              "desc": "通过主动更换精灵的方式入场时，使用第一个能量满足要求，并带有迅捷的技能。",
+              "icon_url": "",
+              "name": "迅捷",
+              "type": 6
+            },
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce3268c6",
+          "category_id": 1,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hqRElUFp1i2MFfStLE1BXtbVoIlkWUvyMdETshL5C8Ch",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/萌_(4)_1744043089577_0.png?expire_at=1744043687&er_sign=d911dae492196b53af0e5638c76bc5d5",
+          "name": "魅惑",
+          "power": 60,
+          "tag_id": -1,
+          "take_energy": 1,
+          "type_id": 16,
+          "is_deleted": false,
+          "visit_total": 2427,
+          "is_public": true,
+          "updated_at": 1744043089550,
+          "is_stone": false,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ad3b38a6188e107e691f",
+          "category_id": 2,
+          "created_at": 1744022845330,
+          "damage_id": -1,
+          "desc": "减伤80%，应对攻击：自己获得魔防+70%。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "虚化",
+          "power": null,
+          "take_energy": 2,
+          "type_id": 3,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776414884084.png",
+          "is_stone": true,
+          "updated_at": 1777137121993,
+          "visit_total": 7376,
+          "comment_total": 3,
+          "collection_total": 1,
+          "last_updated_at": 1776420825604,
+          "last_uid": "69040c958d04173d7edb740e",
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "63-1",
+              "count": 2,
+              "name": "幽影树"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326991",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤90%，应对攻击：自己获得50%吸血。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hsMjxvRwJjR2QCi96Y8ny8upY_jf16-AZEsUPiI6Zguw",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz29hpA7cdXXk5fzoYOXsVxV6BAuLoB2v4655qibHOwSaJm2ZQeNQl54Wg/0?wx_fmt=png",
+          "name": "等价交换",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 3,
+          "type_id": 1,
+          "is_deleted": false,
+          "visit_total": 33898,
+          "is_public": true,
+          "updated_at": 1777137121992,
+          "is_stone": false,
+          "term_list": [
+            {
+              "_id": "6760f1f940d6bdf2bb326016",
+              "desc": "造成伤害时，根据吸血比例和造成伤害值，回复生命。",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_109_1777043259353_0.png?expire_at=1777043861&er_sign=654b49bdee4f2e67a905a58b52b40b7e",
+              "name": "吸血",
+              "type": 1
+            },
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce32699b",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤80%，应对攻击：敌方获得2层星陨印记。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hj8RKUmYxMCnaUkRhwZ_NF_CrgR59jv5iNM2946iIRLz",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2gdiaJHRXRdrHYDuWlajvOyhqx2SqBttjYIuCWlmY1q1rPHjcfemMD7g/0?wx_fmt=png",
+          "name": "冥想",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 3,
+          "type_id": 13,
+          "is_deleted": false,
+          "visit_total": 5461,
+          "is_public": true,
+          "updated_at": 1777137121992,
+          "last_updated_at": 1774933633919,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "6760f1f02f00b587adad911a",
+              "desc": "精灵下场后印记不会消失，新入场的精灵会继承印记效果。精灵最多同时拥有1种正面印记和1种负面印记。",
+              "icon_url": "",
+              "name": "印记",
+              "type": 3,
+              "order_weight": 99
+            },
+            {
+              "_id": "6760f17b2f00b587adad8a6b",
+              "desc": "印记效果，使用非幻系技能攻击拥有此印记的精灵时，会触发星陨印记，消耗全部星陨层\n数，对其造成额外的幻系伤害。",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_220_1777022461444_0.png?expire_at=1777023063&er_sign=77ea4bb15489a9c0c4b6c05f376d3e58",
+              "name": "星陨印记",
+              "type": 3
+            },
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "218-1",
+              "count": 2,
+              "name": "月牙雪熊"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326914",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hkXWJkasYjh3xhELPq87jPILO8D3GBVcQqy37nYlZ2nI",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz27OVosfc65DYBBePGszvLWCOmrYYQ4pMcE0CszQ9FiarVHu51kjUDUmg/0?wx_fmt=png",
+          "name": "跺地",
+          "power": 80,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 18,
+          "is_deleted": false,
+          "visit_total": 7033,
+          "is_public": true,
+          "updated_at": 2,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "62-1",
+              "count": 1,
+              "name": "记忆石"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        }
+      ],
+      "stone": [
+        {
+          "_id": "67ecf719f12561a4f135ebf0",
+          "category_id": 1,
+          "created_at": 1743583001479,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/111018_1743582996576_0.png?expire_at=1743583596&er_sign=2ce569e9e3f095d8e0258080569cd4de",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "瘴气喷射",
+          "power": 100,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 7,
+          "visit_total": 1254,
+          "is_stone": true,
+          "updated_at": 1744025797355,
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "217-1",
+              "count": 2,
+              "name": "嘟嘟锅"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3ad4af9a2858b6528a48b",
+          "category_id": 3,
+          "created_at": 1744022860140,
+          "damage_id": -1,
+          "desc": "敌方每有1层中毒效果，敌方获得双攻-30%。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "腐化",
+          "power": null,
+          "take_energy": 1,
+          "type_id": 7,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/毒_(5)_1744025721430_0.png?expire_at=1744026319&er_sign=522b239b0385936da37213ffd9b631c7",
+          "is_stone": true,
+          "updated_at": 1777137098529,
+          "visit_total": 3432,
+          "comment_total": 1,
+          "term_list": [
+            {
+              "_id": "6760f18b40d6bdf2bb325cc6",
+              "desc": "回合结束时，造成3%生命的毒系伤害。(毒系精灵免疫此效果)",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_45_1777025503634_0.png?expire_at=1777026105&er_sign=0749936ea7cff1592b4a8c3704be31f2",
+              "name": "中毒",
+              "type": 2
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743495012070",
+              "count": 1,
+              "name": "裘卡"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3ad4220776526c26cb330",
+          "category_id": 1,
+          "created_at": 1744022853096,
+          "damage_id": 1,
+          "desc": "造成物伤，双方体重差越大，本次技能威力越高。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "砂糖弹球",
+          "power": 0,
+          "take_energy": 2,
+          "type_id": 16,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/215003_1777274943195_0.png?expire_at=1777275544&er_sign=94a2e7d978a8ff49164ec13bcc541c99",
+          "updated_at": 1777274945579,
+          "visit_total": 3650,
+          "is_stone": true,
+          "term_list": [],
+          "test_desc": "<p><br></p>",
+          "stone_from_list": [
+            {
+              "real_pet_id": "188-1",
+              "count": 2,
+              "name": "魔眷鸟"
+            }
+          ],
+          "comment_total": 1,
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3ad48037a4b0affe2c222",
+          "category_id": 1,
+          "created_at": 1744022858604,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "碰爪",
+          "power": 60,
+          "take_energy": 1,
+          "type_id": 16,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/萌_(4)_1744283985362_0.png?expire_at=1744284585&er_sign=dbd601c91c019e460a997088bc9ee949",
+          "updated_at": 1744283992576,
+          "visit_total": 1261,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "80-1",
+              "count": 1,
+              "name": "菊花梨"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3ad4d65abb5a8083dcd34",
+          "category_id": 2,
+          "created_at": 1744022863861,
+          "damage_id": -1,
+          "desc": "减伤90%，应对攻击：敌方获得1层萌化。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "捧杀",
+          "power": null,
+          "take_energy": 4,
+          "type_id": 16,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/萌_(4)_1744027133351_0.png?expire_at=1744027732&er_sign=a26e77704f45a57aa28579dcd5a783db",
+          "is_stone": true,
+          "updated_at": 1777137121993,
+          "visit_total": 8123,
+          "comment_total": 2,
+          "like_total": 1,
+          "term_list": [
+            {
+              "_id": "6760f21f0a05c09259c35da8",
+              "desc": "退化到上一阶，种族资质相应降低。（可退化的精灵才可以获得萌化，下场不会消失）",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_104_1777026006197_0.png?expire_at=1777026607&er_sign=958616674ca4c18133280470e958804b",
+              "name": "萌化",
+              "type": 2
+            },
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1762151565844",
+              "count": 2,
+              "name": "秩序鱿墨"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268b7",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己获得物攻+100%。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hi4dPF9YzqAhjUvSRWPYydIt80upPrz6biMSrZJWy5uw",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2hNq3D3nFPUN7YTKf3rA7Ce4HHkvZ1fNBXJI8uHjZm6OHZticcwiaaib6Q/0?wx_fmt=png",
+          "name": "力量增效",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 1,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 22734,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1744020618670,
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743497238656",
+              "count": 2,
+              "name": "画间沉铁兽"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268c4",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "<p>敌方获得1层棘刺印记。</p>",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hu0fzjvWSR86urmrkQkaBd7e27uOBGkb09e6zUWkfb6A",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2f1ZoiakWdmAhia27nrhgyyNRmBkXNvtEVuLa1LL89JLS03J1CY4BibSAg/0?wx_fmt=png",
+          "name": "棘刺",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 14557,
+          "is_public": true,
+          "comment_total": 7,
+          "is_stone": true,
+          "updated_at": 1777137200114,
+          "last_uid": "68fc8abd095d887bc001b4d6",
+          "last_updated_at": 1776213265740,
+          "term_list": [
+            {
+              "_id": "6760f1f02f00b587adad911a",
+              "name": "印记",
+              "icon_url": "",
+              "type": 3,
+              "desc": "精灵下场后印记不会消失，新入场的精灵会继承印记效果。精灵最多同时拥有1种正面印记和1种负面印记。",
+              "note_desc": "",
+              "order_weight": 99
+            },
+            {
+              "_id": "67ecfac4f12561a4f1360c59",
+              "name": "棘刺印记",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_66_1777022228514_0.png?expire_at=1777022830&er_sign=2d5e4210e99c8db53f7cd95d09e0d0d1",
+              "type": 3,
+              "desc": "印记效果，场上的精灵离场后，更换入场的精灵失去6%生命。",
+              "note_desc": "",
+              "order_weight": 0
+            }
+          ],
+          "test_desc": "<p><br></p>",
+          "stone_from_list": [
+            {
+              "real_pet_id": "222-1",
+              "count": 3,
+              "name": "权杖-V"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268c9",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤60%，应对攻击：自己获得物攻和魔攻+40%。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hgx9YvmGLQEtNjTGBKs5dcwjIc4bCccG1TupxQyfbiKb",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2IxV79oQuuDjKic71kBfhaMD9qJzPtP7fMKrRDYSFRcexDsqiar08ojnQ/0?wx_fmt=png",
+          "name": "防反",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 2,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 5470,
+          "is_public": true,
+          "updated_at": 1777137121991,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743497533224",
+              "count": 2,
+              "name": "古卷执政官"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268cb",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤100%，应对攻击：减免的伤害变为回复自己生命，且本技能能耗永久+2。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hqMXXVTvFLcl1Oqq5SgS8eSVu7zJuJXVDgbCQwQLSG9u",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2vkVgwsPC5UgKaZ83TxVNKJRKB3yMwnZ62sJq6XQYlRcUZXRp5JvUuA/0?wx_fmt=png",
+          "name": "无畏之心",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 5,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 13672,
+          "is_public": true,
+          "comment_total": 3,
+          "updated_at": 1777137121991,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "92-1",
+              "count": 2,
+              "name": "蹦床松鼠"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268ce",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "每回合随机变成自己未携带的技能，且该技能能耗-2。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hvla12Ms8EwvrhdHtQx9UhCn-qocxNrxUTu-ScfowSW5",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/undefined_1778061878185.png",
+          "name": "复写",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 0,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 9840,
+          "is_public": true,
+          "comment_total": 3,
+          "collection_total": 1,
+          "updated_at": 6,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "143-1",
+              "count": 1,
+              "name": "咔咔鸟"
+            }
+          ],
+          "last_uid": "69ba238385d19fd7c443fc06",
+          "last_updated_at": 1778109860949,
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f39c9ad2cf512251636518",
+          "category_id": 1,
+          "created_at": 1744018588092,
+          "damage_id": 1,
+          "desc": "造成物理伤害，先手-1。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776415606913.png",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "后发制人",
+          "power": 155,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 5,
+          "visit_total": 4523,
+          "comment_total": 1,
+          "updated_at": 6,
+          "last_updated_at": 1776420821662,
+          "last_uid": "69040c958d04173d7edb740e",
+          "stone_from_list": [
+            {
+              "real_pet_id": "70-1",
+              "count": 1,
+              "name": "瞌睡王"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3a62ef9a2858b65282b94",
+          "category_id": 2,
+          "created_at": 1744021040698,
+          "damage_id": -1,
+          "desc": "<p>减伤80%，应对攻击：期间自己每次受到伤害，获得双攻+40%。</p>",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776422178904.png",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "嗜痛",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 2,
+          "type_id": 5,
+          "visit_total": 12845,
+          "comment_total": 2,
+          "updated_at": 1777137121993,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776433862425,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1005-1",
+              "count": 2,
+              "name": "黑猫巫师"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce326915",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "造成物伤，应对状态：额外打断被应对技能。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hmJ92FEVY015M8C2njO9z8-7AaW4BYaFVRIwhFTV7hpZ",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2LLdjM0GIA66Zw5ghob3v4mGOMumGn5Sx0ajiaLDa7DR3SpCYTRUSfmQ/0?wx_fmt=png",
+          "name": "地刺",
+          "power": 95,
+          "tag_id": 1,
+          "take_energy": 3,
+          "type_id": 18,
+          "is_deleted": false,
+          "visit_total": 27419,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1777137118560,
+          "comment_total": 3,
+          "collection_total": 3,
+          "term_list": [
+            {
+              "_id": "67ecfa11133c6c516fe48a3f",
+              "desc": "使敌方本次无法释放对应技能。",
+              "icon_url": "",
+              "name": "打断",
+              "type": 6
+            },
+            {
+              "_id": "67ecfa9016dfbe360c7629ee",
+              "desc": "若敌方使用状态技能，则本技能应对成功，本次行动必定先手，且触发应对效果。",
+              "icon_url": "",
+              "name": "应对状态",
+              "note_desc": "应对效果：技能描述中“应对状态：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743495363415",
+              "count": 2,
+              "name": "泥吼牙"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3ad60037a4b0affe2c2f5",
+          "category_id": 2,
+          "created_at": 1744022882568,
+          "damage_id": -1,
+          "desc": "减伤90%，应对攻击。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "不动如山",
+          "power": null,
+          "take_energy": 2,
+          "type_id": 18,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776423753154.png",
+          "updated_at": 1777137121993,
+          "visit_total": 2309,
+          "is_stone": true,
+          "comment_total": 1,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776433812977,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "95-1",
+              "count": 2,
+              "name": "布克棱岩"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "69c224d459063e84c1c74936",
+          "category_id": 1,
+          "created_at": 1774331092980,
+          "damage_id": 2,
+          "desc": "造成魔伤，敌方获得2层中毒。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/毒_(10)_1774331091043_0.png?expire_at=1774331690&er_sign=2a8fc9e303b208f37b05c0412d2b1354",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "腐蚀酸液",
+          "power": 35,
+          "tag_id": [],
+          "take_energy": 2,
+          "type_id": 7,
+          "visit_total": 2600,
+          "updated_at": 1777137098530,
+          "term_list": [
+            {
+              "_id": "6760f18b40d6bdf2bb325cc6",
+              "desc": "回合结束时，造成3%生命的毒系伤害。(毒系精灵免疫此效果)",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_45_1777025503634_0.png?expire_at=1777026105&er_sign=0749936ea7cff1592b4a8c3704be31f2",
+              "name": "中毒",
+              "type": 2
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "117-1",
+              "count": 1,
+              "name": "古啦多"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        }
+      ]
+    },
+    "egg_list": [
+      {
+        "_id": "67dab45d2543d1a3e369c1fa",
+        "category_id": 6,
+        "collect_count": 0,
+        "collection_total": 0,
+        "comment_total": 0,
+        "created_at": 1742386269096,
+        "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/egg_huociyanxiyi_1777529863043_0.png?expire_at=1777530465&er_sign=7f2f2a7a16a81cceee5ad919001aa15e",
+        "is_deleted": false,
+        "is_public": true,
+        "name": "石肤蜥",
+        "visit_total": 12,
+        "desc": "某种精灵的蛋，通过观察其花纹可以获得一些头绪。",
+        "pet_list": [
+          {
+            "name": "石肤蜥",
+            "form_name": "本来的样子",
+            "pet_id": "127-1",
+            "_id": "66f7c0faa2df66f0080adc45"
+          },
+          {
+            "name": "石刺蜥",
+            "form_name": "本来的样子",
+            "pet_id": "128-1",
+            "_id": "66f7c0faa2df66f0080adc46"
+          },
+          {
+            "name": "石冠王蜥",
+            "form_name": "本来的样子",
+            "pet_id": "129-1",
+            "_id": "66f7c0faa2df66f0080adc47"
+          }
+        ],
+        "skill_list": [],
+        "sub_name": ""
+      }
+    ],
+    "fruit_list": [
+      {
+        "_id": "67dab5b3d5921e858bba65ad",
+        "category_id": 7,
+        "collect_count": 0,
+        "collection_total": 1,
+        "comment_total": 1,
+        "created_at": 1742386611527,
+        "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/prop/7/1742386579538.png",
+        "is_deleted": false,
+        "is_public": true,
+        "name": "石肤蜥",
+        "visit_total": 204,
+        "desc": "放入眠枭庇护所后能吸引某种精灵过来栖息，观察其花纹可以知道什么精灵会被吸引。",
+        "pet_list": [
+          {
+            "name": "石肤蜥",
+            "form_name": "本来的样子",
+            "pet_id": "127-1",
+            "_id": "66f7c0faa2df66f0080adc45"
+          },
+          {
+            "name": "石刺蜥",
+            "form_name": "本来的样子",
+            "pet_id": "128-1",
+            "_id": "66f7c0faa2df66f0080adc46"
+          },
+          {
+            "name": "石冠王蜥",
+            "form_name": "本来的样子",
+            "pet_id": "129-1",
+            "_id": "66f7c0faa2df66f0080adc47"
+          },
+          {
+            "name": "石肤蜥",
+            "form_name": "球球尾巴的样子",
+            "pet_id": "1743697990742",
+            "_id": "67eeb846133c6c516fffdfb3"
+          },
+          {
+            "name": "石刺蜥",
+            "form_name": "球球尾巴的样子",
+            "pet_id": "1743698362996",
+            "_id": "67eeb9ba20776526c21523ea"
+          },
+          {
+            "name": "石冠王蜥",
+            "form_name": "球球尾巴的样子",
+            "pet_id": "1743698406131",
+            "_id": "67eeb9e6133c6c516ffff342"
+          }
+        ],
+        "skill_list": [],
+        "sub_name": "",
+        "updated_at": 1777530296745
+      }
+    ],
+    "evolution_list": [
+      {
+        "_id": "67eeba235c8679990b173697",
+        "is_deleted": false,
+        "main_id": 1743834075116,
+        "stage_1": {
+          "_id": "66f7c0faa2df66f0080adc45",
+          "form_name": "本来的样子",
+          "highest": false,
+          "main_id": 0,
+          "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9siaa8qTJCj8JcPx7AKSCBzbtP0FMxcN0G6ugm0jKydnO54XO2FLUCECICxSw4oomvKjbl5lxyTGNQ/640?wx_fmt=png&from=appmsg",
+          "name": "石肤蜥",
+          "pet_id": 84,
+          "real_pet_id": "127-1",
+          "stage": 1
+        },
+        "stage_2": {
+          "_id": "66f7c0faa2df66f0080adc46",
+          "form_name": "本来的样子",
+          "highest": false,
+          "main_id": 0,
+          "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vFd9mWTV4EGJyHsvoVRicic3ZtrUhicxkOSKVkLSaV3SF6Hs5HN6Xt7UxiaiccC2AZlZS0JmXEp6HNHDw/640?wx_fmt=png&amp;from=appmsg",
+          "name": "石刺蜥",
+          "pet_id": 85,
+          "pre_ids": [
+            "127-1"
+          ],
+          "real_pet_id": "128-1",
+          "stage": 2,
+          "rank": 32
+        },
+        "stage_3": {
+          "_id": "66f7c0faa2df66f0080adc47",
+          "highest": true,
+          "main_id": 0,
+          "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vFd9mWTV4EGJyHsvoVRicic3Lic8iaJBra5NQqjcJBDn6MMql5R28BozJUSb7FxGz8cksLiaictAbrxibjg/640?wx_fmt=png&amp;from=appmsg",
+          "name": "石冠王蜥",
+          "pet_id": 86,
+          "pre_ids": [
+            "128-1"
+          ],
+          "real_pet_id": "129-1",
+          "stage": 3,
+          "form_name": "本来的样子",
+          "rank": 48
+        },
+        "stage_len": 3
+      }
+    ],
+    "co_creation_user": []
+  },
+  {
+    "_id": "66f7c0faa2df66f0080adb93",
+    "avatar_url": "https://game.gtimg.cn/images/rocom/web202407/home/part4/part-4-sprite-5.png",
+    "desc": "这是关于勇气的故事，他很脆弱却也不曾退缩；这是关于梦想的故事，梦很简单却也执着。这就是我，迪莫。",
+    "favorite_food": [
+      "袋袋面包",
+      "布丁奶茶"
+    ],
+    "feature_list": [
+      {
+        "_id": "66f57a0114d9e2960c20276a",
+        "desc": "造成克制伤害后，获得攻防速+20%，并回复2能量。",
+        "feature_id": 4,
+        "icon_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9sGTaicQELD1LwYYpicHu7pb0QjwUJxLr6yLxgxaWb3dwJ84PHotMWXM9Ul2XQjFnmomr35Utp29icuA/640?wx_fmt=png&",
+        "name": "最好的伙伴",
+        "is_deleted": false,
+        "last_uid": "67e3d20e20776526c26e03d6",
+        "last_updated_at": 1773289868443
+      }
+    ],
+    "is_show": true,
+    "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9t9854VJT7e6nRVD9K9AfxTTocmL1U3zGOObvkeJhP3C8wKGOvDXC9ibb45G793biaxNwklD6NzKOEA/640?wx_fmt=png&amp;from=appmsg",
+    "max_height": 0.78,
+    "max_weight": 7,
+    "mf": 105,
+    "mg": 80,
+    "min_height": 0.54,
+    "min_weight": 5.5,
+    "name": "迪莫",
+    "pet_id": 1,
+    "position": "通过剧情获得",
+    "real_pet_id": "1-1",
+    "sd": 92,
+    "sm": 120,
+    "source_link": "https://rocom.qq.com;https://www.bilibili.com/opus/964744427493916678",
+    "title_name": "永远的伙伴",
+    "type_list": [
+      6
+    ],
+    "web_pet_id": 137,
+    "wf": 105,
+    "wg": 80,
+    "is_deleted": false,
+    "evolution_stage": 0,
+    "comment_total": 86,
+    "like_total": 73,
+    "collection_total": 151,
+    "visit_total": 190189,
+    "updated_at": 1777438028051,
+    "is_public": true,
+    "created_at": 1743036348496,
+    "highest": false,
+    "main_id_list": [],
+    "pre_ids": [],
+    "main_id": 0,
+    "is_highest": false,
+    "is_catch": false,
+    "last_uid": "66f667ea77f6ba7e27409758",
+    "last_updated_at": 1774323557739,
+    "subject_skill_stone": [
+      {
+        "name": "闪光",
+        "count": 1,
+        "id": "66f57b7460f84340ce326905"
+      },
+      {
+        "name": "光刃",
+        "count": 1,
+        "id": "67ecea5716dfbe360c75a2d9"
+      }
+    ],
+    "egg_type_list": [
+      999
+    ],
+    "egg_info": {
+      "max_weight": 0,
+      "min_height": 0,
+      "max_height": 0,
+      "min_weight": 0
+    },
+    "is_tc_egg": false,
+    "web_pet": {
+      "_id": "563f33cc624a8a3a044241ba2a70a025",
+      "AD": 102,
+      "AP": 120,
+      "ability_score": null,
+      "alias": [],
+      "bloodline_id": -1,
+      "bloodline_props": [],
+      "catch_way": "暂时无法获得。",
+      "color": "蓝",
+      "created_at": 1562640087,
+      "debuff": [],
+      "defense_sum_ad_ap": 178,
+      "energy": 90,
+      "exp_type": 100,
+      "face_rate": null,
+      "face_score": null,
+      "group_id": "201810",
+      "height": 1.5,
+      "highest": 0,
+      "hobby": "梦想、勇气一个都不能少",
+      "img_url": "https://232e4b9c-bcd6-4055-a342-247f57c33539.cdn.bspapp.com/VKCEYUGU-232e4b9c-bcd6-4055-a342-247f57c33539/a22347f5-07b5-48c2-9b1f-e3fba4d281cd.png",
+      "introduction": "这是关于勇气的故事，他很脆弱却也不曾退缩；这是关于梦想的故事，梦很简单却也执着。这就是我，迪莫。",
+      "magic_defense": 92,
+      "main_id": 1600784561,
+      "media_id": "LeW69lEFPn7FBe8JVrBwNAhAiQXV1G_Cb-maRQo3WxF4gR6e0I3wgnPS4CZUseDt",
+      "name": "迪莫",
+      "paradise_props": null,
+      "physical_defense": 86,
+      "pre_ids": [],
+      "race_id": [
+        "14433"
+      ],
+      "rebirth_props": [],
+      "recommend_character": "暂无",
+      "recommend_recruit": "暂无",
+      "skill_pet_id": 137,
+      "speed": 92,
+      "sum_ad_ap": 222,
+      "tags": [],
+      "total": 582,
+      "weight": 26.8,
+      "delete": false,
+      "is_open": true,
+      "ladder_magic_value": 1,
+      "top": 0,
+      "top_2": 0,
+      "collection_total": 158,
+      "comment_total": 56,
+      "like_total": 71,
+      "visit_total": 100869,
+      "is_public": true,
+      "updated_at": 1769057809552,
+      "related_pet_list": [
+        {
+          "pet_id": 2988,
+          "pet_name": "迪莫·乐弹弹"
+        },
+        {
+          "pet_id": 3088,
+          "pet_name": "霓光迪莫"
+        },
+        {
+          "pet_id": 3125,
+          "pet_name": "源古迪莫"
+        },
+        {
+          "pet_id": 3176,
+          "pet_name": "耀龙迪莫"
+        },
+        {
+          "pet_id": 3223,
+          "pet_name": "独角兽迪莫"
+        },
+        {
+          "pet_id": 3363,
+          "pet_name": "武生迪莫"
+        }
+      ],
+      "multi_bloodline_ids": [],
+      "multi_bloodline_props": [],
+      "origin_img_urls": [],
+      "skins": [],
+      "like_at": 1776782857447
+    },
+    "form_list": [
+      "1-1"
+    ],
+    "has_yise": null,
+    "yise_obj_list": [],
+    "skill_list": {
+      "base": [
+        {
+          "_id": "66f57b7460f84340ce32689e",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hitqAzE_r8R9hcFF4niC4J3hrwa9SLd8pB8we4XOKtt3",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2r1PLt9AAIP0DFUNAOmMxDpVJYRCibSTSVXKTZeicrTXqrAygkQQujlTw/0",
+          "name": "猛烈撞击",
+          "power": 65,
+          "tag_id": -1,
+          "take_energy": 1,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 3394,
+          "updated_at": 1735630118464,
+          "is_public": true,
+          "last_updated_at": 1774933629894,
+          "is_stone": false,
+          "rank": 1,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268c8",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤70%，应对攻击。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hnvm8f2-ycZmRoNwVFMmdHkhcBXHro9ZOUCL5fTiuNWl",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2DBOqgllbqHaObjTLPaLkIlWOZWB2ibYf2BPyV4VCPzuMPt0dDCydoIQ/0?wx_fmt=png",
+          "name": "防御",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 1,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 19290,
+          "is_public": true,
+          "updated_at": 1777137121990,
+          "last_uid": "69b87798d2176ed4903e0739",
+          "last_updated_at": 1773709374560,
+          "comment_total": 1,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "11-1",
+              "count": 1,
+              "name": "鸭吉吉"
+            }
+          ],
+          "rank": 1,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce326905",
+          "category_id": 1,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hrgExAbyYCnJ0Eugl_sLvNkeM5v1vSyS_P32g14uXlzK",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2dsjicRiaPUj3z6PzP4ge1Xq4vWyVAqCy7vib0BaicRQw5HZ6db06iahrbYQ/0?wx_fmt=png",
+          "name": "闪光",
+          "power": 60,
+          "tag_id": -1,
+          "take_energy": 1,
+          "type_id": 6,
+          "is_deleted": false,
+          "visit_total": 2031,
+          "is_public": true,
+          "updated_at": 1777396408635,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1-1",
+              "count": 1,
+              "name": "迪莫"
+            }
+          ],
+          "rank": 1,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268b8",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己获得魔攻+70%。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hpW-a-sCvbukc3UF_V8Bfz96j_hIQi4gLVvu-t08Bv4y",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz29e9w5MRlKFjdltI1w1f4Tmic3ntNqehHRvtIRxrWzfLLjNnSG7kWwrg/0?wx_fmt=png",
+          "name": "魔法增效",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 0,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 12222,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1744020635079,
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "61-1",
+              "count": 2,
+              "name": "魔草巫灵"
+            }
+          ],
+          "rank": 7,
+          "from": 0
+        },
+        {
+          "_id": "67f3ad6c5c8679990b62edca",
+          "category_id": 1,
+          "created_at": 1744022894250,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "光球",
+          "power": 80,
+          "take_energy": 2,
+          "type_id": 6,
+          "visit_total": 1281,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/冰_105008_1744297931664_0.png?expire_at=1744298531&er_sign=79038a8ccee6f72612e4d655c351a0e6",
+          "updated_at": 1744297932517,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743444594110",
+              "count": 1,
+              "name": "窃光蚊"
+            }
+          ],
+          "rank": 9,
+          "from": 0
+        },
+        {
+          "_id": "67f3ad4c38a6188e107e69b1",
+          "category_id": 1,
+          "created_at": 1744022862571,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "火焰箭",
+          "power": 80,
+          "take_energy": 2,
+          "type_id": 9,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/火_103026_1744287075740_0.png?expire_at=1744287676&er_sign=73c5fbb7406a3f5255c48c50c6ec7599",
+          "updated_at": 1744287076620,
+          "visit_total": 610,
+          "is_stone": false,
+          "rank": 11,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268b7",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己获得物攻+100%。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hi4dPF9YzqAhjUvSRWPYydIt80upPrz6biMSrZJWy5uw",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2hNq3D3nFPUN7YTKf3rA7Ce4HHkvZ1fNBXJI8uHjZm6OHZticcwiaaib6Q/0?wx_fmt=png",
+          "name": "力量增效",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 1,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 22722,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1744020618670,
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743497238656",
+              "count": 2,
+              "name": "画间沉铁兽"
+            }
+          ],
+          "rank": 13,
+          "from": 0
+        },
+        {
+          "_id": "67f3ad4038a6188e107e6940",
+          "category_id": 1,
+          "created_at": 1744022850626,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "棘突",
+          "power": 100,
+          "take_energy": 3,
+          "type_id": 4,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/草_102027_1744298606250_0.png?expire_at=1744299206&er_sign=139281d059897c16cdd1bbbca5b4521f",
+          "updated_at": 1744298610865,
+          "visit_total": 5919,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "4-1",
+              "count": 2,
+              "name": "魔力猫"
+            }
+          ],
+          "rank": 16,
+          "from": 0
+        },
+        {
+          "_id": "67f3ad5516dfbe360cc3e2fd",
+          "category_id": 1,
+          "created_at": 1744022871219,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "潮涌",
+          "power": 80,
+          "take_energy": 2,
+          "type_id": 10,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/水_104025_1744125098478_0.png?expire_at=1744125698&er_sign=f098388966608b3038487507b302e1d8",
+          "updated_at": 1744125117522,
+          "visit_total": 3874,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "98-1",
+              "count": 1,
+              "name": "卡洛儿"
+            }
+          ],
+          "rank": 19,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce326938",
+          "category_id": 1,
+          "damage_id": 2,
+          "desc": "造成魔伤，迸发：本技能能耗-1。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hs3JtVCjgl4Ic4Q3Wmo9d1mY6lNljqEAs83Eoj0wzLH1",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz25rLZ4x41LR5x0lqjmTRTlibDaibjKuO1vKFDPoK0padibMTNy2RaOFWMQ/0?wx_fmt=png",
+          "name": "超导",
+          "power": 95,
+          "tag_id": -1,
+          "take_energy": 3,
+          "type_id": 12,
+          "is_deleted": false,
+          "visit_total": 13904,
+          "is_public": true,
+          "comment_total": 2,
+          "updated_at": 1777137117387,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfa0665abb5a808c40dbf",
+              "desc": "进入战场首次行动获得额外效果。",
+              "icon_url": "",
+              "name": "迸发",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "134-1",
+              "count": 2,
+              "name": "星光狮"
+            }
+          ],
+          "rank": 22,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce326906",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hoXbuCuiTIglWblzOmTwBOxNuYq7m872Q5AP7kj00VO0",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2Dndq58hnzIzdvZSceTibMibDdb9XUiaw4lJZiaRG3XNia7rs0cDNAic5Kc6A/0?wx_fmt=png",
+          "name": "闪光冲击",
+          "power": 100,
+          "tag_id": -1,
+          "take_energy": 3,
+          "type_id": 6,
+          "is_deleted": false,
+          "visit_total": 2416,
+          "is_public": true,
+          "updated_at": 2,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "193-1",
+              "count": 2,
+              "name": "晶石蜗"
+            }
+          ],
+          "rank": 27,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce326909",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "每种系别中的至多1个技能，威力+35。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hphkSfPwLIRyNqSVYAQchslPMuvf8WIXt0hsxfp1D4XN",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2uQkqRwOLa1TvRGGyFfibSMmRkF6UXGXXKwWibqQvEib1Va1SNkZcVd2TQ/0?wx_fmt=png",
+          "name": "漫反射",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 1,
+          "type_id": 6,
+          "is_deleted": false,
+          "visit_total": 6386,
+          "is_public": true,
+          "comment_total": 2,
+          "updated_at": 1744024024911,
+          "is_stone": true,
+          "last_updated_at": 1774933630158,
+          "stone_from_list": [
+            {
+              "real_pet_id": "5101-1",
+              "count": 2,
+              "name": "白金独角兽"
+            }
+          ],
+          "rank": 30,
+          "from": 0
+        },
+        {
+          "_id": "67f3ad65f12561a4f198c79c",
+          "category_id": 1,
+          "created_at": 1744022887731,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "冰爪",
+          "power": 80,
+          "take_energy": 2,
+          "type_id": 11,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/冰_(1)_1744044149724_0.png?expire_at=1744044748&er_sign=51a7add4b8dd2ad871c1be4c9a9ac9b0",
+          "updated_at": 1744044155995,
+          "visit_total": 6389,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "181-1",
+              "count": 1,
+              "name": "冰钻布鲁斯"
+            }
+          ],
+          "rank": 32,
+          "from": 0
+        },
+        {
+          "_id": "67ee00d165abb5a808d42d0f",
+          "category_id": 1,
+          "created_at": 1743651025270,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/107026_1743651023748_0.png?expire_at=1743651625&er_sign=d7da717e6b05933c9c344a0129e34a43",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "热砂",
+          "power": 80,
+          "tag_id": [],
+          "take_energy": 2,
+          "type_id": 18,
+          "visit_total": 5265,
+          "updated_at": 2,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1762152781506",
+              "count": 1,
+              "name": "绒光优优"
+            }
+          ],
+          "rank": 34,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce326992",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hlQqfTXFp-6Bri8QD8VH2P7kqeh-iSMCAksVqU-OIdO4",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz26sUkaIUocqiciake8eHTTibVUMadShfvb7rk6sxUq5tq8vFf3NbAHeUicQ/0?wx_fmt=png",
+          "name": "念力膨胀",
+          "power": 80,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 13,
+          "is_deleted": false,
+          "visit_total": 1768,
+          "is_public": true,
+          "updated_at": 2,
+          "is_stone": false,
+          "rank": 36,
+          "from": 0
+        },
+        {
+          "_id": "67f3ad47f12561a4f198c63d",
+          "category_id": 3,
+          "created_at": 1744022857230,
+          "damage_id": -1,
+          "desc": "光系技能威力永久+50%，应对防御：改为永久+100%。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "放晴",
+          "power": null,
+          "take_energy": 0,
+          "type_id": 6,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776416200996.png",
+          "is_stone": true,
+          "updated_at": 1777137123430,
+          "visit_total": 6065,
+          "last_updated_at": 1776420798758,
+          "comment_total": 1,
+          "last_uid": "69040c958d04173d7edb740e",
+          "term_list": [
+            {
+              "_id": "67ecfaa738a6188e101cb514",
+              "desc": "若敌方使用防御技能，则本技能应对成功，本次行动必定先手，且触发应对效果，",
+              "icon_url": "",
+              "name": "应对防御",
+              "type": 6,
+              "note_desc": "应对效果：技能描述中“应对防御：xxx”的效果。"
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "81-2",
+              "count": 2,
+              "name": "兽花蕾"
+            }
+          ],
+          "rank": 40,
+          "from": 0
+        },
+        {
+          "_id": "67ea48a5133c6c516fbe8ca0",
+          "category_id": 1,
+          "created_at": 1743407268121,
+          "created_by": "",
+          "damage_id": 2,
+          "desc": "造成魔伤，每使用过1个其他系别技能，本技能威力永久+30。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/704005_1743407266664_0.png?expire_at=1743407868&er_sign=9cc6a869108ef450b3ba66f4dea2cedb",
+          "is_deleted": false,
+          "name": "过曝",
+          "power": 60,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 6,
+          "is_public": true,
+          "visit_total": 8351,
+          "updated_at": 1777275839165,
+          "is_stone": false,
+          "last_uid": "69e30a9bd3e20ed34fdaa494",
+          "last_updated_at": 1777275802211,
+          "test_desc": "<p>仅主动使用技能可触发威力加成。</p>",
+          "term_list": [],
+          "rank": 42,
+          "from": 0
+        },
+        {
+          "_id": "67ecea5716dfbe360c75a2d9",
+          "category_id": 1,
+          "created_at": 1743579735796,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/冰_105010_1743579735006_0.png?expire_at=1743580335&er_sign=ebfab0229386412902642f933cf079fe",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "光刃",
+          "power": 120,
+          "tag_id": [],
+          "take_energy": 4,
+          "type_id": 6,
+          "visit_total": 6711,
+          "is_stone": true,
+          "updated_at": 1744024008894,
+          "comment_total": 4,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1-1",
+              "count": 1,
+              "name": "迪莫"
+            }
+          ],
+          "rank": 47,
+          "from": 0
+        },
+        {
+          "_id": "67f3ad5c5c8679990b62ecda",
+          "category_id": 1,
+          "created_at": 1744022878465,
+          "damage_id": 2,
+          "desc": "造成魔伤，携带其他系别技能会给本技能带来不同效果。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "折射",
+          "power": 50,
+          "take_energy": 4,
+          "type_id": 6,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/706009_1744036758555_0.png?expire_at=1744037357&er_sign=2e299eb18c81ea5148d68aea781ab79b",
+          "is_stone": true,
+          "updated_at": 1774359146484,
+          "visit_total": 49188,
+          "last_uid": "67e3d20e20776526c26e03d6",
+          "last_updated_at": 1774053632020,
+          "note": "",
+          "test_desc": "<p>本技能光属性不附加效果，据其他系别技能追加效果：<br>光系：+40％魔攻；<br>水系：全技能减少1点能耗；<br>电系：+50速度；<br>草系：恢复15%生命值；<br>火系：4层灼烧（对手）；<br>普通系：+20技能威力；<br>幻系：1层星陨（对手）；<br>恶系：+30％吸血；<br>冰系：2层冻结（对手）；<br>翼系：连击+1；<br>武系：+40%物攻；<br>虫系：-40%物防（对手）；<br>龙系：-40%魔防（对手）；<br>幽系：-2点能量（对手）；<br>机械系：+30%双防；<br>萌系：-30%双攻（对手）；<br>毒系：2层中毒（对手）；<br>地系：速度-40，连击-2（对手）。</p>",
+          "comment_total": 7,
+          "stone_from_list": [
+            {
+              "real_pet_id": "191-1",
+              "count": 3,
+              "name": "疾光千兽"
+            }
+          ],
+          "rank": 48,
+          "from": 0
+        }
+      ],
+      "bloodline": [
+        {
+          "_id": "67ecfe80133c6c516fe4b471",
+          "category_id": 1,
+          "created_at": 1743584896477,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/普通_101073_1743584896096_0.png?expire_at=1743585496&er_sign=44743a8dfe5ac92857523b03126dd5d1",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "星星撞击",
+          "power": 90,
+          "tag_id": [],
+          "take_energy": 2,
+          "type_id": 5,
+          "visit_total": 2497,
+          "updated_at": 3,
+          "last_updated_at": 1774933630826,
+          "is_stone": false,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ac41574f08bac3f0a6f3",
+          "category_id": 1,
+          "created_at": 1744022595358,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "花香",
+          "power": 60,
+          "take_energy": 1,
+          "type_id": 4,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/草_102026_1744042651998_0.png?expire_at=1744043250&er_sign=7e507423f8ddab6716e1a693b1302de9",
+          "is_stone": true,
+          "updated_at": 1744042655314,
+          "visit_total": 1071,
+          "stone_from_list": [
+            {
+              "real_pet_id": "89-1",
+              "count": 1,
+              "name": "白发路路"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce3268e4",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hlRru4epeCrPXMhkVhCRxa4La01IPrsvgXz95BIKyRDE",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2LDqfBO4kOVcsEphcmHicaD1brzEyoaxDibJN0Ej4XlJhyd2NJBo2xaiaA/0?wx_fmt=png",
+          "name": "火焰冲锋",
+          "power": 60,
+          "tag_id": -1,
+          "take_energy": 1,
+          "type_id": 9,
+          "is_deleted": false,
+          "visit_total": 1818,
+          "is_public": true,
+          "updated_at": 3,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "86-1",
+              "count": 1,
+              "name": "烈火守护"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ad4965abb5a8083dccbd",
+          "category_id": 1,
+          "created_at": 1744022859528,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "泡沫",
+          "power": 60,
+          "take_energy": 1,
+          "type_id": 10,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/水_104022_1744042712778_0.png?expire_at=1744043311&er_sign=78e34122c115eb08e4784d76410676b1",
+          "is_stone": true,
+          "updated_at": 1744042712905,
+          "visit_total": 2180,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1021-3",
+              "count": 1,
+              "name": "椰浆布丁"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67ecdd9d574f08bac39db7fd",
+          "category_id": 1,
+          "created_at": 1743576477857,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776416160595.png",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "折线冲击",
+          "power": 80,
+          "tag_id": [],
+          "take_energy": 2,
+          "type_id": 6,
+          "visit_total": 830,
+          "updated_at": 2,
+          "last_updated_at": 1776420797746,
+          "is_stone": false,
+          "last_uid": "69040c958d04173d7edb740e",
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ad63574f08bac3f0af6b",
+          "category_id": 1,
+          "created_at": 1744022886080,
+          "damage_id": 2,
+          "desc": "造成魔伤，本技能位于3号位时威力+40，传动1。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "离子震荡",
+          "power": 90,
+          "take_energy": 3,
+          "type_id": 14,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/机械_(4)_1744042514908_0.png?expire_at=1744043113&er_sign=184dd1264d6c7c5e3cae36afa5ef561b",
+          "is_stone": true,
+          "updated_at": 1777169782034,
+          "visit_total": 15344,
+          "comment_total": 1,
+          "last_updated_at": 1774946715472,
+          "last_uid": "67b412dde850203c2723f88b",
+          "term_list": [
+            {
+              "_id": "67ecfb5c20776526c2fc3267",
+              "name": "传动",
+              "icon_url": "",
+              "type": 6,
+              "desc": "回合开始时，带有“传动X”的技能会向下移动X个位置，该效果可叠加。",
+              "note_desc": "技能顺序从上到下依次计数。",
+              "order_weight": 0
+            }
+          ],
+          "test_desc": "<p><br></p>",
+          "stone_from_list": [
+            {
+              "real_pet_id": "222-1",
+              "count": 1,
+              "name": "权杖-V"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326913",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04htPk8tSVmt9PRLLz_pHRJinLxN0q7qfOH4rTCrvFa2g8",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2wjqGT15D2AH1NL3RwMeISNn1gtx0FwEciaftGeZDBoC5DZU2K1oB6sg/0?wx_fmt=png",
+          "name": "扬沙",
+          "power": 60,
+          "tag_id": -1,
+          "take_energy": 1,
+          "type_id": 18,
+          "is_deleted": false,
+          "visit_total": 2576,
+          "is_public": true,
+          "updated_at": 2,
+          "last_uid": "69bcb25f0add39bd435dc62a",
+          "last_updated_at": 1774933630993,
+          "is_stone": false,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ac4d20776526c26caa7b",
+          "category_id": 1,
+          "created_at": 1744022607897,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "冷风",
+          "power": 60,
+          "take_energy": 1,
+          "type_id": 11,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/冰_(14)_1744042804511_0.png?expire_at=1744043402&er_sign=18beb5dcada2d73bd3248dc0d458c5a3",
+          "is_stone": true,
+          "updated_at": 1744042805242,
+          "visit_total": 2516,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1021-3",
+              "count": 1,
+              "name": "椰浆布丁"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326931",
+          "category_id": 1,
+          "damage_id": 2,
+          "desc": "蓄力，对敌方造成魔法伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hutkbZr-Ezfk9zqM0q_CCI9KegDT3HABX9-Yt1ZfYSqK",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2ibnbDQYM7Cf8LROQ9vEf87jH99pyITiaw5FtNyhCYH9vniac6scwgm92w/0?wx_fmt=png",
+          "name": "升龙咆哮",
+          "power": 200,
+          "tag_id": -1,
+          "take_energy": 3,
+          "type_id": 15,
+          "is_deleted": false,
+          "visit_total": 11737,
+          "is_public": true,
+          "comment_total": 0,
+          "updated_at": 1777137115172,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "6760f1c62f00b587adad8e7c",
+              "desc": "该技能需要先蓄力1回合，下回合才能释放。蓄力期间免疫所有离场效果。",
+              "icon_url": "",
+              "name": "蓄力",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "166-1",
+              "count": 1,
+              "name": "伊兰亚龙"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ad69037a4b0affe2c331",
+          "category_id": 1,
+          "created_at": 1744022891768,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "球状闪电",
+          "power": 60,
+          "take_energy": 1,
+          "type_id": 12,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/电_(5)_1744042927283_0.png?expire_at=1744043525&er_sign=a07579d1e0b87908026de61a8471ddf5",
+          "updated_at": 1744042948936,
+          "visit_total": 2527,
+          "is_stone": false,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ad3d1b5df7e766fd4f7b",
+          "category_id": 1,
+          "created_at": 1744022847594,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "溃烂触碰",
+          "power": 60,
+          "take_energy": 1,
+          "type_id": 7,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/毒_(2)_1744042558617_0.png?expire_at=1744043157&er_sign=856965bcceb00fcbf9ccc11d0285ebb1",
+          "is_stone": false,
+          "updated_at": 1744042558961,
+          "visit_total": 811,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ad5465abb5a8083dcdff",
+          "category_id": 1,
+          "created_at": 1744022870433,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "噬心",
+          "power": 60,
+          "take_energy": 1,
+          "type_id": 8,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/虫_(11)_1744042985960_0.png?expire_at=1744043584&er_sign=3bc91ab85218b96e599f02dbaccdb57d",
+          "updated_at": 1744043001370,
+          "visit_total": 707,
+          "is_stone": false,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ac4c133c6c516f3ffd55",
+          "category_id": 1,
+          "created_at": 1744022606212,
+          "damage_id": 1,
+          "desc": "造成物伤，2连击。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "缠丝劲",
+          "power": 25,
+          "take_energy": 1,
+          "type_id": 17,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/武_(3)_1744043054554_0.png?expire_at=1744043652&er_sign=0a5564ac9cdf33b38b742a8c359e7dea",
+          "updated_at": 1744043062010,
+          "visit_total": 13861,
+          "last_uid": "69c78ffa68be701c9c310bf9",
+          "last_updated_at": 1774766580392,
+          "test_desc": "<p>棋骑士图鉴获得</p>",
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743489541077",
+              "count": 1,
+              "name": "棋骑士"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67ecff8b20776526c2fcaac4",
+          "category_id": 1,
+          "created_at": 1743585163888,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/114014_1743585163823_0.png?expire_at=1743585763&er_sign=06e86c5368f976466e82074c5743a540",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "鹰爪",
+          "power": 60,
+          "tag_id": [],
+          "take_energy": 1,
+          "type_id": 2,
+          "visit_total": 1020,
+          "collection_total": 1,
+          "updated_at": 2,
+          "is_stone": false,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce3268c6",
+          "category_id": 1,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hqRElUFp1i2MFfStLE1BXtbVoIlkWUvyMdETshL5C8Ch",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/萌_(4)_1744043089577_0.png?expire_at=1744043687&er_sign=d911dae492196b53af0e5638c76bc5d5",
+          "name": "魅惑",
+          "power": 60,
+          "tag_id": -1,
+          "take_energy": 1,
+          "type_id": 16,
+          "is_deleted": false,
+          "visit_total": 2425,
+          "is_public": true,
+          "updated_at": 1744043089550,
+          "is_stone": false,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ad3965abb5a8083dcace",
+          "category_id": 1,
+          "created_at": 1744022844038,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "幻象",
+          "power": 60,
+          "take_energy": 1,
+          "type_id": 3,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776414926337.png",
+          "updated_at": 1744043139953,
+          "visit_total": 1725,
+          "is_stone": true,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776420824596,
+          "stone_from_list": [
+            {
+              "real_pet_id": "38-1",
+              "count": 1,
+              "name": "花影羚羊"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326984",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hl4woqPgz_Cw8_fpH0XwGu2I7AR0c7e_cdPMYNnQlAo6",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2CcX6cssKdAh1UbVxoSRzKQgsaSRdubXErvK5nd4eML9aiaxrgN7jFxQ/0?wx_fmt=png",
+          "name": "恶能量",
+          "power": 60,
+          "tag_id": -1,
+          "take_energy": 1,
+          "type_id": 1,
+          "is_deleted": false,
+          "visit_total": 6333,
+          "is_public": true,
+          "updated_at": 2,
+          "is_stone": false,
+          "like_total": 1,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67ea468f20776526c2d76634",
+          "category_id": 1,
+          "created_at": 1743406734205,
+          "created_by": "",
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/719014_1743406723142_0.png?expire_at=1743407325&er_sign=9f5ca8b41550966c18185a100f70a32a",
+          "is_deleted": false,
+          "name": "星云漩涡",
+          "power": 60,
+          "tag_id": [],
+          "take_energy": 1,
+          "type_id": 13,
+          "is_public": true,
+          "visit_total": 694,
+          "updated_at": 1744043335295,
+          "is_stone": false,
+          "rank": -1,
+          "from": 1
+        }
+      ],
+      "stone": [
+        {
+          "_id": "67f3a43165abb5a8083cbf96",
+          "category_id": 3,
+          "created_at": 1744020531897,
+          "damage_id": -1,
+          "desc": "每回合随机变成己方队伍中其他精灵的技能。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/普通_(1)_1744020528077_0.png?expire_at=1744021126&er_sign=97616f1ac40880989366cd522089c290",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "借用",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 0,
+          "type_id": 5,
+          "visit_total": 23892,
+          "comment_total": 4,
+          "updated_at": 5,
+          "stone_from_list": [
+            {
+              "real_pet_id": "101-1",
+              "count": 1,
+              "name": "彩蝶鲨"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3a3d95c8679990b624f08",
+          "category_id": 2,
+          "created_at": 1744020443095,
+          "damage_id": -1,
+          "desc": "减伤50%，应对攻击：下一次行动获得先手+1。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776415950333.png",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "有效预防",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 1,
+          "type_id": 5,
+          "visit_total": 41550,
+          "comment_total": 4,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776420813423,
+          "updated_at": 1777137121992,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "196-1",
+              "count": 2,
+              "name": "卷胡巨獭"
+            }
+          ],
+          "collection_total": 1,
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268d5",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "造成物伤，自己回复5能量。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hponTBCG6zehMXFpDVswMS6veOESzqPUX8MbGDhfqbVl",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776415241201.png",
+          "name": "藤绞",
+          "power": 80,
+          "tag_id": -1,
+          "take_energy": 4,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 14433,
+          "is_public": true,
+          "updated_at": 1744021100530,
+          "is_stone": true,
+          "comment_total": 1,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776420788563,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743485998192",
+              "count": 2,
+              "name": "针叶巡林"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268da",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己回复4能量，并获得魔攻+70%。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hku1Hr0_Caju94PhsAuXToqrgjtmYiVdUSWwHTigjWZL",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2SHDPDtF7t1mfus38uibEhdTcc6sJqmqWVzjF2MBjQBqLuPtOeLXjgLw/0?wx_fmt=png",
+          "name": "氧输送",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 17081,
+          "is_public": true,
+          "updated_at": 1774709768707,
+          "comment_total": 1,
+          "test_desc": "<p><br></p>",
+          "last_updated_at": 1774933630587,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "22-1",
+              "count": 2,
+              "name": "奇丽花"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3ad3fd2cf512251640c04",
+          "category_id": 1,
+          "created_at": 1744022849428,
+          "damage_id": 1,
+          "desc": "造成物伤，应对状态：自己回复50%生命和5能量。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "抽枝",
+          "power": 90,
+          "take_energy": 4,
+          "type_id": 4,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776415045330.png",
+          "is_stone": true,
+          "updated_at": 1777137118562,
+          "visit_total": 18994,
+          "comment_total": 2,
+          "last_updated_at": 1776420822758,
+          "last_uid": "69040c958d04173d7edb740e",
+          "term_list": [
+            {
+              "_id": "67ecfa9016dfbe360c7629ee",
+              "desc": "若敌方使用状态技能，则本技能应对成功，本次行动必定先手，且触发应对效果。",
+              "icon_url": "",
+              "name": "应对状态",
+              "note_desc": "应对效果：技能描述中“应对状态：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "27-1",
+              "count": 3,
+              "name": "卡瓦重"
+            }
+          ],
+          "collection_total": 1,
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268e7",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "造成物伤，应对状态：本次技能威力变为4倍。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hi0_yRjzWtdWdS8J4I73dFnwJagumcEDjebN-35TxC5c",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2NoU7f848o6LgR5mpyfnEXWPGhXDyqDqcp6DuGhTHlmaUwzzB6uQgdA/0?wx_fmt=png",
+          "name": "闪燃",
+          "power": 40,
+          "tag_id": 1,
+          "take_energy": 1,
+          "type_id": 9,
+          "is_deleted": false,
+          "visit_total": 14893,
+          "is_public": true,
+          "comment_total": 2,
+          "is_stone": true,
+          "updated_at": 1777137118560,
+          "last_uid": "67e3d20e20776526c26e03d6",
+          "last_updated_at": 1774933630432,
+          "term_list": [
+            {
+              "_id": "67ecfa9016dfbe360c7629ee",
+              "desc": "若敌方使用状态技能，则本技能应对成功，本次行动必定先手，且触发应对效果。",
+              "icon_url": "",
+              "name": "应对状态",
+              "note_desc": "应对效果：技能描述中“应对状态：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743493668934",
+              "count": 2,
+              "name": "武者鸡"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67ecee08f9a2858b65dcaaec",
+          "category_id": 1,
+          "created_at": 1743580680649,
+          "damage_id": 2,
+          "desc": "造成高额魔法伤害，自己获得物防-40%。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/火_103025_1743580680301_0.png?expire_at=1743581280&er_sign=57d20a4f8d95be65bf91dfdc03afefff",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "炎打",
+          "note": "进攻是最好的防守",
+          "power": 95,
+          "tag_id": [],
+          "take_energy": 2,
+          "type_id": 9,
+          "visit_total": 6740,
+          "is_stone": true,
+          "updated_at": 1744023794338,
+          "comment_total": 2,
+          "collection_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743486218603",
+              "count": 2,
+              "name": "炽心勇狮"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67ececc31b5df7e766bc7c4f",
+          "category_id": 3,
+          "created_at": 1743580355033,
+          "damage_id": -1,
+          "desc": "<p>自己获得双攻+120%和双防-40%。</p>",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/火_103026_1743580355102_0.png?expire_at=1743580954&er_sign=0ec24bc10ad9186a2a82aed781caf441",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "怒火",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 1,
+          "type_id": 9,
+          "visit_total": 2791,
+          "is_stone": true,
+          "updated_at": 1744023595621,
+          "comment_total": 1,
+          "last_uid": "694f211fcbe5c88a55da1488",
+          "last_updated_at": 1774609478472,
+          "stone_from_list": [
+            {
+              "real_pet_id": "7-1",
+              "count": 2,
+              "name": "火神"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268f8",
+          "category_id": 1,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hmXOhQvRm6zm8u0p0xImqkox_6UudSR4EIJgcCFEAHRb",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2Nd5tiaticBuFwsKUCZJibvZgrye11zC0s1Cm9tyCNQ5UxXZgBxCeMibFpw/0?wx_fmt=png",
+          "name": "气泡",
+          "power": 100,
+          "tag_id": -1,
+          "take_energy": 3,
+          "type_id": 10,
+          "is_deleted": false,
+          "visit_total": 16896,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1744023810650,
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743489394948",
+              "count": 2,
+              "name": "嗜波螺"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268fb",
+          "category_id": 1,
+          "damage_id": 2,
+          "desc": "造成魔伤，应对状态：本技能能耗永久-6。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hpsIDKMxGupECHLGZ1h0YmMiqzRY6FpUi0R_7U2JxHIz",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2Qm7XyEgFCQ9QL0lib3Id6Aq5eXvNXZFIGcQ4gXrhFMSEcre9ZEzmqFg/0?wx_fmt=png",
+          "name": "天洪",
+          "power": 150,
+          "tag_id": 1,
+          "take_energy": 7,
+          "type_id": 10,
+          "is_deleted": false,
+          "visit_total": 16987,
+          "is_public": true,
+          "comment_total": 3,
+          "updated_at": 1777137118560,
+          "last_updated_at": 1774933630358,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfa9016dfbe360c7629ee",
+              "desc": "若敌方使用状态技能，则本技能应对成功，本次行动必定先手，且触发应对效果。",
+              "icon_url": "",
+              "name": "应对状态",
+              "note_desc": "应对效果：技能描述中“应对状态：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1820-1",
+              "count": 3,
+              "name": "龙鱼"
+            }
+          ],
+          "collection_total": 1,
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268fc",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己获得魔攻+190%。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hoyFWQBiqksuamTI4FIWvh2qwlFDjYySWrlZG_IswCGB",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2jkNoT6hvmt9iaBKKtpprhwMVzseWL9UBJBDl6icRZkIyuSn2UCrGpbXQ/0?wx_fmt=png",
+          "name": "润泽",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 7,
+          "type_id": 10,
+          "is_deleted": false,
+          "visit_total": 22908,
+          "is_public": true,
+          "comment_total": 4,
+          "is_stone": true,
+          "updated_at": 1744023828459,
+          "collection_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743488658875",
+              "count": 2,
+              "name": "圆号鱼"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce326914",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hkXWJkasYjh3xhELPq87jPILO8D3GBVcQqy37nYlZ2nI",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz27OVosfc65DYBBePGszvLWCOmrYYQ4pMcE0CszQ9FiarVHu51kjUDUmg/0?wx_fmt=png",
+          "name": "跺地",
+          "power": 80,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 18,
+          "is_deleted": false,
+          "visit_total": 7011,
+          "is_public": true,
+          "updated_at": 2,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "62-1",
+              "count": 1,
+              "name": "记忆石"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "69c224369eef0ad07f07b48e",
+          "category_id": 1,
+          "created_at": 1774330934551,
+          "damage_id": 2,
+          "desc": "造成魔伤，敌方获得魔防-50%。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776421900648.png",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "寒风吹",
+          "power": 70,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 11,
+          "visit_total": 12318,
+          "updated_at": 1,
+          "comment_total": 2,
+          "last_updated_at": 1776433867572,
+          "last_uid": "69040c958d04173d7edb740e",
+          "stone_from_list": [
+            {
+              "real_pet_id": "108-1",
+              "count": 1,
+              "name": "圣代甜甜"
+            }
+          ],
+          "collection_total": 1,
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce326936",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "造成物伤，迸发：本次技能威力+40。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hqwlDRIfxUPoCdHcjPC4KDu6M9jwGeds-Ptiq8xMiuNQ",
+          "icon_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9tWSZ2dGFqe5aliaarN4lsTUia6asv0t2NiccLibA2uaugE0BJ9gnUthqGhh2D09piavSv4AnySDAZrTEQ/640?wx_fmt=png&amp;from=appmsg",
+          "name": "电弧",
+          "power": 80,
+          "tag_id": -1,
+          "take_energy": 3,
+          "type_id": 12,
+          "is_deleted": false,
+          "visit_total": 15730,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1777137117387,
+          "comment_total": 2,
+          "term_list": [
+            {
+              "_id": "67ecfa0665abb5a808c40dbf",
+              "desc": "进入战场首次行动获得额外效果。",
+              "icon_url": "",
+              "name": "迸发",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "215-1",
+              "count": 1,
+              "name": "爵士鹿"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce326994",
+          "category_id": 1,
+          "damage_id": 2,
+          "desc": "造成魔伤，若击败敌方，自己获得魔攻+70%。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hnbmqKOZlyDpGTXiSLViE89BlxqK8R96rpeG_JR8WWvD",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2FKS4icQv1EjJYNiaIVAH6MibuSHTxhHXJKXicDdztvr5r8nyVTRTne7X3w/0?wx_fmt=png",
+          "name": "坍缩",
+          "power": 85,
+          "tag_id": -1,
+          "take_energy": 3,
+          "type_id": 13,
+          "is_deleted": false,
+          "visit_total": 9438,
+          "is_public": true,
+          "updated_at": 1744027793184,
+          "is_stone": true,
+          "comment_total": 1,
+          "last_updated_at": 1774933630668,
+          "stone_from_list": [
+            {
+              "real_pet_id": "61-1",
+              "count": 2,
+              "name": "魔草巫灵"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        }
+      ]
+    },
+    "egg_list": [
+      {
+        "_id": "67dab45c2543d1a3e369c17e",
+        "category_id": 6,
+        "collect_count": 0,
+        "collection_total": 0,
+        "comment_total": 2,
+        "created_at": 1742386274085,
+        "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/prop/6/1742386174992.png",
+        "is_deleted": false,
+        "is_public": true,
+        "name": "迪莫",
+        "visit_total": 2110,
+        "desc": "某种精灵的蛋，通过观察其花纹可以获得一些头绪。",
+        "pet_list": [
+          {
+            "name": "迪莫",
+            "pet_id": "1-1",
+            "_id": "66f7c0faa2df66f0080adb93"
+          }
+        ],
+        "skill_list": []
+      }
+    ],
+    "fruit_list": [],
+    "evolution_list": [],
+    "co_creation_user": [
+      {
+        "_id": "69b2418cd2176ed490cf82e2",
+        "count": 2,
+        "created_at": 1773289868455,
+        "created_by": "67e3d20e20776526c26e03d6",
+        "edit_id": "66f7c0faa2df66f0080adb93",
+        "edit_type": "pet",
+        "updated_at": 1773369261883,
+        "username": "清兮",
+        "avatar": {
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/47a1c36f3eb3777978ad8ed8734b7a901885042657_1739503782401_0.png?expire_at=1739504383&er_sign=4e235c37649a9becc75ba5477555e893",
+          "_id": "67aeb8bb164dfa9086981081",
+          "get_way": "",
+          "name": "嘿。春兔"
+        },
+        "current_level": 2,
+        "official_title_list": [],
+        "avatar_dress": {
+          "icon_url": ""
+        },
+        "dynamic_dress": {
+          "icon_url": ""
+        },
+        "comment_dress": {
+          "icon_url": ""
+        }
+      },
+      {
+        "_id": "69b20b64dcf6a7985371d0c7",
+        "count": 1,
+        "created_at": 1773276004206,
+        "created_by": "67d1c3e8c35fb80add991697",
+        "edit_id": "66f7c0faa2df66f0080adb93",
+        "edit_type": "pet"
+      },
+      {
+        "_id": "69b297391117bf9b46b75934",
+        "count": 1,
+        "created_at": 1773311801556,
+        "created_by": "68f6185314fbd591889e23ae",
+        "edit_id": "66f7c0faa2df66f0080adb93",
+        "edit_type": "pet",
+        "username": "石竹",
+        "avatar": {
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/13256ec346389f5d81cd152211dd280c1885042657_1739503741672_0.png?expire_at=1739504343&er_sign=69736ed8905d77c787a86085658d6e77",
+          "_id": "67aeb89c3fea5a2e1d1d2f57",
+          "name": "呱？呱呱",
+          "get_way": ""
+        },
+        "current_level": 1,
+        "official_title_list": [],
+        "avatar_dress": {
+          "icon_url": ""
+        },
+        "dynamic_dress": {
+          "icon_url": ""
+        },
+        "comment_dress": {
+          "icon_url": ""
+        }
+      }
+    ]
+  },
+  {
+    "_id": "66f7c0faa2df66f0080adb9d",
+    "gosanke": true,
+    "avatar_url": "",
+    "desc": "喜欢阳光，喜欢新鲜的空气，会摇晃尾巴，受到惊吓会快速逃跑。虽然很胆小，但是也有时候非常调皮。",
+    "favorite_food": [
+      "草果多",
+      "哇哇板塘"
+    ],
+    "feature_list": [
+      {
+        "_id": "66f57a0114d9e2960c202767",
+        "desc": "使用草系技能后，回复10%生命。",
+        "feature_id": 1,
+        "name": "氧循环",
+        "is_deleted": false,
+        "icon_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9uWZ5olcQkReMXrHWbZdF3E67Y839CzKQyrODyHZr9ciaLMtG1z6G7PB6XXRMeXIbyyL509ISicP8pA/640?wx_fmt=png&a",
+        "last_uid": "69ac35e76fb69e064537d8dc",
+        "last_updated_at": 1773709357390
+      }
+    ],
+    "is_show": true,
+    "main_id": 1724487044,
+    "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9tGPsrBkDxnaCQgZeAZdtFGaIUib9HWzNy25rLpkicLUP4MzuhcRFoL7AfgeKfyVa3anTNYUgE3BHYA/640?wx_fmt=png&amp;from=appmsg",
+    "max_height": 0.75,
+    "max_weight": 4.6,
+    "mf": 91,
+    "mg": 66,
+    "min_height": 0.53,
+    "min_weight": 3.62,
+    "name": "喵喵",
+    "pet_id": 2,
+    "position": "",
+    "real_pet_id": "2-1",
+    "sd": 33,
+    "sm": 65,
+    "source_link": "https://www.bilibili.com/opus/964373123477536853",
+    "title_name": "草猫精灵",
+    "type_list": [
+      4
+    ],
+    "web_pet_id": 1,
+    "wf": 49,
+    "wg": 66,
+    "is_deleted": false,
+    "evolution_stage": 1,
+    "comment_total": 16,
+    "main_id_list": [
+      1724487044
+    ],
+    "collection_total": 36,
+    "visit_total": 58173,
+    "updated_at": 1777438033332,
+    "like_total": 36,
+    "is_public": true,
+    "created_at": 1743036348829,
+    "is_highest": false,
+    "is_catch": false,
+    "last_uid": "6900eb4d14fbd5918822ee83",
+    "last_updated_at": 1774517713809,
+    "egg_type_list": [
+      5,
+      8
+    ],
+    "egg_info": {
+      "max_weight": 1.84,
+      "min_height": 0.23,
+      "max_height": 0.31,
+      "min_weight": 1.271
+    },
+    "is_tc_egg": true,
+    "is_special": true,
+    "web_pet": {
+      "_id": "563f33cc624a8a3a0442419d443f6f4d",
+      "AD": 49,
+      "AP": 65,
+      "ability_score": null,
+      "alias": [],
+      "bloodline_id": -1,
+      "bloodline_props": [],
+      "catch_way": "在宠物园，战斗概率出现；出现在梦起之地。",
+      "color": "绿",
+      "created_at": 1562640087,
+      "debuff": [
+        "寄生"
+      ],
+      "defense_sum_ad_ap": 114,
+      "energy": 45,
+      "exp_type": 105,
+      "face_rate": null,
+      "face_score": null,
+      "group_id": "201807",
+      "height": 0.7,
+      "highest": 0,
+      "hobby": "喜欢阳光，喜欢新鲜的空气",
+      "img_url": "https://232e4b9c-bcd6-4055-a342-247f57c33539.cdn.bspapp.com/VKCEYUGU-232e4b9c-bcd6-4055-a342-247f57c33539/2d7a76ad-0237-4c19-b821-2601d1d382df.png",
+      "introduction": "不停摇晃的尾巴，容易受到惊吓，平时很乖巧。",
+      "magic_defense": 65,
+      "main_id": 1600766206,
+      "media_id": "LeW69lEFPn7FBe8JVrBwNBg6okKT8KGVBbhRi4ZJE0naXxFnHJXGsP2eiNloHoVO",
+      "name": "喵喵",
+      "paradise_props": null,
+      "physical_defense": 49,
+      "pre_ids": [],
+      "race_id": [
+        "774"
+      ],
+      "rebirth_props": [],
+      "recommend_character": "暂无",
+      "recommend_recruit": "暂无",
+      "skill_pet_id": 1,
+      "speed": 45,
+      "sum_ad_ap": 114,
+      "tags": [
+        86
+      ],
+      "total": 318,
+      "weight": 6.9,
+      "delete": false,
+      "is_open": true,
+      "multi_bloodline_ids": [],
+      "multi_bloodline_props": [],
+      "origin_img_urls": [],
+      "skins": [],
+      "ladder_magic_value": 1,
+      "top": 0,
+      "top_2": 0,
+      "collection_total": 103,
+      "comment_total": 39,
+      "like_total": 44,
+      "visit_total": 106767,
+      "is_public": true,
+      "updated_at": 1763105135099,
+      "related_pet_list": [],
+      "like_at": 1778508886648
+    },
+    "form_list": [
+      "2-1"
+    ],
+    "has_yise": null,
+    "yise_obj_list": [],
+    "skill_list": {
+      "base": [
+        {
+          "_id": "66f57b7460f84340ce32689d",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "造成物伤，自己回复1能量。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hmZZF58O6xutU8YiOzf9rajIIx45LdgpFg-_CrHVtT5o",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2Dryf9EQ63CnorvtPbrQn6PUogRHuMEqAhLR5EltdYI0FmXLmVaCicGQ/0",
+          "name": "抓挠",
+          "power": 35,
+          "tag_id": -1,
+          "take_energy": 0,
+          "type_id": 5,
+          "is_deleted": false,
+          "comment_total": 0,
+          "visit_total": 3074,
+          "collection_total": 1,
+          "like_total": 1,
+          "updated_at": 1743338421513,
+          "is_public": true,
+          "last_updated_at": 1774933631151,
+          "is_stone": false,
+          "rank": 1,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268b9",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己回复30%生命。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hqWJNOKRWaHBDZF2gBSFZ7AZ6_eiwMB1SIjtKQdaAAOf",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2nUQ1fwic2KC2wcAPWGQnm4K9Ozq8J9U8T8C1VZUgxoz49icicEqEwbOmA/0?wx_fmt=png",
+          "name": "休息回复",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 10915,
+          "is_public": true,
+          "updated_at": 3,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743496843211",
+              "count": 2,
+              "name": "陨星虫"
+            }
+          ],
+          "rank": 1,
+          "from": 0
+        },
+        {
+          "_id": "67f3ad4038a6188e107e6940",
+          "category_id": 1,
+          "created_at": 1744022850626,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "棘突",
+          "power": 100,
+          "take_energy": 3,
+          "type_id": 4,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/草_102027_1744298606250_0.png?expire_at=1744299206&er_sign=139281d059897c16cdd1bbbca5b4521f",
+          "updated_at": 1744298610865,
+          "visit_total": 5919,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "4-1",
+              "count": 2,
+              "name": "魔力猫"
+            }
+          ],
+          "rank": 6,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268a0",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04htVBWXTZrlkoc-iCoB_e6FpoA8vg25GXC8yj_qh7iEWK",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2qDtSqBlAggUIFKaO2XGVqicRokfEVapwyRnu1ibBia59CIB7NGvmRsWvA/0?wx_fmt=png",
+          "name": "扫尾",
+          "power": 90,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 1764,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1774929898431,
+          "comment_total": 1,
+          "test_desc": "<p><br></p>",
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743497159254",
+              "count": 1,
+              "name": "画间法师手"
+            }
+          ],
+          "rank": 7,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268d5",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "造成物伤，自己回复5能量。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hponTBCG6zehMXFpDVswMS6veOESzqPUX8MbGDhfqbVl",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776415241201.png",
+          "name": "藤绞",
+          "power": 80,
+          "tag_id": -1,
+          "take_energy": 4,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 14436,
+          "is_public": true,
+          "updated_at": 1744021100530,
+          "is_stone": true,
+          "comment_total": 1,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776420788563,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743485998192",
+              "count": 2,
+              "name": "针叶巡林"
+            }
+          ],
+          "rank": 8,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268c8",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "减伤70%，应对攻击。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hnvm8f2-ycZmRoNwVFMmdHkhcBXHro9ZOUCL5fTiuNWl",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2DBOqgllbqHaObjTLPaLkIlWOZWB2ibYf2BPyV4VCPzuMPt0dDCydoIQ/0?wx_fmt=png",
+          "name": "防御",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 1,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 19294,
+          "is_public": true,
+          "updated_at": 1777137121990,
+          "last_uid": "69b87798d2176ed4903e0739",
+          "last_updated_at": 1773709374560,
+          "comment_total": 1,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "11-1",
+              "count": 1,
+              "name": "鸭吉吉"
+            }
+          ],
+          "rank": 10,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268d7",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己回复10能量。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hsmJIYcI6a4UJwu8dEvQtmI89TlC9a2Ouqd4gDzS-6Jd",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz26KtWw7iaZqgOZSuhzdaPl5snCfFyarVXzibShjp0ibZKI5zsM0oW5uwQQ/0?wx_fmt=png",
+          "name": "徒长",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 10121,
+          "is_public": true,
+          "collection_total": 0,
+          "updated_at": 3,
+          "is_stone": false,
+          "rank": 12,
+          "from": 0
+        },
+        {
+          "_id": "67ecf5d265abb5a808c3b71a",
+          "category_id": 1,
+          "created_at": 1743582674535,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/草_102029_1743582674613_0.png?expire_at=1743583274&er_sign=69361dc50b3d3a7303af97a60ffca42d",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "叶绿光束",
+          "power": 120,
+          "tag_id": [],
+          "take_energy": 4,
+          "type_id": 4,
+          "visit_total": 13646,
+          "updated_at": 3,
+          "comment_total": 1,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743494516864",
+              "count": 1,
+              "name": "格兰球"
+            }
+          ],
+          "rank": 17,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268e1",
+          "category_id": 2,
+          "damage_id": -1,
+          "desc": "<p>减伤80%，应对攻击：自己回复20%生命。</p>",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hn6R6Cm3HrDEtHM1ETsZsfRNFPwbDJmtREBB-ux60tgg",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776415157910.png",
+          "name": "酶浓度调整",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 3,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 19782,
+          "is_public": true,
+          "comment_total": 4,
+          "is_stone": true,
+          "updated_at": 1777137121991,
+          "last_updated_at": 1776420786700,
+          "last_uid": "69040c958d04173d7edb740e",
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "61-1",
+              "count": 1,
+              "name": "魔草巫灵"
+            }
+          ],
+          "rank": 21,
+          "from": 0
+        },
+        {
+          "_id": "67ecec903ad13a7977a8ca63",
+          "category_id": 1,
+          "created_at": 1743580304050,
+          "damage_id": 1,
+          "desc": "造成物伤，自己生命大于80%时，本次技能威力+75。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776415300440.png",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "筛管奔流",
+          "power": 80,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 4,
+          "visit_total": 9675,
+          "is_stone": true,
+          "updated_at": 1744023489836,
+          "comment_total": 2,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776420789590,
+          "stone_from_list": [
+            {
+              "real_pet_id": "27-1",
+              "count": 2,
+              "name": "卡瓦重"
+            }
+          ],
+          "rank": 29,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268d8",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己获得全技能威力+30，应对防御：改为威力+60。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hseaAwIQBwfPiRrpRNnSRqZ3uMS2H0SqhlaDwG041SOf",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2IUj5KcluLyoTqFzSXicxpWvG99343Y0BZM1UmrsSicD3tQQicfRZjaKKA/0?wx_fmt=png",
+          "name": "盛开",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 1,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 4738,
+          "is_public": true,
+          "updated_at": 1777137123429,
+          "is_stone": true,
+          "comment_total": 2,
+          "last_updated_at": 1774933631304,
+          "term_list": [
+            {
+              "_id": "67ecfaa738a6188e101cb514",
+              "desc": "若敌方使用防御技能，则本技能应对成功，本次行动必定先手，且触发应对效果，",
+              "icon_url": "",
+              "name": "应对防御",
+              "type": 6,
+              "note_desc": "应对效果：技能描述中“应对防御：xxx”的效果。"
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743494516864",
+              "count": 2,
+              "name": "格兰球"
+            }
+          ],
+          "rank": 30,
+          "from": 0
+        },
+        {
+          "_id": "69c2221e91ffaeab57ef084e",
+          "category_id": 3,
+          "created_at": 1774330398875,
+          "damage_id": -1,
+          "desc": "敌方获得1层寄生。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/草_102025_1774330395337_0.png?expire_at=1774330996&er_sign=c8277f74d0547659562acd0a4ac3d93a",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "孢子",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 4,
+          "visit_total": 11415,
+          "updated_at": 1777137100577,
+          "last_updated_at": 1774933631377,
+          "term_list": [
+            {
+              "_id": "6760f1ba87ebec1bdb2332a2",
+              "desc": "回合结束时，从寄生来源吸收6%生命。（草系精灵免疫此效果）",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_43_1777025636508_0.png?expire_at=1777026237&er_sign=984b2e02dbe724985187414c412cbafe",
+              "name": "寄生",
+              "type": 2
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "14-1",
+              "count": 2,
+              "name": "蹦蹦花"
+            }
+          ],
+          "comment_total": 1,
+          "rank": 36,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268d3",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hrUC-m4MttxJp15x3c6lzEEeTGJZpfn_xERwY2inhUjn",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2CXloGHf0FrOPEV8ZMPX6xKAuu7AJ84dnUTaLQwfCLtSATGSrj4ZExw/0?wx_fmt=png",
+          "name": "仙人掌刺击",
+          "power": 150,
+          "tag_id": -1,
+          "take_energy": 6,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 6708,
+          "is_public": true,
+          "comment_total": 2,
+          "updated_at": 3,
+          "is_stone": false,
+          "rank": 42,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268dd",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "<p>自己获得物攻和魔攻+140%。</p>",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hk1pLeOW8pwCquOwsDMr3DowsFJFn5DujZRZbgsQX8kn",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776415117896.png",
+          "name": "丰饶",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 3,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 8366,
+          "is_public": true,
+          "note": "“信我！白树真的没有死，她仍然在喂养我们！”",
+          "updated_at": 1743580725197,
+          "last_updated_at": 1776420785041,
+          "last_uid": "69040c958d04173d7edb740e",
+          "is_stone": false,
+          "comment_total": 1,
+          "rank": 48,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268df",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "<p>自己获得1层光合印记。</p>",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hseZR_U8VdoGsvTeS5pdWrExcO6Zg4gh6TYT_l-5iGE3",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2JzA0rQFgarDNKqZn7brcqNrnaKwChpicyEfhkCr5WyK9n9WxZfzdsibA/0?wx_fmt=png",
+          "name": "光合作用",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 4,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 19994,
+          "is_public": true,
+          "comment_total": 2,
+          "updated_at": 1777137218335,
+          "is_stone": true,
+          "last_uid": "69c50fa947db6ed1b7eddb1e",
+          "last_updated_at": 1776213305942,
+          "term_list": [
+            {
+              "_id": "6760f1f02f00b587adad911a",
+              "name": "印记",
+              "icon_url": "",
+              "type": 3,
+              "desc": "精灵下场后印记不会消失，新入场的精灵会继承印记效果。精灵最多同时拥有1种正面印记和1种负面印记。",
+              "note_desc": "",
+              "order_weight": 99
+            },
+            {
+              "_id": "67ecfadb38a6188e101cb793",
+              "name": "光合印记",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_194_1777022106476_0.png?expire_at=1777022708&er_sign=f4061029c5ab64c4cbb602e0d5b95990",
+              "type": 3,
+              "desc": "印记效果，回合结束时获得1能量。",
+              "note_desc": "",
+              "order_weight": 0
+            }
+          ],
+          "test_desc": "<p><br></p>",
+          "stone_from_list": [
+            {
+              "real_pet_id": "4-1",
+              "count": 3,
+              "name": "魔力猫"
+            }
+          ],
+          "rank": 49,
+          "from": 0
+        },
+        {
+          "_id": "66f57b7460f84340ce3268d6",
+          "category_id": 1,
+          "damage_id": 2,
+          "desc": "造成魔伤，每次使用其他草系技能后，本技能威力永久+60。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hskI-Yr8vUXvRaQqFpjcrXJLfGbTbACnSowMukxoTRtX",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2tzFWUVH5DdAcOHXCryicricJnW0WeUZesy8s8lDZB7fERfGVetIia1hew/0?wx_fmt=png",
+          "name": "光能聚集",
+          "power": 100,
+          "tag_id": -1,
+          "take_energy": 7,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 19547,
+          "is_public": true,
+          "comment_total": 1,
+          "last_uid": "67f227fc65abb5a808264460",
+          "last_updated_at": 1773481344349,
+          "updated_at": 3,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "16-1",
+              "count": 3,
+              "name": "蒲公英娃娃"
+            }
+          ],
+          "rank": 50,
+          "from": 0
+        }
+      ],
+      "bloodline": [
+        {
+          "_id": "67ecfe80133c6c516fe4b471",
+          "category_id": 1,
+          "created_at": 1743584896477,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/普通_101073_1743584896096_0.png?expire_at=1743585496&er_sign=44743a8dfe5ac92857523b03126dd5d1",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "星星撞击",
+          "power": 90,
+          "tag_id": [],
+          "take_energy": 2,
+          "type_id": 5,
+          "visit_total": 2497,
+          "updated_at": 3,
+          "last_updated_at": 1774933630826,
+          "is_stone": false,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce3268d2",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hlHOjqzYzG8bvTcmm1RcLqZTRP66xXrV8EvAOOpiC_10",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2rVgxJJtnjVuHK7WakMH1jhh8tlUvjB7ftzwxtC33xux1nMzfqIe18w/0?wx_fmt=png",
+          "name": "荆棘爪",
+          "power": 80,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 1541,
+          "is_public": true,
+          "updated_at": 3,
+          "is_stone": false,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce3268ef",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "敌方获得10层灼烧。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04huydEmP1yK-Wv0ovwZEoFHd6l_eDd_MeefQtOtCmvAiX",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2DYGULbpzLZXK4uA6ViaxUQ5KYp4hVRRrDZSmc9Go08A7aKojsHyb1DA/0?wx_fmt=png",
+          "name": "引燃",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 9,
+          "is_deleted": false,
+          "visit_total": 12533,
+          "is_public": true,
+          "comment_total": 3,
+          "updated_at": 1777137099450,
+          "last_updated_at": 1774933631686,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "6760f198fae75ca7cd71055a",
+              "desc": "回合结束时，造成2%生命的火系伤害，并衰减一半层数。（火系精灵免疫此效果）",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_110_1777025582067_0.png?expire_at=1777026184&er_sign=663c6e87b21deaf6a526fecea4049c6c",
+              "name": "灼烧",
+              "type": 2
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "79-1",
+              "count": 2,
+              "name": "红绒十字"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce3268fd",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "下次使用的技能能耗-6。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hqIVvxP_xq2byE5i48P0NTNMnFfuhOkCudWH0vP4XGkh",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2qk9QzdB4u0cJj4nHMZ90OAAbqPUQb0CUkwZPQSjXztpdcuYvicPlk7A/0?wx_fmt=png",
+          "name": "蓄水",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 1,
+          "type_id": 10,
+          "is_deleted": false,
+          "visit_total": 5759,
+          "is_public": true,
+          "updated_at": 2,
+          "is_stone": true,
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "204-1",
+              "count": 1,
+              "name": "千棘盔"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67ea471ff9a2858b65b90a51",
+          "category_id": 1,
+          "created_at": 1743406878062,
+          "created_by": "",
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776416250090.png",
+          "is_deleted": false,
+          "name": "虹光冲击",
+          "power": 100,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 6,
+          "is_public": true,
+          "visit_total": 7832,
+          "updated_at": 2,
+          "is_stone": false,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776420800317,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67ecf284574f08bac39f14e5",
+          "category_id": 3,
+          "created_at": 1743581828441,
+          "damage_id": -1,
+          "desc": "自己获得速度+80，本技能位于1号或3号位时额外获得物攻+60%，传动1。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/720005_1743581828004_0.png?expire_at=1743582428&er_sign=745bd2d81ac749b1e8b60ef2a1164866",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "啮合传递",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 1,
+          "type_id": 14,
+          "visit_total": 42915,
+          "last_uid": "67e8354ff9a2858b65a724e9",
+          "last_updated_at": 1774933632362,
+          "comment_total": 4,
+          "updated_at": 1777169789050,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfb5c20776526c2fc3267",
+              "name": "传动",
+              "icon_url": "",
+              "type": 6,
+              "desc": "回合开始时，带有“传动X”的技能会向下移动X个位置，该效果可叠加。",
+              "note_desc": "技能顺序从上到下依次计数。",
+              "order_weight": 0
+            }
+          ],
+          "test_desc": "<p><br></p>",
+          "stone_from_list": [
+            {
+              "real_pet_id": "146-1",
+              "count": 1,
+              "name": "立方人"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce32691c",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "<p>自己获得物攻和物防+60%，应对防御：额外使自己的增益翻倍。</p>",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hhEc5_LO7t3iMM3FZRPjvhTpYuIbwRrElG839rsiJrpx",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2rg913LGxhgJOnLiby3nKdNlrtVibib8senFlgDznkEjCSRKkl6xHW1shg/0?wx_fmt=png",
+          "name": "泥浆铠甲",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 18,
+          "is_deleted": false,
+          "visit_total": 9648,
+          "is_public": true,
+          "updated_at": 1777137123429,
+          "last_uid": "69c6234988accd79a8e63ed8",
+          "last_updated_at": 1774710044283,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfa4a65abb5a808c411f0",
+              "desc": "增加属性、技能威力、连击数，以及降低能耗、吸血、过载等效果。\n（不包括类型为“印记”、“特性”、“其他”的效果）",
+              "icon_url": "",
+              "name": "增益",
+              "type": 1,
+              "order_weight": 99
+            },
+            {
+              "_id": "67ecfaa738a6188e101cb514",
+              "desc": "若敌方使用防御技能，则本技能应对成功，本次行动必定先手，且触发应对效果，",
+              "icon_url": "",
+              "name": "应对防御",
+              "type": 6,
+              "note_desc": "应对效果：技能描述中“应对防御：xxx”的效果。"
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "137-1",
+              "count": 2,
+              "name": "仪式巨像"
+            }
+          ],
+          "collection_total": 1,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326928",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "敌方获得4层冻结。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hsWaqyqUcVpw2Fe1On0dU9NA1NL9DYE7Af2IxfpMSpvI",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2SZ970m9yomofT7bgFDglK85I9N6a9WK7Isibd5VshkQ26nP8xUzSD9A/0?wx_fmt=png",
+          "name": "霜降",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 1,
+          "type_id": 11,
+          "is_deleted": false,
+          "visit_total": 13389,
+          "is_public": true,
+          "updated_at": 1777137102614,
+          "last_updated_at": 1774933631787,
+          "is_stone": false,
+          "term_list": [
+            {
+              "_id": "67ecf93020776526c2fbf0f1",
+              "desc": "冻结5%生命，若当前生命低于冻结比例，则力竭。（冰系精灵免疫此效果）",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_44_1777025694566_0.png?expire_at=1777026295&er_sign=f7ac598d0810ecdaf18d6d47d3f6b5d1",
+              "name": "冻结",
+              "type": 2
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326931",
+          "category_id": 1,
+          "damage_id": 2,
+          "desc": "蓄力，对敌方造成魔法伤害。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hutkbZr-Ezfk9zqM0q_CCI9KegDT3HABX9-Yt1ZfYSqK",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2ibnbDQYM7Cf8LROQ9vEf87jH99pyITiaw5FtNyhCYH9vniac6scwgm92w/0?wx_fmt=png",
+          "name": "升龙咆哮",
+          "power": 200,
+          "tag_id": -1,
+          "take_energy": 3,
+          "type_id": 15,
+          "is_deleted": false,
+          "visit_total": 11737,
+          "is_public": true,
+          "comment_total": 0,
+          "updated_at": 1777137115172,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "6760f1c62f00b587adad8e7c",
+              "desc": "该技能需要先蓄力1回合，下回合才能释放。蓄力期间免疫所有离场效果。",
+              "icon_url": "",
+              "name": "蓄力",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "166-1",
+              "count": 1,
+              "name": "伊兰亚龙"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce32693d",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "敌方先手-1，应对防御：额外使敌方获得双攻-70%。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hgqlIdea4V70Fgfic4hRBbmp1SCMlM7-NDtCtbRNmv1g",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2pCmbpFBfRrvrJoez9SZ06NbIL8xohw2TXDwdrZVTvkTo8VaIarocCA/0?wx_fmt=png",
+          "name": "麻痹",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 12,
+          "is_deleted": false,
+          "visit_total": 6451,
+          "is_public": true,
+          "updated_at": 1777137123430,
+          "last_updated_at": 1774933631864,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfaa738a6188e101cb514",
+              "desc": "若敌方使用防御技能，则本技能应对成功，本次行动必定先手，且触发应对效果，",
+              "icon_url": "",
+              "name": "应对防御",
+              "type": 6,
+              "note_desc": "应对效果：技能描述中“应对防御：xxx”的效果。"
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743488395155",
+              "count": 1,
+              "name": "荆棘电环"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67f3ad3d1b5df7e766fd4f7b",
+          "category_id": 1,
+          "created_at": 1744022847594,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "溃烂触碰",
+          "power": 60,
+          "take_energy": 1,
+          "type_id": 7,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/毒_(2)_1744042558617_0.png?expire_at=1744043157&er_sign=856965bcceb00fcbf9ccc11d0285ebb1",
+          "is_stone": false,
+          "updated_at": 1744042558961,
+          "visit_total": 811,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326954",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己回复2能量，己方队伍获得1次奉献：能耗-2。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04htZytv5ptl4pMIvsb9AalHxxh7RKLbDIg5jwFa06SRK1",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz26vvzEb40Fa8zZIOZCJCLnibuzrqBWcPicqx9icaVk14zuanySWViaHF3Ng/0?wx_fmt=png",
+          "name": "假寐",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 8,
+          "is_deleted": false,
+          "visit_total": 7508,
+          "is_public": true,
+          "updated_at": 1777137115884,
+          "last_updated_at": 1774933631947,
+          "is_stone": false,
+          "term_list": [
+            {
+              "_id": "6760f1d02f00b587adad8f0b",
+              "desc": "使己方队伍中所有的「啃咬」和「虫群」技能获得奉献对应的强化效果。",
+              "icon_url": "",
+              "name": "奉献",
+              "note_desc": "强化效果为技能描述包含“奉献：xxxx”的效果，随机获取，每种效果可重复可叠加。\n当前强化效果有：10%吸血；20%吸血；威力+20；连击数+1；敌方获得2层中毒；能耗-2。",
+              "type": 6
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce326961",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己获得全技能威力+40。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hg5ijktPzspKyyiDsp1RXeQpTrZDLzSgG7CzlXqvGAB3",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2aN8VQ2d3MhlrowzlkqAGgOPccVNwvDZBml9rMmN30XpclF04zXEujQ/0?wx_fmt=png",
+          "name": "化劲",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 17,
+          "is_deleted": false,
+          "visit_total": 10143,
+          "is_public": true,
+          "updated_at": 2,
+          "last_updated_at": 1774933632023,
+          "is_stone": true,
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743490309640",
+              "count": 2,
+              "name": "棋绮后"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67ea3d563ad13a797784a76a",
+          "category_id": 3,
+          "created_at": 1743404373257,
+          "created_by": "",
+          "damage_id": -1,
+          "desc": "自己获得全技能威力+20，迅捷。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/715001_1743404943734_0.png?expire_at=1743405545&er_sign=4704c52f3fb49d71323de91c3b0c9282",
+          "is_deleted": false,
+          "name": "羽化加速",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 2,
+          "type_id": 2,
+          "updated_at": 1777137114445,
+          "is_public": true,
+          "visit_total": 27389,
+          "last_updated_at": 1774933632104,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "6760ee67327bfab2b1815e09",
+              "desc": "通过主动更换精灵的方式入场时，使用第一个能量满足要求，并带有迅捷的技能。",
+              "icon_url": "",
+              "name": "迅捷",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "143-1",
+              "count": 2,
+              "name": "咔咔鸟"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "69c226945cee11b05e6f8aef",
+          "category_id": 3,
+          "created_at": 1774331540898,
+          "damage_id": -1,
+          "desc": "自己和敌方获得萌化：回复40%生命和4能量。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/萌_(1)_1774331540931_0.png?expire_at=1774332140&er_sign=2566ba0e47a8542c8cda4432fefc3489",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "甜心续航",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 16,
+          "visit_total": 26420,
+          "updated_at": 1777137101296,
+          "collection_total": 3,
+          "like_total": 6,
+          "term_list": [
+            {
+              "_id": "6760f21f0a05c09259c35da8",
+              "desc": "退化到上一阶，种族资质相应降低。（可退化的精灵才可以获得萌化，下场不会消失）",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_104_1777026006197_0.png?expire_at=1777026607&er_sign=958616674ca4c18133280470e958804b",
+              "name": "萌化",
+              "type": 2
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "105-1",
+              "count": 2,
+              "name": "雪影娃娃"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "69c225c4836c2b0268fdf8b0",
+          "category_id": 3,
+          "created_at": 1774331332525,
+          "damage_id": -1,
+          "desc": "偷取敌方3能量。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776414728939.png",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "勾魂",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 1,
+          "type_id": 3,
+          "updated_at": 1,
+          "visit_total": 9944,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776420828889,
+          "stone_from_list": [
+            {
+              "real_pet_id": "65-1",
+              "count": 2,
+              "name": "影狸"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "66f57b7460f84340ce32698c",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己获得100%吸血。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04htS35-R4OcKp_AiCr6xVZOY_T5dsUzgi6UVzEaFPYMEW",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2yvZ4xIpHwlS5LV3VlicTG4J7yKLk82J4qNUhVXXosiaDpCIOgn00d1Fw/0?wx_fmt=png",
+          "name": "贪婪",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 1,
+          "is_deleted": false,
+          "visit_total": 17465,
+          "is_public": true,
+          "comment_total": 3,
+          "updated_at": 1777137095382,
+          "last_updated_at": 1774933632178,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "6760f1f940d6bdf2bb326016",
+              "desc": "造成伤害时，根据吸血比例和造成伤害值，回复生命。",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_109_1777043259353_0.png?expire_at=1777043861&er_sign=654b49bdee4f2e67a905a58b52b40b7e",
+              "name": "吸血",
+              "type": 1
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743493299765",
+              "count": 2,
+              "name": "乌拉塔"
+            }
+          ],
+          "collection_total": 1,
+          "rank": -1,
+          "from": 1
+        },
+        {
+          "_id": "67ee021c38a6188e10270f52",
+          "category_id": 3,
+          "created_at": 1743651356478,
+          "damage_id": -1,
+          "desc": "敌方获得4层星陨印记。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/719001_1743651355028_0.png?expire_at=1743651956&er_sign=5613242f2ef015160e30dab113cc1d84",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "超维投射",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 4,
+          "type_id": 13,
+          "visit_total": 9101,
+          "updated_at": 1777137104151,
+          "last_updated_at": 1774933632435,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "6760f1f02f00b587adad911a",
+              "desc": "精灵下场后印记不会消失，新入场的精灵会继承印记效果。精灵最多同时拥有1种正面印记和1种负面印记。",
+              "icon_url": "",
+              "name": "印记",
+              "type": 3,
+              "order_weight": 99
+            },
+            {
+              "_id": "6760f17b2f00b587adad8a6b",
+              "desc": "印记效果，使用非幻系技能攻击拥有此印记的精灵时，会触发星陨印记，消耗全部星陨层\n数，对其造成额外的幻系伤害。",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_220_1777022461444_0.png?expire_at=1777023063&er_sign=77ea4bb15489a9c0c4b6c05f376d3e58",
+              "name": "星陨印记",
+              "type": 3
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "156-1",
+              "count": 2,
+              "name": "小皮球"
+            }
+          ],
+          "rank": -1,
+          "from": 1
+        }
+      ],
+      "stone": [
+        {
+          "_id": "66f57b7460f84340ce3268af",
+          "category_id": 1,
+          "damage_id": 1,
+          "desc": "造成物伤，每次使用后，本技能能耗永久+1。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hpQ5maTSHoAlEi5HlvuCkv513sbeS0on7hqM01YIE1H7",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2oqicJlEetmiaAOGW2CzJLrsTkia7WydR3rjMDiaB07BchLbQap6Axicu7ZA/0?wx_fmt=png",
+          "name": "重击",
+          "power": 110,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 2257,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1744020076377,
+          "comment_total": 1,
+          "last_updated_at": 1774933631614,
+          "stone_from_list": [
+            {
+              "real_pet_id": "172-1",
+              "count": 2,
+              "name": "怒目怂猫"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268c3",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己回复25%生命，应对防御：改为回复50%生命。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hhdvAgPtKF4uEb1qT_kaHuy-VyeN_hC4qCuNQesCJRCD",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2nUQ1fwic2KC2wcAPWGQnm4K9Ozq8J9U8T8C1VZUgxoz49icicEqEwbOmA/0?wx_fmt=png",
+          "name": "应激反应",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 2,
+          "type_id": 5,
+          "is_deleted": false,
+          "visit_total": 10613,
+          "is_public": true,
+          "updated_at": 1777137123429,
+          "is_stone": true,
+          "comment_total": 1,
+          "term_list": [
+            {
+              "_id": "67ecfaa738a6188e101cb514",
+              "desc": "若敌方使用防御技能，则本技能应对成功，本次行动必定先手，且触发应对效果，",
+              "icon_url": "",
+              "name": "应对防御",
+              "type": 6,
+              "note_desc": "应对效果：技能描述中“应对防御：xxx”的效果。"
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743497238656",
+              "count": 2,
+              "name": "画间沉铁兽"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3ad71133c6c516f400c36",
+          "category_id": 3,
+          "created_at": 1744022899126,
+          "damage_id": -1,
+          "desc": "敌方获得全技能能耗+1，应对防御：改为能耗+3。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "精神扰乱",
+          "power": null,
+          "take_energy": 0,
+          "type_id": 5,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776415994014.png",
+          "updated_at": 1777137123430,
+          "visit_total": 6716,
+          "is_stone": true,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776420812559,
+          "term_list": [
+            {
+              "_id": "67ecfaa738a6188e101cb514",
+              "desc": "若敌方使用防御技能，则本技能应对成功，本次行动必定先手，且触发应对效果，",
+              "icon_url": "",
+              "name": "应对防御",
+              "type": 6,
+              "note_desc": "应对效果：技能描述中“应对防御：xxx”的效果。"
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1005-1",
+              "count": 2,
+              "name": "黑猫巫师"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3a43165abb5a8083cbf96",
+          "category_id": 3,
+          "created_at": 1744020531897,
+          "damage_id": -1,
+          "desc": "每回合随机变成己方队伍中其他精灵的技能。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/普通_(1)_1744020528077_0.png?expire_at=1744021126&er_sign=97616f1ac40880989366cd522089c290",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "借用",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 0,
+          "type_id": 5,
+          "visit_total": 23897,
+          "comment_total": 4,
+          "updated_at": 5,
+          "stone_from_list": [
+            {
+              "real_pet_id": "101-1",
+              "count": 1,
+              "name": "彩蝶鲨"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3a6021b5df7e766fd102e",
+          "category_id": 3,
+          "created_at": 1744020996855,
+          "damage_id": -1,
+          "desc": "驱散敌方所有增益。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/700021_1744020994866_0.png?expire_at=1744021594&er_sign=9d552561de826ebe32e353caea74423e",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "晒太阳",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 1,
+          "type_id": 5,
+          "visit_total": 27980,
+          "comment_total": 1,
+          "updated_at": 1777137097089,
+          "term_list": [
+            {
+              "_id": "67ecfa4a65abb5a808c411f0",
+              "desc": "增加属性、技能威力、连击数，以及降低能耗、吸血、过载等效果。\n（不包括类型为“印记”、“特性”、“其他”的效果）",
+              "icon_url": "",
+              "name": "增益",
+              "type": 1,
+              "order_weight": 99
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "134-1",
+              "count": 1,
+              "name": "星光狮"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67efbd9a16dfbe360c90de21",
+          "category_id": 3,
+          "created_at": 1743764890194,
+          "damage_id": -1,
+          "desc": "敌方获得全技能能耗+3，应对防御：额外造成打断，且敌方下回合获得眩晕。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776415689892.png",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "摇篮曲",
+          "power": null,
+          "tag_id": [],
+          "take_energy": 5,
+          "type_id": 5,
+          "visit_total": 10563,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776420819088,
+          "updated_at": 1777137123430,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "67ecfa11133c6c516fe48a3f",
+              "desc": "使敌方本次无法释放对应技能。",
+              "icon_url": "",
+              "name": "打断",
+              "type": 6
+            },
+            {
+              "_id": "67ecfaa738a6188e101cb514",
+              "desc": "若敌方使用防御技能，则本技能应对成功，本次行动必定先手，且触发应对效果，",
+              "icon_url": "",
+              "name": "应对防御",
+              "type": 6,
+              "note_desc": "应对效果：技能描述中“应对防御：xxx”的效果。"
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743444734539",
+              "count": 1,
+              "name": "公平鸽"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce3268de",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "自己回复15%生命，随后脱离。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hpUR9Xwg7X35lXHchiMtwLh5kb03qPNjNkYCvY8mf4GP",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2osAak6L3CwKjtamhhCgRMUc1wFyW2kgdt4IZt3n7MFsQlqF3yspsmg/0?wx_fmt=png",
+          "name": "移花接木",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 2,
+          "type_id": 4,
+          "is_deleted": false,
+          "visit_total": 23497,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1777137116628,
+          "comment_total": 4,
+          "term_list": [
+            {
+              "_id": "67ecf926133c6c516fe48194",
+              "desc": "精灵离场，并选择队伍里一只其他精灵替换入场。本回合入场的精灵免疫此效果。",
+              "icon_url": "",
+              "name": "脱离",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743444064582",
+              "count": 1,
+              "name": "九幽菇"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3ac4bf12561a4f198bcbf",
+          "category_id": 2,
+          "created_at": 1744022606045,
+          "damage_id": -1,
+          "desc": "<p>减伤80%，应对攻击：自己获得物防+70%。</p>",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "纤维化",
+          "power": null,
+          "take_energy": 2,
+          "type_id": 4,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776415076112.png",
+          "is_stone": true,
+          "updated_at": 1777137121993,
+          "visit_total": 16009,
+          "comment_total": 3,
+          "last_uid": "69040c958d04173d7edb740e",
+          "last_updated_at": 1776420778120,
+          "term_list": [
+            {
+              "_id": "67ecfa9bf12561a4f1360b03",
+              "desc": "若敌方使用攻击技能，则本技能应对成功，本次行动必定先手，且触发应对效果。使用后携带的防御技能进入1回合冷却。",
+              "icon_url": "",
+              "name": "应对攻击",
+              "note_desc": "应对效果：技能描述中“应对攻击：xxx”的效果。",
+              "type": 6
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "35-1",
+              "count": 2,
+              "name": "伊贝粉粉"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67ece3e6f9a2858b65dc1772",
+          "category_id": 1,
+          "created_at": 1743578086391,
+          "damage_id": 2,
+          "desc": "<p>造成魔伤，本技能系别和天气系别相同。</p",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/co_creation/60551_1776416120471.png",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "天光",
+          "power": 95,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 6,
+          "visit_total": 10776,
+          "is_stone": true,
+          "updated_at": 1777275932130,
+          "comment_total": 2,
+          "last_updated_at": 1777275850035,
+          "last_uid": "67bfac6b0bffc02428560c7e",
+          "test_desc": "<p>雨天：水系</p><p>雾天：幽系</p><p>雪天：冰系</p><p>沙暴：地系（能耗受到沙暴天气影响）</p>",
+          "term_list": [],
+          "stone_from_list": [
+            {
+              "real_pet_id": "5101-1",
+              "count": 1,
+              "name": "白金独角兽"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3ad5e574f08bac3f0af37",
+          "category_id": 1,
+          "created_at": 1744022880906,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "透射",
+          "power": 60,
+          "take_energy": 1,
+          "type_id": 6,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/光_1744024064267_0.png?expire_at=1744024663&er_sign=b510b15151ab17b6a088881cae94b5cd",
+          "is_stone": true,
+          "updated_at": 1744024064655,
+          "visit_total": 1423,
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "193-1",
+              "count": 1,
+              "name": "晶石蜗"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "69c224d459063e84c1c74936",
+          "category_id": 1,
+          "created_at": 1774331092980,
+          "damage_id": 2,
+          "desc": "造成魔伤，敌方获得2层中毒。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/毒_(10)_1774331091043_0.png?expire_at=1774331690&er_sign=2a8fc9e303b208f37b05c0412d2b1354",
+          "is_deleted": false,
+          "is_public": true,
+          "is_stone": true,
+          "name": "腐蚀酸液",
+          "power": 35,
+          "tag_id": [],
+          "take_energy": 2,
+          "type_id": 7,
+          "visit_total": 2590,
+          "updated_at": 1777137098530,
+          "term_list": [
+            {
+              "_id": "6760f18b40d6bdf2bb325cc6",
+              "desc": "回合结束时，造成3%生命的毒系伤害。(毒系精灵免疫此效果)",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_45_1777025503634_0.png?expire_at=1777026105&er_sign=0749936ea7cff1592b4a8c3704be31f2",
+              "name": "中毒",
+              "type": 2
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "117-1",
+              "count": 1,
+              "name": "古啦多"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce326947",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "敌方获得5层中毒。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hhZEB4hOkY0AzpdSpcGzpSXea4pF1UbggZvzA5ucbM83",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2BibBqq4ibPRnUA5OyT4Z9UIrSK0VE9sSKvl374xnib16JVhfPMCXAroicg/0?wx_fmt=png",
+          "name": "毒孢子",
+          "power": null,
+          "tag_id": -1,
+          "take_energy": 3,
+          "type_id": 7,
+          "is_deleted": false,
+          "visit_total": 11242,
+          "is_public": true,
+          "updated_at": 1777137098529,
+          "is_stone": true,
+          "term_list": [
+            {
+              "_id": "6760f18b40d6bdf2bb325cc6",
+              "desc": "回合结束时，造成3%生命的毒系伤害。(毒系精灵免疫此效果)",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_45_1777025503634_0.png?expire_at=1777026105&er_sign=0749936ea7cff1592b4a8c3704be31f2",
+              "name": "中毒",
+              "type": 2
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "14-1",
+              "count": 2,
+              "name": "蹦蹦花"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "66f57b7460f84340ce326949",
+          "category_id": 3,
+          "damage_id": -1,
+          "desc": "敌方获得3层中毒，应对防御：改为获得8层。",
+          "icon_media_id": "eNBmbdri9weA45ctjb04hjcuAv8ix8hsO21RZhV_dlUxtHTG0NO3xYnHtwBzpoZP",
+          "icon_url": "http://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9vSL6xSFlMKz9ZwPdH3llz2JsAtRoGn3YCodFAQfuNdLhicqOS6aOfpJSK5TZvYZaYHkO34Y6SwlCw/0?wx_fmt=png",
+          "name": "剧毒",
+          "power": null,
+          "tag_id": 1,
+          "take_energy": 2,
+          "type_id": 7,
+          "is_deleted": false,
+          "visit_total": 4840,
+          "is_public": true,
+          "is_stone": true,
+          "updated_at": 1777137123430,
+          "term_list": [
+            {
+              "_id": "6760f18b40d6bdf2bb325cc6",
+              "desc": "回合结束时，造成3%生命的毒系伤害。(毒系精灵免疫此效果)",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_45_1777025503634_0.png?expire_at=1777026105&er_sign=0749936ea7cff1592b4a8c3704be31f2",
+              "name": "中毒",
+              "type": 2
+            },
+            {
+              "_id": "67ecfaa738a6188e101cb514",
+              "desc": "若敌方使用防御技能，则本技能应对成功，本次行动必定先手，且触发应对效果，",
+              "icon_url": "",
+              "name": "应对防御",
+              "type": 6,
+              "note_desc": "应对效果：技能描述中“应对防御：xxx”的效果。"
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "217-1",
+              "count": 2,
+              "name": "嘟嘟锅"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3ad5616dfbe360cc3e312",
+          "category_id": 1,
+          "created_at": 1744022873048,
+          "damage_id": 1,
+          "desc": "对敌方精灵造成物理伤害。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "毒沼",
+          "power": 80,
+          "take_energy": 2,
+          "type_id": 7,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/毒_(3)_1744043546267_0.png?expire_at=1744044145&er_sign=b0b6a2052980c66c982beba1f16e6e6e",
+          "updated_at": 1744043559295,
+          "visit_total": 2045,
+          "is_stone": true,
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743486842813",
+              "count": 1,
+              "name": "月亮砣"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67ecf719f12561a4f135ebf0",
+          "category_id": 1,
+          "created_at": 1743583001479,
+          "damage_id": 2,
+          "desc": "对敌方精灵造成魔法伤害。",
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/111018_1743582996576_0.png?expire_at=1743583596&er_sign=2ce569e9e3f095d8e0258080569cd4de",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "瘴气喷射",
+          "power": 100,
+          "tag_id": [],
+          "take_energy": 3,
+          "type_id": 7,
+          "visit_total": 1252,
+          "is_stone": true,
+          "updated_at": 1744025797355,
+          "comment_total": 1,
+          "stone_from_list": [
+            {
+              "real_pet_id": "217-1",
+              "count": 2,
+              "name": "嘟嘟锅"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        },
+        {
+          "_id": "67f3ad4af9a2858b6528a48b",
+          "category_id": 3,
+          "created_at": 1744022860140,
+          "damage_id": -1,
+          "desc": "敌方每有1层中毒效果，敌方获得双攻-30%。",
+          "is_deleted": false,
+          "is_public": true,
+          "name": "腐化",
+          "power": null,
+          "take_energy": 1,
+          "type_id": 7,
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/毒_(5)_1744025721430_0.png?expire_at=1744026319&er_sign=522b239b0385936da37213ffd9b631c7",
+          "is_stone": true,
+          "updated_at": 1777137098529,
+          "visit_total": 3425,
+          "comment_total": 1,
+          "term_list": [
+            {
+              "_id": "6760f18b40d6bdf2bb325cc6",
+              "desc": "回合结束时，造成3%生命的毒系伤害。(毒系精灵免疫此效果)",
+              "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/BuffIcon_45_1777025503634_0.png?expire_at=1777026105&er_sign=0749936ea7cff1592b4a8c3704be31f2",
+              "name": "中毒",
+              "type": 2
+            }
+          ],
+          "stone_from_list": [
+            {
+              "real_pet_id": "1743495012070",
+              "count": 1,
+              "name": "裘卡"
+            }
+          ],
+          "rank": -1,
+          "from": 2
+        }
+      ]
+    },
+    "egg_list": [
+      {
+        "_id": "67dab45c2543d1a3e369c1e2",
+        "category_id": 6,
+        "collect_count": 0,
+        "collection_total": 0,
+        "comment_total": 0,
+        "created_at": 1742386268965,
+        "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/prop/6/1742386223161.png",
+        "is_deleted": false,
+        "is_public": true,
+        "name": "喵喵",
+        "visit_total": 486,
+        "desc": "某种精灵的蛋，通过观察其花纹可以获得一些头绪。",
+        "pet_list": [
+          {
+            "name": "喵喵",
+            "pet_id": "2-1",
+            "_id": "66f7c0faa2df66f0080adb9d"
+          },
+          {
+            "name": "喵呜",
+            "pet_id": "3-1",
+            "_id": "66f7c0faa2df66f0080adba0"
+          },
+          {
+            "name": "魔力猫",
+            "pet_id": "4-1",
+            "_id": "66f7c0faa2df66f0080adba1"
+          }
+        ],
+        "skill_list": []
+      }
+    ],
+    "fruit_list": [
+      {
+        "_id": "67dab5b3d5921e858bba658a",
+        "category_id": 7,
+        "collect_count": 0,
+        "collection_total": 1,
+        "comment_total": 0,
+        "created_at": 1742386611378,
+        "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/prop/7/1742386565712.png",
+        "is_deleted": false,
+        "is_public": true,
+        "name": "喵喵",
+        "visit_total": 646,
+        "desc": "放入眠枭庇护所后能吸引某种精灵过来栖息，观察其花纹可以知道什么精灵会被吸引。",
+        "pet_list": [
+          {
+            "name": "喵喵",
+            "pet_id": "2-1",
+            "_id": "66f7c0faa2df66f0080adb9d"
+          },
+          {
+            "name": "魔力猫",
+            "pet_id": "4-1",
+            "_id": "66f7c0faa2df66f0080adba1"
+          },
+          {
+            "name": "喵呜",
+            "pet_id": "3-1",
+            "_id": "66f7c0faa2df66f0080adba0"
+          }
+        ],
+        "skill_list": []
+      }
+    ],
+    "evolution_list": [
+      {
+        "_id": "690232518d04173d7ec09879",
+        "created_at": 1761751633866,
+        "is_deleted": false,
+        "main_id": 1777908513054,
+        "stage_1": {
+          "_id": "66f7c0faa2df66f0080adb9d",
+          "highest": false,
+          "main_id": 1724487044,
+          "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9tGPsrBkDxnaCQgZeAZdtFGaIUib9HWzNy25rLpkicLUP4MzuhcRFoL7AfgeKfyVa3anTNYUgE3BHYA/640?wx_fmt=png&amp;from=appmsg",
+          "name": "喵喵",
+          "pet_id": 2,
+          "real_pet_id": "2-1",
+          "stage": 1
+        },
+        "stage_2": {
+          "_id": "66f7c0faa2df66f0080adba0",
+          "highest": false,
+          "main_id": 1724487044,
+          "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9tGPsrBkDxnaCQgZeAZdtFGCrhsnExo07ggkbts24vzK7cr5KeK7Mq0slMLcwWZ7tYPdVWgPHClDA/640?wx_fmt=png&amp;from=appmsg",
+          "name": "喵呜",
+          "pet_id": 3,
+          "pre_ids": [
+            "2-1"
+          ],
+          "real_pet_id": "3-1",
+          "stage": 2,
+          "rank": 16
+        },
+        "stage_3": {
+          "_id": "66f7c0faa2df66f0080adba1",
+          "highest": true,
+          "main_id": 1724487044,
+          "main_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9tGPsrBkDxnaCQgZeAZdtFG1st8ficshFgZLfrWOEkDmUj5otKVFI01TmWc5I0w6a02ZhIZ9BQ1h2w/640?wx_fmt=png&amp;from=appmsg",
+          "name": "魔力猫",
+          "pet_id": 4,
+          "pre_ids": [
+            "3-1"
+          ],
+          "real_pet_id": "4-1",
+          "stage": 3,
+          "rank": 32
+        },
+        "stage_4": {
+          "_id": "68006810beac997a9f37c36c",
+          "form_name": "首领形态",
+          "highest": true,
+          "is_leader": true,
+          "main_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/JL_molimiao_shouling_1744857082918_0.png?expire_at=1744857685&er_sign=f105d8f40beeed432902be061e7f8043",
+          "name": "叶冕魔力猫",
+          "pet_id": 4,
+          "pre_ids": [
+            "4-1"
+          ],
+          "real_pet_id": "1744857104271",
+          "stage": 4
+        },
+        "stage_len": 4
+      }
+    ],
+    "co_creation_user": [
+      {
+        "_id": "69b63553d2176ed4901d890f",
+        "count": 1,
+        "created_at": 1773548883892,
+        "created_by": "68f6185314fbd591889e23ae",
+        "edit_id": "66f7c0faa2df66f0080adb9d",
+        "edit_type": "pet",
+        "username": "石竹",
+        "avatar": {
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/13256ec346389f5d81cd152211dd280c1885042657_1739503741672_0.png?expire_at=1739504343&er_sign=69736ed8905d77c787a86085658d6e77",
+          "_id": "67aeb89c3fea5a2e1d1d2f57",
+          "name": "呱？呱呱",
+          "get_way": ""
+        },
+        "current_level": 1,
+        "official_title_list": [],
+        "avatar_dress": {
+          "icon_url": ""
+        },
+        "dynamic_dress": {
+          "icon_url": ""
+        },
+        "comment_dress": {
+          "icon_url": ""
+        }
+      },
+      {
+        "_id": "69c016d3d2176ed490d22bed",
+        "count": 1,
+        "created_at": 1774196435757,
+        "created_by": "69c00a5a8438071459fa6812",
+        "edit_id": "66f7c0faa2df66f0080adb9d",
+        "edit_type": "pet",
+        "username": "rocom_92501",
+        "avatar": {
+          "icon_url": "https://mmbiz.qpic.cn/mmbiz_png/27WWseXuaKCMvCFGFEibnm1n8spcwp7MWY69rPv30e9INTSrwKEPV2vUsGl3sFMB5X4xJgRVbwiatxIVLdmNvQVw/640?wx_fmt=png&amp;from=appmsg"
+        },
+        "current_level": 1,
+        "official_title_list": [],
+        "avatar_dress": {
+          "icon_url": ""
+        },
+        "dynamic_dress": {
+          "icon_url": ""
+        },
+        "comment_dress": {
+          "icon_url": ""
+        }
+      },
+      {
+        "_id": "69c4fdd19eef0ad07f44dcaa",
+        "count": 1,
+        "created_at": 1774517713824,
+        "created_by": "6900eb4d14fbd5918822ee83",
+        "edit_id": "66f7c0faa2df66f0080adb9d",
+        "edit_type": "pet",
+        "username": "圣帝尊大人",
+        "avatar": {
+          "icon_url": "https://env-00jxhb62nv6n.normal.cloudstatic.cn/avatar/58096_1761803940729.png",
+          "_id": "custom",
+          "name": "自定义",
+          "get_way": ""
+        },
+        "current_level": 2,
+        "official_title_list": [],
+        "avatar_dress": {
+          "icon_url": ""
+        },
+        "dynamic_dress": {
+          "icon_url": "https://mmbiz.qpic.cn/sz_mmbiz_png/dhh0GGnuf9u0tz06jfUd76LUOW6Ptx7r86BNor10VTZwuvicCfQTohwnyTetYJrKY7kdQia9mDoe7BQ3oWeSXSTA/640?wx_fmt=png&a",
+          "_id": "67eb529338a6188e10005870",
+          "get_way": "",
+          "name": "快活鸭"
+        },
+        "comment_dress": {
+          "icon_url": ""
+        }
+      }
+    ]
+  }
+]
