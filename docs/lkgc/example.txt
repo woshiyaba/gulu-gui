@@ -1,0 +1,349 @@
+import time
+import json
+import hmac
+import hashlib
+import requests
+
+# =========================================
+# 配置
+# =========================================
+
+ACCESS_KEY = "Y8OQpKSpRYnjPAYB"
+SECRET_KEY = "E8KwT8Rb9UgiFhur"
+SECRET = "E8KwT8Rb9UgiFhur"
+
+URL = "https://env-00jxhb62nv6n.api-hz.cloudbasefunction.cn/functions/invokeFunction"
+
+FUNCTION_NAME = "m-pet-co"
+ENV_ID = "env-00jxhb62nv6n"
+APP_ID = "2021004147646503"
+
+UNI_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2OWQ1ZjVkZDM5OTMzMmIyYTQ1NGY1Y2YiLCJyb2xlIjpbXSwicGVybWlzc2lvbiI6W10sInVuaUlkVmVyc2lvbiI6IjEuMC4xOCIsImlhdCI6MTc3ODQzMTEzMywiZXhwIjoxNzc5MDM1OTMzfQ.780kB4WtCheFqAsSqvkHknm4Aj7YwZPjmQDK8gcHaF0"
+# =========================================
+# 签名函数
+# =========================================
+
+"""
+{"method":"getList","params":[{"curPage":1,"pageSize":12,"query":{"is_show_form":false}}],"clientInfo":{"PLATFORM":"mp-weixin","OS":"ios","APPID":"__UNI__A807A48","DEVICEID":"17784311178584987447","scene":1106,"appName":"rcgd-m","appId":"__UNI__A807A48","appVersion":"1.0.25","appVersionCode":"1025","appLanguage":"zh-Hans","hostVersion":"8.0.71","hostName":"WeChat","uniPlatform":"mp-weixin","uniCompilerVersion":"4.87","uniRuntimeVersion":"4.87","deviceId":"17784311178584987447","deviceType":"phone","deviceBrand":"iphone","deviceModel":"iPhone 17<iPhone18,3>","osName":"ios","osVersion":"26.4.2","locale":"zh-Hans","LOCALE":"zh-Hans"},"uniIdToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2OWQ1ZjVkZDM5OTMzMmIyYTQ1NGY1Y2YiLCJyb2xlIjpbXSwicGVybWlzc2lvbiI6W10sInVuaUlkVmVyc2lvbiI6IjEuMC4xOCIsImlhdCI6MTc3ODQzMTEzMywiZXhwIjoxNzc5MDM1OTMzfQ.780kB4WtCheFqAsSqvkHknm4Aj7YwZPjmQDK8gcHaF0"}
+{"method":"getList","params":[{"curPage":1,"pageSize":12,"query":{"is_show_form":false}}],"clientInfo":{"PLATFORM":"mp-weixin","OS":"ios","APPID":"__UNI__A807A48","DEVICEID":"17784311178584987447","scene":1106,"appName":"rcgd-m","appId":"__UNI__A807A48","appVersion":"1.0.25","appVersionCode":"1025","appLanguage":"zh-Hans","hostVersion":"8.0.71","hostName":"WeChat","uniPlatform":"mp-weixin","uniCompilerVersion":"4.87","uniRuntimeVersion":"4.87","deviceId":"17784311178584987447","deviceType":"phone","deviceBrand":"iphone","deviceModel":"iPhone 17<iPhone18,3>","osName":"ios","osVersion":"26.4.2","locale":"zh-Hans","LOCALE":"zh-Hans"},"uniIdToken":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2OWQ1ZjVkZDM5OTMzMmIyYTQ1NGY1Y2YiLCJyb2xlIjpbXSwicGVybWlzc2lvbiI6W10sInVuaUlkVmVyc2lvbiI6IjEuMC4xOCIsImlhdCI6MTc3ODQzMTEzMywiZXhwIjoxNzc5MDM1OTMzfQ.780kB4WtCheFqAsSqvkHknm4Aj7YwZPjmQDK8gcHaF0"}
+
+"""
+SIGNED_HEADERS = [
+    "x-client-timestamp",
+    "x-from-app-id",
+    "x-from-env-id",
+    "x-from-function-name",
+    "x-from-instance-id",
+    "x-to-env-id",
+    "x-to-function-name",
+]
+
+
+import json
+import hmac
+import hashlib
+import time
+
+
+def sha256_hex(data: str):
+    return hashlib.sha256(
+        data.encode("utf-8")
+    ).hexdigest()
+
+
+def hmac_sha256(secret: str, data: str):
+    return hmac.new(
+        secret.encode("utf-8"),
+        data.encode("utf-8"),
+        hashlib.sha256
+    ).hexdigest()
+
+
+def generate_authorization(
+    method,
+    path,
+    query,
+    body,
+    headers,
+    access_key,
+    secret_key,
+    timestamp=None
+):
+
+    if timestamp is None:
+        timestamp = str(int(time.time() * 1000))
+
+    signed_headers = sorted([
+        "x-client-timestamp",
+        "x-from-app-id",
+        "x-from-env-id",
+        "x-from-function-name",
+        "x-from-instance-id",
+        "x-to-env-id",
+        "x-to-function-name",
+    ])
+
+    # canonical headers
+    canonical_headers = ""
+
+    for k in signed_headers:
+        canonical_headers += (
+            f"{k.lower()}:{headers[k]}\n"
+        )
+
+    # body sha256
+    body_json = json.dumps(
+        body,
+        separators=(",", ":"),
+        ensure_ascii=False
+    )
+
+    body_hash = sha256_hex(body_json)
+
+    # canonical request
+    canonical_request = (
+        method.upper() + "\n" +
+        path + "\n" +
+        query + "\n" +
+        canonical_headers + "\n" +
+        ";".join(signed_headers) + "\n" +
+        body_hash + "\n"
+    )
+
+    canonical_request_hash = sha256_hex(
+        canonical_request
+    )
+
+    string_to_sign = (
+        "HMAC-SHA256\n" +
+        timestamp + "\n" +
+        canonical_request_hash + "\n"
+    )
+
+    signature = hmac_sha256(
+        secret_key,
+        string_to_sign
+    )
+
+    authorization = (
+        f"HMAC-SHA256 "
+        f"Credential={access_key}, "
+        f"SignedHeaders={';'.join(signed_headers)}, "
+        f"Signature={signature}"
+    )
+
+    return authorization
+
+
+
+
+# =========================================
+# 请求函数
+# =========================================
+
+def fetch_page(page):
+
+    timestamp = str(int(time.time() * 1000))
+
+    body_data = {
+        "method": "getList",
+        "params": [
+            {
+                "curPage": page,
+                "pageSize": 12,
+                "query": {
+                    "is_show_form": False
+                }
+            }
+        ],
+        "clientInfo": {
+            "PLATFORM": "mp-weixin",
+            "OS": "ios",
+            "APPID": "__UNI__A807A48","DEVICEID":"17784311178584987447","scene":1106,"appName":"rcgd-m","appId":"__UNI__A807A48","appVersion":"1.0.25","appVersionCode":"1025","appLanguage":"zh-Hans","hostVersion":"8.0.71","hostName":"WeChat","uniPlatform":"mp-weixin","uniCompilerVersion":"4.87","uniRuntimeVersion":"4.87","deviceId":"17784311178584987447","deviceType":"phone","deviceBrand":"iphone","deviceModel":"iPhone 17<iPhone18,3>","osName":"ios","osVersion":"26.4.2","locale":"zh-Hans","LOCALE":"zh-Hans"
+        },
+        "uniIdToken": UNI_TOKEN
+    }
+
+    # 注意：
+    # separators 去空格
+    # ensure_ascii=False
+    # 非常关键
+    body = json.dumps(
+        body_data,
+        ensure_ascii=False,
+        separators=(",", ":")
+    )
+
+    print(body)
+    headers = {
+        "x-client-timestamp": timestamp,
+        "content-type": "application/json",
+        "x-from-instance-id": timestamp,
+        "x-from-env-id": "env-00jxhb62nv6n",
+        "x-from-function-name": "m-pet-co",
+        "x-from-app-id": APP_ID,
+        "x-to-env-id": "env-00jxhb62nv6n",
+        "x-to-function-name": "m-pet-co",
+    }
+    authorization = generate_authorization(method="POST", path="/functions/invokeFunction", query="", body=body_data,
+                                           headers=headers, access_key=ACCESS_KEY, secret_key=SECRET_KEY,
+                                           timestamp=headers["x-client-timestamp"])
+
+    """
+
+d46f3c57c6691ffd2c1c8298a6f57972114690992fea30bd1bd2f88010050390
+d46f3c57c6691ffd2c1c8298a6f57972114690992fea30bd1bd2f88010050390
+e0a040d5d9872b662c56f7fe22d6db2c62a339b280921007fa61ad302000afc5
+70cdddfb77b293162b1cb8614d30665c39569de46f7f24c367b11bd291146e14
+
+
+
+    """
+    print(authorization)
+    headers["Authorization"] = authorization
+    response = requests.post(
+        URL,
+        headers=headers,
+        data=body,
+        timeout=20
+    )
+
+    print("状态码:", response.status_code)
+
+    try:
+        return response.json()
+    except:
+        print(response.text)
+        return None
+
+def get_pet_info(pet_id):
+
+    timestamp = str(int(time.time() * 1000))
+
+    body_data = {
+        "method": "getPetInfo",
+        "params": [
+            {
+                "pet_id": pet_id
+            }
+        ],
+        "clientInfo": {
+            "PLATFORM": "mp-weixin",
+            "OS": "ios",
+            "APPID": "__UNI__A807A48",
+            "DEVICEID": "17784311178584987447",
+            "scene": 1106,
+            "appName": "rcgd-m",
+            "appId": "__UNI__A807A48",
+            "appVersion": "1.0.25",
+            "appVersionCode": "1025",
+            "appLanguage": "zh-Hans",
+            "hostVersion": "8.0.71",
+            "hostName": "WeChat",
+            "uniPlatform": "mp-weixin",
+            "uniCompilerVersion": "4.87",
+            "uniRuntimeVersion": "4.87",
+            "deviceId": "17784311178584987447",
+            "deviceType": "phone",
+            "deviceBrand": "iphone",
+            "deviceModel": "iPhone 17<iPhone18,3>",
+            "osName": "ios",
+            "osVersion": "26.4.2",
+            "locale": "zh-Hans",
+            "LOCALE": "zh-Hans"
+        },
+        "uniIdToken": UNI_TOKEN
+    }
+
+    body = json.dumps(
+        body_data,
+        ensure_ascii=False,
+        separators=(",", ":")
+    )
+
+    headers = {
+        "Host": "env-00jxhb62nv6n.api-hz.cloudbasefunction.cn",
+        "x-client-timestamp": timestamp,
+        "x-alipay-source": "client",
+        "content-type": "application/json",
+        "x-from-instance-id": timestamp,
+        "x-from-env-id": ENV_ID,
+        "x-from-function-name": FUNCTION_NAME,
+        "x-from-app-id": APP_ID,
+        "x-to-env-id": ENV_ID,
+        "x-to-function-name": FUNCTION_NAME,
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_4_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.71(0x18004730) NetType/WIFI Language/zh_CN",
+        "Referer": "https://servicewechat.com/wxece8d6735c1455ce/69/page-frame.html"
+    }
+
+    # 生成签名
+    authorization = generate_authorization(
+        method="POST",
+        path="/functions/invokeFunction",
+        query="",
+        body=body_data,
+        headers=headers,
+        access_key=ACCESS_KEY,
+        secret_key=SECRET_KEY,
+        timestamp=timestamp
+    )
+
+    headers["Authorization"] = authorization
+
+    response = requests.post(
+        URL,
+        headers=headers,
+        data=body,
+        timeout=20
+    )
+
+    print("状态码:", response.status_code)
+
+    try:
+        result = response.json()
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return result
+    except Exception:
+        print(response.text)
+        return None
+# =========================================
+# 自动翻页
+# =========================================
+
+def main():
+
+    all_data = []
+
+    for page in range(1, 50):
+
+        print(f"\n========== 第 {page} 页 ==========")
+
+        data = fetch_page(page)
+
+        if not data:
+            print("请求失败")
+            break
+
+        print(json.dumps(data, ensure_ascii=False, indent=2))
+
+        # 根据真实结构修改
+        records = (
+            data.get("data", {})
+                .get("list", [])
+        )
+
+        if not records:
+            print("没有更多数据")
+            break
+
+        all_data.extend(records)
+
+        time.sleep(1)
+
+    print(f"\n总共获取: {len(all_data)} 条")
+
+
+if __name__ == "__main__":
+    pet_info = get_pet_info("127-1")
+
+    print(pet_info)
