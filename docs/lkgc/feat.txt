@@ -1,0 +1,15 @@
+ @docs/lkgc/getList_exam.json 这个是 @common/utils/lkgc.py:118-131
+  fetch_pet_list的返回值 @docs/lkgc/getPetInfo_exam.json 是
+  @common/utils/lkgc.py:134-136获取宠物详情的返回值 请求示例 在
+  @docs/lkgc/example.txt 帮我在 @api/schemas/ops.py 中写一个方法
+  分页获取宠物列表 然后遍历宠物列表获取详情 获取宠物的详情  1.根据
+  getListexam的 name和from 组合为 name（from_name）去数库pokemon.name 中查询   
+  如果有则不做任何操作，本次操作只插入不更新历史数据 然后将main_url 上传到oss  
+  将作为pokemon.image_lc，mf->mdef,mg->matk,sd->spd,sm->hp,wf->def_val,wg->atk 这是种族值的对应关系，
+  catch_way->obtain_method avatar_url->avatar有的话则更新 没有的话则不更新 将数据插入到pokemon
+
+  2. @docs/lkgc/getPetInfo_exam.json 主要是获取 skill_list中的base、bloodline和stone，插入到pokemon_skill表中 base为pokemon_skill.type 原生技能
+  bloodline为pokemon_skill.type 血脉技能，  stone为pokemon_skill.type 技能石技能 要首先从skill表中根据技能名称查询，如果有则直接插入，如果没有先插入到skill表然后插入到pokemon_skill表中
+  json中 take_energy->consume power->power desc->skill_desc icon_url->icon 同样先将icon_url上传到oss 然后记录的表中
+
+待办：1.对应lkgc的type id 对应到 属性 2.tag_id对应的技能类型
