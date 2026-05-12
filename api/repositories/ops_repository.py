@@ -580,6 +580,70 @@ async def create_audit_log(
         await conn.commit()
 
 
+async def list_audit_logs_for_ops(
+    username: str = "",
+    resource_type: str = "",
+    resource_id: str = "",
+    action: str = "",
+    page: int = 1,
+    page_size: int = 10,
+) -> tuple[int, list[dict]]:
+    pool = await get_pool()
+    conditions: list[str] = []
+    params: list = []
+    if username:
+        conditions.append("(ou.username LIKE %s OR ou.nickname LIKE %s)")
+        params.extend([f"%{username}%", f"%{username}%"])
+    if resource_type:
+        conditions.append("oal.resource_type = %s")
+        params.append(resource_type)
+    if resource_id:
+        conditions.append("oal.resource_id LIKE %s")
+        params.append(f"%{resource_id}%")
+    if action:
+        conditions.append("oal.action = %s")
+        params.append(action)
+    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    offset = (page - 1) * page_size
+
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT COUNT(*) AS cnt
+                FROM ops_audit_log oal
+                LEFT JOIN ops_user ou ON ou.id = oal.user_id
+                {where_clause}
+                """,
+                params,
+            )
+            total_row = await cur.fetchone() or {}
+            total = int(total_row.get("cnt", 0))
+
+            await cur.execute(
+                f"""
+                SELECT
+                    oal.id,
+                    oal.user_id,
+                    COALESCE(ou.username, '') AS username,
+                    COALESCE(ou.nickname, '') AS nickname,
+                    oal.resource_type,
+                    oal.resource_id,
+                    oal.action,
+                    oal.before_json,
+                    oal.after_json,
+                    oal.created_at
+                FROM ops_audit_log oal
+                LEFT JOIN ops_user ou ON ou.id = oal.user_id
+                {where_clause}
+                ORDER BY oal.id DESC
+                LIMIT %s OFFSET %s
+                """,
+                [*params, page_size, offset],
+            )
+            return total, await cur.fetchall()
+
+
 async def list_pokemon_for_ops(
     keyword: str = "",
     no: str = "",

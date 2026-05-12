@@ -24,6 +24,7 @@ const menus = [
   { to: '/ops/home', label: '首页' },
   { to: '/ops/dicts', label: '字典维护' },
   { to: '/ops/users', label: '用户管理' },
+  { to: '/ops/audit-logs', label: '操作日志' },
   { to: '/ops/pokemon', label: '精灵维护' },
   { to: '/ops/banners', label: 'Banner管理' },
   { to: '/ops/pokemon-lineups', label: '阵容管理' },

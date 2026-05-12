@@ -7,6 +7,7 @@ from api.schemas.ops import (
     OpsLoginRequest,
     OpsLoginResponse,
     OpsProfileUpdateRequest,
+    OpsAuditLogListResponse,
     OpsUserCreateRequest,
     OpsUserInfo,
     OpsUserListResponse,
@@ -160,6 +161,27 @@ async def delete_ops_user(
 ):
     await ops_service.delete_user(current_user, user_id)
     return Response(status_code=204)
+
+
+@router.get("/audit-logs", response_model=OpsAuditLogListResponse)
+async def list_ops_audit_logs(
+    username: str = Query(default=""),
+    resource_type: str = Query(default=""),
+    resource_id: str = Query(default=""),
+    action: str = Query(default=""),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.list_audit_logs_for_ops(
+        current_user,
+        username=username,
+        resource_type=resource_type,
+        resource_id=resource_id,
+        action=action,
+        page=page,
+        page_size=page_size,
+    )
 
 
 @router.get("/pokemon", response_model=OpsPokemonListResponse)

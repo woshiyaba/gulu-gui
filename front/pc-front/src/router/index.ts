@@ -66,6 +66,10 @@ const router = createRouter({
           component: () => import('@/views/ops/OpsUsersView.vue'),
         },
         {
+          path: 'audit-logs',
+          component: () => import('@/views/ops/OpsAuditLogsView.vue'),
+        },
+        {
           path: 'skills',
           component: () => import('@/views/ops/OpsSkillsView.vue'),
         },

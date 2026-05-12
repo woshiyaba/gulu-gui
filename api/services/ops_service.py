@@ -350,6 +350,29 @@ async def delete_user(user: dict, target_user_id: int) -> None:
     )
 
 
+async def list_audit_logs_for_ops(
+    user: dict,
+    username: str = "",
+    resource_type: str = "",
+    resource_id: str = "",
+    action: str = "",
+    page: int = 1,
+    page_size: int = 10,
+) -> dict:
+    ensure_role(user, {"admin"})
+    page = max(page, 1)
+    page_size = max(1, min(page_size, 100))
+    total, items = await ops_repository.list_audit_logs_for_ops(
+        username=username.strip(),
+        resource_type=resource_type.strip(),
+        resource_id=resource_id.strip(),
+        action=action.strip(),
+        page=page,
+        page_size=page_size,
+    )
+    return {"total": total, "page": page, "page_size": page_size, "items": items}
+
+
 def _normalize_pokemon_payload(payload: dict) -> dict:
     normalized = dict(payload)
     normalized["no"] = (payload.get("no") or "").strip()

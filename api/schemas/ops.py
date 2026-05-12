@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pydantic import BaseModel, Field
 
 
@@ -64,6 +66,26 @@ class OpsUserUpdateRequest(BaseModel):
 
 class OpsUserListResponse(BaseModel):
     items: list[OpsUserInfo] = Field(default_factory=list)
+
+
+class OpsAuditLogItem(BaseModel):
+    id: int
+    user_id: int
+    username: str = ""
+    nickname: str = ""
+    resource_type: str
+    resource_id: str = ""
+    action: str
+    before_json: dict | None = None
+    after_json: dict | None = None
+    created_at: datetime
+
+
+class OpsAuditLogListResponse(BaseModel):
+    total: int
+    page: int = 1
+    page_size: int = 10
+    items: list[OpsAuditLogItem] = Field(default_factory=list)
 
 
 class OpsFriendImageUploadResponse(BaseModel):

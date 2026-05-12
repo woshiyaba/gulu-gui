@@ -56,6 +56,26 @@ export interface OpsUserListResponse {
   items: OpsUser[]
 }
 
+export interface OpsAuditLogItem {
+  id: number
+  user_id: number
+  username: string
+  nickname: string
+  resource_type: string
+  resource_id: string
+  action: string
+  before_json: Record<string, unknown> | null
+  after_json: Record<string, unknown> | null
+  created_at: string
+}
+
+export interface OpsAuditLogListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsAuditLogItem[]
+}
+
 export interface OpsUserCreatePayload {
   username: string
   nickname: string
@@ -296,6 +316,17 @@ export function updateOpsUser(id: number, payload: OpsUserUpdatePayload): Promis
 
 export function deleteOpsUser(id: number): Promise<void> {
   return http.delete(`/api/ops/users/${id}`).then(() => undefined)
+}
+
+export function fetchOpsAuditLogs(params: {
+  username?: string
+  resource_type?: string
+  resource_id?: string
+  action?: string
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsAuditLogListResponse> {
+  return http.get<OpsAuditLogListResponse>('/api/ops/audit-logs', { params }).then((r) => r.data)
 }
 
 export function fetchOpsPokemon(params: {
