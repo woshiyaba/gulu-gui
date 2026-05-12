@@ -1,35 +1,47 @@
 # 洛克王国精灵图鉴
 
-一个前后端分离的洛克王国精灵资料站。项目负责采集和整理精灵、技能、地图、阵容、性格、印记等数据，并通过 FastAPI、PC Web 和 uni-app 小程序/H5 提供查询与运营维护能力。
+一个前后端分离的洛克王国精灵资料站。项目负责采集和整理精灵、技能、地图、阵容、性格、印记、血脉、共鸣魔法等数据，并通过 FastAPI、PC Web 和 uni-app 小程序/H5 提供查询与运营维护能力，同时内置 LangChain/LangGraph 智能问答 Agent。
 
-当前项目主要包含 4 条线：
+当前项目主要包含 5 条线：
 
 - 数据采集与同步：`scraper/`、`scripts/` 从外部站点或本地数据源直接导入并同步到 PostgreSQL。
-- 后端 API：`api/` 基于 FastAPI，对外提供图鉴、技能、地图、阵容等公共接口，也提供运营后台接口。
+- 后端 API：`api/` 基于 FastAPI，对外提供图鉴、技能、地图、阵容、PK 对战分析等公共接口，也提供完整的运营后台 CRUD。
+- 文件存储：`oss/` 基于腾讯云 COS，统一管理精灵图片、技能图标、异色立绘等静态资源。
 - 前端页面：`front/pc-front/` 是 Vue 3 + Vite 的 PC Web；`front/mini-app/` 是 uni-app，可跑 H5 和微信小程序等端。
-- 智能问答：`agents/` + `ws/` 通过 WebSocket 接入 QQ 消息，并让 Agent 调用后端 API 回答游戏问题。
+- 智能问答：`agents/` + `ws/` 通过 WebSocket 接入 QQ 消息，Agent 可调用后端 API 回答游戏问题，支持 CLI 和子 Agent（PK 分析）。
 
 ## 项目结构
 
 ```text
-gulu-gui/
+lkwg_gui/
 ├─ api/                         # FastAPI 后端
-│  ├─ routes/                   # 路由入口：公共接口、运营接口、WebSocket
-│  ├─ services/                 # 业务编排
-│  ├─ repositories/             # PostgreSQL 数据访问
+│  ├─ routes/                   # 路由入口：公共接口、运营接口、微信登录、第三方、AI PK、文件上传、WebSocket
+│  ├─ services/                 # 业务编排：精灵、技能、阵容、PK 分析、Banner、性格、微信登录
+│  ├─ repositories/             # PostgreSQL 数据访问层
 │  ├─ schemas/                  # Pydantic 响应/请求模型
-│  └─ utils/                    # 转换、媒体地址、属性计算等工具
-├─ db/                          # PostgreSQL 异步连接池
-├─ scraper/                     # 外部站点数据抓取
-├─ scripts/                     # 导入、同步、初始化、迁移脚本（直接落 PG）
-├─ sql/                         # PostgreSQL 表结构和补充 SQL
+│  └─ utils/                    # 属性克制计算、类型映射等工具
+├─ db/                          # PostgreSQL 异步连接池（psycopg v3）
+├─ oss/                         # 腾讯云 COS 对象存储客户端
+├─ common/                      # 共享工具
+│  └─ utils/                    # LLM 工具、JSON 解析、文件写入、哈希等
+├─ scraper/                     # 外部站点数据抓取（API 客户端）
+├─ scripts/                     # 导入、同步、迁移、建表脚本（独立运行，直接写 PG）
+├─ sql/                         # PostgreSQL 表结构（主表 + 印记术语表）
 ├─ front/
 │  ├─ pc-front/                 # Vue 3 + TypeScript + Vite PC Web
 │  └─ mini-app/                 # uni-app H5 / 微信小程序等多端
-├─ agents/                      # LangChain/LangGraph 问答 Agent
-├─ ws/                          # WebSocket 连接与 QQ 消息处理
+├─ agents/                      # LangChain/LangGraph 问答 Agent + PK 子 Agent
+│  ├─ tools/                    # Agent 工具（call_api）
+│  └─ sub/                      # 子 Agent（PK 分析）
+├─ ws/                          # WebSocket 连接管理 + QQ 消息处理
+│  └─ handlers/                 # QQ Agent 消息路由
+├─ skills/                      # Agent Skill 定义（精灵图鉴 API 规范）
+│  ├─ pokemon-guide/            # 洛克王国精灵图鉴 Skill
+│  └─ find-skills/              # 技能查询 Skill
+├─ docs/                        # 文档、样例数据、设计文档
+├─ logs/                        # 运行日志
 ├─ config.py                    # 环境变量和基础配置
-└─ pyproject.toml               # Python 依赖
+└─ pyproject.toml               # Python 依赖（uv 管理）
 ```
 
 ## 整体流程
@@ -44,52 +56,91 @@ flowchart LR
   service --> route["api/routes"]
   route --> pc["PC Web"]
   route --> mini["uni-app"]
+  route --> wx["微信小程序登录"]
+  route --> third["远行商人等第三方"]
   route --> ws["WebSocket / QQ Agent"]
+  route --> oss["腾讯云 COS<br/>图片/文件存储"]
 ```
 
-简单理解：采集脚本直接写入 PostgreSQL，FastAPI 查询同一个 PG 库。前端不要直接连数据库，只请求后端接口。
+简单理解：采集脚本直接写入 PostgreSQL，FastAPI 查询同一个 PG 库。图片等静态资源统一上传到腾讯云 COS。前端不要直接连数据库，只请求后端接口。
 
 ## 后端说明
 
-后端入口是 `api/main.py`，启动时会创建 PostgreSQL 异步连接池，并自动执行运营后台账号表的 bootstrap。
+后端入口是 `api/main.py`，启动时创建 PostgreSQL 异步连接池，并自动执行以下 bootstrap：
+
+- 运营后台账号表初始化（默认管理员）
+- 微信小程序认证表初始化
+- AI PK 任务表初始化
+- 精灵筛选器选项表初始化
 
 代码分层比较固定：
 
-- `api/routes/`：只负责接 HTTP/WebSocket 请求，做参数声明和错误码。
-- `api/services/`：负责业务规则，比如分页、筛选、上传、登录、阵容组装。
+- `api/routes/`：只负责接 HTTP/WebSocket 请求，做参数声明和错误码。共 7 个路由器：
+  - `pokemon.py`（`/api`）—— 公共图鉴接口
+  - `ops.py`（`/api/ops`）—— 运营后台 CRUD（需 Bearer Token）
+  - `wx.py`（`/api/wx`）—— 微信小程序静默登录
+  - `ai_pk.py`（`/api/ai-pk`）—— AI PK 异步任务
+  - `third.py`（`/api/third`）—— 第三方集成（远行商人）
+  - `file_upload.py`（`/api/file`）—— COS 通用文件上传
+  - `ws_route.py` —— WebSocket（QQ Agent + 前端推送）
+- `api/services/`：负责业务规则，比如分页、筛选、上传、登录、阵容组装、PK 分析编排。
 - `api/repositories/`：负责 SQL 查询和写入。
 - `api/schemas/`：定义接口返回和请求体结构。
 
-主要公共接口：
+### 主要公共接口
 
-- `GET /`：健康检查。
-- `GET /api/banners`：首页 Banner。
-- `GET /api/attributes`：属性列表。
-- `GET /api/egg-groups`：蛋组列表。
-- `GET /api/pokemon`：精灵列表，支持名称、属性、蛋组、排序、分页。
-- `GET /api/pokemon/{pokemon_name}`：精灵详情。
-- `GET /api/pokemon/evolution-chain/{pokemon_name}`：进化链。
-- `GET /api/pokemon/body-match`：按身高体重匹配可孵化精灵。
-- `GET /api/skills`：技能列表。
-- `GET /api/skill-types`：技能类型。
-- `GET /api/skill-stones`：技能石查询。
-- `GET /api/pokemon/categories`：地图分类。
-- `GET /api/pokemon/map-points`：地图点位。
-- `GET /api/pokemon-marks`：印记/状态/战斗名词解释。
-- `GET /api/personalities`：性格字典。
-- `GET /api/pokemon-lineups`：阵容推荐列表。
-- `GET /api/pokemon-lineups/{lineup_id}`：阵容详情。
-- `GET /api/starlight-duel/latest`：最新星光对决阵容。
-- `GET /api/starlight-duel/{lineup_id}`：指定星光对决阵容。
-- `WebSocket /ws`：QQ Agent 消息通道。
+| 类别 | 端点 | 说明 |
+|------|------|------|
+| 根 | `GET /` | 健康检查 |
+| Banner | `GET /api/banners` | 首页/活动 Banner 轮播图 |
+| 精灵 | `GET /api/pokemon` | 精灵列表，支持名称/属性/蛋组/异色/排序/分页/预设筛选 |
+| 精灵 | `GET /api/pokemon/{name}` | 精灵详情（含种族值、特性、克制、技能、防御倍率） |
+| 精灵 | `GET /api/pokemon/evolution-chain/{name}` | 进化链 |
+| 精灵 | `GET /api/pokemon/body-match` | 按身高体重匹配可孵化精灵 |
+| 精灵 | `GET /api/pokemon-eggs` | 精灵蛋查询（分页） |
+| 精灵 | `GET /api/pokemon-fruits` | 精灵果实查询（分页） |
+| 技能 | `GET /api/skills` | 技能列表（名称/类型/属性筛选） |
+| 技能 | `GET /api/skill-types` | 技能类型列表 |
+| 技能 | `GET /api/skill-stones` | 技能石查询 |
+| 属性 | `GET /api/attributes` | 属性列表 |
+| 属性 | `GET /api/egg-groups` | 蛋组列表 |
+| 地图 | `GET /api/pokemon/categories` | 地图分类 |
+| 地图 | `GET /api/pokemon/map-points` | 地图点位 |
+| 阵容 | `GET /api/pokemon-lineups` | 阵容推荐列表（支持分类/ID 筛选） |
+| 阵容 | `GET /api/pokemon-lineups/{id}` | 阵容详情 |
+| 阵容 | `GET /api/starlight-duel/latest` | 最新星光对决阵容 |
+| 阵容 | `GET /api/starlight-duel/{id}` | 指定星光对决阵容 |
+| 战斗 | `GET /api/battle-pk/random-pokemon-modes` | 随机精灵模式选项 |
+| 战斗 | `POST /api/battle-pk` | PVP 对战分析（同步，返回结构化分析结果） |
+| 战斗 | `POST /api/ai-pk/battle-pk` | PVP 对战分析（异步，通过 WebSocket 推送结果） |
+| 战斗 | `GET /api/ai-pk/tasks/{task_id}` | 查询异步 PK 任务状态和结果 |
+| 词典 | `GET /api/bloodlines` | 血脉字典 |
+| 词典 | `GET /api/resonance-magics` | 共鸣魔法列表 |
+| 词典 | `GET /api/personalities` | 性格字典（含种族值修正） |
+| 词典 | `GET /api/pokemon-marks` | 印记/状态/战斗名词解释 |
+| 词典 | `GET /api/pokemon-filter-options` | 精灵筛选选项（异色/排序预设） |
+| 第三方 | `GET /api/third/merchant` | 远行商人信息 |
+| 微信 | `POST /api/wx/login` | 微信小程序静默登录 |
+| 文件 | `POST /api/file/upload` | COS 通用文件上传 |
+| WebSocket | `WS /ws` | QQ Agent 消息通道 |
+| WebSocket | `WS /ws/{user_id}` | 前端用户推送通道（PK 结果流式推送） |
 
-运营后台接口统一在 `/api/ops` 下，需要 Bearer Token：
+### 运营后台接口
 
-- 登录与个人信息：`/auth/login`、`/auth/me`
-- 字典与用户：`/dicts`、`/users`
-- 精灵与进化链：`/pokemon`、`/pokemon/{id}/evolution-chain`
-- 技能与技能石：`/skills`、`/skill-stones`
-- Banner、性格、阵容、共鸣魔法、印记、徽章：`/banners`、`/personalities`、`/pokemon-lineups`、`/resonance-magics`、`/pokemon-marks`、`/marks`
+统一在 `/api/ops` 下，需要 Bearer Token 认证（角色分为 `admin` 和 `editor`）：
+
+- 认证：`POST /auth/login`、`GET /auth/me`、`PUT /auth/me`
+- 字典：`GET|POST /dicts`、`PUT|DELETE /dicts/{id}`
+- 用户：`GET|POST /users`、`PUT|DELETE /users/{id}`
+- 精灵：`GET|POST /pokemon`、`GET|PUT|DELETE /pokemon/{id}`，含进化链管理、图片上传（异色/朋友图）
+- 技能：`GET|POST /skills`、`GET|PUT|DELETE /skills/{id}`，含图标上传、使用查询
+- 技能石：`GET|POST /skill-stones`、`GET|PUT|DELETE /skill-stones/{id}`，含可用技能搜索
+- Banner：`GET|POST /banners`、`PUT|DELETE /banners/{id}`
+- 性格：`GET|POST /personalities`、`GET|PUT|DELETE /personalities/{id}`，含重置
+- 阵容：`GET|POST /pokemon-lineups`、`GET|PUT|DELETE /pokemon-lineups/{id}`，含精灵/技能搜索辅助
+- 共鸣魔法：`GET|POST /resonance-magics`、`GET|PUT|DELETE /resonance-magics/{id}`，含图标上传
+- 精灵印记：`GET|POST /pokemon-marks`、`PUT|DELETE /pokemon-marks/{id}`
+- 精灵筛选器：`GET|POST /pokemon-filter-options`、`PUT|DELETE /pokemon-filter-options/{id}`
 
 Swagger 文档启动后访问 `http://localhost:8000/docs`。
 
@@ -101,15 +152,16 @@ Swagger 文档启动后访问 `http://localhost:8000/docs`。
 
 主要页面：
 
-- `/`：精灵图鉴首页。
-- `/pokemon/:name`：精灵详情。
-- `/skills`：技能图鉴。
-- `/skill-stones`：技能石查询。
-- `/body-match`：身高体重孵蛋匹配。
-- `/map`：世界地图。
-- `/pokemon-marks`：名词解释。
-- `/lineups`、`/lineups/:id`：阵容推荐。
-- `/ops/login`、`/ops/**`：运营后台。
+- `/`：精灵图鉴首页（含筛选和排序）
+- `/pokemon/:name`：精灵详情
+- `/skills`：技能图鉴
+- `/skill-stones`：技能石查询
+- `/body-match`：身高体重孵蛋匹配
+- `/map`：世界地图
+- `/pokemon-marks`：名词解释
+- `/lineups`、`/lineups/:id`：阵容推荐
+- `/battle-pk`：阵容 PK 对战分析
+- `/ops/login`、`/ops/**`：运营后台（14 个子页面）
 
 接口地址通过环境文件配置：
 
@@ -122,15 +174,18 @@ Swagger 文档启动后访问 `http://localhost:8000/docs`。
 
 主要页面：
 
-- `pages/index/index`：图鉴。
-- `pages/skill/list`：技能图鉴。
-- `pages/map/index`：世界地图。
-- `pages/more/index`：更多入口。
-- `pages/pokemon/detail`：精灵详情。
-- `pages/pokemon/body-match`：孵蛋查询。
-- `pages/skill/stone`：技能石查询。
-- `pages/more/pokemon-marks`：名词解释。
-- `pages/lineup/list`、`pages/lineup/detail`：阵容推荐。
+- `pages/index/index`：精灵图鉴
+- `pages/skill/list`：技能图鉴
+- `pages/map/index`：世界地图
+- `pages/more/index`：更多入口
+- `pages/pokemon/detail`：精灵详情
+- `pages/pokemon/body-match`：孵蛋查询
+- `pages/skill/stone`：技能石查询
+- `pages/more/pokemon-marks`：名词解释
+- `pages/more/pokemon-eggs`：精灵蛋查询
+- `pages/more/pokemon-fruits`：精灵果实查询
+- `pages/lineup/list`、`pages/lineup/detail`：阵容推荐
+- `pages/battle-pk/index`：阵容 PK
 
 ## 数据库说明
 
@@ -138,17 +193,18 @@ Swagger 文档启动后访问 `http://localhost:8000/docs`。
 
 核心 SQL 文件：
 
-- `sql/wikiroco.sql`：PostgreSQL 主表结构，包含精灵、技能、地图、性格、阵容等表。
+- `sql/wikiroco.sql`：PostgreSQL 主表结构，包含精灵、属性、技能、地图、性格、血脉、进化链、蛋组、阵容、共鸣魔法等表。
 - `sql/pokemon_mark.sql`：印记、状态、增益、减益、环境等战斗术语表。
 
 主要表：
 
 - 基础图鉴：`pokemon`、`attribute`、`pokemon_attribute`、`pokemon_trait`、`evolution_chain`
 - 技能体系：`skill`、`pokemon_skill`、`skill_stone`
-- 孵蛋与筛选：`egg_hatch_pet`、`pokemon_egg_group`、`attribute_matchup`
+- 孵蛋与筛选：`egg_hatch_pet`、`pokemon_egg`、`pokemon_fruit`、`pokemon_egg_group`、`attribute_matchup`
 - 地图：`category`、`pet_map_point`
 - 内容运营：`banner`、`personality`、`pokemon_lineup`、`pokemon_lineup_member`
-- 字典与术语：`sys_dict`、`pokemon_mark`
+- 战斗与词典：`sys_dict`（血脉、共鸣魔法、随机精灵模式等）、`pokemon_mark`、`ai_pk_task`
+- 运营系统：`ops_users`、`wx_auth`、`pokemon_filter_options`
 
 ## 环境要求
 
@@ -157,6 +213,7 @@ Swagger 文档启动后访问 `http://localhost:8000/docs`。
 - Python `>= 3.13`
 - `uv`
 - PostgreSQL `12+`
+- 腾讯云 COS（用于图片/文件存储）
 
 前端：
 
@@ -168,30 +225,46 @@ Swagger 文档启动后访问 `http://localhost:8000/docs`。
 根目录创建 `.env`，至少配置数据库连接：
 
 ```env
+# PostgreSQL 数据库
 PG_HOST=localhost
 PG_PORT=5432
 PG_DATABASE=wikiroco
 PG_USER=wikiroco
 PG_PASSWORD=your_pg_password
-```
 
-运营后台和静态资源可选配置：
-
-```env
+# 运营后台
 OPS_TOKEN_SECRET=change_me
 OPS_TOKEN_TTL_SECONDS=43200
 OPS_INIT_USERNAME=admin
 OPS_INIT_PASSWORD=admin123456
 OPS_INIT_NICKNAME=默认管理员
 
+# 静态资源（默认使用 https://wikiroco.com）
 STATIC_BASE_URL=https://wikiroco.com
 FRIEND_IMAGE_UPLOAD_DIR=/var/www/images/friends
 YISE_IMAGE_UPLOAD_DIR=/var/www/images/yise/friends
 SKILL_ICON_UPLOAD_DIR=/var/www/images/icon/skill
 RESONANCE_MAGIC_ICON_UPLOAD_DIR=/var/www/images/resonance-magic
+
+# 腾讯云 COS（图片/文件上传）
+COS_SECRET_ID=your_secret_id
+COS_SECRET_KEY=your_secret_key
+COS_REGION=ap-guangzhou
+COS_BUCKET=your-bucket-name
+
+# 微信小程序
+WX_MINI_APPID=your_appid
+WX_MINI_SECRET=your_secret
+
+# AI / Agent（DashScope API）
+DASHSCOPE_API_KEY=your_api_key
+
+# 远行商人 API
+MERCHANT_API_URL=https://wegame.shallow.ink/api/v1/games/rocom/merchant/info
+MERCHANT_API_KEY=your_merchant_key
 ```
 
-注意：`.env` 不要提交到仓库，生产环境必须修改默认管理员密码和 `OPS_TOKEN_SECRET`。
+注意：`.env` 不要提交到仓库，生产环境必须修改默认管理员密码、`OPS_TOKEN_SECRET` 以及所有第三方 API 密钥。
 
 ## 启动方式
 
@@ -206,6 +279,17 @@ uv sync
 ### 2. 准备数据库
 
 先准备 PostgreSQL，并填写 `.env`。表结构参考 `sql/wikiroco.sql`，可在新建库后导入。需要补充数据时按需运行 `scripts/` 下的 `import_*` / `sync_*` / `seed_*` 脚本，每个脚本都是独立可执行的。
+
+常用数据初始化顺序：
+
+```bash
+uv run python scripts/import_personalities.py    # 性格数据
+uv run python scripts/import_map_points.py       # 地图点位
+uv run python scripts/sync_xiaoheihe_pets.py     # 精灵数据（主要数据源，文件最大）
+uv run python scripts/import_pokemon_egg.py      # 精灵蛋
+uv run python scripts/import_pokemon_fruit.py    # 精灵果实
+uv run python scripts/sync_pokemon_skills_from_pet_jsons.py  # 技能同步
+```
 
 ### 3. 启动后端 API
 
@@ -233,13 +317,8 @@ npm run dev
 ```bash
 cd front/mini-app
 npm install
-npm run dev:h5
-```
-
-微信小程序开发构建：
-
-```bash
-npm run dev:mp-weixin
+npm run dev:h5            # H5 开发
+npm run dev:mp-weixin     # 微信小程序开发
 ```
 
 ## 常用开发命令
@@ -247,42 +326,47 @@ npm run dev:mp-weixin
 后端：
 
 ```bash
-uv run uvicorn api.main:app --reload --port 8000
-uv run python scripts/<script>.py
-uv run python -m compileall api
-uv run python agents/main_agent.py
+uv run uvicorn api.main:app --reload --port 8000    # API 开发服务器
+uv run python scripts/<script>.py                    # 运行数据脚本
+uv run python -m compileall api                      # 语法检查
+uv run python agents/main_agent.py                   # Agent CLI 交互模式
 ```
 
 PC Web：
 
 ```bash
 cd front/pc-front
-npm run dev
-npm run type-check
-npm run build
+npm run dev              # 开发服务器
+npm run type-check       # TypeScript 类型检查
+npm run build            # 生产构建
 ```
 
 uni-app：
 
 ```bash
 cd front/mini-app
-npm run dev:h5
-npm run dev:mp-weixin
-npm run build:mp-weixin
-npm run type-check
+npm run dev:h5           # H5 开发
+npm run dev:mp-weixin    # 微信小程序开发
+npm run build:mp-weixin  # 微信小程序生产构建
+npm run type-check       # TypeScript 类型检查
 ```
 
-## 推荐启动顺序
+## 智能问答 Agent
 
-第一次本地运行建议按这个顺序：
+Agent 入口在 `agents/main_agent.py`，基于 LangChain/LangGraph 构建。Agent 名称为"洛克精灵百事通"，通过读取 `skills/` 目录下的 SKILL.md 获取可用 API 规范，然后使用 `call_api` 工具调用后端接口回答用户问题。
 
-1. 创建 PostgreSQL 数据库，并按 `sql/wikiroco.sql` 初始化表结构。
-2. 填写根目录 `.env`。
-3. 执行 `uv sync`。
-4. 根据数据来源执行 `scripts/` 下相关的导入/同步脚本。
-5. 执行 `uv run uvicorn api.main:app --reload --port 8000`。
-6. 进入 `front/pc-front`，执行 `npm install && npm run dev`。
-7. 打开 `http://localhost:5173`。
+核心组件：
+
+- `agents/main_agent.py`：主 Agent，负责意图理解和 API 调用编排
+- `agents/tools/api_tool.py`：`call_api` 工具，封装 HTTP 请求调用后端
+- `agents/sub/pk_subagent.py`：PK 子 Agent，负责 PVP 对战分析（支持同步/异步/流式）
+
+支持两种运行模式：
+
+1. **CLI 交互**：`uv run python agents/main_agent.py`
+2. **WebSocket 接入**：通过 `/ws` 接收 QQ 消息并异步回复
+
+Agent 使用的 Skill 定义在 `skills/` 目录下，包含完整的 API 接口规范和调用示例。
 
 ## 自测用例
 
@@ -330,3 +414,13 @@ npm run type-check
 - 密码：`admin123456`
 
 生产环境必须通过 `.env` 改掉默认值。
+
+### 图片上传失败
+
+检查 COS 相关环境变量是否正确配置（`COS_SECRET_ID`、`COS_SECRET_KEY`、`COS_REGION`、`COS_BUCKET`），确认 COS Bucket 已创建且有写入权限。
+
+### Agent 无法回答或回答不准确
+
+- 确认 Agent 使用的 `POKEMON_API_BASE_URL` 指向正确的后端地址。
+- 确认 `skills/` 目录下的 SKILL.md 与当前 API 实际接口一致。
+- 确认 `DASHSCOPE_API_KEY` 已配置且有效。

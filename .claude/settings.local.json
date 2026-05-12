@@ -29,7 +29,9 @@
       "Bash(uv lock *)",
       "Bash(Get-ChildItem -Path . -Directory)",
       "Bash(Select-Object Name)",
-      "PowerShell(Remove-Item *)"
+      "PowerShell(Remove-Item *)",
+      "Bash(Get-ChildItem -Directory \"E:/play/lkwg_gui/\")",
+      "Bash(git *)"
     ]
   }
 }
