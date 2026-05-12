@@ -75,6 +75,10 @@ CREATE TABLE pokemon (
     spd           INT          NOT NULL DEFAULT 0,
     total_race    INT          NOT NULL DEFAULT 0,
     obtain_method VARCHAR(255) NOT NULL DEFAULT '',
+    name_en       VARCHAR(255) NOT NULL DEFAULT '',
+    image_yise    VARCHAR(255) NOT NULL DEFAULT '',
+    avatar        VARCHAR(255) NOT NULL DEFAULT '',
+    source_id     BIGINT,
     -- 外键约束（type/form/egg_group 不再走字典外键，仅冗余存值）
     CONSTRAINT fk_pokemon_trait FOREIGN KEY (trait_id) REFERENCES pokemon_trait(id)
 );
@@ -114,7 +118,8 @@ CREATE TABLE evolution_chain (
     chain_id            INT          NOT NULL,         -- 进化链编号，同链共享
     sort_order          SMALLINT     NOT NULL,         -- 在链中的顺序，从 1 开始
     pokemon_name        VARCHAR(50)  NOT NULL,         -- 基础名（不含形态后缀）
-    evolution_condition VARCHAR(255) NOT NULL DEFAULT '',
+    evolution_condition     VARCHAR(255) NOT NULL DEFAULT '',
+    pre_evolution_condition VARCHAR(255),
     CONSTRAINT uk_chain_step UNIQUE (chain_id, sort_order)
 );
 
@@ -274,7 +279,7 @@ CREATE TABLE IF NOT EXISTS pokemon_lineup_member (
     id                SERIAL PRIMARY KEY,
     lineup_id         INT    NOT NULL REFERENCES pokemon_lineup(id) ON DELETE CASCADE,
     sort_order        INT    NOT NULL DEFAULT 1,
-    pokemon_id        INT    NOT NULL REFERENCES pokemon(id),
+    pokemon_id        INT    REFERENCES pokemon(id),
     bloodline_dict_id INT    REFERENCES sys_dict(id),
     personality_id    SMALLINT REFERENCES personality(id),
     qual_1            VARCHAR(20) NOT NULL DEFAULT '',
@@ -285,79 +290,173 @@ CREATE TABLE IF NOT EXISTS pokemon_lineup_member (
     skill_3_id        INT REFERENCES skill(id),
     skill_4_id        INT REFERENCES skill(id),
     member_desc       TEXT NOT NULL DEFAULT '',
-    CONSTRAINT uk_pokemon_lineup_member_order UNIQUE (lineup_id, sort_order)
+    random_pk_dict_id INT,
+    CONSTRAINT uk_pokemon_lineup_member_order UNIQUE (lineup_id, sort_order),
+    CONSTRAINT chk_lineup_member_pokemon_or_random CHECK (
+        (pokemon_id IS NOT NULL AND random_pk_dict_id IS NULL)
+        OR (pokemon_id IS NULL AND random_pk_dict_id IS NOT NULL)
+    )
 );
 
 
-CREATE TABLE "public"."pokemon_egg" (
-  "id" int4 NOT NULL DEFAULT nextval('pokemon_egg_id_seq'::regclass),
-  "source_id" int8 NOT NULL,
-  "name" varchar(100) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
-  "form" varchar(100) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
-  "icon" varchar(500) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
-  "pokemon_source_id" int8,
-  "pokemon_id" int4,
-  "item_quality" int2 NOT NULL DEFAULT 0,
-  "created_at" timestamp(6) NOT NULL DEFAULT now(),
-  "updated_at" timestamp(6) NOT NULL DEFAULT now(),
-  CONSTRAINT "pokemon_egg_pkey" PRIMARY KEY ("id"),
-  CONSTRAINT "uk_pe_source_id" UNIQUE ("source_id")
-)
-;
-
-ALTER TABLE "public"."pokemon_egg" 
-  OWNER TO "wikiroco";
-
-CREATE INDEX "idx_pe_item_quality" ON "public"."pokemon_egg" USING btree (
-  "item_quality" "pg_catalog"."int2_ops" ASC NULLS LAST
+-- 精灵蛋
+CREATE TABLE pokemon_egg (
+    id                SERIAL       PRIMARY KEY,
+    source_id         BIGINT       NOT NULL,
+    name              VARCHAR(100) NOT NULL DEFAULT '',
+    form              VARCHAR(100) NOT NULL DEFAULT '',
+    icon              VARCHAR(500) NOT NULL DEFAULT '',
+    pokemon_source_id BIGINT,
+    pokemon_id        INT,
+    item_quality      SMALLINT     NOT NULL DEFAULT 0,
+    created_at        TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMP    NOT NULL DEFAULT NOW(),
+    CONSTRAINT uk_pe_source_id UNIQUE (source_id)
 );
 
-CREATE INDEX "idx_pe_name" ON "public"."pokemon_egg" USING btree (
-  "name" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+CREATE INDEX idx_pe_item_quality     ON pokemon_egg (item_quality);
+CREATE INDEX idx_pe_name             ON pokemon_egg (name);
+CREATE INDEX idx_pe_pokemon_id       ON pokemon_egg (pokemon_id);
+CREATE INDEX idx_pe_pokemon_source_id ON pokemon_egg (pokemon_source_id);
+
+COMMENT ON COLUMN pokemon_egg.source_id IS '没用';
+COMMENT ON COLUMN pokemon_egg.pokemon_source_id IS '官方通用id';
+COMMENT ON COLUMN pokemon_egg.pokemon_id IS 'pokemon表的id';
+
+
+-- 精灵果实
+CREATE TABLE pokemon_fruit (
+    id                SERIAL       PRIMARY KEY,
+    source_id         BIGINT       NOT NULL,
+    name              VARCHAR(100) NOT NULL DEFAULT '',
+    icon              VARCHAR(500) NOT NULL DEFAULT '',
+    pokemon_source_id BIGINT,
+    item_quality      SMALLINT     NOT NULL DEFAULT 0,
+    created_at        TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at        TIMESTAMP    NOT NULL DEFAULT NOW(),
+    CONSTRAINT uk_pf_source_id UNIQUE (source_id)
 );
 
-CREATE INDEX "idx_pe_pokemon_id" ON "public"."pokemon_egg" USING btree (
-  "pokemon_id" "pg_catalog"."int4_ops" ASC NULLS LAST
+CREATE INDEX idx_pf_item_quality      ON pokemon_fruit (item_quality);
+CREATE INDEX idx_pf_name              ON pokemon_fruit (name);
+CREATE INDEX idx_pf_pokemon_source_id ON pokemon_fruit (pokemon_source_id);
+
+-- ============================================================
+-- 以下是新表（在 DB 中存在但原 SQL 中缺失）
+-- ============================================================
+
+-- 共鸣魔法
+CREATE TABLE resonance_magic (
+    id              SERIAL       PRIMARY KEY,
+    name            VARCHAR(50)  NOT NULL UNIQUE,
+    description     TEXT,
+    max_usage_count INT          NOT NULL DEFAULT 1,
+    icon            VARCHAR(255) NOT NULL DEFAULT '',
+    sort_order      INT          NOT NULL DEFAULT 0,
+    created_at      TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX "idx_pe_pokemon_source_id" ON "public"."pokemon_egg" USING btree (
-  "pokemon_source_id" "pg_catalog"."int8_ops" ASC NULLS LAST
+-- 印记 / 战斗效果词典
+CREATE TABLE pokemon_mark (
+    id              SERIAL       PRIMARY KEY,
+    key             VARCHAR(50)  NOT NULL,
+    zh_name         VARCHAR(50)  NOT NULL,
+    zh_description  TEXT         NOT NULL DEFAULT '',
+    sort_order      INT          NOT NULL DEFAULT 0,
+    image           VARCHAR(255) NOT NULL DEFAULT '',
+    CONSTRAINT uk_pokemon_mark_key  UNIQUE (key),
+    CONSTRAINT uk_pokemon_mark_sort UNIQUE (sort_order)
 );
 
-COMMENT ON COLUMN "public"."pokemon_egg"."source_id" IS '没用';
-
-COMMENT ON COLUMN "public"."pokemon_egg"."pokemon_source_id" IS '官方通用id';
-
-COMMENT ON COLUMN "public"."pokemon_egg"."pokemon_id" IS 'pokemon表的id';
-
-
-
-
-CREATE TABLE "public"."pokemon_fruit" (
-  "id" int4 NOT NULL DEFAULT nextval('pokemon_fruit_id_seq'::regclass),
-  "source_id" int8 NOT NULL,
-  "name" varchar(100) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
-  "icon" varchar(500) COLLATE "pg_catalog"."default" NOT NULL DEFAULT ''::character varying,
-  "pokemon_source_id" int8,
-  "item_quality" int2 NOT NULL DEFAULT 0,
-  "created_at" timestamp(6) NOT NULL DEFAULT now(),
-  "updated_at" timestamp(6) NOT NULL DEFAULT now(),
-  CONSTRAINT "pokemon_fruit_pkey" PRIMARY KEY ("id"),
-  CONSTRAINT "uk_pf_source_id" UNIQUE ("source_id")
-)
-;
-
-ALTER TABLE "public"."pokemon_fruit" 
-  OWNER TO "wikiroco";
-
-CREATE INDEX "idx_pf_item_quality" ON "public"."pokemon_fruit" USING btree (
-  "item_quality" "pg_catalog"."int2_ops" ASC NULLS LAST
+-- 精灵筛选选项（前端配置）
+CREATE TABLE pokemon_filter_option (
+    id          SERIAL       PRIMARY KEY,
+    code        VARCHAR(50)  NOT NULL UNIQUE,
+    label       VARCHAR(100) NOT NULL,
+    filter_type VARCHAR(20)  NOT NULL,
+    order_by    VARCHAR(20)  NOT NULL DEFAULT '',
+    order_dir   VARCHAR(10)  NOT NULL DEFAULT '',
+    sort_order  INT          NOT NULL DEFAULT 0,
+    is_active   BOOLEAN      NOT NULL DEFAULT TRUE,
+    created_at  TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX "idx_pf_name" ON "public"."pokemon_fruit" USING btree (
-  "name" COLLATE "pg_catalog"."default" "pg_catalog"."text_ops" ASC NULLS LAST
+-- OPS 用户
+CREATE TABLE ops_user (
+    id            SERIAL       PRIMARY KEY,
+    username      VARCHAR(50)  NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    nickname      VARCHAR(50)  NOT NULL DEFAULT '',
+    role          VARCHAR(20)  NOT NULL DEFAULT 'editor',
+    is_active     BOOLEAN      NOT NULL DEFAULT TRUE,
+    created_at    TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX "idx_pf_pokemon_source_id" ON "public"."pokemon_fruit" USING btree (
-  "pokemon_source_id" "pg_catalog"."int8_ops" ASC NULLS LAST
+-- OPS 操作审计日志
+CREATE TABLE ops_audit_log (
+    id            BIGSERIAL    PRIMARY KEY,
+    user_id       INT          NOT NULL,
+    resource_type VARCHAR(50)  NOT NULL,
+    resource_id   VARCHAR(50)  NOT NULL DEFAULT '',
+    action        VARCHAR(20)  NOT NULL,
+    before_json   JSONB,
+    after_json    JSONB,
+    created_at    TIMESTAMP    NOT NULL DEFAULT NOW()
 );
+
+-- AI PK 对战任务
+CREATE TABLE ai_pk_task (
+    id         BIGSERIAL    PRIMARY KEY,
+    task_id    VARCHAR(64)  NOT NULL UNIQUE,
+    user_id    VARCHAR(128) NOT NULL,
+    team_a     JSONB        NOT NULL,
+    team_b     JSONB        NOT NULL,
+    status     VARCHAR(32)  NOT NULL DEFAULT 'pending',
+    result     JSONB,
+    raw        TEXT,
+    error      TEXT,
+    created_at TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP    NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_ai_pk_task_user ON ai_pk_task (user_id, created_at DESC);
+
+-- 社交成员
+CREATE TABLE social_member (
+    id           BIGSERIAL    PRIMARY KEY,
+    provider     VARCHAR(50)  NOT NULL,
+    openid       VARCHAR(128) NOT NULL,
+    session_key  VARCHAR(255) NOT NULL DEFAULT '',
+    unionid      VARCHAR(128) NOT NULL DEFAULT '',
+    errcode      INT          NOT NULL DEFAULT 0,
+    errmsg       VARCHAR(255) NOT NULL DEFAULT '',
+    raw_json     JSONB        NOT NULL DEFAULT '{}',
+    created_at   TIMESTAMP    NOT NULL DEFAULT NOW(),
+    updated_at   TIMESTAMP    NOT NULL DEFAULT NOW(),
+    CONSTRAINT uk_social_member_provider_openid UNIQUE (provider, openid)
+);
+
+-- 社交绑定
+CREATE TABLE social_bind (
+    id               BIGSERIAL    PRIMARY KEY,
+    user_id          BIGINT       NOT NULL,
+    social_member_id BIGINT       NOT NULL,
+    provider         VARCHAR(50)  NOT NULL,
+    created_at       TIMESTAMP    NOT NULL DEFAULT NOW(),
+    CONSTRAINT uk_social_bind_user_provider  UNIQUE (user_id, provider),
+    CONSTRAINT uk_social_bind_social_member  UNIQUE (social_member_id)
+);
+
+-- 用户表
+CREATE TABLE "user" (
+    id            BIGSERIAL    PRIMARY KEY,
+    created_at    TIMESTAMP    NOT NULL DEFAULT NOW(),
+    last_login_at TIMESTAMP    NOT NULL DEFAULT NOW()
+);
+
+-- 精灵阵容外键（原 SQL 中已定义但引用的表此前不存在）
+ALTER TABLE pokemon_lineup ADD CONSTRAINT fk_pl_resonance_magic
+    FOREIGN KEY (resonance_magic_id) REFERENCES resonance_magic(id);
