@@ -788,6 +788,187 @@ async def get_pokemon_detail_for_ops(pokemon_id: int) -> dict | None:
             }
 
 
+async def get_pokemon_lkgc_sync_identity(pokemon_id: int) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT id, name, form_name, source_id
+                FROM pokemon
+                WHERE id = %s
+                """,
+                (pokemon_id,),
+            )
+            return await cur.fetchone()
+
+
+async def list_existing_skill_names(names: list[str]) -> set[str]:
+    if not names:
+        return set()
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT name FROM skill WHERE name = ANY(%s)", (names,))
+            rows = await cur.fetchall()
+            return {row["name"] for row in rows}
+
+
+async def sync_pokemon_lkgc_skill_links(pokemon_id: int, skills: list[dict]) -> dict:
+    """补齐 skill 缺失项并写入 pokemon_skill 关系；已有 skill 内容不更新。"""
+    names: list[str] = []
+    seen_names: set[str] = set()
+    for item in skills:
+        name = (item.get("name") or "").strip()
+        if name and name not in seen_names:
+            names.append(name)
+            seen_names.add(name)
+
+    stats = {
+        "matched_skill_count": 0,
+        "inserted_skill_count": 0,
+        "inserted_relation_count": 0,
+        "updated_relation_count": 0,
+        "skipped_count": 0,
+    }
+    items: list[dict] = []
+    warnings: list[str] = []
+
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            skill_index: dict[str, int] = {}
+            if names:
+                await cur.execute(
+                    "SELECT id, name FROM skill WHERE name = ANY(%s)",
+                    (names,),
+                )
+                for row in await cur.fetchall():
+                    skill_index[row["name"]] = int(row["id"])
+
+            planned_skill_ids: set[int] = set()
+            planned_names: set[str] = set()
+            for item in skills:
+                name = (item.get("name") or "").strip()
+                source_type = (item.get("source_type") or "").strip() or "原生技能"
+                if not name:
+                    stats["skipped_count"] += 1
+                    items.append({
+                        "name": "",
+                        "source_type": source_type,
+                        "skill_id": None,
+                        "status": "skipped",
+                        "message": "技能名称为空，已跳过",
+                    })
+                    continue
+
+                if name in planned_names:
+                    stats["skipped_count"] += 1
+                    warnings.append(f"技能 {name} 在洛克观测详情中重复出现，已保留首次来源")
+                    items.append({
+                        "name": name,
+                        "source_type": source_type,
+                        "skill_id": None,
+                        "status": "skipped",
+                        "message": "重复技能，已保留首次来源",
+                    })
+                    continue
+                planned_names.add(name)
+
+                skill_id = skill_index.get(name)
+                status_text = "matched"
+                if skill_id:
+                    stats["matched_skill_count"] += 1
+                else:
+                    await cur.execute(
+                        """
+                        INSERT INTO skill (name, attr_id, power, type, consume, skill_desc, icon)
+                        VALUES (%s, NULL, %s, %s, %s, %s, %s)
+                        ON CONFLICT (name) DO NOTHING
+                        RETURNING id
+                        """,
+                        (
+                            name,
+                            int(item.get("power") or 0),
+                            item.get("type") or "",
+                            int(item.get("consume") or 0),
+                            item.get("skill_desc") or "",
+                            item.get("icon") or "",
+                        ),
+                    )
+                    row = await cur.fetchone()
+                    if row:
+                        skill_id = int(row["id"])
+                        skill_index[name] = skill_id
+                        stats["inserted_skill_count"] += 1
+                        status_text = "inserted"
+                    else:
+                        await cur.execute("SELECT id FROM skill WHERE name = %s", (name,))
+                        row = await cur.fetchone()
+                        if not row:
+                            stats["skipped_count"] += 1
+                            warnings.append(f"技能 {name} 插入失败且未能重新查询到，已跳过关系写入")
+                            items.append({
+                                "name": name,
+                                "source_type": source_type,
+                                "skill_id": None,
+                                "status": "skipped",
+                                "message": "技能插入失败，已跳过关系写入",
+                            })
+                            continue
+                        skill_id = int(row["id"])
+                        skill_index[name] = skill_id
+                        stats["matched_skill_count"] += 1
+
+                if skill_id in planned_skill_ids:
+                    stats["skipped_count"] += 1
+                    warnings.append(f"技能 {name} 对应 skill_id={skill_id} 重复，已跳过后续来源")
+                    items.append({
+                        "name": name,
+                        "source_type": source_type,
+                        "skill_id": skill_id,
+                        "status": "skipped",
+                        "message": "重复 skill_id，已跳过后续来源",
+                    })
+                    continue
+                planned_skill_ids.add(skill_id)
+
+                await cur.execute(
+                    """
+                    INSERT INTO pokemon_skill (pokemon_id, skill_id, type, sort_order)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (pokemon_id, skill_id) DO UPDATE
+                    SET type = EXCLUDED.type,
+                        sort_order = EXCLUDED.sort_order
+                    RETURNING (xmax = 0) AS inserted
+                    """,
+                    (
+                        pokemon_id,
+                        skill_id,
+                        source_type,
+                        int(item.get("sort_order") or 0),
+                    ),
+                )
+                row = await cur.fetchone()
+                relation_inserted = bool(row and row.get("inserted"))
+                if relation_inserted:
+                    stats["inserted_relation_count"] += 1
+                else:
+                    stats["updated_relation_count"] += 1
+
+                items.append({
+                    "name": name,
+                    "source_type": source_type,
+                    "skill_id": skill_id,
+                    "status": status_text,
+                    "message": "已新增关系" if relation_inserted else "已更新关系",
+                })
+
+        await conn.commit()
+
+    return {**stats, "items": items, "warnings": warnings}
+
+
 async def save_pokemon_for_ops(payload: dict, pokemon_id: int | None = None) -> dict:
     pool = await get_pool()
     async with pool.connection() as conn:

@@ -168,6 +168,29 @@ export interface OpsPokemonOptionsResponse {
   skill_sources: string[]
 }
 
+export interface OpsPokemonLkgcSkillSyncItem {
+  name: string
+  source_type: string
+  skill_id: number | null
+  status: string
+  message: string
+}
+
+export interface OpsPokemonLkgcSkillSyncResponse {
+  pokemon_id: number
+  pokemon_name: string
+  lkgc_pet_id: string
+  lkgc_name: string
+  request_total: number
+  matched_skill_count: number
+  inserted_skill_count: number
+  inserted_relation_count: number
+  updated_relation_count: number
+  skipped_count: number
+  warnings: string[]
+  items: OpsPokemonLkgcSkillSyncItem[]
+}
+
 export interface OpsFileUploadResponse {
   url: string
   filename: string
@@ -377,6 +400,14 @@ export function updateOpsPokemon(id: number, payload: OpsPokemonUpsertPayload): 
 
 export function deleteOpsPokemon(id: number): Promise<void> {
   return http.delete(`/api/ops/pokemon/${id}`).then(() => undefined)
+}
+
+export function syncOpsPokemonLkgcSkills(id: number): Promise<OpsPokemonLkgcSkillSyncResponse> {
+  return http
+    .post<OpsPokemonLkgcSkillSyncResponse>(`/api/ops/pokemon/${id}/sync-lkgc-skills`, undefined, {
+      timeout: 120000,
+    })
+    .then((r) => r.data)
 }
 
 export function fetchOpsPokemonEvolutionChain(id: number): Promise<OpsEvolutionChain> {

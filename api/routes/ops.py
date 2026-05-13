@@ -13,6 +13,7 @@ from api.schemas.ops import (
     OpsUserListResponse,
     OpsUserUpdateRequest,
     OpsPokemonDetailResponse,
+    OpsPokemonLkgcSkillSyncResponse,
     OpsPokemonListResponse,
     OpsPokemonOptionsResponse,
     OpsPokemonUpsertRequest,
@@ -265,6 +266,14 @@ async def update_ops_pokemon_evolution_chain(
     current_user: dict = Depends(get_current_ops_user),
 ):
     return await ops_service.update_pokemon_evolution_chain_for_ops(current_user, pokemon_id, payload.model_dump())
+
+
+@router.post("/pokemon/{pokemon_id}/sync-lkgc-skills", response_model=OpsPokemonLkgcSkillSyncResponse)
+async def sync_ops_pokemon_lkgc_skills(
+    pokemon_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.sync_pokemon_lkgc_skills_for_ops(current_user, pokemon_id)
 
 
 @router.get("/pokemon/evolution-chain/search", response_model=OpsEvolutionChainResponse)

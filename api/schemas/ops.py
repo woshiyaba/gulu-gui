@@ -190,6 +190,29 @@ class OpsPokemonOptionsResponse(BaseModel):
     skill_sources: list[str] = Field(default_factory=list)
 
 
+class OpsPokemonLkgcSkillSyncItem(BaseModel):
+    name: str
+    source_type: str
+    skill_id: int | None = None
+    status: str = ""
+    message: str = ""
+
+
+class OpsPokemonLkgcSkillSyncResponse(BaseModel):
+    pokemon_id: int
+    pokemon_name: str
+    lkgc_pet_id: str = ""
+    lkgc_name: str = ""
+    request_total: int = 0
+    matched_skill_count: int = 0
+    inserted_skill_count: int = 0
+    inserted_relation_count: int = 0
+    updated_relation_count: int = 0
+    skipped_count: int = 0
+    warnings: list[str] = Field(default_factory=list)
+    items: list[OpsPokemonLkgcSkillSyncItem] = Field(default_factory=list)
+
+
 class OpsEvolutionChainStepItem(BaseModel):
     sort_order: int
     pokemon_name: str

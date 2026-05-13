@@ -12,11 +12,13 @@ import {
   fetchOpsPokemonOptions,
   searchOpsPokemonEvolutionChain,
   showOpsToast,
+  syncOpsPokemonLkgcSkills,
   updateOpsPokemonEvolutionChain,
   updateOpsPokemon,
   uploadOpsFriendImage,
   uploadOpsYiseImage,
   type OpsEvolutionChainStep,
+  type OpsPokemonLkgcSkillSyncResponse,
   type OpsPokemonDetail,
   type OpsPokemonItem,
   type OpsPokemonOptionItem,
@@ -44,6 +46,11 @@ const totalPages = ref(1)
 
 const modalVisible = ref(false)
 const editingId = ref<number | null>(null)
+const syncSkillModalVisible = ref(false)
+const syncingSkills = ref(false)
+const syncSkillTarget = ref<OpsPokemonItem | null>(null)
+const syncSkillResult = ref<OpsPokemonLkgcSkillSyncResponse | null>(null)
+const syncSkillError = ref('')
 
 const traits = ref<OpsPokemonOptionItem[]>([])
 const attributes = ref<OpsPokemonOptionItem[]>([])
@@ -784,6 +791,34 @@ async function removeItem(id: number, name: string) {
   }
 }
 
+async function openSyncSkillModal(item: OpsPokemonItem) {
+  syncSkillModalVisible.value = true
+  syncingSkills.value = true
+  syncSkillTarget.value = item
+  syncSkillResult.value = null
+  syncSkillError.value = ''
+  try {
+    const result = await syncOpsPokemonLkgcSkills(item.id)
+    syncSkillResult.value = result
+    showOpsToast('技能同步完成', 'success')
+    await loadOptions()
+    await loadList()
+  } catch (err: any) {
+    syncSkillError.value = err?.response?.data?.detail || '同步失败'
+    showOpsToast(syncSkillError.value, 'error')
+  } finally {
+    syncingSkills.value = false
+  }
+}
+
+function closeSyncSkillModal() {
+  if (syncingSkills.value) return
+  syncSkillModalVisible.value = false
+  syncSkillTarget.value = null
+  syncSkillResult.value = null
+  syncSkillError.value = ''
+}
+
 function applyTypeLabel() {
   const matched = typeOptions.value.find((x) => x.code === form.type)
   form.type_name = matched?.label || ''
@@ -946,6 +981,7 @@ onBeforeUnmount(() => {
               <td>
                 <div class="ops-action-group">
                   <button type="button" class="ops-btn ops-btn-text" @click="openEditModal(item.id)">修改</button>
+                  <button type="button" class="ops-btn ops-btn-text" @click="openSyncSkillModal(item)">同步技能</button>
                   <button type="button" class="ops-btn ops-btn-text ops-btn--danger" @click="removeItem(item.id, item.name)">删除</button>
                 </div>
               </td>
@@ -1359,6 +1395,85 @@ onBeforeUnmount(() => {
             <button type="button" class="ops-btn ops-btn-secondary" @click="closeModal">取消</button>
           </div>
         </form>
+      </section>
+    </div>
+
+    <!-- 洛克观测技能同步结果 -->
+    <div v-if="syncSkillModalVisible" class="ops-modal-mask">
+      <section
+        style="width:min(100%,760px);max-height:calc(100vh - 48px);overflow:auto;background:var(--ops-surface);border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);"
+        @click.stop
+      >
+        <div class="ops-modal-header">
+          <h3>同步技能</h3>
+        </div>
+        <div style="padding:12px 20px 0;display:grid;gap:12px;">
+          <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);background:var(--ops-bg);padding:12px;display:grid;gap:6px;">
+            <div style="font-size:14px;color:var(--ops-text);font-weight:600;">{{ syncSkillTarget?.name || '未选择精灵' }}</div>
+            <div style="font-size:13px;color:var(--ops-text-secondary);">
+              从洛克观测拉取详情后，同步 <code>base</code>、<code>bloodline</code>、<code>stone</code> 三类技能到当前精灵。
+            </div>
+          </div>
+
+          <div v-if="syncingSkills" class="ops-loading" style="min-height:100px;">同步中，请稍候...</div>
+
+          <p v-if="syncSkillError" class="ops-error">{{ syncSkillError }}</p>
+
+          <template v-if="syncSkillResult">
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;">
+              <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);padding:10px;background:var(--ops-bg);">
+                <div style="font-size:12px;color:var(--ops-muted);">请求技能</div>
+                <strong style="font-size:18px;color:var(--ops-text);">{{ syncSkillResult.request_total }}</strong>
+              </div>
+              <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);padding:10px;background:var(--ops-bg);">
+                <div style="font-size:12px;color:var(--ops-muted);">命中 / 新增技能</div>
+                <strong style="font-size:18px;color:var(--ops-text);">{{ syncSkillResult.matched_skill_count }} / {{ syncSkillResult.inserted_skill_count }}</strong>
+              </div>
+              <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);padding:10px;background:var(--ops-bg);">
+                <div style="font-size:12px;color:var(--ops-muted);">新增 / 更新关系</div>
+                <strong style="font-size:18px;color:var(--ops-text);">{{ syncSkillResult.inserted_relation_count }} / {{ syncSkillResult.updated_relation_count }}</strong>
+              </div>
+            </div>
+
+            <div style="font-size:13px;color:var(--ops-text-secondary);">
+              洛克观测匹配：{{ syncSkillResult.lkgc_name || '未知' }}
+              <span v-if="syncSkillResult.lkgc_pet_id">（{{ syncSkillResult.lkgc_pet_id }}）</span>
+              <span v-if="syncSkillResult.skipped_count">，跳过 {{ syncSkillResult.skipped_count }} 条</span>
+            </div>
+
+            <div v-if="syncSkillResult.warnings.length" style="border:1px solid #fed7aa;border-radius:var(--ops-radius-sm);background:#fff7ed;color:#9a3412;padding:10px;display:grid;gap:4px;font-size:13px;">
+              <strong>提示</strong>
+              <div v-for="(msg, index) in syncSkillResult.warnings" :key="index">{{ msg }}</div>
+            </div>
+
+            <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);overflow:hidden;">
+              <table class="ops-table">
+                <thead>
+                  <tr>
+                    <th>技能</th>
+                    <th>来源</th>
+                    <th>技能ID</th>
+                    <th>状态</th>
+                    <th>结果</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(item, index) in syncSkillResult.items" :key="`${item.name}-${index}`">
+                    <td>{{ item.name || '-' }}</td>
+                    <td>{{ item.source_type }}</td>
+                    <td>{{ item.skill_id ?? '-' }}</td>
+                    <td>{{ item.status }}</td>
+                    <td>{{ item.message }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div v-if="!syncSkillResult.items.length" class="ops-empty" style="min-height:60px;">没有可同步的技能</div>
+            </div>
+          </template>
+        </div>
+        <div style="display:flex;justify-content:center;align-items:center;gap:10px;padding:12px 20px 20px;">
+          <button type="button" class="ops-btn ops-btn-secondary" :disabled="syncingSkills" @click="closeSyncSkillModal">关闭</button>
+        </div>
       </section>
     </div>
 

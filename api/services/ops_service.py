@@ -1,6 +1,8 @@
+import asyncio
 import base64
 import hashlib
 import hmac
+import html
 import json
 import os
 import re
@@ -12,6 +14,7 @@ from uuid import uuid4
 from fastapi import HTTPException, UploadFile, status
 
 from api.repositories import ops_repository, pokemon_filter_repository
+from common.utils import lkgc
 
 OPS_TOKEN_SECRET = os.getenv("OPS_TOKEN_SECRET", "ops-dev-secret")
 OPS_TOKEN_TTL_SECONDS = int(os.getenv("OPS_TOKEN_TTL_SECONDS", "43200"))
@@ -496,6 +499,206 @@ async def get_pokemon_options_for_ops(user: dict) -> dict:
     rows = await ops_repository.list_dicts_all(dict_type="pokemon_skill_source")
     result["skill_sources"] = [str(r.get("code") or "").strip() for r in rows if str(r.get("code") or "").strip()]
     return result
+
+
+def _normalize_lkgc_response(raw: object) -> object:
+    if isinstance(raw, dict) and "data" in raw:
+        data = raw.get("data")
+        if isinstance(data, dict) and "data" in data:
+            return data.get("data")
+        return data
+    return raw
+
+
+def _strip_lkgc_html(raw: str) -> str:
+    text = re.sub(r"<[^>]+>", "", raw or "")
+    return html.unescape(text).strip()
+
+
+def _lkgc_form_names(item: dict) -> list[str]:
+    values: list[str] = []
+    for key in ("from", "form_name"):
+        value = str(item.get(key) or "").strip()
+        if value:
+            values.append(value)
+    return values
+
+
+def _lkgc_name_candidates(item: dict) -> set[str]:
+    name = str(item.get("name") or "").strip()
+    candidates = {name} if name else set()
+    for form_name in _lkgc_form_names(item):
+        candidates.add(f"{name}（{form_name}）")
+        candidates.add(f"{name}({form_name})")
+    return candidates
+
+
+def _find_lkgc_pet_for_pokemon(pokemon: dict, max_pages: int = 120, page_size: int = 100) -> dict | None:
+    pokemon_name = str(pokemon.get("name") or "").strip()
+    source_id = pokemon.get("source_id")
+    best_by_name: dict | None = None
+
+    for page in range(1, max_pages + 1):
+        raw = lkgc.fetch_pet_list(page=page, page_size=page_size)
+        data = _normalize_lkgc_response(raw)
+        if isinstance(data, dict):
+            records = data.get("list") or data.get("data") or data.get("items") or []
+        elif isinstance(data, list):
+            records = data
+        else:
+            records = []
+        if not records:
+            break
+
+        for item in records:
+            if not isinstance(item, dict):
+                continue
+            name_matched = pokemon_name in _lkgc_name_candidates(item)
+            if source_id and str(item.get("web_pet_id") or "") == str(source_id) and name_matched:
+                return item
+            if name_matched:
+                best_by_name = item
+
+    return best_by_name
+
+
+def _fetch_lkgc_detail_for_pokemon(pokemon: dict) -> tuple[dict | None, dict | None]:
+    pet = _find_lkgc_pet_for_pokemon(pokemon)
+    if not pet:
+        return None, None
+    pet_id = str(pet.get("real_pet_id") or pet.get("pet_id") or "").strip()
+    if not pet_id:
+        return pet, None
+
+    raw = lkgc.get_pet_info(pet_id)
+    data = _normalize_lkgc_response(raw)
+    if isinstance(data, list):
+        detail = data[0] if data else None
+    elif isinstance(data, dict):
+        detail = data
+    else:
+        detail = None
+    return pet, detail if isinstance(detail, dict) else None
+
+
+def _infer_lkgc_skill_type(item: dict) -> str:
+    category_id = item.get("category_id")
+    damage_id = item.get("damage_id")
+    if category_id == 1 and damage_id == 1:
+        return "物攻"
+    if category_id == 1 and damage_id == 2:
+        return "魔攻"
+    if category_id == 2 and damage_id == -1:
+        return "防御"
+    if category_id == 3 and damage_id == -1:
+        return "状态"
+    return ""
+
+
+def _upload_lkgc_skill_icon(icon_url: str, warnings: list[str], skill_name: str) -> str:
+    icon_url = (icon_url or "").strip()
+    if not icon_url:
+        return ""
+    try:
+        from oss.oss import COSClient
+
+        return COSClient().upload_from_url(icon_url, prefix="skill/icon")
+    except Exception as exc:
+        warnings.append(f"技能 {skill_name} 图标上传失败：{exc}")
+        return ""
+
+
+async def sync_pokemon_lkgc_skills_for_ops(user: dict, pokemon_id: int) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    pokemon = await ops_repository.get_pokemon_lkgc_sync_identity(pokemon_id)
+    if not pokemon:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="精灵不存在")
+
+    pet, detail = await asyncio.to_thread(_fetch_lkgc_detail_for_pokemon, pokemon)
+    if not pet:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="未在洛克观测列表中匹配到该精灵")
+    if not detail:
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="洛克观测宠物详情为空")
+
+    source_map = [
+        ("base", "原生技能"),
+        ("bloodline", "血脉技能"),
+        ("stone", "技能石技能"),
+    ]
+    skill_list = detail.get("skill_list") or {}
+    if not isinstance(skill_list, dict):
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="洛克观测 skill_list 格式异常")
+
+    warnings: list[str] = []
+    planned: list[dict] = []
+    raw_skill_items: list[dict] = []
+    for source_key, source_type in source_map:
+        entries = skill_list.get(source_key) or []
+        if not isinstance(entries, list):
+            warnings.append(f"skill_list.{source_key} 不是数组，已跳过")
+            continue
+        for sort_order, item in enumerate(entries, start=1):
+            if not isinstance(item, dict):
+                warnings.append(f"skill_list.{source_key}[{sort_order}] 不是对象，已跳过")
+                continue
+            name = str(item.get("name") or "").strip()
+            if not name:
+                warnings.append(f"skill_list.{source_key}[{sort_order}] 缺少技能名称，已跳过")
+                continue
+            raw_skill_items.append({
+                "raw": item,
+                "name": name,
+                "source_type": source_type,
+                "sort_order": sort_order,
+            })
+
+    existing_skill_names = await ops_repository.list_existing_skill_names([item["name"] for item in raw_skill_items])
+    for raw_item in raw_skill_items:
+        item = raw_item["raw"]
+        icon = ""
+        if raw_item["name"] not in existing_skill_names:
+            icon = await asyncio.to_thread(
+                _upload_lkgc_skill_icon,
+                str(item.get("icon_url") or "").strip(),
+                warnings,
+                raw_item["name"],
+            )
+        planned.append({
+            "name": raw_item["name"],
+            "source_type": raw_item["source_type"],
+            "sort_order": raw_item["sort_order"],
+            "power": int(item.get("power") or 0),
+            "consume": int(item.get("take_energy") or 0),
+            "skill_desc": _strip_lkgc_html(str(item.get("desc") or "")),
+            "icon": icon,
+            "type": _infer_lkgc_skill_type(item),
+        })
+
+    result = await ops_repository.sync_pokemon_lkgc_skill_links(pokemon_id, planned)
+    warnings.extend(result.get("warnings") or [])
+    response = {
+        "pokemon_id": pokemon_id,
+        "pokemon_name": pokemon.get("name") or "",
+        "lkgc_pet_id": str((detail or {}).get("real_pet_id") or pet.get("real_pet_id") or ""),
+        "lkgc_name": str((detail or {}).get("name") or pet.get("name") or ""),
+        "request_total": len(planned),
+        "matched_skill_count": result["matched_skill_count"],
+        "inserted_skill_count": result["inserted_skill_count"],
+        "inserted_relation_count": result["inserted_relation_count"],
+        "updated_relation_count": result["updated_relation_count"],
+        "skipped_count": result["skipped_count"],
+        "warnings": warnings,
+        "items": result["items"],
+    }
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="pokemon",
+        resource_id=str(pokemon_id),
+        action="sync_lkgc_skills",
+        before_json=None,
+        after_json=response,
+    )
+    return response
 
 
 async def get_pokemon_evolution_chain_for_ops(user: dict, pokemon_id: int) -> dict:
