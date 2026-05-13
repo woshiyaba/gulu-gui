@@ -8,8 +8,15 @@
   将作为pokemon.image_lc，mf->mdef,mg->matk,sd->spd,sm->hp,wf->def_val,wg->atk 这是种族值的对应关系，
   catch_way->obtain_method avatar_url->avatar有的话则更新 没有的话则不更新 将数据插入到pokemon
 
-  2. @docs/lkgc/getPetInfo_exam.json 主要是获取 skill_list中的base、bloodline和stone，插入到pokemon_skill表中 base为pokemon_skill.type 原生技能
-  bloodline为pokemon_skill.type 血脉技能，  stone为pokemon_skill.type 技能石技能 要首先从skill表中根据技能名称查询，如果有则直接插入，如果没有先插入到skill表然后插入到pokemon_skill表中
-  json中 take_energy->consume power->power desc->skill_desc icon_url->icon 同样先将icon_url上传到oss 然后记录的表中
-
-待办：1.对应lkgc的type id 对应到 属性 2.tag_id对应的技能类型
+ 2. 在精灵维护列表的操作列增加“同步技能”功能，点击后弹出同步结果弹窗。后端根据当前 pokemon.name 匹配
+ getList 返回的 name/from 组合名，再调用 getPetInfo 获取详情，读取 skill_list 中的 base、bloodline、stone 三类技能。
+ base 写入 pokemon_skill.type=原生技能，bloodline 写入 pokemon_skill.type=血脉技能，stone 写入 pokemon_skill.type=技能石技能。
+ 同步时先按 skill.name 查询本库 skill 表：如果存在，只复用 skill.id，不更新已有 skill 的属性、威力、能耗、描述、图标；
+ 如果不存在，则新增 skill 后再写入 pokemon_skill。新增 skill 时 take_energy->consume，power->power，
+ desc->skill_desc，icon_url 先上传到 oss 后写入 icon；技能属性 attr_id 不使用 lkgc 的 type_id，新增技能先写 NULL，
+ 后续以本库维护的 skill.attr_id 为准。
+ 技能类型 skill.type 优先使用本库已有值；新增技能可按 lkgc 的 category_id + damage_id 推断：
+ category_id=1 且 damage_id=1 -> 物攻，category_id=1 且 damage_id=2 -> 魔攻，
+ category_id=2 且 damage_id=-1 -> 防御，category_id=3 且 damage_id=-1 -> 状态。
+ tag_id 不作为技能类型映射依据。pokemon_skill 按 (pokemon_id, skill_id) 幂等写入，重复同步时更新关系的 type 和 sort_order。
+ 弹窗展示请求技能数、命中/新增技能数、新增/更新关系数、跳过数、告警信息和逐条技能处理结果。
