@@ -239,31 +239,28 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="ops-page">
-    <section class="query-card">
-      <div class="query-row">
-        <label class="query-item">
-          <span class="query-label">关键字</span>
-          <input v-model="keyword" class="keyword-input" type="text" placeholder="共鸣魔法名称" @keyup.enter="search" />
-        </label>
-        <div class="query-actions">
-          <button type="button" class="btn-primary" @click="search">查询</button>
-          <button type="button" class="btn-secondary" @click="resetFilters">重置</button>
+    <section class="ops-card-padded">
+      <div class="ops-filter-bar" style="margin-bottom:16px;">
+        <div class="ops-form-item" style="min-width:200px;">
+          <span class="ops-filter-label">关键字</span>
+          <input v-model="keyword" class="ops-input" type="text" placeholder="共鸣魔法名称" @keyup.enter="search" />
+        </div>
+        <div class="ops-filter-actions">
+          <button type="button" class="ops-btn ops-btn-primary" @click="search">查询</button>
+          <button type="button" class="ops-btn ops-btn-secondary" @click="resetFilters">重置</button>
         </div>
       </div>
-    </section>
-
-    <section class="table-card">
-      <div class="toolbar">
-        <button v-if="isAdmin" type="button" class="btn-primary" @click="openCreateModal">新增共鸣魔法</button>
-        <div class="toolbar-meta">共 {{ total }} 条</div>
+      <div class="ops-toolbar">
+        <button v-if="isAdmin" type="button" class="ops-btn ops-btn-primary" @click="openCreateModal">新增共鸣魔法</button>
+        <span class="ops-toolbar-meta">共 {{ total }} 条</span>
       </div>
 
-      <p v-if="error" class="error">{{ error }}</p>
+      <p v-if="error" class="ops-error">{{ error }}</p>
 
-      <div v-if="loading" class="placeholder">加载中...</div>
-      <div v-else-if="!items.length" class="placeholder">暂无数据</div>
-      <div v-else class="table-wrap">
-        <table class="tbl">
+      <div v-if="loading" class="ops-loading">加载中...</div>
+      <div v-else-if="!items.length" class="ops-empty">暂无数据</div>
+      <div v-else class="ops-table-wrap">
+        <table class="ops-table">
           <thead>
             <tr>
               <th>序号</th>
@@ -282,80 +279,91 @@ onBeforeUnmount(() => {
               <td>{{ item.max_usage_count }}</td>
               <td>{{ item.sort_order }}</td>
               <td>
-                <button type="button" class="txt-btn" @click="editItem(item)">修改</button>
-                <button v-if="isAdmin" type="button" class="txt-btn danger" @click="removeItem(item)">删除</button>
+                <div class="ops-action-group">
+                  <button type="button" class="ops-btn ops-btn-text" @click="editItem(item)">修改</button>
+                  <button v-if="isAdmin" type="button" class="ops-btn ops-btn-text ops-btn--danger" @click="removeItem(item)">删除</button>
+                </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div v-if="total > 0" class="pager">
-        <div class="pager-summary">共 {{ total }} 条，当前显示 {{ pageStart }}-{{ pageEnd }} 条</div>
-        <div class="pager-controls">
-          <button type="button" class="pager-btn" :disabled="currentPage === 1" @click="goToPage(1)">首页</button>
-          <button type="button" class="pager-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">上一页</button>
+      <div v-if="total > 0" class="ops-pagination">
+        <span class="ops-pagination-summary">共 {{ total }} 条，当前显示 {{ pageStart }}-{{ pageEnd }} 条</span>
+        <div class="ops-pagination-controls">
+          <button type="button" class="ops-page-btn" :disabled="currentPage === 1" @click="goToPage(1)">首页</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">上一页</button>
           <button
             v-for="p in visiblePages"
             :key="p"
             type="button"
-            class="pager-btn"
-            :class="{ active: p === currentPage }"
+            class="ops-page-btn"
+            :class="{ 'ops-page-btn--active': p === currentPage }"
             @click="goToPage(p)"
           >
             {{ p }}
           </button>
-          <button type="button" class="pager-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">下一页</button>
-          <button type="button" class="pager-btn" :disabled="currentPage === totalPages" @click="goToPage(totalPages)">末页</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">下一页</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === totalPages" @click="goToPage(totalPages)">末页</button>
         </div>
       </div>
     </section>
 
-    <div v-if="modalVisible" class="modal-mask">
-      <section class="modal" @click.stop>
-        <div class="modal-head">
+    <div v-if="modalVisible" class="ops-modal-mask">
+      <section class="ops-modal" @click.stop>
+        <div class="ops-modal-header">
           <h3>{{ editingId ? '编辑共鸣魔法' : '新增共鸣魔法' }}</h3>
         </div>
-        <form class="modal-body" @submit.prevent="submit">
-          <section class="section-card section-with-icon">
-            <h4>基础信息</h4>
-            <div class="basic-with-icon">
-              <div class="basic-with-icon-fields">
-                <label><span>名称</span><input v-model="form.name" required type="text" placeholder="例：元素共鸣" maxlength="50" /></label>
-                <label><span>可使用次数</span><input v-model.number="form.max_usage_count" required type="number" min="1" placeholder="例：1" /></label>
-                <label><span>排序</span><input v-model.number="form.sort_order" type="number" placeholder="越小越靠前" /></label>
+        <form class="ops-modal-body" @submit.prevent="submit">
+          <section style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);padding:12px;background:var(--ops-bg);">
+            <h4 style="font-size:14px;color:var(--ops-text);margin:0 0 12px;">基础信息</h4>
+            <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 20px;align-items:start;">
+              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px 14px;">
+                <label style="display:grid;gap:6px;">
+                  <span style="font-size:13px;color:var(--ops-text-secondary);">名称</span>
+                  <input v-model="form.name" class="ops-input" required type="text" placeholder="例：元素共鸣" maxlength="50" />
+                </label>
+                <label style="display:grid;gap:6px;">
+                  <span style="font-size:13px;color:var(--ops-text-secondary);">可使用次数</span>
+                  <input v-model.number="form.max_usage_count" class="ops-input" required type="number" min="1" placeholder="例：1" />
+                </label>
+                <label style="display:grid;gap:6px;">
+                  <span style="font-size:13px;color:var(--ops-text-secondary);">排序</span>
+                  <input v-model.number="form.sort_order" class="ops-input" type="number" placeholder="越小越靠前" />
+                </label>
               </div>
-              <aside class="basic-with-icon-side" aria-label="图标">
-                <div class="basic-icon-heading">图标</div>
-                <div class="icon-upload-area">
+              <aside style="width:148px;padding:10px 10px 12px;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);background:var(--ops-surface);box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+                <div style="font-size:12px;font-weight:600;color:var(--ops-muted);text-transform:uppercase;letter-spacing:0.02em;margin-bottom:8px;">图标</div>
+                <div style="display:flex;flex-direction:column;gap:8px;align-items:stretch;width:100%;">
                   <button
                     type="button"
-                    class="icon-preview"
+                    style="width:100%;aspect-ratio:1;max-height:148px;padding:0;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);background:var(--ops-bg);cursor:pointer;display:grid;place-items:center;overflow:hidden;"
                     :disabled="saving"
                     @click="triggerIconFilePick"
                   >
-                    <img v-if="iconDisplaySrc" :src="iconDisplaySrc" alt="" class="icon-preview-img" />
-                    <div v-else class="icon-placeholder-inner">
-                      <span class="icon-placeholder-title">暂无</span>
-                      <span class="icon-placeholder-sub">点击上传</span>
+                    <img v-if="iconDisplaySrc" :src="iconDisplaySrc" alt="" style="max-width:100%;max-height:100%;object-fit:contain;" />
+                    <div v-else style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;text-align:center;">
+                      <span style="font-size:12px;color:var(--ops-text-secondary);">暂无</span>
+                      <span style="font-size:11px;color:var(--ops-muted);">点击上传</span>
                     </div>
                   </button>
                   <input
                     ref="iconFileInputRef"
                     type="file"
-                    class="icon-file-hidden"
+                    style="position:absolute;width:0;height:0;opacity:0;pointer-events:none;"
                     accept=".webp,.png,.jpg,.jpeg,.gif,image/webp,image/png,image/jpeg,image/gif"
                     :disabled="saving"
                     @change="onIconImageSelected"
                   />
-                  <div class="icon-actions">
-                    <button type="button" class="btn-primary btn-compact" :disabled="saving" @click="triggerIconFilePick">
+                  <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:stretch;">
+                    <button type="button" class="ops-btn ops-btn-primary ops-btn-sm" style="flex:1;" :disabled="saving" @click="triggerIconFilePick">
                       {{ iconDisplaySrc ? '更换' : '选择图片' }}
                     </button>
                     <button
                       v-if="form.icon || pendingIconFile"
                       type="button"
-                      class="btn-secondary btn-compact"
+                      class="ops-btn ops-btn-secondary ops-btn-sm"
                       :disabled="saving"
                       @click="clearIconImage"
                     >
@@ -367,481 +375,17 @@ onBeforeUnmount(() => {
             </div>
           </section>
 
-          <section class="section-card full">
-            <h4>描述</h4>
-            <textarea v-model="form.description" rows="4" placeholder="请输入共鸣魔法描述" />
+          <section style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);padding:12px;background:var(--ops-bg);grid-column:1/-1;">
+            <h4 style="font-size:14px;color:var(--ops-text);margin:0 0 10px;">描述</h4>
+            <textarea v-model="form.description" class="ops-input" style="height:auto;min-height:96px;padding:8px 12px;resize:vertical;" rows="4" placeholder="请输入共鸣魔法描述"></textarea>
           </section>
 
-          <div class="actions">
-            <button type="submit" class="btn-primary" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</button>
-            <button type="button" class="btn-secondary" @click="closeModal">取消</button>
+          <div class="ops-modal-footer">
+            <button type="submit" class="ops-btn ops-btn-primary" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</button>
+            <button type="button" class="ops-btn ops-btn-secondary" @click="closeModal">取消</button>
           </div>
         </form>
       </section>
     </div>
   </div>
 </template>
-
-<style scoped>
-.ops-page {
-  display: grid;
-  gap: 16px;
-}
-
-.query-card,
-.table-card {
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
-  padding: 16px;
-}
-
-.query-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.query-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.query-label {
-  font-size: 13px;
-  color: #606266;
-  line-height: 1;
-  white-space: nowrap;
-  min-width: 56px;
-}
-
-.keyword-input {
-  width: 180px;
-  height: 36px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 0 12px;
-  color: #606266;
-  background: #fff;
-}
-
-.query-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.toolbar-meta {
-  color: #909399;
-  font-size: 13px;
-}
-
-.table-wrap {
-  overflow: auto;
-  border: 1px solid #ebeef5;
-  border-radius: 2px;
-}
-
-.tbl {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.tbl th,
-.tbl td {
-  border: 1px solid #ebeef5;
-  padding: 10px;
-  text-align: center;
-}
-
-.placeholder {
-  min-height: 120px;
-  display: grid;
-  place-items: center;
-  color: #909399;
-  border: 1px dashed #dcdfe6;
-  border-radius: 2px;
-}
-
-.pager {
-  margin-top: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #ebeef5;
-}
-
-.pager-summary {
-  color: #606266;
-  font-size: 13px;
-}
-
-.pager-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.pager-btn {
-  min-width: 36px;
-  height: 32px;
-  padding: 0 10px;
-  border: 1px solid #dcdfe6;
-  border-radius: 2px;
-  background: #fff;
-  color: #606266;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.pager-btn:hover:not(:disabled) {
-  color: #409eff;
-  border-color: #409eff;
-}
-
-.pager-btn.active {
-  background: #409eff;
-  border-color: #409eff;
-  color: #fff;
-}
-
-.pager-btn:disabled {
-  color: #c0c4cc;
-  cursor: not-allowed;
-  border-color: #ebeef5;
-}
-
-.txt-btn {
-  border: none;
-  background: transparent;
-  color: #409eff;
-  cursor: pointer;
-  margin: 0 4px;
-}
-
-.txt-btn.danger {
-  color: #f56c6c;
-}
-
-.btn-primary,
-.btn-secondary {
-  height: 36px;
-  border-radius: 4px;
-  padding: 0 14px;
-  cursor: pointer;
-}
-
-.btn-primary {
-  border: 1px solid #409eff;
-  background: #409eff;
-  color: #fff;
-}
-
-.btn-secondary {
-  border: 1px solid #dcdfe6;
-  background: #fff;
-  color: #606266;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background: #66b1ff;
-  border-color: #66b1ff;
-}
-
-.btn-primary:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.btn-secondary:hover {
-  color: #409eff;
-  border-color: #c6e2ff;
-  background: #ecf5ff;
-}
-
-.btn-compact {
-  height: 32px;
-  padding: 0 10px;
-  font-size: 13px;
-}
-
-.error {
-  color: #fff;
-  background: #f56c6c;
-  border: 1px solid #f56c6c;
-  border-radius: 4px;
-  padding: 10px 12px;
-  margin-bottom: 10px;
-}
-
-.modal-mask {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgba(15, 23, 42, 0.36);
-  padding: 24px;
-  z-index: 1000;
-}
-
-.modal {
-  width: min(100%, 600px);
-  max-height: calc(100vh - 48px);
-  overflow: auto;
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
-}
-
-.modal-head {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 16px 20px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.modal-head h3 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #303133;
-  margin: 0;
-}
-
-.modal-body {
-  display: grid;
-  gap: 12px;
-  padding: 16px 20px 20px;
-}
-
-.section-card {
-  border: 1px solid #ebeef5;
-  border-radius: 6px;
-  padding: 12px;
-  background: #fcfdff;
-}
-
-.section-card h4 {
-  font-size: 14px;
-  color: #303133;
-  margin: 0 0 10px;
-}
-
-.section-with-icon > h4 {
-  margin-bottom: 12px;
-}
-
-.basic-with-icon {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 16px 20px;
-  align-items: start;
-}
-
-.basic-with-icon-fields {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px 14px;
-}
-
-.basic-with-icon-fields label {
-  display: grid;
-  gap: 6px;
-}
-
-.basic-with-icon-fields label span {
-  font-size: 13px;
-  color: #606266;
-}
-
-.basic-with-icon-fields label input {
-  height: 36px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 0 10px;
-  font-size: 13px;
-  color: #303133;
-}
-
-.basic-with-icon-fields label input:disabled {
-  background: #f5f7fa;
-  color: #909399;
-  cursor: not-allowed;
-}
-
-.basic-with-icon-side {
-  width: 148px;
-  padding: 10px 10px 12px;
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.basic-icon-heading {
-  font-size: 12px;
-  font-weight: 600;
-  color: #909399;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  margin-bottom: 8px;
-}
-
-.icon-upload-area {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: stretch;
-  width: 100%;
-}
-
-.icon-file-hidden {
-  position: absolute;
-  width: 0;
-  height: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.icon-preview {
-  width: 100%;
-  aspect-ratio: 1;
-  max-height: 148px;
-  padding: 0;
-  border: 1px solid #dcdfe6;
-  border-radius: 8px;
-  background: #f5f7fa;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.icon-preview:hover:not(:disabled) {
-  border-color: #409eff;
-  background: #ecf5ff;
-}
-
-.icon-preview:disabled {
-  cursor: wait;
-  opacity: 0.85;
-}
-
-.icon-preview-img {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-}
-
-.icon-placeholder-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 8px;
-  text-align: center;
-}
-
-.icon-placeholder-title {
-  font-size: 12px;
-  color: #606266;
-}
-
-.icon-placeholder-sub {
-  font-size: 11px;
-  color: #c0c4cc;
-}
-
-.icon-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: stretch;
-}
-
-.icon-actions .btn-primary,
-.icon-actions .btn-secondary {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-
-.full {
-  grid-column: 1 / -1;
-}
-
-textarea {
-  width: 100%;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 8px 12px;
-  font-size: 13px;
-  color: #303133;
-  resize: vertical;
-  box-sizing: border-box;
-}
-
-textarea:focus {
-  outline: none;
-  border-color: #409eff;
-}
-
-.actions {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 10px;
-  padding-top: 4px;
-}
-
-@media (max-width: 720px) {
-  .basic-with-icon {
-    grid-template-columns: 1fr;
-  }
-
-  .basic-with-icon-side {
-    width: 140px;
-    position: static;
-  }
-
-  .query-row {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .query-item {
-    width: 100%;
-    min-width: 0;
-  }
-
-  .keyword-input {
-    width: 100%;
-  }
-
-  .basic-with-icon-fields {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 960px) {
-  .pager {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-</style>

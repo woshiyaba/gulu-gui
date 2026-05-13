@@ -1,0 +1,754 @@
+/* ═══════════════════════════════════════════════
+   OPS Design System — Modern Minimal
+   Direction: modern-minimal (Linear / Notion inspired)
+   ═══════════════════════════════════════════════ */
+
+/* ── Design Tokens ───────────────────────────── */
+:root {
+  /* Core palette (modern-minimal) */
+  --ops-bg: oklch(99% 0.002 240);
+  --ops-surface: oklch(100% 0 0);
+  --ops-text: oklch(18% 0.012 250);
+  --ops-text-secondary: oklch(45% 0.008 250);
+  --ops-muted: oklch(54% 0.012 250);
+  --ops-border: oklch(92% 0.005 250);
+  --ops-border-light: oklch(95% 0.003 250);
+
+  /* Accent */
+  --ops-accent: oklch(58% 0.18 255);
+  --ops-accent-hover: oklch(52% 0.2 255);
+  --ops-accent-light: oklch(92% 0.04 255);
+  --ops-accent-ring: oklch(58% 0.18 255 / 0.2);
+
+  /* Semantic */
+  --ops-success: oklch(55% 0.18 145);
+  --ops-success-light: oklch(92% 0.06 145);
+  --ops-danger: oklch(55% 0.2 25);
+  --ops-danger-light: oklch(92% 0.08 25);
+  --ops-warning: oklch(65% 0.16 85);
+  --ops-warning-light: oklch(94% 0.08 85);
+  --ops-info: oklch(55% 0.06 250);
+  --ops-info-light: oklch(94% 0.02 250);
+
+  /* Sizing */
+  --ops-radius-sm: 6px;
+  --ops-radius-md: 8px;
+  --ops-radius-lg: 12px;
+  --ops-input-height: 36px;
+  --ops-btn-height: 36px;
+  --ops-font-size: 14px;
+  --ops-font-size-sm: 13px;
+  --ops-font-size-xs: 12px;
+
+  /* Shadows */
+  --ops-shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.04);
+  --ops-shadow-md: 0 4px 12px oklch(0% 0 0 / 0.06);
+  --ops-shadow-lg: 0 12px 32px oklch(0% 0 0 / 0.08);
+}
+
+/* ── Typography ──────────────────────────────── */
+.ops-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ops-text);
+  letter-spacing: -0.01em;
+}
+
+.ops-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ops-text);
+  letter-spacing: -0.01em;
+}
+
+/* ── Cards ───────────────────────────────────── */
+.ops-card {
+  background: var(--ops-surface);
+  border: 1px solid var(--ops-border);
+  border-radius: var(--ops-radius-md);
+}
+
+.ops-card-padded {
+  background: var(--ops-surface);
+  border: 1px solid var(--ops-border);
+  border-radius: var(--ops-radius-md);
+  padding: 20px;
+}
+
+.ops-card-section {
+  border: 1px solid var(--ops-border);
+  border-radius: var(--ops-radius-md);
+  padding: 16px;
+  background: var(--ops-surface);
+}
+
+.ops-card-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ops-text);
+  margin-bottom: 12px;
+}
+
+/* ── Buttons ─────────────────────────────────── */
+.ops-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--ops-btn-height);
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--ops-radius-sm);
+  font-size: var(--ops-font-size);
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  line-height: 1;
+}
+
+.ops-btn:active {
+  transform: scale(0.97);
+}
+
+.ops-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Primary */
+.ops-btn-primary {
+  background: var(--ops-accent);
+  color: #fff;
+  border-color: var(--ops-accent);
+}
+
+.ops-btn-primary:hover:not(:disabled) {
+  background: var(--ops-accent-hover);
+  border-color: var(--ops-accent-hover);
+}
+
+.ops-btn-primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ops-accent-ring);
+}
+
+/* Secondary */
+.ops-btn-secondary {
+  background: var(--ops-surface);
+  color: var(--ops-text);
+  border-color: var(--ops-border);
+}
+
+.ops-btn-secondary:hover:not(:disabled) {
+  border-color: var(--ops-accent);
+  color: var(--ops-accent);
+}
+
+.ops-btn-secondary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ops-accent-ring);
+}
+
+/* Text / ghost */
+.ops-btn-text {
+  background: transparent;
+  color: var(--ops-accent);
+  border-color: transparent;
+  padding: 0 8px;
+  height: auto;
+  min-height: 28px;
+}
+
+.ops-btn-text:hover:not(:disabled) {
+  background: var(--ops-accent-light);
+}
+
+.ops-btn-text.ops-btn--danger {
+  color: var(--ops-danger);
+}
+
+.ops-btn-text.ops-btn--danger:hover:not(:disabled) {
+  background: var(--ops-danger-light);
+}
+
+/* Danger primary */
+.ops-btn-danger {
+  background: var(--ops-danger);
+  color: #fff;
+  border-color: var(--ops-danger);
+}
+
+.ops-btn-danger:hover:not(:disabled) {
+  background: oklch(48% 0.22 25);
+  border-color: oklch(48% 0.22 25);
+}
+
+/* Small button variant */
+.ops-btn-sm {
+  height: 30px;
+  padding: 0 12px;
+  font-size: var(--ops-font-size-sm);
+}
+
+/* ── Inputs ──────────────────────────────────── */
+.ops-input,
+.ops-select {
+  height: var(--ops-input-height);
+  padding: 0 12px;
+  border: 1px solid var(--ops-border);
+  border-radius: var(--ops-radius-sm);
+  background: var(--ops-surface);
+  color: var(--ops-text);
+  font-size: var(--ops-font-size);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ops-input:focus,
+.ops-select:focus {
+  outline: none;
+  border-color: var(--ops-accent);
+  box-shadow: 0 0 0 3px var(--ops-accent-ring);
+}
+
+.ops-input::placeholder {
+  color: var(--ops-muted);
+}
+
+.ops-input:disabled,
+.ops-select:disabled {
+  background: var(--ops-bg);
+  color: var(--ops-muted);
+  cursor: not-allowed;
+}
+
+.ops-input-sm {
+  height: 30px;
+  font-size: var(--ops-font-size-sm);
+}
+
+/* Search input with icon */
+.ops-search-input {
+  width: 240px;
+}
+
+/* Input with prefix label (row layout) */
+.ops-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ops-input-row label {
+  font-size: var(--ops-font-size-sm);
+  color: var(--ops-text-secondary);
+  white-space: nowrap;
+  min-width: 56px;
+}
+
+/* ── Filter / Query Bar ──────────────────────── */
+.ops-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ops-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ops-filter-item .ops-input,
+.ops-filter-item .ops-select {
+  width: 180px;
+}
+
+.ops-filter-label {
+  font-size: var(--ops-font-size-sm);
+  color: var(--ops-text-secondary);
+  white-space: nowrap;
+  min-width: 56px;
+}
+
+.ops-filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Tables ──────────────────────────────────── */
+.ops-table-wrap {
+  border-radius: var(--ops-radius-md);
+  overflow: auto;
+}
+
+.ops-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--ops-font-size-sm);
+}
+
+.ops-table thead {
+  background: var(--ops-bg);
+}
+
+.ops-table th {
+  padding: 11px 14px;
+  text-align: center;
+  font-weight: 600;
+  color: var(--ops-text-secondary);
+  font-size: var(--ops-font-size-sm);
+  border-bottom: 1px solid var(--ops-border);
+  white-space: nowrap;
+}
+
+.ops-table td {
+  padding: 11px 14px;
+  text-align: center;
+  color: var(--ops-text);
+  border-bottom: 1px solid var(--ops-border-light);
+}
+
+.ops-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ops-table tbody tr:hover {
+  background: var(--ops-bg);
+}
+
+/* Column widths */
+.ops-col-index { width: 72px; }
+.ops-col-actions { width: 140px; }
+.ops-col-sort { width: 80px; }
+.ops-col-code { width: 120px; }
+
+/* ── Toolbar ─────────────────────────────────── */
+.ops-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.ops-toolbar-meta {
+  font-size: var(--ops-font-size-sm);
+  color: var(--ops-muted);
+}
+
+/* ── Pagination ──────────────────────────────── */
+.ops-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 14px;
+  flex-wrap: wrap;
+}
+
+.ops-pagination-summary {
+  font-size: var(--ops-font-size-sm);
+  color: var(--ops-text-secondary);
+}
+
+.ops-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ops-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--ops-border);
+  border-radius: var(--ops-radius-sm);
+  background: var(--ops-surface);
+  color: var(--ops-text);
+  font-size: var(--ops-font-size-sm);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.ops-page-btn:hover:not(:disabled) {
+  border-color: var(--ops-accent);
+  color: var(--ops-accent);
+}
+
+.ops-page-btn.ops-page-btn--active {
+  background: var(--ops-accent);
+  border-color: var(--ops-accent);
+  color: #fff;
+}
+
+.ops-page-btn:disabled {
+  color: var(--ops-muted);
+  border-color: var(--ops-border-light);
+  cursor: not-allowed;
+}
+
+/* ── Modals ──────────────────────────────────── */
+.ops-modal-mask {
+  position: fixed;
+  inset: 0;
+  background: oklch(15% 0.02 250 / 0.4);
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.ops-modal {
+  width: min(100%, 700px);
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  background: var(--ops-surface);
+  border: 1px solid var(--ops-border);
+  border-radius: var(--ops-radius-lg);
+  box-shadow: var(--ops-shadow-lg);
+}
+
+.ops-modal-wide {
+  width: min(100%, 980px);
+}
+
+.ops-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px 0;
+}
+
+.ops-modal-header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ops-text);
+}
+
+.ops-modal-close {
+  border: none;
+  background: transparent;
+  color: var(--ops-muted);
+  cursor: pointer;
+  font-size: var(--ops-font-size);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.ops-modal-close:hover {
+  color: var(--ops-text);
+  background: var(--ops-bg);
+}
+
+.ops-modal-body {
+  padding: 20px 24px;
+}
+
+.ops-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 24px;
+}
+
+/* ── Form Grid ───────────────────────────────── */
+.ops-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 18px;
+}
+
+.ops-form-grid-full {
+  grid-column: 1 / -1;
+}
+
+.ops-form-item {
+  display: grid;
+  gap: 6px;
+}
+
+.ops-form-item label {
+  font-size: var(--ops-font-size-sm);
+  color: var(--ops-text-secondary);
+  font-weight: 500;
+}
+
+/* Inline form row (label + input in one line) */
+.ops-form-row {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+}
+
+.ops-form-row > span {
+  font-size: var(--ops-font-size-sm);
+  color: var(--ops-text-secondary);
+  white-space: nowrap;
+}
+
+/* ── Placeholder / Empty State ───────────────── */
+.ops-empty {
+  min-height: 160px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--ops-muted);
+  border: 1px dashed var(--ops-border);
+  border-radius: var(--ops-radius-md);
+  padding: 32px;
+  font-size: var(--ops-font-size-sm);
+}
+
+.ops-empty strong {
+  display: block;
+  color: var(--ops-text-secondary);
+  margin-bottom: 4px;
+}
+
+/* ── Status Badges ───────────────────────────── */
+.ops-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: var(--ops-font-size-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.ops-badge--default {
+  background: var(--ops-bg);
+  color: var(--ops-text-secondary);
+  border: 1px solid var(--ops-border);
+}
+
+.ops-badge--success {
+  background: var(--ops-success-light);
+  color: var(--ops-success);
+}
+
+.ops-badge--danger {
+  background: var(--ops-danger-light);
+  color: var(--ops-danger);
+}
+
+.ops-badge--warning {
+  background: var(--ops-warning-light);
+  color: var(--ops-warning);
+}
+
+.ops-badge--info {
+  background: var(--ops-info-light);
+  color: var(--ops-info);
+}
+
+.ops-badge--accent {
+  background: var(--ops-accent-light);
+  color: var(--ops-accent);
+}
+
+/* ── Toast / Notification ────────────────────── */
+.ops-toast-stack {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  display: grid;
+  gap: 10px;
+  z-index: 1100;
+}
+
+.ops-toast {
+  min-width: 240px;
+  max-width: 380px;
+  padding: 12px 16px;
+  border-radius: var(--ops-radius-md);
+  color: #fff;
+  font-size: var(--ops-font-size-sm);
+  box-shadow: var(--ops-shadow-lg);
+  backdrop-filter: blur(8px);
+}
+
+.ops-toast--success {
+  background: var(--ops-success);
+}
+
+.ops-toast--error {
+  background: var(--ops-danger);
+}
+
+.ops-toast--info {
+  background: var(--ops-accent);
+}
+
+/* ── Action Group (inline button group) ──────── */
+.ops-action-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Attribute Pills (chip selectors) ────────── */
+.ops-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ops-pill {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--ops-border);
+  border-radius: 999px;
+  background: var(--ops-surface);
+  color: var(--ops-text);
+  font-size: var(--ops-font-size-xs);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.ops-pill:hover {
+  border-color: var(--ops-accent);
+  color: var(--ops-accent);
+}
+
+.ops-pill.ops-pill--active {
+  border-color: var(--ops-accent);
+  background: var(--ops-accent-light);
+  color: var(--ops-accent);
+  font-weight: 600;
+}
+
+/* ── Page Layout ─────────────────────────────── */
+.ops-page {
+  display: grid;
+  gap: 16px;
+}
+
+/* ── Error Message ──────────────────────────── */
+.ops-error {
+  color: var(--ops-danger);
+  background: var(--ops-danger-light);
+  border: 1px solid color-mix(in srgb, var(--ops-danger) 20%, transparent);
+  border-radius: var(--ops-radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: var(--ops-font-size-sm);
+}
+
+/* ── Alert Banner ──────────────────────────── */
+.ops-alert {
+  padding: 10px 14px;
+  border-radius: var(--ops-radius-sm);
+  font-size: var(--ops-font-size-sm);
+}
+
+.ops-alert--error {
+  color: var(--ops-danger);
+  background: var(--ops-danger-light);
+  border: 1px solid color-mix(in srgb, var(--ops-danger) 20%, transparent);
+}
+
+.ops-alert--success {
+  color: var(--ops-success);
+  background: var(--ops-success-light);
+  border: 1px solid color-mix(in srgb, var(--ops-success) 20%, transparent);
+}
+
+/* ── Loading Spinner (text-based) ────────────── */
+.ops-loading {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  color: var(--ops-muted);
+  font-size: var(--ops-font-size-sm);
+}
+
+/* ── Selector List (for skill selectors etc.) ── */
+.ops-selector-list {
+  border: 1px solid var(--ops-border);
+  border-radius: var(--ops-radius-md);
+  max-height: 340px;
+  overflow-y: auto;
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.ops-selector-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--ops-border);
+  border-radius: var(--ops-radius-sm);
+  background: var(--ops-surface);
+  color: var(--ops-text);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.12s ease;
+}
+
+.ops-selector-item:hover {
+  border-color: var(--ops-accent);
+  color: var(--ops-accent);
+}
+
+/* ── Responsive ──────────────────────────────── */
+@media (max-width: 960px) {
+  .ops-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .ops-filter-item {
+    width: 100%;
+  }
+
+  .ops-filter-item .ops-input,
+  .ops-filter-item .ops-select {
+    width: 100%;
+  }
+
+  .ops-filter-actions {
+    width: 100%;
+  }
+
+  .ops-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ops-form-row {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .ops-pagination {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .ops-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

@@ -209,56 +209,53 @@ onMounted(() => {
 
 <template>
   <div class="ops-page">
-    <section class="query-card">
-      <div class="query-row">
-        <label class="query-item">
-          <span class="query-label">操作者</span>
-          <input v-model="filters.username" type="text" placeholder="账号或昵称" @keyup.enter="search" />
+    <section class="ops-card-padded">
+      <div class="ops-filter-bar" style="align-items:flex-end;flex-wrap:wrap;margin-bottom:16px;">
+        <label class="ops-form-item" style="min-width:180px;">
+          <span class="ops-filter-label">操作者</span>
+          <input v-model="filters.username" class="ops-input" type="text" placeholder="账号或昵称" @keyup.enter="search" />
         </label>
-        <label class="query-item">
-          <span class="query-label">资源类型</span>
-          <input v-model="filters.resource_type" type="text" placeholder="如 pokemon / skill" @keyup.enter="search" />
+        <label class="ops-form-item" style="min-width:180px;">
+          <span class="ops-filter-label">资源类型</span>
+          <input v-model="filters.resource_type" class="ops-input" type="text" placeholder="如 pokemon / skill" @keyup.enter="search" />
         </label>
-        <label class="query-item">
-          <span class="query-label">资源 ID</span>
-          <input v-model="filters.resource_id" type="text" placeholder="资源 ID" @keyup.enter="search" />
+        <label class="ops-form-item" style="min-width:160px;">
+          <span class="ops-filter-label">资源 ID</span>
+          <input v-model="filters.resource_id" class="ops-input" type="text" placeholder="资源 ID" @keyup.enter="search" />
         </label>
-        <label class="query-item">
-          <span class="query-label">动作</span>
-          <select v-model="filters.action">
+        <label class="ops-form-item" style="min-width:150px;">
+          <span class="ops-filter-label">动作</span>
+          <select v-model="filters.action" class="ops-select">
             <option v-for="option in actionOptions" :key="option.value" :value="option.value">
               {{ option.label }}
             </option>
           </select>
         </label>
-        <div class="query-actions">
-          <button type="button" class="btn-primary" @click="search">搜索</button>
-          <button type="button" class="btn-default" @click="resetFilters">重置</button>
+        <div class="ops-filter-actions">
+          <button type="button" class="ops-btn ops-btn-primary" @click="search">搜索</button>
+          <button type="button" class="ops-btn ops-btn-secondary" @click="resetFilters">重置</button>
         </div>
       </div>
-    </section>
-
-    <section class="table-card">
-      <div class="toolbar">
-        <div class="toolbar-title">操作日志</div>
-        <div class="toolbar-meta">共 {{ total }} 条</div>
+      <div class="ops-toolbar">
+        <span class="ops-section-title">操作日志</span>
+        <span class="ops-toolbar-meta">共 {{ total }} 条</span>
       </div>
 
-      <p v-if="error" class="error">{{ error }}</p>
-      <div v-if="loading" class="table-placeholder">加载中...</div>
-      <div v-else-if="!items.length" class="table-placeholder">暂无日志</div>
+      <p v-if="error" class="ops-error">{{ error }}</p>
+      <div v-if="loading" class="ops-loading">加载中...</div>
+      <div v-else-if="!items.length" class="ops-empty">暂无日志</div>
 
-      <div v-else class="table-wrap">
-        <table class="audit-table">
+      <div v-else class="ops-table-wrap">
+        <table class="ops-table" style="min-width:920px;">
           <thead>
             <tr>
-              <th class="col-id">ID</th>
+              <th style="width:80px;">ID</th>
               <th>时间</th>
               <th>操作者</th>
               <th>资源类型</th>
               <th>资源 ID</th>
               <th>动作</th>
-              <th class="col-action">操作</th>
+              <th style="width:88px;">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -266,170 +263,95 @@ onMounted(() => {
               <td>{{ item.id }}</td>
               <td>{{ formatDate(item.created_at) }}</td>
               <td>
-                <div class="operator">
+                <div style="display:grid;gap:2px;">
                   <strong>{{ operatorName(item) }}</strong>
-                  <span v-if="item.username && item.nickname">{{ item.username }}</span>
+                  <span v-if="item.username && item.nickname" style="color:var(--ops-muted);font-size:12px;">{{ item.username }}</span>
                 </div>
               </td>
-              <td><span class="tag">{{ item.resource_type }}</span></td>
+              <td><span class="ops-badge ops-badge--default">{{ item.resource_type }}</span></td>
               <td>{{ item.resource_id || '-' }}</td>
-              <td><span class="action-tag">{{ item.action }}</span></td>
+              <td><span class="ops-badge ops-badge--accent">{{ item.action }}</span></td>
               <td>
-                <button type="button" class="text-btn" @click="openDetail(item)">查看</button>
+                <button type="button" class="ops-btn ops-btn-text" @click="openDetail(item)">查看</button>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div v-if="total > 0" class="pagination">
-        <span class="page-info">第 {{ pageStart }}-{{ pageEnd }} 条 / 共 {{ total }} 条</span>
-        <button type="button" :disabled="currentPage <= 1" @click="goToPage(currentPage - 1)">上一页</button>
-        <button
-          v-for="page in visiblePages"
-          :key="page"
-          type="button"
-          :class="{ active: page === currentPage }"
-          @click="goToPage(page)"
-        >
-          {{ page }}
-        </button>
-        <button type="button" :disabled="currentPage >= totalPages" @click="goToPage(currentPage + 1)">下一页</button>
+      <div v-if="total > 0" class="ops-pagination">
+        <span class="ops-pagination-summary">第 {{ pageStart }}-{{ pageEnd }} 条 / 共 {{ total }} 条</span>
+        <div class="ops-pagination-controls">
+          <button type="button" class="ops-page-btn" :disabled="currentPage <= 1" @click="goToPage(currentPage - 1)">上一页</button>
+          <button
+            v-for="page in visiblePages"
+            :key="page"
+            type="button"
+            class="ops-page-btn"
+            :class="{ 'ops-page-btn--active': page === currentPage }"
+            @click="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage >= totalPages" @click="goToPage(currentPage + 1)">下一页</button>
+        </div>
       </div>
     </section>
 
-    <div v-if="detailVisible && detailItem" class="modal-mask" @click="closeDetail">
-      <section class="modal" @click.stop>
-        <div class="modal-head">
+    <div v-if="detailVisible && detailItem" class="ops-modal-mask" @click="closeDetail">
+      <section class="ops-modal ops-modal-wide" @click.stop>
+        <div class="ops-modal-header">
           <div>
             <h3>日志详情 #{{ detailItem.id }}</h3>
-            <p>{{ formatDate(detailItem.created_at) }} · {{ detailItem.resource_type }} · {{ detailItem.action }}</p>
+            <p style="margin:4px 0 0;color:var(--ops-muted);font-size:13px;">{{ formatDate(detailItem.created_at) }} · {{ detailItem.resource_type }} · {{ detailItem.action }}</p>
           </div>
-          <button type="button" class="btn-text" @click="closeDetail">关闭</button>
+          <button type="button" class="ops-btn ops-btn-text" @click="closeDetail">关闭</button>
         </div>
-        <div class="modal-body">
-          <section class="diff-panel">
-            <div class="diff-head">
-              <h4>差异对比</h4>
-              <span>共 {{ detailDiffRows.length }} 处差异</span>
+        <div class="ops-modal-body">
+          <section style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);overflow:hidden;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--ops-bg);">
+              <h4 style="margin:0;color:var(--ops-text-secondary);font-size:13px;font-weight:600;">差异对比</h4>
+              <span style="color:var(--ops-muted);font-size:12px;">共 {{ detailDiffRows.length }} 处差异</span>
             </div>
-            <div v-if="!detailDiffRows.length" class="diff-empty">变更前后没有字段差异</div>
-            <div v-else class="diff-wrap">
-              <table class="diff-table">
+            <div v-if="!detailDiffRows.length" style="padding:28px 12px;color:var(--ops-muted);text-align:center;">变更前后没有字段差异</div>
+            <div v-else style="max-height:320px;overflow:auto;">
+              <table style="width:100%;min-width:820px;border-collapse:collapse;font-size:12px;">
                 <thead>
                   <tr>
-                    <th>字段</th>
-                    <th>变更前</th>
-                    <th>变更后</th>
-                    <th>类型</th>
+                    <th style="border-top:1px solid var(--ops-border);padding:8px 10px;text-align:left;color:var(--ops-text-secondary);background:#fff;">字段</th>
+                    <th style="border-top:1px solid var(--ops-border);padding:8px 10px;text-align:left;color:var(--ops-text-secondary);background:#fff;">变更前</th>
+                    <th style="border-top:1px solid var(--ops-border);padding:8px 10px;text-align:left;color:var(--ops-text-secondary);background:#fff;">变更后</th>
+                    <th style="border-top:1px solid var(--ops-border);padding:8px 10px;text-align:center;color:var(--ops-text-secondary);background:#fff;width:86px;">类型</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="row in detailDiffRows" :key="row.path" :class="row.status">
-                    <td class="diff-path">{{ row.path }}</td>
-                    <td class="diff-value before">{{ formatDiffValue(row.before) }}</td>
-                    <td class="diff-value after">{{ formatDiffValue(row.after) }}</td>
-                    <td><span class="diff-status" :class="row.status">{{ diffStatusLabel(row.status) }}</span></td>
+                  <tr v-for="row in detailDiffRows" :key="row.path" :style="{
+                    background: row.status === 'added' ? 'var(--ops-success-light)' : row.status === 'deleted' ? 'var(--ops-danger-light)' : 'var(--ops-warning-light)'
+                  }">
+                    <td style="width:220px;padding:8px 10px;border-top:1px solid var(--ops-border);font-family:Consolas,monospace;word-break:break-all;color:var(--ops-text);">{{ row.path }}</td>
+                    <td style="max-width:280px;padding:8px 10px;border-top:1px solid var(--ops-border);font-family:Consolas,monospace;white-space:pre-wrap;word-break:break-all;color:#7c2d12;">{{ formatDiffValue(row.before) }}</td>
+                    <td style="max-width:280px;padding:8px 10px;border-top:1px solid var(--ops-border);font-family:Consolas,monospace;white-space:pre-wrap;word-break:break-all;color:#14532d;">{{ formatDiffValue(row.after) }}</td>
+                    <td style="padding:8px 10px;border-top:1px solid var(--ops-border);text-align:center;">
+                      <span class="ops-badge" :class="row.status === 'added' ? 'ops-badge--success' : row.status === 'deleted' ? 'ops-badge--danger' : 'ops-badge--warning'" style="height:22px;font-size:12px;">{{ diffStatusLabel(row.status) }}</span>
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </section>
 
-        <div class="detail-grid">
-          <section class="json-panel">
-            <h4>变更前</h4>
-            <pre>{{ formatJson(detailItem.before_json) }}</pre>
-          </section>
-          <section class="json-panel">
-            <h4>变更后</h4>
-            <pre>{{ formatJson(detailItem.after_json) }}</pre>
-          </section>
-        </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
+            <section style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);overflow:hidden;">
+              <h4 style="margin:0;padding:10px 12px;background:var(--ops-bg);color:var(--ops-text-secondary);font-size:13px;">变更前</h4>
+              <pre style="min-height:280px;max-height:560px;margin:0;padding:12px;overflow:auto;background:#0f172a;color:#e5e7eb;font-size:12px;line-height:1.6;">{{ formatJson(detailItem.before_json) }}</pre>
+            </section>
+            <section style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);overflow:hidden;">
+              <h4 style="margin:0;padding:10px 12px;background:var(--ops-bg);color:var(--ops-text-secondary);font-size:13px;">变更后</h4>
+              <pre style="min-height:280px;max-height:560px;margin:0;padding:12px;overflow:auto;background:#0f172a;color:#e5e7eb;font-size:12px;line-height:1.6;">{{ formatJson(detailItem.after_json) }}</pre>
+            </section>
+          </div>
         </div>
       </section>
     </div>
   </div>
 </template>
-
-<style scoped>
-.ops-page { display: grid; gap: 16px; }
-.query-card,
-.table-card { background: #fff; border: 1px solid #ebeef5; border-radius: 4px; padding: 16px 20px; }
-.query-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
-.query-item { display: grid; gap: 6px; min-width: 180px; }
-.query-label { color: #606266; font-size: 13px; }
-.query-item input,
-.query-item select { height: 36px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 12px; background: #fff; }
-.query-actions { display: flex; gap: 8px; }
-.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.toolbar-title { font-weight: 600; color: #303133; }
-.toolbar-meta { color: #909399; font-size: 13px; }
-.table-wrap { border: 1px solid #ebeef5; border-radius: 2px; overflow: auto; }
-.audit-table { width: 100%; min-width: 920px; border-collapse: collapse; font-size: 13px; }
-.audit-table th,
-.audit-table td { border-bottom: 1px solid #ebeef5; border-right: 1px solid #ebeef5; padding: 10px 12px; text-align: center; vertical-align: middle; }
-.audit-table th:last-child,
-.audit-table td:last-child { border-right: none; }
-.audit-table thead { background: #fafafa; }
-.col-id { width: 80px; }
-.col-action { width: 88px; }
-.operator { display: grid; gap: 2px; }
-.operator span { color: #909399; font-size: 12px; }
-.tag,
-.action-tag { display: inline-flex; align-items: center; height: 24px; border-radius: 12px; padding: 0 10px; background: #f4f4f5; color: #606266; }
-.action-tag { background: #ecf5ff; color: #409eff; }
-.text-btn { border: none; background: transparent; color: #409eff; cursor: pointer; font-size: 13px; padding: 0; }
-.text-btn:hover { color: #66b1ff; }
-.btn-primary,
-.btn-default { height: 36px; border-radius: 4px; padding: 0 14px; cursor: pointer; }
-.btn-primary { background: #409eff; border: 1px solid #409eff; color: #fff; }
-.btn-default { background: #fff; border: 1px solid #dcdfe6; color: #606266; }
-.table-placeholder { min-height: 180px; display: grid; place-items: center; color: #909399; border: 1px dashed #dcdfe6; border-radius: 2px; }
-.error { color: #dc2626; background: #fef0f0; border: 1px solid #fde2e2; border-radius: 4px; padding: 10px 12px; margin-bottom: 10px; }
-.pagination { display: flex; justify-content: flex-end; align-items: center; gap: 6px; margin-top: 14px; }
-.pagination button { min-width: 34px; height: 32px; border: 1px solid #dcdfe6; background: #fff; color: #606266; border-radius: 4px; cursor: pointer; }
-.pagination button.active { background: #409eff; border-color: #409eff; color: #fff; }
-.pagination button:disabled { color: #c0c4cc; cursor: not-allowed; }
-.page-info { margin-right: 8px; color: #909399; font-size: 13px; }
-.modal-mask { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(15, 23, 42, 0.34); padding: 24px; z-index: 1000; }
-.modal { width: min(100%, 1080px); max-height: min(860px, calc(100vh - 48px)); overflow: hidden; background: #fff; border: 1px solid #ebeef5; border-radius: 4px; }
-.modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; padding: 16px 20px; border-bottom: 1px solid #ebeef5; }
-.modal-head h3 { margin: 0 0 6px; color: #303133; }
-.modal-head p { margin: 0; color: #909399; font-size: 13px; }
-.btn-text { border: none; background: transparent; color: #909399; cursor: pointer; }
-.modal-body { max-height: calc(100vh - 126px); overflow: auto; padding: 16px 20px 20px; }
-.diff-panel { border: 1px solid #ebeef5; border-radius: 4px; overflow: hidden; margin-bottom: 16px; }
-.diff-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; background: #fafafa; }
-.diff-head h4 { margin: 0; color: #606266; font-size: 13px; }
-.diff-head span { color: #909399; font-size: 12px; }
-.diff-empty { padding: 28px 12px; color: #909399; text-align: center; }
-.diff-wrap { max-height: 320px; overflow: auto; }
-.diff-table { width: 100%; min-width: 820px; border-collapse: collapse; font-size: 12px; }
-.diff-table th,
-.diff-table td { border-top: 1px solid #ebeef5; border-right: 1px solid #ebeef5; padding: 8px 10px; text-align: left; vertical-align: top; }
-.diff-table th:last-child,
-.diff-table td:last-child { border-right: none; text-align: center; width: 86px; }
-.diff-table thead { background: #fff; color: #606266; }
-.diff-table tr.added { background: #f0f9eb; }
-.diff-table tr.deleted { background: #fef0f0; }
-.diff-table tr.changed { background: #fdf6ec; }
-.diff-path { width: 220px; color: #303133; font-family: Consolas, 'Courier New', monospace; word-break: break-all; }
-.diff-value { max-width: 280px; white-space: pre-wrap; word-break: break-all; font-family: Consolas, 'Courier New', monospace; }
-.diff-value.before { color: #7c2d12; }
-.diff-value.after { color: #14532d; }
-.diff-status { display: inline-flex; align-items: center; height: 22px; border-radius: 11px; padding: 0 8px; font-size: 12px; }
-.diff-status.added { background: #e1f3d8; color: #67c23a; }
-.diff-status.deleted { background: #fde2e2; color: #f56c6c; }
-.diff-status.changed { background: #faecd8; color: #e6a23c; }
-.detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
-.json-panel { min-width: 0; border: 1px solid #ebeef5; border-radius: 4px; overflow: hidden; }
-.json-panel h4 { margin: 0; padding: 10px 12px; background: #fafafa; color: #606266; font-size: 13px; }
-.json-panel pre { min-height: 280px; max-height: 560px; margin: 0; padding: 12px; overflow: auto; background: #0f172a; color: #e5e7eb; font-size: 12px; line-height: 1.6; }
-
-@media (max-width: 960px) {
-  .query-item { width: 100%; }
-  .detail-grid { grid-template-columns: 1fr; }
-  .pagination { justify-content: flex-start; flex-wrap: wrap; }
-}
-</style>

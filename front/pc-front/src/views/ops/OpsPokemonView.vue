@@ -59,7 +59,7 @@ const skillKeyword = ref('')
 const skillSelectorVisible = ref(false)
 const skillSelectorKeyword = ref('')
 const skillSelectorPage = ref(1)
-const skillSelectorPageSize = 10
+const skillSelectorPageSize = 8
 const evolutionSteps = ref<OpsEvolutionChainStep[]>([])
 const evolutionChainId = ref<number | null>(null)
 const evolutionSearchKeyword = ref('')
@@ -836,62 +836,66 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="ops-page">
-    <section class="query-card">
-      <div class="query-row">
-        <label class="query-item">
-          <span class="query-label">精灵编号</span>
-          <input v-model="filterNo" class="keyword-input" type="text" placeholder="请输入精灵编号" />
+    <section class="ops-card-padded">
+      <div class="ops-filter-bar" style="align-items:flex-end;flex-wrap:wrap;">
+        <label class="ops-form-item" style="min-width:200px;">
+          <span class="ops-filter-label">精灵编号</span>
+          <input v-model="filterNo" class="ops-input" type="text" placeholder="请输入精灵编号" />
         </label>
-        <label class="query-item">
-          <span class="query-label">精灵名称</span>
-          <input v-model="filterName" class="keyword-input" type="text" placeholder="请输入精灵名称" />
+        <label class="ops-form-item" style="min-width:200px;">
+          <span class="ops-filter-label">精灵名称</span>
+          <input v-model="filterName" class="ops-input" type="text" placeholder="请输入精灵名称" />
         </label>
-        <label class="query-item">
-          <span class="query-label">属性</span>
-          <select v-model="filterAttrId" class="query-select">
+        <label class="ops-form-item" style="min-width:160px;">
+          <span class="ops-filter-label">属性</span>
+          <select v-model="filterAttrId" class="ops-select">
             <option value="">全部属性</option>
             <option v-for="item in attributes" :key="item.id" :value="item.id">{{ item.name }}</option>
           </select>
         </label>
-        <label class="query-item">
-          <span class="query-label">蛋组</span>
-          <select v-model="filterEggGroup" class="query-select">
+        <label class="ops-form-item" style="min-width:160px;">
+          <span class="ops-filter-label">蛋组</span>
+          <select v-model="filterEggGroup" class="ops-select">
             <option value="">全部蛋组</option>
             <option v-for="item in eggGroupOptions" :key="item" :value="item">{{ item }}</option>
           </select>
         </label>
-        <label class="query-item">
-          <span class="query-label">阶段</span>
-          <select v-model="filterTypeCode" class="query-select">
+        <label class="ops-form-item" style="min-width:160px;">
+          <span class="ops-filter-label">阶段</span>
+          <select v-model="filterTypeCode" class="ops-select">
             <option value="">全部阶段</option>
             <option v-for="item in typeOptions" :key="item.code" :value="item.code">{{ item.label }}</option>
           </select>
         </label>
-        <label class="query-item">
-          <span class="query-label">形态</span>
-          <select v-model="filterFormCode" class="query-select">
+        <label class="ops-form-item" style="min-width:160px;">
+          <span class="ops-filter-label">形态</span>
+          <select v-model="filterFormCode" class="ops-select">
             <option value="">全部形态</option>
             <option v-for="item in formOptions" :key="item.code" :value="item.code">{{ item.label }}</option>
           </select>
         </label>
-        <label class="query-item">
-          <span class="query-label">特性</span>
-          <div class="trait-autocomplete">
+        <label class="ops-form-item" style="min-width:200px;">
+          <span class="ops-filter-label">特性</span>
+          <div style="position:relative;">
             <input
               v-model="filterTraitKeyword"
-              class="query-select"
+              class="ops-input"
               type="text"
               placeholder="输入特性名称"
               @focus="onTraitInputFocus"
               @input="onTraitInput"
               @blur="onTraitInputBlur"
             />
-            <div v-if="traitSuggestVisible && filteredTraitSuggestions.length" class="trait-suggest-list">
+            <div
+              v-if="traitSuggestVisible && filteredTraitSuggestions.length"
+              style="position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:30;border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);background:var(--ops-surface);box-shadow:0 8px 20px rgba(15,23,42,0.1);max-height:220px;overflow:auto;"
+            >
               <button
                 v-for="item in filteredTraitSuggestions"
                 :key="item.id"
                 type="button"
-                class="trait-suggest-item"
+                class="ops-hover-bg"
+                style="width:100%;height:34px;border:none;background:var(--ops-surface);color:var(--ops-text);text-align:left;padding:0 10px;cursor:pointer;font-size:13px;"
                 @click="selectTraitSuggestion(item)"
               >
                 {{ item.name }}
@@ -899,23 +903,23 @@ onBeforeUnmount(() => {
             </div>
           </div>
         </label>
-        <div class="query-actions">
-          <button type="button" class="btn-primary" @click="searchList">搜索</button>
-          <button type="button" class="btn-secondary" @click="resetFilters">重置</button>
+        <div class="ops-filter-actions">
+          <button type="button" class="ops-btn ops-btn-primary" @click="searchList">搜索</button>
+          <button type="button" class="ops-btn ops-btn-secondary" @click="resetFilters">重置</button>
         </div>
       </div>
     </section>
 
-    <section class="table-card">
-      <div class="toolbar">
-        <button type="button" class="btn-primary" @click="openCreateModal">新增精灵</button>
-        <div class="toolbar-meta">共 {{ total }} 条</div>
+    <section class="ops-card-padded">
+      <div class="ops-toolbar">
+        <button type="button" class="ops-btn ops-btn-primary" @click="openCreateModal">新增精灵</button>
+        <span class="ops-toolbar-meta">共 {{ total }} 条</span>
       </div>
-      <p v-if="error" class="error">{{ error }}</p>
-      <div v-if="loading" class="placeholder">加载中...</div>
-      <div v-else-if="!items.length" class="placeholder">暂无数据</div>
-      <div v-else class="table-wrap">
-        <table class="tbl">
+      <p v-if="error" class="ops-error">{{ error }}</p>
+      <div v-if="loading" class="ops-loading">加载中...</div>
+      <div v-else-if="!items.length" class="ops-empty">暂无数据</div>
+      <div v-else class="ops-table-wrap">
+        <table class="ops-table">
           <thead>
             <tr>
               <th>序号</th>
@@ -940,104 +944,130 @@ onBeforeUnmount(() => {
               <td>{{ item.attributes.join(' / ') }}</td>
               <td>{{ item.egg_groups.join(' / ') }}</td>
               <td>
-                <button type="button" class="txt-btn" @click="openEditModal(item.id)">修改</button>
-                <button type="button" class="txt-btn danger" @click="removeItem(item.id, item.name)">删除</button>
+                <div class="ops-action-group">
+                  <button type="button" class="ops-btn ops-btn-text" @click="openEditModal(item.id)">修改</button>
+                  <button type="button" class="ops-btn ops-btn-text ops-btn--danger" @click="removeItem(item.id, item.name)">删除</button>
+                </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
-      <div class="pager">
-        <div class="pager-summary">共 {{ total }} 条，当前显示 {{ pageStart() }}-{{ pageEnd() }} 条</div>
-        <div class="pager-controls">
-          <button type="button" class="pager-btn" :disabled="page === 1" @click="goToPage(1)">首页</button>
-          <button type="button" class="pager-btn" :disabled="page === 1" @click="goToPage(page - 1)">上一页</button>
+      <div v-if="total > 0" class="ops-pagination">
+        <span class="ops-pagination-summary">共 {{ total }} 条，当前显示 {{ pageStart() }}-{{ pageEnd() }} 条</span>
+        <div class="ops-pagination-controls">
+          <button type="button" class="ops-page-btn" :disabled="page === 1" @click="goToPage(1)">首页</button>
+          <button type="button" class="ops-page-btn" :disabled="page === 1" @click="goToPage(page - 1)">上一页</button>
           <button
             v-for="p in visiblePages()"
             :key="p"
             type="button"
-            class="pager-btn"
-            :class="{ active: p === page }"
+            class="ops-page-btn"
+            :class="{ 'ops-page-btn--active': p === page }"
             @click="goToPage(p)"
           >
             {{ p }}
           </button>
-          <button type="button" class="pager-btn" :disabled="page === totalPages" @click="goToPage(page + 1)">下一页</button>
-          <button type="button" class="pager-btn" :disabled="page === totalPages" @click="goToPage(totalPages)">末页</button>
+          <button type="button" class="ops-page-btn" :disabled="page === totalPages" @click="goToPage(page + 1)">下一页</button>
+          <button type="button" class="ops-page-btn" :disabled="page === totalPages" @click="goToPage(totalPages)">末页</button>
         </div>
       </div>
     </section>
 
-    <div v-if="modalVisible" class="modal-mask">
-      <section class="modal" @click.stop>
-        <div class="modal-head">
+    <div v-if="modalVisible" class="ops-modal-mask">
+      <section class="ops-modal" @click.stop>
+        <div class="ops-modal-header">
           <h3>{{ editingId ? '编辑精灵' : '新增精灵' }}</h3>
         </div>
-        <form class="form-grid" @submit.prevent="submit" @keydown.enter.prevent>
-          <section class="full section-card section-basic-with-art">
-            <h4>基础信息</h4>
-            <div class="basic-with-art">
-              <div class="basic-with-art-fields">
-                <div class="section-grid">
-                  <label><span>编号</span><input v-model="form.no" required type="text" /></label>
-                  <label><span>名称</span><input v-model="form.name" required type="text" /></label>
-                  <label>
-                    <span>阶段编码</span>
-                    <select v-model="form.type">
+        <form
+          style="display:grid;grid-template-columns:1fr;gap:12px;padding:12px 20px 20px;"
+          @submit.prevent="submit"
+          @keydown.enter.prevent
+        >
+          <!-- 基础信息 -->
+          <section
+            style="grid-column:1/-1;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);padding:12px;background:var(--ops-bg);"
+          >
+            <h4 style="font-size:14px;color:var(--ops-text);margin:0 0 12px;">基础信息</h4>
+            <div
+              style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px 20px;align-items:start;"
+            >
+              <div style="min-width:0;">
+                <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;">
+                  <label style="display:grid;gap:6px;min-width:0;">
+                    <span style="font-size:13px;color:var(--ops-text-secondary);">编号</span>
+                    <input v-model="form.no" class="ops-input" required type="text" />
+                  </label>
+                  <label style="display:grid;gap:6px;min-width:0;">
+                    <span style="font-size:13px;color:var(--ops-text-secondary);">名称</span>
+                    <input v-model="form.name" class="ops-input" required type="text" />
+                  </label>
+                  <label style="display:grid;gap:6px;min-width:0;">
+                    <span style="font-size:13px;color:var(--ops-text-secondary);">阶段编码</span>
+                    <select v-model="form.type" class="ops-select">
                       <option value="">请选择</option>
                       <option v-for="item in typeOptions" :key="item.code" :value="item.code">{{ item.code }}</option>
                     </select>
                   </label>
-                  <label><span>阶段名称</span><input :value="form.type_name" type="text" disabled /></label>
-                  <label>
-                    <span>形态编码</span>
-                    <select v-model="form.form">
+                  <label style="display:grid;gap:6px;min-width:0;">
+                    <span style="font-size:13px;color:var(--ops-text-secondary);">阶段名称</span>
+                    <input :value="form.type_name" class="ops-input" type="text" disabled />
+                  </label>
+                  <label style="display:grid;gap:6px;min-width:0;">
+                    <span style="font-size:13px;color:var(--ops-text-secondary);">形态编码</span>
+                    <select v-model="form.form" class="ops-select">
                       <option value="">请选择</option>
                       <option v-for="item in formOptions" :key="item.code" :value="item.code">{{ item.code }}</option>
                     </select>
                   </label>
-                  <label><span>形态名称</span><input :value="form.form_name" type="text" disabled /></label>
-                  <label>
-                    <span>特性</span>
-                    <select v-model.number="form.trait_id" required>
+                  <label style="display:grid;gap:6px;min-width:0;">
+                    <span style="font-size:13px;color:var(--ops-text-secondary);">形态名称</span>
+                    <input :value="form.form_name" class="ops-input" type="text" disabled />
+                  </label>
+                  <label style="display:grid;gap:6px;min-width:0;">
+                    <span style="font-size:13px;color:var(--ops-text-secondary);">特性</span>
+                    <select v-model.number="form.trait_id" class="ops-select" required>
                       <option :value="0">请选择</option>
                       <option v-for="t in traits" :key="t.id" :value="t.id">{{ t.name }}</option>
                     </select>
                   </label>
                 </div>
               </div>
-              <div class="basic-with-art-sides">
-                <aside class="basic-with-art-side" aria-label="精灵立绘">
-                  <div class="basic-art-heading">立绘</div>
-                  <div class="friend-image-main">
+              <div style="display:flex;gap:12px;position:sticky;top:0;">
+                <aside
+                  style="width:148px;padding:10px 10px 12px;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);background:var(--ops-surface);box-shadow:0 1px 2px rgba(0,0,0,0.04);"
+                  aria-label="精灵立绘"
+                >
+                  <div style="font-size:12px;font-weight:600;color:var(--ops-muted);text-transform:uppercase;letter-spacing:0.02em;margin-bottom:8px;">立绘</div>
+                  <div style="display:flex;flex-direction:column;gap:8px;align-items:stretch;width:100%;">
                     <button
                       type="button"
-                      class="friend-image-preview"
+                      style="width:100%;aspect-ratio:1;max-height:148px;padding:0;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);background:var(--ops-bg);cursor:pointer;display:grid;place-items:center;overflow:hidden;"
                       :disabled="saving"
                       @click="triggerFriendFilePick"
                     >
-                      <img v-if="friendDisplaySrc" :src="friendDisplaySrc" alt="" class="friend-image-preview-img" />
-                      <div v-else class="friend-image-placeholder-inner">
-                        <span class="friend-image-placeholder-title">暂无</span>
-                        <span class="friend-image-placeholder-sub">点击上传</span>
+                      <img v-if="friendDisplaySrc" :src="friendDisplaySrc" alt="" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;" />
+                      <div v-else style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;text-align:center;">
+                        <span style="font-size:12px;color:var(--ops-text-secondary);">暂无</span>
+                        <span style="font-size:11px;color:var(--ops-muted);">点击上传</span>
                       </div>
                     </button>
                     <input
                       ref="friendFileInputRef"
                       type="file"
-                      class="friend-file-hidden"
+                      style="position:absolute;width:0;height:0;opacity:0;pointer-events:none;"
                       accept=".webp,.png,.jpg,.jpeg,.gif,image/webp,image/png,image/jpeg,image/gif"
                       :disabled="saving"
                       @change="onFriendImageSelected"
                     />
-                    <div class="friend-image-actions">
-                      <button type="button" class="btn-primary btn-compact" :disabled="saving" @click="triggerFriendFilePick">
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:stretch;">
+                      <button type="button" class="ops-btn ops-btn-primary ops-btn-sm" style="flex:1 1 auto;min-width:0;" :disabled="saving" @click="triggerFriendFilePick">
                         {{ friendDisplaySrc ? '更换' : '选择图片' }}
                       </button>
                       <button
                         v-if="form.image_lc || pendingFriendFile"
                         type="button"
-                        class="btn-secondary btn-compact"
+                        class="ops-btn ops-btn-secondary ops-btn-sm"
                         :disabled="saving"
                         @click="clearFriendImage"
                       >
@@ -1046,37 +1076,40 @@ onBeforeUnmount(() => {
                     </div>
                   </div>
                 </aside>
-                <aside class="basic-with-art-side" aria-label="异色立绘">
-                  <div class="basic-art-heading">异色</div>
-                  <div class="friend-image-main">
+                <aside
+                  style="width:148px;padding:10px 10px 12px;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);background:var(--ops-surface);box-shadow:0 1px 2px rgba(0,0,0,0.04);"
+                  aria-label="异色立绘"
+                >
+                  <div style="font-size:12px;font-weight:600;color:var(--ops-muted);text-transform:uppercase;letter-spacing:0.02em;margin-bottom:8px;">异色</div>
+                  <div style="display:flex;flex-direction:column;gap:8px;align-items:stretch;width:100%;">
                     <button
                       type="button"
-                      class="friend-image-preview"
+                      style="width:100%;aspect-ratio:1;max-height:148px;padding:0;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);background:var(--ops-bg);cursor:pointer;display:grid;place-items:center;overflow:hidden;"
                       :disabled="saving"
                       @click="triggerYiseFilePick"
                     >
-                      <img v-if="yiseDisplaySrc" :src="yiseDisplaySrc" alt="" class="friend-image-preview-img" />
-                      <div v-else class="friend-image-placeholder-inner">
-                        <span class="friend-image-placeholder-title">暂无</span>
-                        <span class="friend-image-placeholder-sub">点击上传</span>
+                      <img v-if="yiseDisplaySrc" :src="yiseDisplaySrc" alt="" style="max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;" />
+                      <div v-else style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px;text-align:center;">
+                        <span style="font-size:12px;color:var(--ops-text-secondary);">暂无</span>
+                        <span style="font-size:11px;color:var(--ops-muted);">点击上传</span>
                       </div>
                     </button>
                     <input
                       ref="yiseFileInputRef"
                       type="file"
-                      class="friend-file-hidden"
+                      style="position:absolute;width:0;height:0;opacity:0;pointer-events:none;"
                       accept=".webp,.png,.jpg,.jpeg,.gif,image/webp,image/png,image/jpeg,image/gif"
                       :disabled="saving"
                       @change="onYiseImageSelected"
                     />
-                    <div class="friend-image-actions">
-                      <button type="button" class="btn-primary btn-compact" :disabled="saving" @click="triggerYiseFilePick">
+                    <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:stretch;">
+                      <button type="button" class="ops-btn ops-btn-primary ops-btn-sm" style="flex:1 1 auto;min-width:0;" :disabled="saving" @click="triggerYiseFilePick">
                         {{ yiseDisplaySrc ? '更换' : '选择图片' }}
                       </button>
                       <button
                         v-if="form.image_yise || pendingYiseFile"
                         type="button"
-                        class="btn-secondary btn-compact"
+                        class="ops-btn ops-btn-secondary ops-btn-sm"
                         :disabled="saving"
                         @click="clearYiseImage"
                       >
@@ -1089,46 +1122,73 @@ onBeforeUnmount(() => {
             </div>
           </section>
 
-          <section class="full section-card">
-            <h4>种族值</h4>
-            <div class="stats-grid">
-              <label><span>HP</span><input v-model.number="form.hp" type="number" /></label>
-              <label><span>物攻</span><input v-model.number="form.atk" type="number" /></label>
-              <label><span>魔攻</span><input v-model.number="form.matk" type="number" /></label>
-              <label><span>物防</span><input v-model.number="form.def_val" type="number" /></label>
-              <label><span>魔防</span><input v-model.number="form.mdef" type="number" /></label>
-              <label><span>速度</span><input v-model.number="form.spd" type="number" /></label>
-              <label><span>总和</span><input :value="form.total_race" type="number" disabled /></label>
+          <!-- 种族值 -->
+          <section
+            style="grid-column:1/-1;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);padding:12px;background:var(--ops-bg);"
+          >
+            <h4 style="font-size:14px;color:var(--ops-text);margin:0 0 10px;">种族值</h4>
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 12px;">
+              <label style="display:grid;gap:6px;min-width:0;">
+                <span style="font-size:13px;color:var(--ops-text-secondary);">HP</span>
+                <input v-model.number="form.hp" class="ops-input" type="number" />
+              </label>
+              <label style="display:grid;gap:6px;min-width:0;">
+                <span style="font-size:13px;color:var(--ops-text-secondary);">物攻</span>
+                <input v-model.number="form.atk" class="ops-input" type="number" />
+              </label>
+              <label style="display:grid;gap:6px;min-width:0;">
+                <span style="font-size:13px;color:var(--ops-text-secondary);">魔攻</span>
+                <input v-model.number="form.matk" class="ops-input" type="number" />
+              </label>
+              <label style="display:grid;gap:6px;min-width:0;">
+                <span style="font-size:13px;color:var(--ops-text-secondary);">物防</span>
+                <input v-model.number="form.def_val" class="ops-input" type="number" />
+              </label>
+              <label style="display:grid;gap:6px;min-width:0;">
+                <span style="font-size:13px;color:var(--ops-text-secondary);">魔防</span>
+                <input v-model.number="form.mdef" class="ops-input" type="number" />
+              </label>
+              <label style="display:grid;gap:6px;min-width:0;">
+                <span style="font-size:13px;color:var(--ops-text-secondary);">速度</span>
+                <input v-model.number="form.spd" class="ops-input" type="number" />
+              </label>
+              <label style="display:grid;gap:6px;min-width:0;">
+                <span style="font-size:13px;color:var(--ops-text-secondary);">总和</span>
+                <input :value="form.total_race" class="ops-input" type="number" disabled />
+              </label>
             </div>
           </section>
 
-          <section class="full section-card">
-            <h4>关联信息</h4>
-            <div class="section-grid">
-              <label class="wide">
-                <span>蛋组列表</span>
-                <div class="attr-picker">
+          <!-- 关联信息 -->
+          <section
+            style="grid-column:1/-1;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);padding:12px;background:var(--ops-bg);"
+          >
+            <h4 style="font-size:14px;color:var(--ops-text);margin:0 0 10px;">关联信息</h4>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 14px;">
+              <label style="grid-column:1/-1;display:grid;gap:6px;min-width:0;">
+                <span style="font-size:13px;color:var(--ops-text-secondary);">蛋组列表</span>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
                   <button
                     v-for="g in eggGroupOptions"
                     :key="g"
                     type="button"
-                    class="attr-pill"
-                    :class="{ active: isEggGroupSelected(g) }"
+                    style="height:30px;padding:0 10px;border:1px solid var(--ops-border);border-radius:15px;background:var(--ops-surface);color:var(--ops-text-secondary);cursor:pointer;font-size:12px;"
+                    :style="isEggGroupSelected(g) ? {borderColor:'var(--ops-accent)',background:'var(--ops-accent-light)',color:'var(--ops-accent)'} : {}"
                     @click="toggleEggGroup(g)"
                   >
                     {{ g }}
                   </button>
                 </div>
               </label>
-              <label class="wide">
-                <span>属性（最多 2 种）</span>
-                <div class="attr-picker">
+              <label style="grid-column:1/-1;display:grid;gap:6px;min-width:0;">
+                <span style="font-size:13px;color:var(--ops-text-secondary);">属性（最多 2 种）</span>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
                   <button
                     v-for="a in attributes"
                     :key="a.id"
                     type="button"
-                    class="attr-pill"
-                    :class="{ active: isAttrSelected(a.id) }"
+                    style="height:30px;padding:0 10px;border:1px solid var(--ops-border);border-radius:15px;background:var(--ops-surface);color:var(--ops-text-secondary);cursor:pointer;font-size:12px;"
+                    :style="isAttrSelected(a.id) ? {borderColor:'var(--ops-accent)',background:'var(--ops-accent-light)',color:'var(--ops-accent)'} : {}"
                     @click="toggleAttribute(a.id)"
                   >
                     {{ a.name }}
@@ -1138,31 +1198,38 @@ onBeforeUnmount(() => {
             </div>
           </section>
 
-          <section class="full section-card skill-block">
-            <div class="skill-head">
-              <h4>技能列表</h4>
-              <div class="skill-head-actions">
-                <input v-model="skillKeyword" class="skill-search-input" type="text" placeholder="按技能名称搜索" />
-                <button type="button" class="btn-secondary" @click="openSkillSelector">新增技能</button>
+          <!-- 技能列表 -->
+          <section
+            style="grid-column:1/-1;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);padding:12px;background:var(--ops-surface);"
+          >
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <h4 style="font-size:14px;color:var(--ops-text);margin:0;">技能列表</h4>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <input v-model="skillKeyword" class="ops-input" type="text" placeholder="按技能名称搜索" style="width:220px;" />
+                <button type="button" class="ops-btn ops-btn-secondary" @click="openSkillSelector">新增技能</button>
               </div>
             </div>
-            <div v-for="{ item: s, realIndex, skillName, icon } in pagedSkills" :key="realIndex" class="skill-row">
-              <div class="skill-name-cell">
-                <img v-if="icon" :src="icon" alt="icon" class="skill-icon" />
+            <div
+              v-for="{ item: s, realIndex, skillName, icon } in pagedSkills"
+              :key="realIndex"
+              style="display:grid;grid-template-columns:1.8fr 1fr 110px auto;gap:8px;margin-bottom:8px;align-items:center;"
+            >
+              <div style="height:36px;border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);display:flex;align-items:center;gap:8px;padding:0 10px;color:var(--ops-text);background:var(--ops-surface);">
+                <img v-if="icon" :src="icon" alt="icon" style="width:20px;height:20px;object-fit:contain;border-radius:3px;background:var(--ops-bg);" />
                 <span>{{ skillName || `技能ID: ${s.skill_id}` }}</span>
               </div>
-              <select v-model="s.type">
+              <select v-model="s.type" class="ops-select">
                 <option v-for="opt in skillSourceOptions" :key="opt.code" :value="opt.code">{{ opt.label }}</option>
               </select>
-              <input v-model.number="s.sort_order" type="number" placeholder="排序" />
-              <button type="button" class="btn-text danger" @click="removeSkillRow(realIndex)">删除</button>
+              <input v-model.number="s.sort_order" class="ops-input" type="number" placeholder="排序" />
+              <button type="button" class="ops-btn ops-btn-text ops-btn--danger" @click="removeSkillRow(realIndex)">删除</button>
             </div>
-            <div class="skill-pager">
-              <button type="button" class="pager-btn" :disabled="skillPage === 1" @click="skillPage -= 1">上一页</button>
+            <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:6px;color:var(--ops-text-secondary);font-size:13px;">
+              <button type="button" class="ops-page-btn" :disabled="skillPage === 1" @click="skillPage -= 1">上一页</button>
               <span>第 {{ skillPage }} / {{ skillTotalPages }} 页</span>
               <button
                 type="button"
-                class="pager-btn"
+                class="ops-page-btn"
                 :disabled="skillPage >= skillTotalPages"
                 @click="skillPage += 1"
               >
@@ -1171,139 +1238,161 @@ onBeforeUnmount(() => {
             </div>
           </section>
 
-          <section class="full section-card">
-            <div class="skill-head">
-              <h4>进化链（链ID：{{ evolutionChainId ?? '未设置' }}）</h4>
-              <div class="skill-head-actions">
+          <!-- 进化链 -->
+          <section
+            style="grid-column:1/-1;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);padding:12px;background:var(--ops-bg);"
+          >
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <h4 style="font-size:14px;color:var(--ops-text);margin:0;">进化链（链ID：{{ evolutionChainId ?? '未设置' }}）</h4>
+              <div style="display:flex;align-items:center;gap:8px;">
                 <input
                   v-model="evolutionSearchKeyword"
-                  class="skill-search-input"
+                  class="ops-input"
                   type="text"
                   placeholder="按精灵名称搜索进化链"
+                  style="width:220px;"
                 />
-                <button type="button" class="btn-secondary" @click="searchEvolutionChain">搜索进化链</button>
-                <button type="button" class="btn-secondary" @click="createEvolutionChainDraft">新建链草稿</button>
+                <button type="button" class="ops-btn ops-btn-secondary" @click="searchEvolutionChain">搜索进化链</button>
+                <button type="button" class="ops-btn ops-btn-secondary" @click="createEvolutionChainDraft">新建链草稿</button>
               </div>
             </div>
-            <div class="evo-toolbar">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
               <input
                 v-model="evolutionPokemonKeyword"
-                class="skill-search-input"
+                class="ops-input"
                 type="text"
                 placeholder="搜索精灵添加到进化链"
+                style="width:220px;"
                 @keyup.enter="searchEvolutionPokemon"
               />
-              <button type="button" class="btn-secondary" :disabled="evolutionPokemonSearching" @click="searchEvolutionPokemon">
+              <button type="button" class="ops-btn ops-btn-secondary" :disabled="evolutionPokemonSearching" @click="searchEvolutionPokemon">
                 {{ evolutionPokemonSearching ? '搜索中...' : '搜索精灵' }}
               </button>
-              <button type="button" class="btn-secondary" @click="addCurrentPokemonToEvolution">添加当前精灵</button>
+              <button type="button" class="ops-btn ops-btn-secondary" @click="addCurrentPokemonToEvolution">添加当前精灵</button>
             </div>
-            <div v-if="evolutionPokemonCandidates.length" class="evo-candidates">
+            <div v-if="evolutionPokemonCandidates.length" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
               <button
                 v-for="item in evolutionPokemonCandidates"
                 :key="item.id"
                 type="button"
-                class="evo-candidate"
+                class="ops-hover-accent"
+                style="min-height:34px;border:1px solid var(--ops-border);border-radius:999px;background:var(--ops-surface);color:var(--ops-text);display:inline-flex;align-items:center;gap:6px;padding:0 12px;cursor:pointer;font-size:13px;"
                 @click="addEvolutionPokemon(item)"
               >
-                <span>{{ item.no }}</span>
+                <span style="color:var(--ops-muted);font-size:12px;">{{ item.no }}</span>
                 <strong>{{ item.name }}</strong>
-                <em>{{ item.type_name || '未分类' }}</em>
+                <em style="color:var(--ops-muted);font-size:12px;font-style:normal;">{{ item.type_name || '未分类' }}</em>
               </button>
             </div>
-            <div class="evo-topbar">
-              <div class="own-pokemon-card" draggable="true" @dragstart="dragCurrentPokemon">
-                <div class="evo-stage">当前精灵（拖拽到下方插槽）</div>
-                <div class="evo-image-wrap own-image-wrap">
+            <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+              <div
+                style="width:168px;border:1px dashed var(--ops-accent);border-radius:var(--ops-radius-md);background:linear-gradient(to bottom, #f6faff 0%, #f6faff 72%, #eaf8ea 72%, #eaf8ea 100%);padding:10px;display:grid;gap:8px;cursor:grab;"
+                draggable="true"
+                @dragstart="dragCurrentPokemon"
+              >
+                <div style="font-size:12px;color:var(--ops-muted);">当前精灵（拖拽到下方插槽）</div>
+                <div style="width:100%;aspect-ratio:1/1;border-radius:6px;background:var(--ops-bg);display:grid;place-items:center;overflow:hidden;">
                   <img
                     v-if="evolutionSteps.find((x) => x.pokemon_name === form.name)?.image_url"
                     :src="evolutionSteps.find((x) => x.pokemon_name === form.name)?.image_url"
                     alt="self"
-                    class="evo-image"
+                    style="max-width:86%;max-height:86%;width:auto;height:auto;object-fit:contain;"
                   />
-                  <div v-else class="evo-image-placeholder">未加载图片</div>
+                  <div v-else style="color:var(--ops-muted);font-size:12px;">未加载图片</div>
                 </div>
-                <div class="evo-name">{{ form.name || '未命名精灵' }}</div>
+                <div style="font-size:13px;color:var(--ops-text);font-weight:600;text-align:center;">{{ form.name || '未命名精灵' }}</div>
               </div>
             </div>
-            <div v-if="evolutionSteps.length" class="evo-levels">
+            <div v-if="evolutionSteps.length" style="display:grid;gap:10px;">
               <section
                 v-for="(level, levelIndex) in evolutionLevelsForEditor"
                 :key="level.sort_order"
-                class="evo-level"
+                style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"
               >
-                <div class="evo-level-title">排序 {{ level.sort_order }}</div>
-                <div class="evo-level-items">
+                <div style="min-width:64px;color:var(--ops-muted);font-size:12px;font-weight:600;">排序 {{ level.sort_order }}</div>
+                <div style="display:flex;align-items:stretch;gap:8px;flex-wrap:wrap;">
                   <article
                     v-for="{ step, index: realIndex } in level.items"
                     :key="`${step.pokemon_name}-${realIndex}`"
-                    class="evo-card"
+                    class="ops-hover-card"
+                    style="width:160px;min-width:160px;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);background:var(--ops-surface);padding:10px;display:grid;gap:8px;cursor:pointer;"
                     @click="openEvolutionEditor(realIndex)"
                     @dragover.prevent
                     @drop.prevent="dropCurrentPokemon(realIndex)"
                   >
-                    <div class="evo-stage">第 {{ step.sort_order }} 阶</div>
-                    <div class="evo-image-wrap">
-                      <img v-if="step.image_url" :src="step.image_url" alt="pokemon" class="evo-image" />
-                      <div v-else class="evo-image-placeholder">未匹配</div>
+                    <div style="font-size:12px;color:var(--ops-muted);">第 {{ step.sort_order }} 阶</div>
+                    <div style="width:100%;aspect-ratio:1/1;border-radius:6px;background:var(--ops-bg);display:grid;place-items:center;overflow:hidden;">
+                      <img v-if="step.image_url" :src="step.image_url" alt="pokemon" style="max-width:86%;max-height:86%;width:auto;height:auto;object-fit:contain;" />
+                      <div v-else style="color:var(--ops-muted);font-size:12px;">未匹配</div>
                     </div>
-                    <div class="evo-name">{{ step.pokemon_name || '未命名' }}</div>
-                    <div class="evo-condition">进化：{{ step.evolution_condition || '空' }}</div>
-                    <div class="evo-condition">前置：{{ step.pre_evolution_condition || '空' }}</div>
-                    <div class="evo-actions">
-                      <button type="button" class="txt-btn" @click.stop="openEvolutionEditor(realIndex)">编辑</button>
-                      <button type="button" class="txt-btn danger" @click.stop="removeEvolutionStep(realIndex)">删除</button>
+                    <div style="font-size:13px;color:var(--ops-text);font-weight:600;text-align:center;">{{ step.pokemon_name || '未命名' }}</div>
+                    <div style="min-height:30px;color:var(--ops-text-secondary);font-size:12px;text-align:center;">进化：{{ step.evolution_condition || '空' }}</div>
+                    <div style="min-height:30px;color:var(--ops-text-secondary);font-size:12px;text-align:center;">前置：{{ step.pre_evolution_condition || '空' }}</div>
+                    <div style="display:flex;justify-content:center;gap:8px;">
+                      <button type="button" class="ops-btn ops-btn-text" style="font-size:13px;" @click.stop="openEvolutionEditor(realIndex)">编辑</button>
+                      <button type="button" class="ops-btn ops-btn-text ops-btn--danger" style="font-size:13px;" @click.stop="removeEvolutionStep(realIndex)">删除</button>
                     </div>
                   </article>
                 </div>
                 <div
                   v-if="levelIndex < evolutionLevelsForEditor.length - 1"
-                  class="evo-arrow"
+                  class="ops-hover-accent-bg"
+                  style="color:var(--ops-muted);font-size:16px;font-weight:600;min-width:24px;height:24px;border-radius:999px;display:grid;place-items:center;cursor:default;"
                   @dragover.prevent
                   @drop.prevent="dropCurrentPokemonAfter(getEvolutionLevelLastIndex(level))"
                 >
                   →
                 </div>
               </section>
-              <div class="evo-end-drop" @dragover.prevent @drop.prevent="dropCurrentPokemon(evolutionSteps.length)">放到末尾</div>
+              <div
+                class="ops-hover-drop"
+                style="min-width:72px;height:92px;border:1px dashed var(--ops-border);border-radius:6px;color:var(--ops-muted);font-size:12px;display:grid;place-items:center;background:var(--ops-bg);"
+                @dragover.prevent
+                @drop.prevent="dropCurrentPokemon(evolutionSteps.length)"
+              >放到末尾</div>
             </div>
-            <div v-if="!evolutionSteps.length" class="placeholder">可搜索已有进化链，或点击“新建链草稿 / 添加当前精灵”开始配置</div>
+            <div v-if="!evolutionSteps.length" class="ops-empty" style="min-height:80px;">可搜索已有进化链，或点击"新建链草稿 / 添加当前精灵"开始配置</div>
           </section>
 
-          <div class="full actions">
-            <button type="submit" class="btn-primary" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</button>
-            <button type="button" class="btn-secondary" @click="closeModal">取消</button>
+          <div style="grid-column:1/-1;display:flex;justify-content:center;align-items:center;gap:10px;padding-top:4px;">
+            <button type="submit" class="ops-btn ops-btn-primary" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</button>
+            <button type="button" class="ops-btn ops-btn-secondary" @click="closeModal">取消</button>
           </div>
         </form>
       </section>
     </div>
 
-    <div v-if="skillSelectorVisible" class="modal-mask">
-      <section class="selector-modal" @click.stop>
-        <div class="modal-head">
+    <!-- 技能选择器 -->
+    <div v-if="skillSelectorVisible" class="ops-modal-mask">
+      <section
+        style="width:min(100%,700px);max-height:calc(100vh - 48px);overflow:auto;background:var(--ops-surface);border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);"
+        @click.stop
+      >
+        <div class="ops-modal-header">
           <h3>选择技能</h3>
         </div>
-        <div class="selector-body">
-          <div class="selector-toolbar">
-            <input v-model="skillSelectorKeyword" class="keyword-input" type="text" placeholder="输入技能名称搜索" />
+        <div style="padding:12px 20px 0;display:grid;gap:10px;">
+          <div style="display:flex;justify-content:flex-start;">
+            <input v-model="skillSelectorKeyword" class="ops-input" type="text" placeholder="输入技能名称搜索" style="width:280px;" />
           </div>
-          <div class="selector-list">
+          <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);max-height:340px;overflow:auto;padding:8px;display:grid;gap:8px;">
             <button
               v-for="item in pagedSkillCandidates"
               :key="item.id"
               type="button"
-              class="selector-item"
+              class="ops-hover-accent"
+              style="height:40px;border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);background:var(--ops-surface);color:var(--ops-text);display:flex;align-items:center;gap:8px;padding:0 10px;cursor:pointer;text-align:left;font-size:13px;"
               @click="addSkillBySelect(item.id)"
             >
-              <img v-if="item.icon" :src="item.icon" alt="icon" class="skill-icon" />
+              <img v-if="item.icon" :src="item.icon" alt="icon" style="width:20px;height:20px;object-fit:contain;border-radius:3px;background:var(--ops-bg);" />
               <span>{{ item.name }}</span>
             </button>
-            <div v-if="!pagedSkillCandidates.length" class="placeholder">暂无技能</div>
+            <div v-if="!pagedSkillCandidates.length" class="ops-empty" style="min-height:60px;">暂无技能</div>
           </div>
-          <div class="skill-pager">
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:10px;color:var(--ops-text-secondary);font-size:13px;">
             <button
               type="button"
-              class="pager-btn"
+              class="ops-page-btn"
               :disabled="skillSelectorPage === 1"
               @click="skillSelectorPage -= 1"
             >
@@ -1312,7 +1401,7 @@ onBeforeUnmount(() => {
             <span>第 {{ skillSelectorPage }} / {{ skillSelectorTotalPages }} 页</span>
             <button
               type="button"
-              class="pager-btn"
+              class="ops-page-btn"
               :disabled="skillSelectorPage >= skillSelectorTotalPages"
               @click="skillSelectorPage += 1"
             >
@@ -1320,38 +1409,42 @@ onBeforeUnmount(() => {
             </button>
           </div>
         </div>
-        <div class="actions">
-          <button type="button" class="btn-secondary" @click="closeSkillSelector">关闭</button>
+        <div style="display:flex;justify-content:center;align-items:center;gap:10px;padding:12px 20px 20px;">
+          <button type="button" class="ops-btn ops-btn-secondary" @click="closeSkillSelector">关闭</button>
         </div>
       </section>
     </div>
 
-    <div v-if="evolutionEditorVisible" class="modal-mask">
-      <section class="selector-modal evolution-editor" @click.stop>
-        <div class="modal-head">
+    <!-- 进化阶段编辑器 -->
+    <div v-if="evolutionEditorVisible" class="ops-modal-mask">
+      <section
+        style="width:min(100%,700px);max-height:calc(100vh - 48px);overflow:auto;background:var(--ops-surface);border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);"
+        @click.stop
+      >
+        <div class="ops-modal-header">
           <h3>编辑进化阶段</h3>
         </div>
-        <div class="selector-body">
-          <label>
-            <span>排序（相同排序表示同一阶段分支）</span>
-            <input v-model.number="evolutionDraft.sort_order" class="keyword-input" type="number" min="1" />
+        <div style="padding:12px 20px 0;display:grid;gap:10px;">
+          <label style="display:grid;gap:6px;">
+            <span style="font-size:13px;color:var(--ops-text-secondary);">排序（相同排序表示同一阶段分支）</span>
+            <input v-model.number="evolutionDraft.sort_order" class="ops-input" type="number" min="1" />
           </label>
-          <label>
-            <span>精灵名称</span>
-            <input v-model="evolutionDraft.pokemon_name" class="keyword-input" type="text" placeholder="请输入精灵名称" />
+          <label style="display:grid;gap:6px;">
+            <span style="font-size:13px;color:var(--ops-text-secondary);">精灵名称</span>
+            <input v-model="evolutionDraft.pokemon_name" class="ops-input" type="text" placeholder="请输入精灵名称" />
           </label>
-          <label>
-            <span>进化条件</span>
-            <input v-model="evolutionDraft.evolution_condition" class="keyword-input" type="text" placeholder="可为空，如：等级32进化" />
+          <label style="display:grid;gap:6px;">
+            <span style="font-size:13px;color:var(--ops-text-secondary);">进化条件</span>
+            <input v-model="evolutionDraft.evolution_condition" class="ops-input" type="text" placeholder="可为空，如：等级32进化" />
           </label>
-          <label>
-            <span>前置进化条件</span>
-            <input v-model="evolutionDraft.pre_evolution_condition" class="keyword-input" type="text" placeholder="可为空，如：完成指定任务" />
+          <label style="display:grid;gap:6px;">
+            <span style="font-size:13px;color:var(--ops-text-secondary);">前置进化条件</span>
+            <input v-model="evolutionDraft.pre_evolution_condition" class="ops-input" type="text" placeholder="可为空，如：完成指定任务" />
           </label>
         </div>
-        <div class="actions">
-          <button type="button" class="btn-primary" @click="saveEvolutionStep">保存</button>
-          <button type="button" class="btn-secondary" @click="closeEvolutionEditor">取消</button>
+        <div style="display:flex;justify-content:center;align-items:center;gap:10px;padding:12px 20px 20px;">
+          <button type="button" class="ops-btn ops-btn-primary" @click="saveEvolutionStep">保存</button>
+          <button type="button" class="ops-btn ops-btn-secondary" @click="closeEvolutionEditor">取消</button>
         </div>
       </section>
     </div>
@@ -1359,409 +1452,9 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.ops-page { display: grid; gap: 16px; }
-.query-card, .table-card { background: #fff; border: 1px solid #ebeef5; border-radius: 4px; padding: 16px; }
-.query-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.query-item { display: flex; align-items: center; gap: 8px; min-width: 220px; }
-.query-label { font-size: 13px; color: #606266; line-height: 1; white-space: nowrap; min-width: 56px; }
-.keyword-input, .query-select {
-  width: 180px;
-  height: 36px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 0 12px;
-  color: #606266;
-  background: #fff;
-}
-.query-actions { display: flex; align-items: center; gap: 8px; }
-.trait-autocomplete { position: relative; }
-.trait-suggest-list {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(100% + 4px);
-  z-index: 30;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  background: #fff;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.1);
-  max-height: 220px;
-  overflow: auto;
-}
-.trait-suggest-item {
-  width: 100%;
-  height: 34px;
-  border: none;
-  background: #fff;
-  color: #303133;
-  text-align: left;
-  padding: 0 10px;
-  cursor: pointer;
-}
-.trait-suggest-item:hover { background: #f5f7fa; color: #409eff; }
-.toolbar { display: flex; justify-content: space-between; margin-bottom: 12px; }
-.toolbar-meta { color: #909399; font-size: 13px; }
-.table-wrap { overflow: auto; border: 1px solid #ebeef5; border-radius: 2px; }
-.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-.tbl th, .tbl td { border: 1px solid #ebeef5; padding: 10px; text-align: center; }
-.placeholder { min-height: 120px; display: grid; place-items: center; color: #909399; border: 1px dashed #dcdfe6; border-radius: 2px; }
-.pager {
-  margin-top: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding-top: 12px;
-  border-top: 1px solid #ebeef5;
-}
-.pager-summary { color: #606266; font-size: 13px; }
-.pager-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.pager-btn {
-  min-width: 36px;
-  height: 32px;
-  padding: 0 10px;
-  border: 1px solid #dcdfe6;
-  border-radius: 2px;
-  background: #fff;
-  color: #606266;
-  cursor: pointer;
-  font-size: 13px;
-}
-.pager-btn:hover:not(:disabled) { color: #409eff; border-color: #409eff; }
-.pager-btn.active { background: #409eff; border-color: #409eff; color: #fff; }
-.pager-btn:disabled { color: #c0c4cc; cursor: not-allowed; border-color: #ebeef5; }
-.txt-btn { border: none; background: transparent; color: #409eff; cursor: pointer; margin: 0 4px; }
-.txt-btn.danger { color: #f56c6c; }
-
-.btn-primary, .btn-secondary { height: 36px; border-radius: 4px; padding: 0 14px; cursor: pointer; }
-.btn-primary { border: 1px solid #409eff; background: #409eff; color: #fff; }
-.btn-secondary { border: 1px solid #dcdfe6; background: #fff; color: #606266; }
-.btn-text { border: none; background: transparent; color: #909399; cursor: pointer; }
-.btn-text.danger { color: #f56c6c; }
-
-.error { color: #fff; background: #f56c6c; border: 1px solid #f56c6c; border-radius: 4px; padding: 10px 12px; margin-bottom: 10px; }
-
-.modal-mask { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(15, 23, 42, 0.36); padding: 24px; z-index: 1000; }
-.modal { width: min(100%, 980px); max-height: calc(100vh - 48px); overflow: auto; background: #fff; border: 1px solid #ebeef5; border-radius: 8px; }
-.modal-head { display: flex; align-items: center; justify-content: flex-start; padding: 16px 20px; border-bottom: 1px solid #ebeef5; }
-.form-grid { display: grid; grid-template-columns: 1fr; gap: 12px; padding: 12px 20px 20px; }
-.form-grid label { display: grid; gap: 6px; min-width: 0; }
-.form-grid label span { font-size: 13px; color: #606266; }
-.form-grid input, .form-grid select { height: 36px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 10px; }
-.form-grid input:disabled { background: #f5f7fa; color: #909399; cursor: not-allowed; }
-.form-grid select[multiple] { height: auto; min-height: 96px; padding: 6px; }
-.full { grid-column: 1 / -1; }
-.section-card { border: 1px solid #ebeef5; border-radius: 6px; padding: 12px; background: #fcfdff; }
-.section-card h4 { font-size: 14px; color: #303133; margin-bottom: 10px; }
-.section-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 14px; }
-.stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px 12px; }
-.section-grid .wide { grid-column: 1 / -1; }
-.section-basic-with-art > h4 {
-  margin-bottom: 12px;
-}
-.basic-with-art {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 16px 20px;
-  align-items: start;
-}
-.basic-with-art-fields { min-width: 0; }
-.basic-with-art-sides {
-  display: flex;
-  gap: 12px;
-  position: sticky;
-  top: 0;
-}
-.basic-with-art-side {
-  width: 148px;
-  padding: 10px 10px 12px;
-  border: 1px solid #e4e7ed;
-  border-radius: 8px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-.basic-art-heading {
-  font-size: 12px;
-  font-weight: 600;
-  color: #909399;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  margin-bottom: 8px;
-}
-.friend-image-main {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: stretch;
-  width: 100%;
-}
-.friend-file-hidden {
-  position: absolute;
-  width: 0;
-  height: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-.friend-image-preview {
-  width: 100%;
-  aspect-ratio: 1;
-  max-height: 148px;
-  padding: 0;
-  border: 1px solid #dcdfe6;
-  border-radius: 8px;
-  background: #f5f7fa;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-.friend-image-preview:hover:not(:disabled) {
-  border-color: #409eff;
-  background: #ecf5ff;
-}
-.friend-image-preview:disabled {
-  cursor: wait;
-  opacity: 0.85;
-}
-.friend-image-preview-img {
-  max-width: 100%;
-  max-height: 100%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-}
-.friend-image-placeholder-inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 8px;
-  text-align: center;
-}
-.friend-image-placeholder-title { font-size: 12px; color: #606266; }
-.friend-image-placeholder-sub { font-size: 11px; color: #c0c4cc; }
-.friend-image-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  justify-content: stretch;
-}
-.friend-image-actions .btn-primary,
-.friend-image-actions .btn-secondary {
-  flex: 1 1 auto;
-  min-width: 0;
-}
-.btn-compact {
-  height: 32px;
-  padding: 0 10px;
-  font-size: 13px;
-}
-.friend-image-note {
-  margin: 0;
-  font-size: 11px;
-  color: #c0c4cc;
-  line-height: 1.4;
-}
-@media (max-width: 720px) {
-  .basic-with-art {
-    grid-template-columns: 1fr;
-  }
-  .basic-with-art-sides {
-    position: static;
-    justify-content: flex-start;
-  }
-  .basic-with-art-side {
-    width: 140px;
-  }
-}
-.attr-picker { display: flex; flex-wrap: wrap; gap: 8px; }
-.attr-pill {
-  height: 30px;
-  padding: 0 10px;
-  border: 1px solid #dcdfe6;
-  border-radius: 15px;
-  background: #fff;
-  color: #606266;
-  cursor: pointer;
-  font-size: 12px;
-}
-.attr-pill:hover { border-color: #409eff; color: #409eff; }
-.attr-pill.active {
-  border-color: #409eff;
-  background: #ecf5ff;
-  color: #409eff;
-}
-.skill-block { background: #fff; }
-.skill-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-.skill-head-actions { display: flex; align-items: center; gap: 8px; }
-.skill-search-input { width: 220px; height: 36px; border: 1px solid #dcdfe6; border-radius: 4px; padding: 0 10px; }
-.skill-row { display: grid; grid-template-columns: 1.8fr 1fr 110px auto; gap: 8px; margin-bottom: 8px; }
-.evo-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; overflow-x: hidden; padding-bottom: 4px; }
-.evo-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-.evo-candidates { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-.evo-candidate {
-  min-height: 34px;
-  border: 1px solid #dcdfe6;
-  border-radius: 999px;
-  background: #fff;
-  color: #303133;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 0 12px;
-  cursor: pointer;
-}
-.evo-candidate:hover { border-color: #409eff; color: #409eff; }
-.evo-candidate span, .evo-candidate em { color: #909399; font-size: 12px; font-style: normal; }
-.evo-topbar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
-.own-pokemon-card {
-  width: 168px;
-  border: 1px dashed #409eff;
-  border-radius: 8px;
-  background: linear-gradient(to bottom, #f6faff 0%, #f6faff 72%, #eaf8ea 72%, #eaf8ea 100%);
-  padding: 10px;
-  display: grid;
-  gap: 8px;
-  cursor: grab;
-}
-.evo-levels { display: grid; gap: 10px; }
-.evo-level { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.evo-level-title {
-  min-width: 64px;
-  color: #909399;
-  font-size: 12px;
-  font-weight: 600;
-}
-.evo-level-items { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; }
-.evo-card {
-  width: 160px;
-  min-width: 160px;
-  border: 1px solid #dcdfe6;
-  border-radius: 8px;
-  background: #fff;
-  padding: 10px;
-  display: grid;
-  gap: 8px;
-  cursor: pointer;
-}
-.evo-card:hover { border-color: #409eff; box-shadow: 0 2px 8px rgba(64, 158, 255, 0.12); }
-.evo-card:hover { background: #f8fbff; }
-.evo-stage { font-size: 12px; color: #909399; }
-.evo-image-wrap {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  border-radius: 6px;
-  background: #f5f7fa;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-}
-.own-image-wrap { aspect-ratio: 1 / 1; }
-.evo-image {
-  max-width: 86%;
-  max-height: 86%;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-}
-.evo-image-placeholder { color: #c0c4cc; font-size: 12px; }
-.evo-name { font-size: 13px; color: #303133; font-weight: 600; text-align: center; }
-.evo-condition { min-height: 30px; color: #606266; font-size: 12px; text-align: center; }
-.evo-actions { display: flex; justify-content: center; gap: 8px; }
-.evo-arrow {
-  color: #909399;
-  font-size: 16px;
-  font-weight: 600;
-  min-width: 24px;
-  height: 24px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-}
-.evo-arrow:hover { background: #ecf5ff; color: #409eff; }
-.evo-end-drop {
-  min-width: 72px;
-  height: 92px;
-  border: 1px dashed #c0c4cc;
-  border-radius: 6px;
-  color: #909399;
-  font-size: 12px;
-  display: grid;
-  place-items: center;
-  background: #fafafa;
-}
-.evo-end-drop:hover { border-color: #409eff; color: #409eff; background: #ecf5ff; }
-.skill-name-cell {
-  height: 36px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 10px;
-  color: #303133;
-  background: #fff;
-}
-.skill-icon { width: 20px; height: 20px; object-fit: contain; border-radius: 3px; background: #f5f7fa; }
-.skill-pager { display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 6px; color: #606266; font-size: 13px; }
-.actions { display: flex; justify-content: center; align-items: center; gap: 10px; padding-top: 4px; }
-.selector-modal {
-  width: min(100%, 700px);
-  max-height: calc(100vh - 48px);
-  overflow: auto;
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
-}
-.selector-body { padding: 12px 20px 0; display: grid; gap: 10px; }
-.selector-toolbar { display: flex; justify-content: flex-start; }
-.selector-list {
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
-  max-height: 340px;
-  overflow: auto;
-  padding: 8px;
-  display: grid;
-  gap: 8px;
-}
-.selector-item {
-  height: 40px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  background: #fff;
-  color: #303133;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 10px;
-  cursor: pointer;
-  text-align: left;
-}
-.selector-item:hover { border-color: #409eff; color: #409eff; }
-.evolution-editor label { display: grid; gap: 6px; }
-.evolution-editor label span { font-size: 13px; color: #606266; }
-
-@media (max-width: 960px) {
-  .query-row { flex-direction: column; align-items: stretch; }
-  .query-item { width: 100%; min-width: 0; }
-  .query-label { min-width: 0; }
-  .keyword-input, .query-select { width: 100%; }
-  .query-actions { width: 100%; }
-  .section-grid, .stats-grid { grid-template-columns: 1fr; }
-  .skill-row { grid-template-columns: 1fr; }
-  .evo-flow { flex-direction: column; align-items: stretch; }
-  .evo-toolbar { flex-direction: column; align-items: stretch; }
-  .evo-level { flex-direction: column; align-items: stretch; }
-  .evo-level-items { flex-direction: column; }
-  .evo-topbar { justify-content: stretch; }
-  .own-pokemon-card { width: 100%; }
-  .evo-end-drop { width: 100%; min-width: 0; height: 40px; }
-  .evo-card { width: 100%; min-width: 0; }
-  .evo-arrow { transform: rotate(90deg); }
-  .skill-head, .skill-head-actions { flex-direction: column; align-items: stretch; }
-  .skill-search-input { width: 100%; }
-  .pager { align-items: flex-start; flex-direction: column; }
-}
+.ops-hover-bg:hover { background: var(--ops-bg); }
+.ops-hover-accent:hover { border-color: var(--ops-accent); color: var(--ops-accent); }
+.ops-hover-card:hover { border-color: var(--ops-accent); box-shadow: var(--ops-shadow-sm); background: var(--ops-bg); }
+.ops-hover-drop:hover { border-color: var(--ops-accent); color: var(--ops-accent); background: var(--ops-accent-light); }
+.ops-hover-accent-bg:hover { background: var(--ops-accent-light); color: var(--ops-accent); }
 </style>

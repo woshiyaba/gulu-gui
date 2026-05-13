@@ -212,7 +212,7 @@ async function submitForm() {
 }
 
 async function removeItem(item: OpsPokemonFilterOptionItem) {
-  if (!window.confirm(`确定删除筛选项 “${item.label}” 吗？`)) return
+  if (!window.confirm(`确定删除筛选项 "${item.label}" 吗？`)) return
   try {
     await deleteOpsPokemonFilterOption(item.id)
     if (editingId.value === item.id) resetForm()
@@ -250,73 +250,56 @@ onMounted(() => {
 
 <template>
   <div class="ops-page">
-    <section class="query-card">
-      <div class="query-row">
-        <label class="query-item">
-          <span class="query-label">关键字</span>
-          <input
-            v-model="keyword"
-            type="text"
-            placeholder="按 code / label 模糊搜索"
-            @keyup.enter="search"
-          />
-        </label>
-        <div class="query-actions">
-          <button type="button" class="btn-primary" @click="search">搜索</button>
-          <button type="button" class="btn-default" @click="resetFilters">重置</button>
+    <section class="ops-card-padded">
+      <div class="ops-filter-bar" style="margin-bottom:16px;">
+        <div class="ops-filter-item">
+          <span class="ops-filter-label">关键字</span>
+          <input v-model="keyword" class="ops-input" style="width:320px" type="text" placeholder="按 code / label 模糊搜索" @keyup.enter="search" />
+        </div>
+        <div class="ops-filter-actions">
+          <button type="button" class="ops-btn ops-btn-primary" @click="search">搜索</button>
+          <button type="button" class="ops-btn ops-btn-secondary" @click="resetFilters">重置</button>
         </div>
       </div>
-    </section>
-
-    <section class="table-card">
-      <div class="toolbar">
-        <button type="button" class="btn-primary" @click="openCreateDrawer">新增</button>
-        <div class="toolbar-meta">共 {{ total }} 条</div>
+      <div class="ops-toolbar">
+        <button type="button" class="ops-btn ops-btn-primary" @click="openCreateDrawer">新增</button>
+        <span class="ops-toolbar-meta">共 {{ total }} 条</span>
       </div>
 
-      <p v-if="error" class="error">{{ error }}</p>
+      <p v-if="error" class="ops-error">{{ error }}</p>
 
-      <div v-if="loading" class="table-placeholder muted">加载中...</div>
-      <div v-else-if="!items.length" class="table-placeholder">
-        <strong>暂无数据</strong>
-        <span>请调整筛选条件或新增筛选项。</span>
-      </div>
-      <div v-else class="table-wrap">
-        <table class="dict-table">
+      <div v-if="loading" class="ops-loading">加载中...</div>
+      <div v-else-if="!items.length" class="ops-empty"><strong>暂无数据</strong><span>请调整筛选条件或新增筛选项。</span></div>
+      <div v-else class="ops-table-wrap">
+        <table class="ops-table">
           <thead>
             <tr>
-              <th class="col-index">序号</th>
+              <th>序号</th>
               <th>code</th>
               <th>label</th>
-              <th class="col-type">类型</th>
+              <th>类型</th>
               <th>排序字段</th>
-              <th class="col-dir">方向</th>
-              <th class="col-sort">显示排序</th>
-              <th class="col-status">状态</th>
-              <th class="col-actions">操作</th>
+              <th>方向</th>
+              <th>显示排序</th>
+              <th>状态</th>
+              <th>操作</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(item, index) in items" :key="item.id">
               <td>{{ pageStart + index }}</td>
-              <td class="mono-cell">{{ item.code }}</td>
-              <td class="name-cell">{{ item.label }}</td>
+              <td><code>{{ item.code }}</code></td>
+              <td style="font-weight:500;">{{ item.label }}</td>
               <td>{{ FILTER_TYPE_LABELS[item.filter_type] || item.filter_type }}</td>
               <td>{{ describeOrderBy(item.order_by) }}</td>
               <td>{{ describeOrderDir(item.order_dir) }}</td>
               <td>{{ item.sort_order }}</td>
+              <td><span class="ops-badge" :class="item.is_active ? 'ops-badge--accent' : 'ops-badge--default'">{{ item.is_active ? '启用' : '停用' }}</span></td>
               <td>
-                <span class="badge" :class="item.is_active ? 'badge-on' : 'badge-off'">
-                  {{ item.is_active ? '启用' : '停用' }}
-                </span>
-              </td>
-              <td>
-                <div class="action-group">
-                  <button type="button" class="text-btn" @click="editItem(item)">修改</button>
-                  <button type="button" class="text-btn" @click="toggleActive(item)">
-                    {{ item.is_active ? '停用' : '启用' }}
-                  </button>
-                  <button type="button" class="text-btn danger" @click="removeItem(item)">删除</button>
+                <div class="ops-action-group">
+                  <button type="button" class="ops-btn ops-btn-text" @click="editItem(item)">修改</button>
+                  <button type="button" class="ops-btn ops-btn-text" @click="toggleActive(item)">{{ item.is_active ? '停用' : '启用' }}</button>
+                  <button type="button" class="ops-btn ops-btn-text ops-btn--danger" @click="removeItem(item)">删除</button>
                 </div>
               </td>
             </tr>
@@ -324,568 +307,72 @@ onMounted(() => {
         </table>
       </div>
 
-      <div v-if="total > 0" class="pagination">
-        <div class="pagination-summary">
-          共 {{ total }} 条，当前显示 {{ pageStart }}-{{ pageEnd }} 条
-        </div>
-        <div class="pagination-controls">
-          <button type="button" class="pager-btn" :disabled="currentPage === 1" @click="goToPage(1)">首页</button>
-          <button type="button" class="pager-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">
-            上一页
-          </button>
-          <button
-            v-for="page in visiblePages"
-            :key="page"
-            type="button"
-            class="pager-btn"
-            :class="{ active: page === currentPage }"
-            @click="goToPage(page)"
-          >
-            {{ page }}
-          </button>
-          <button
-            type="button"
-            class="pager-btn"
-            :disabled="currentPage === totalPages"
-            @click="goToPage(currentPage + 1)"
-          >
-            下一页
-          </button>
-          <button type="button" class="pager-btn" :disabled="currentPage === totalPages" @click="goToPage(totalPages)">
-            末页
-          </button>
+      <div v-if="total > 0" class="ops-pagination">
+        <span class="ops-pagination-summary">共 {{ total }} 条，当前显示 {{ pageStart }}-{{ pageEnd }} 条</span>
+        <div class="ops-pagination-controls">
+          <button type="button" class="ops-page-btn" :disabled="currentPage === 1" @click="goToPage(1)">首页</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">上一页</button>
+          <button v-for="page in visiblePages" :key="page" type="button" class="ops-page-btn" :class="{ 'ops-page-btn--active': page === currentPage }" @click="goToPage(page)">{{ page }}</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">下一页</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === totalPages" @click="goToPage(totalPages)">末页</button>
         </div>
       </div>
     </section>
 
-    <div v-if="drawerVisible" class="modal-mask" @click="closeDrawer">
-      <section class="dict-modal" @click.stop>
-        <div class="modal-head">
-          <div>
-            <h2>{{ editingId ? '编辑筛选项' : '新增筛选项' }}</h2>
-          </div>
-          <button type="button" class="modal-close" @click="closeDrawer">关闭</button>
+    <div v-if="drawerVisible" class="ops-modal-mask" @click="closeDrawer">
+      <section class="ops-modal" @click.stop>
+        <div class="ops-modal-header">
+          <h3>{{ editingId ? '编辑筛选项' : '新增筛选项' }}</h3>
+          <button type="button" class="ops-modal-close" @click="closeDrawer">✕</button>
         </div>
-
-        <form class="dict-form" @submit.prevent="submitForm">
-          <div class="form-grid">
-            <label class="form-row">
-              <span>code</span>
-              <input v-model="form.code" required type="text" placeholder="例如：total_desc" />
-            </label>
-            <label class="form-row">
-              <span>label</span>
-              <input v-model="form.label" required type="text" placeholder="例如：总种族值降序" />
-            </label>
-            <label class="form-row">
-              <span>类型</span>
-              <select v-model="form.filter_type" @change="onFilterTypeChange">
+        <form class="ops-modal-body" @submit.prevent="submitForm">
+          <div class="ops-form-grid">
+            <div class="ops-form-item">
+              <label>code</label>
+              <input v-model="form.code" class="ops-input" required type="text" placeholder="例如：total_desc" />
+            </div>
+            <div class="ops-form-item">
+              <label>label</label>
+              <input v-model="form.label" class="ops-input" required type="text" placeholder="例如：总种族值降序" />
+            </div>
+            <div class="ops-form-item">
+              <label>类型</label>
+              <select v-model="form.filter_type" class="ops-select" @change="onFilterTypeChange">
                 <option value="shiny">shiny（异色筛选）</option>
                 <option value="sort">sort（排序）</option>
               </select>
-            </label>
-            <label class="form-row">
-              <span>显示排序</span>
-              <input v-model="form.sort_order" type="number" placeholder="同类排序，越小越靠前" />
-            </label>
-            <label class="form-row" :class="{ disabled: !isSortType }">
-              <span>排序字段</span>
-              <select v-model="form.order_by" :disabled="!isSortType">
-                <option v-for="opt in ORDER_BY_OPTIONS" :key="opt.value" :value="opt.value">
-                  {{ opt.label }}
-                </option>
+            </div>
+            <div class="ops-form-item">
+              <label>显示排序</label>
+              <input v-model="form.sort_order" class="ops-input" type="number" placeholder="越小越靠前" />
+            </div>
+            <div class="ops-form-item" :style="{ opacity: isSortType ? 1 : 0.6 }">
+              <label>排序字段</label>
+              <select v-model="form.order_by" class="ops-select" :disabled="!isSortType">
+                <option v-for="opt in ORDER_BY_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
               </select>
-            </label>
-            <label class="form-row" :class="{ disabled: !isSortType }">
-              <span>排序方向</span>
-              <select v-model="form.order_dir" :disabled="!isSortType">
+            </div>
+            <div class="ops-form-item" :style="{ opacity: isSortType ? 1 : 0.6 }">
+              <label>排序方向</label>
+              <select v-model="form.order_dir" class="ops-select" :disabled="!isSortType">
                 <option value="">（不限）</option>
                 <option value="asc">升序 asc</option>
                 <option value="desc">降序 desc</option>
               </select>
-            </label>
-            <label class="form-row form-row-checkbox">
-              <span>是否启用</span>
-              <span class="checkbox-wrap">
-                <input v-model="form.is_active" type="checkbox" />
-                <span class="checkbox-text">启用后小程序图鉴页会展示该筛选项</span>
-              </span>
-            </label>
-          </div>
-          <div class="modal-footer">
-            <div class="form-actions">
-              <button type="submit" class="btn-primary" :disabled="saving">
-                {{ saving ? '保存中...' : '保存' }}
-              </button>
-              <button type="button" class="btn-secondary" @click="closeDrawer">取消</button>
             </div>
+            <div class="ops-form-item" style="grid-column:1/-1;">
+              <label style="display:flex;align-items:center;gap:8px;">
+                <input v-model="form.is_active" type="checkbox" style="width:16px;height:16px;" />
+                <span style="color:var(--ops-text-secondary);font-size:12px;">启用后小程序图鉴页会展示该筛选项</span>
+              </label>
+            </div>
+          </div>
+          <div class="ops-modal-footer">
+            <button type="submit" class="ops-btn ops-btn-primary" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</button>
+            <button type="button" class="ops-btn ops-btn-secondary" @click="closeDrawer">取消</button>
           </div>
         </form>
       </section>
     </div>
   </div>
 </template>
-
-<style scoped>
-.ops-page {
-  display: grid;
-  gap: 16px;
-}
-
-.form-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-.query-card,
-.table-card {
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 2px;
-  padding: 16px 20px;
-}
-
-.query-row,
-.toolbar,
-.pagination,
-.pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.query-row {
-  flex-wrap: wrap;
-}
-
-.query-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.query-label,
-.dict-form label span {
-  color: #606266;
-  font-size: 13px;
-  white-space: nowrap;
-}
-
-.query-item input {
-  width: 320px;
-}
-
-.query-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: 12px;
-}
-
-input,
-select,
-textarea {
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  background: #fff;
-  color: #303133;
-  padding: 0 14px;
-  font: inherit;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-input,
-select {
-  height: 36px;
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-  outline: none;
-  border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.12);
-}
-
-.btn-primary,
-.btn-default,
-.btn-secondary {
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 2px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-}
-
-.btn-primary {
-  border: 1px solid #409eff;
-  background: #409eff;
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background: #66b1ff;
-  border-color: #66b1ff;
-}
-
-.btn-default,
-.btn-secondary {
-  border: 1px solid #dcdfe6;
-  background: #fff;
-  color: #606266;
-}
-
-.btn-default:hover,
-.btn-secondary:hover {
-  color: #409eff;
-  border-color: #c6e2ff;
-  background: #ecf5ff;
-}
-
-.toolbar {
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.toolbar-meta {
-  font-size: 13px;
-  color: #909399;
-}
-
-.table-wrap {
-  overflow: auto;
-  border: 1px solid #ebeef5;
-  border-radius: 2px;
-  background: #fff;
-}
-
-.pagination {
-  margin-top: 16px;
-  justify-content: space-between;
-  padding-top: 16px;
-  border-top: 1px solid #ebeef5;
-  flex-wrap: wrap;
-}
-
-.pagination-summary {
-  color: #606266;
-  font-size: 13px;
-}
-
-.pager-btn {
-  min-width: 36px;
-  height: 32px;
-  padding: 0 10px;
-  border: 1px solid #dcdfe6;
-  border-radius: 2px;
-  background: #fff;
-  color: #606266;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.pager-btn:hover:not(:disabled) {
-  color: #409eff;
-  border-color: #409eff;
-}
-
-.pager-btn.active {
-  background: #409eff;
-  border-color: #409eff;
-  color: #fff;
-}
-
-.pager-btn:disabled {
-  cursor: not-allowed;
-  color: #c0c4cc;
-  background: #fff;
-  border-color: #ebeef5;
-}
-
-.table-placeholder {
-  min-height: 220px;
-  border: 1px dashed #dcdfe6;
-  border-radius: 2px;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  color: var(--color-muted);
-  padding: 24px;
-}
-
-.dict-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.dict-table th,
-.dict-table td {
-  padding: 11px 14px;
-  border-bottom: 1px solid #ebeef5;
-  border-right: 1px solid #ebeef5;
-  text-align: center;
-  vertical-align: middle;
-}
-
-.dict-table th:last-child,
-.dict-table td:last-child {
-  border-right: none;
-}
-
-.dict-table thead {
-  background: #fafafa;
-}
-
-.dict-table th {
-  color: #909399;
-  font-weight: 600;
-}
-
-.dict-table tbody tr:hover {
-  background: #f5f7fa;
-}
-
-.col-index {
-  width: 70px;
-}
-
-.col-type,
-.col-dir,
-.col-sort,
-.col-status {
-  width: 100px;
-}
-
-.col-actions {
-  width: 200px;
-}
-
-.mono-cell {
-  font-family: 'Consolas', 'Menlo', 'Monaco', monospace;
-  color: #606266;
-  min-width: 160px;
-}
-
-.name-cell {
-  min-width: 160px;
-  font-weight: 600;
-  color: #303133;
-}
-
-.action-group {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  min-width: 180px;
-}
-
-.text-btn {
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: #409eff;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.text-btn:hover {
-  color: #66b1ff;
-}
-
-.text-btn.danger {
-  color: #f56c6c;
-}
-
-.text-btn.danger:hover {
-  color: #f78989;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 10px;
-  border-radius: 10px;
-  font-size: 12px;
-}
-
-.badge-on {
-  background: #ecf5ff;
-  color: #409eff;
-  border: 1px solid #d9ecff;
-}
-
-.badge-off {
-  background: #f4f4f5;
-  color: #909399;
-  border: 1px solid #e9e9eb;
-}
-
-.dict-form {
-  display: grid;
-  gap: 0;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px 20px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 90px minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-}
-
-.form-row.disabled {
-  opacity: 0.6;
-}
-
-.form-row-checkbox {
-  grid-column: 1 / -1;
-}
-
-.checkbox-wrap {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.checkbox-wrap input {
-  width: 16px;
-  height: 16px;
-  padding: 0;
-}
-
-.checkbox-text {
-  color: #909399;
-  font-size: 12px;
-}
-
-.form-row span {
-  color: #606266;
-  font-size: 13px;
-}
-
-.form-row input,
-.form-row select {
-  width: 100%;
-}
-
-.modal-footer {
-  margin-top: 20px;
-  padding-top: 4px;
-}
-
-.muted {
-  color: var(--color-muted);
-}
-
-.error {
-  color: #dc2626;
-  background: #fef0f0;
-  border: 1px solid #fde2e2;
-  border-radius: 4px;
-  padding: 10px 12px;
-}
-
-.modal-mask {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.34);
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  z-index: 1000;
-}
-
-.dict-modal {
-  width: min(100%, 720px);
-  max-height: calc(100vh - 48px);
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  padding: 0;
-  display: grid;
-  grid-template-rows: auto 1fr;
-  overflow: hidden;
-}
-
-.modal-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 18px 20px;
-}
-
-.modal-head h2 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #303133;
-}
-
-.modal-close {
-  border: none;
-  background: transparent;
-  color: #909399;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.modal-close:hover {
-  color: #409eff;
-}
-
-.dict-modal form {
-  padding: 8px 20px 20px;
-  align-content: start;
-  overflow: auto;
-}
-
-@media (max-width: 960px) {
-  .query-item {
-    width: 100%;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .query-item input {
-    width: 100%;
-  }
-
-  .query-actions {
-    margin-left: 0;
-  }
-
-  .toolbar,
-  .pagination {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .pagination-controls {
-    flex-wrap: wrap;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .dict-modal {
-    width: 100%;
-  }
-}
-</style>

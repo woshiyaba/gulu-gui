@@ -26,27 +26,32 @@ async function onSubmit() {
 </script>
 
 <template>
-  <div class="ops-login-page">
-    <div class="bg-decoration bg-decoration-a"></div>
-    <div class="bg-decoration bg-decoration-b"></div>
-    <form class="ops-login-card" @submit.prevent="onSubmit">
-      <div class="login-head">
-        <span class="badge">内部使用</span>
+  <div
+    class="ops-login-page"
+  >
+    <div class="ops-login-bg ops-login-bg-a"></div>
+    <div class="ops-login-bg ops-login-bg-b"></div>
+    <form
+      class="ops-login-card"
+      @submit.prevent="onSubmit"
+    >
+      <div class="ops-login-head">
+        <span class="ops-login-badge">内部使用</span>
         <h1>运营维护平台</h1>
       </div>
 
-      <label>
+      <label class="ops-login-field">
         <span>账号</span>
         <input v-model="username" type="text" placeholder="请输入账号" />
       </label>
 
-      <label>
+      <label class="ops-login-field">
         <span>密码</span>
         <input v-model="password" type="password" placeholder="请输入密码" />
       </label>
 
-      <p v-if="error" class="error">{{ error }}</p>
-      <button type="submit" class="submit-btn" :disabled="loading">
+      <p v-if="error" class="ops-error" style="border-radius:12px;">{{ error }}</p>
+      <button type="submit" class="ops-login-submit" :disabled="loading">
         {{ loading ? '登录中...' : '进入后台' }}
       </button>
     </form>
@@ -63,7 +68,7 @@ async function onSubmit() {
   overflow: hidden;
 }
 
-.bg-decoration {
+.ops-login-bg {
   position: absolute;
   border-radius: 999px;
   filter: blur(10px);
@@ -71,7 +76,7 @@ async function onSubmit() {
   pointer-events: none;
 }
 
-.bg-decoration-a {
+.ops-login-bg-a {
   width: 320px;
   height: 320px;
   background: rgba(37, 99, 235, 0.18);
@@ -79,7 +84,7 @@ async function onSubmit() {
   left: 8%;
 }
 
-.bg-decoration-b {
+.ops-login-bg-b {
   width: 260px;
   height: 260px;
   background: rgba(124, 147, 255, 0.2);
@@ -101,12 +106,17 @@ async function onSubmit() {
   z-index: 1;
 }
 
-.login-head {
+.ops-login-head {
   display: grid;
   gap: 8px;
 }
 
-.badge {
+.ops-login-head h1 {
+  font-size: 28px;
+  margin: 0;
+}
+
+.ops-login-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -120,20 +130,12 @@ async function onSubmit() {
   font-weight: 700;
 }
 
-h1 {
-  font-size: 28px;
-}
-
-p {
-  color: var(--color-muted);
-}
-
-label {
+.ops-login-field {
   display: grid;
   gap: 8px;
 }
 
-input {
+.ops-login-field input {
   height: 46px;
   border: 1px solid color-mix(in srgb, var(--color-border) 84%, white 16%);
   border-radius: 12px;
@@ -143,13 +145,13 @@ input {
   transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
 }
 
-input:focus {
+.ops-login-field input:focus {
   outline: none;
   border-color: var(--color-accent);
   box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
 }
 
-.submit-btn {
+.ops-login-submit {
   height: 46px;
   border: none;
   border-radius: 12px;
@@ -161,21 +163,12 @@ input:focus {
   transition: transform 0.18s ease, opacity 0.18s ease;
 }
 
-.submit-btn:hover {
+.ops-login-submit:hover {
   transform: translateY(-1px);
 }
 
-.submit-btn:disabled {
+.ops-login-submit:disabled {
   opacity: 0.7;
   cursor: wait;
 }
-
-.error {
-  color: #dc2626;
-  background: rgba(220, 38, 38, 0.08);
-  border: 1px solid rgba(220, 38, 38, 0.16);
-  border-radius: 12px;
-  padding: 10px 12px;
-}
-
 </style>

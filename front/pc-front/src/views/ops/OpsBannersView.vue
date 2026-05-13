@@ -284,31 +284,31 @@ onMounted(async () => {
 
 <template>
   <div class="ops-page">
-    <section class="table-card">
-      <div class="toolbar">
-        <button type="button" class="btn-primary" @click="openCreateDrawer">新增</button>
-        <div class="toolbar-meta">共 {{ total }} 条</div>
+    <section class="ops-card-padded">
+      <div class="ops-toolbar">
+        <button type="button" class="ops-btn ops-btn-primary" @click="openCreateDrawer">新增</button>
+        <span class="ops-toolbar-meta">共 {{ total }} 条</span>
       </div>
 
-      <p v-if="error" class="error">{{ error }}</p>
+      <p v-if="error" class="ops-error">{{ error }}</p>
 
-      <div v-if="loading" class="table-placeholder muted">加载中...</div>
-      <div v-else-if="!items.length" class="table-placeholder">
+      <div v-if="loading" class="ops-loading">加载中...</div>
+      <div v-else-if="!items.length" class="ops-empty">
         <strong>暂无数据</strong>
         <span>点击「新增」添加 Banner。</span>
       </div>
-      <div v-else class="table-wrap">
-        <table class="tbl">
+      <div v-else class="ops-table-wrap">
+        <table class="ops-table">
           <thead>
             <tr>
-              <th class="col-index">序号</th>
+              <th class="ops-col-index">序号</th>
               <th>标题</th>
               <th>图片预览</th>
               <th>跳转类型</th>
               <th>跳转阵容</th>
-              <th class="col-sort">排序</th>
+              <th class="ops-col-sort">排序</th>
               <th>状态</th>
-              <th class="col-actions">操作</th>
+              <th class="ops-col-actions">操作</th>
             </tr>
           </thead>
           <tbody>
@@ -316,21 +316,21 @@ onMounted(async () => {
               <td>{{ pageStart + index }}</td>
               <td>{{ item.title }}</td>
               <td>
-                <img v-if="item.image_url" :src="item.image_url" class="preview-img" />
-                <span v-else class="muted">无</span>
+                <img v-if="item.image_url" :src="item.image_url" style="max-width:120px;max-height:48px;border-radius:4px;object-fit:cover;" />
+                <span v-else style="color:var(--ops-muted);">无</span>
               </td>
               <td>{{ linkTypeLabel(item.link_type) }}</td>
               <td>{{ linkParamLabel(item) }}</td>
               <td>{{ item.sort_order }}</td>
               <td>
-                <span :class="item.is_active ? 'tag-active' : 'tag-inactive'">
+                <span class="ops-badge" :class="item.is_active ? 'ops-badge--success' : 'ops-badge--default'">
                   {{ item.is_active ? '启用' : '禁用' }}
                 </span>
               </td>
               <td>
-                <div class="action-group">
-                  <button type="button" class="text-btn" @click="editItem(item)">修改</button>
-                  <button v-if="isAdmin" type="button" class="text-btn danger" @click="removeItem(item)">删除</button>
+                <div class="ops-action-group">
+                  <button type="button" class="ops-btn ops-btn-text" @click="editItem(item)">修改</button>
+                  <button v-if="isAdmin" type="button" class="ops-btn ops-btn-text ops-btn--danger" @click="removeItem(item)">删除</button>
                 </div>
               </td>
             </tr>
@@ -338,62 +338,60 @@ onMounted(async () => {
         </table>
       </div>
 
-      <div v-if="total > 0" class="pagination">
-        <div class="pagination-summary">
-          共 {{ total }} 条，当前显示 {{ pageStart }}-{{ pageEnd }} 条
-        </div>
-        <div class="pagination-controls">
-          <button type="button" class="pager-btn" :disabled="currentPage === 1" @click="goToPage(1)">首页</button>
-          <button type="button" class="pager-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">上一页</button>
+      <div v-if="total > 0" class="ops-pagination">
+        <span class="ops-pagination-summary">共 {{ total }} 条，当前显示 {{ pageStart }}-{{ pageEnd }} 条</span>
+        <div class="ops-pagination-controls">
+          <button type="button" class="ops-page-btn" :disabled="currentPage === 1" @click="goToPage(1)">首页</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">上一页</button>
           <button
             v-for="page in visiblePages"
             :key="page"
             type="button"
-            class="pager-btn"
-            :class="{ active: page === currentPage }"
+            class="ops-page-btn"
+            :class="{ 'ops-page-btn--active': page === currentPage }"
             @click="goToPage(page)"
           >
             {{ page }}
           </button>
-          <button type="button" class="pager-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">下一页</button>
-          <button type="button" class="pager-btn" :disabled="currentPage === totalPages" @click="goToPage(totalPages)">末页</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">下一页</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === totalPages" @click="goToPage(totalPages)">末页</button>
         </div>
       </div>
     </section>
 
-    <div v-if="drawerVisible" class="modal-mask" @click="closeDrawer">
-      <section class="modal" @click.stop>
-        <div class="modal-head">
-          <h2>{{ editingId ? '编辑Banner' : '新增Banner' }}</h2>
-          <button type="button" class="modal-close" @click="closeDrawer">关闭</button>
+    <div v-if="drawerVisible" class="ops-modal-mask" @click="closeDrawer">
+      <section class="ops-modal" @click.stop>
+        <div class="ops-modal-header">
+          <h3>{{ editingId ? '编辑Banner' : '新增Banner' }}</h3>
+          <button type="button" class="ops-modal-close" @click="closeDrawer">✕</button>
         </div>
 
-        <form class="modal-body" @submit.prevent="submitForm">
-          <div class="form-grid">
-            <label class="form-row">
+        <form class="ops-modal-body" @submit.prevent="submitForm">
+          <div class="ops-form-grid">
+            <label class="ops-form-row">
               <span>标题</span>
-              <input v-model="form.title" type="text" placeholder="Banner标题" />
+              <input v-model="form.title" class="ops-input" type="text" placeholder="Banner标题" />
             </label>
-            <label class="form-row">
+            <label class="ops-form-row">
               <span>图片URL</span>
-              <input v-model="form.image_url" required type="text" placeholder="Banner图片地址" />
+              <input v-model="form.image_url" class="ops-input" required type="text" placeholder="Banner图片地址" />
             </label>
-            <label class="form-row">
+            <label class="ops-form-row">
               <span>跳转类型</span>
-              <select v-model="form.link_type">
+              <select v-model="form.link_type" class="ops-select">
                 <option value="">不跳转</option>
                 <option v-for="opt in lineupTypeOptions" :key="opt.code" :value="opt.code">
                   {{ opt.label }}
                 </option>
               </select>
             </label>
-            <label class="form-row">
+            <label class="ops-form-row">
               <span>排序</span>
-              <input v-model="form.sort_order" type="number" placeholder="排序值" />
+              <input v-model="form.sort_order" class="ops-input" type="number" placeholder="排序值" />
             </label>
-            <label class="form-row">
+            <label class="ops-form-row">
               <span>状态</span>
-              <select v-model="form.is_active">
+              <select v-model="form.is_active" class="ops-select">
                 <option :value="true">启用</option>
                 <option :value="false">禁用</option>
               </select>
@@ -401,31 +399,41 @@ onMounted(async () => {
           </div>
 
           <!-- 阵容选择区域 -->
-          <div v-if="hasLinkType" class="lineup-selector">
-            <div class="lineup-selector-head">
-              <span class="lineup-selector-label">
+          <div v-if="hasLinkType" style="margin-top:18px;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);padding:14px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+              <span style="font-size:13px;font-weight:600;color:var(--ops-text);">
                 选择阵容{{ isMultiMode ? '（可多选）' : '' }}
               </span>
-              <span v-if="selectedLineupIds.length > 0" class="lineup-selector-count">
+              <span v-if="selectedLineupIds.length > 0" style="font-size:12px;color:var(--ops-accent);">
                 已选 {{ selectedLineupIds.length }} 条
               </span>
             </div>
 
-            <div v-if="lineupLoading" class="lineup-loading">加载阵容中...</div>
-            <div v-else-if="lineupOptions.length === 0" class="lineup-empty">
+            <div v-if="lineupLoading" style="text-align:center;padding:16px 0;color:var(--ops-muted);font-size:13px;">加载阵容中...</div>
+            <div v-else-if="lineupOptions.length === 0" style="text-align:center;padding:16px 0;color:var(--ops-muted);font-size:13px;">
               该类型暂无阵容数据
             </div>
-            <div v-else class="lineup-list">
+            <div v-else style="max-height:240px;overflow:auto;display:flex;flex-direction:column;gap:4px;">
               <div
                 v-for="lineup in lineupOptions"
                 :key="lineup.id"
-                class="lineup-item"
-                :class="{ selected: isLineupSelected(lineup.id) }"
+                :style="{
+                  display:'flex',alignItems:'center',gap:'8px',padding:'8px 12px',borderRadius:'4px',cursor:'pointer',
+                  background: isLineupSelected(lineup.id) ? 'var(--ops-accent-light)' : 'transparent',
+                  border: isLineupSelected(lineup.id) ? '1px solid var(--ops-accent)' : '1px solid transparent',
+                }"
                 @click="toggleLineupSelection(lineup.id)"
               >
-                <span class="lineup-check">{{ isLineupSelected(lineup.id) ? '✓' : '' }}</span>
-                <span class="lineup-title">{{ lineup.title || `阵容#${lineup.id}` }}</span>
-                <span class="lineup-meta">
+                <span :style="{
+                  width:'18px',height:'18px',border:'1px solid var(--ops-border)',borderRadius:'3px',
+                  display:'flex',alignItems:'center',justifyContent:'center',fontSize:'12px',
+                  background: isLineupSelected(lineup.id) ? 'var(--ops-accent)' : 'transparent',
+                  borderColor: isLineupSelected(lineup.id) ? 'var(--ops-accent)' : 'var(--ops-border)',
+                  color: isLineupSelected(lineup.id) ? '#fff' : 'transparent',
+                  flexShrink:0,
+                }">{{ isLineupSelected(lineup.id) ? '✓' : '' }}</span>
+                <span style="font-size:13px;color:var(--ops-text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ lineup.title || `阵容#${lineup.id}` }}</span>
+                <span style="font-size:12px;color:var(--ops-muted);flex-shrink:0;">
                   {{ lineup.member_count }}只 · 排序{{ lineup.sort_order }}
                   <template v-if="!lineup.is_active"> · 已禁用</template>
                 </span>
@@ -433,483 +441,16 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div v-if="form.image_url" class="preview-section">
-            <span class="preview-label">图片预览</span>
-            <img :src="form.image_url" class="preview-large" />
+          <div v-if="form.image_url" style="margin-top:18px;">
+            <span style="display:block;font-size:13px;color:var(--ops-text-secondary);margin-bottom:8px;">图片预览</span>
+            <img :src="form.image_url" style="max-width:100%;max-height:200px;border-radius:4px;border:1px solid var(--ops-border);" />
           </div>
-          <div class="modal-footer">
-            <div class="form-actions">
-              <button type="submit" class="btn-primary" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</button>
-              <button type="button" class="btn-secondary" @click="closeDrawer">取消</button>
-            </div>
+          <div class="ops-modal-footer" style="margin-top:20px;">
+            <button type="submit" class="ops-btn ops-btn-primary" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</button>
+            <button type="button" class="ops-btn ops-btn-secondary" @click="closeDrawer">取消</button>
           </div>
         </form>
       </section>
     </div>
   </div>
 </template>
-
-<style scoped>
-.ops-page {
-  display: grid;
-  gap: 16px;
-}
-
-.table-card {
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 2px;
-  padding: 16px 20px;
-}
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.toolbar-meta {
-  font-size: 13px;
-  color: #909399;
-}
-
-.form-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-.btn-primary,
-.btn-secondary {
-  height: 36px;
-  padding: 0 14px;
-  border-radius: 2px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-}
-
-.btn-primary {
-  border: 1px solid #409eff;
-  background: #409eff;
-  color: #fff;
-}
-
-.btn-primary:hover {
-  background: #66b1ff;
-  border-color: #66b1ff;
-}
-
-.btn-secondary {
-  border: 1px solid #dcdfe6;
-  background: #fff;
-  color: #606266;
-}
-
-.btn-secondary:hover {
-  color: #409eff;
-  border-color: #c6e2ff;
-  background: #ecf5ff;
-}
-
-.table-wrap {
-  overflow: auto;
-  border: 1px solid #ebeef5;
-  border-radius: 2px;
-}
-
-.tbl {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.tbl th,
-.tbl td {
-  padding: 11px 14px;
-  border-bottom: 1px solid #ebeef5;
-  border-right: 1px solid #ebeef5;
-  text-align: center;
-  vertical-align: middle;
-}
-
-.tbl th:last-child,
-.tbl td:last-child {
-  border-right: none;
-}
-
-.tbl thead {
-  background: #fafafa;
-}
-
-.tbl th {
-  color: #909399;
-  font-weight: 600;
-}
-
-.tbl tbody tr:hover {
-  background: #f5f7fa;
-}
-
-.col-index {
-  width: 60px;
-}
-
-.col-sort {
-  width: 70px;
-}
-
-.col-actions {
-  width: 140px;
-}
-
-.preview-img {
-  max-width: 120px;
-  max-height: 48px;
-  border-radius: 4px;
-  object-fit: cover;
-}
-
-.tag-active {
-  color: #67c23a;
-  font-size: 13px;
-}
-
-.tag-inactive {
-  color: #909399;
-  font-size: 13px;
-}
-
-.action-group {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-}
-
-.text-btn {
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: #409eff;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.text-btn:hover {
-  color: #66b1ff;
-}
-
-.text-btn.danger {
-  color: #f56c6c;
-}
-
-.text-btn.danger:hover {
-  color: #f78989;
-}
-
-.pagination {
-  margin-top: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 16px;
-  border-top: 1px solid #ebeef5;
-  flex-wrap: wrap;
-}
-
-.pagination-summary {
-  color: #606266;
-  font-size: 13px;
-}
-
-.pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.pager-btn {
-  min-width: 36px;
-  height: 32px;
-  padding: 0 10px;
-  border: 1px solid #dcdfe6;
-  border-radius: 2px;
-  background: #fff;
-  color: #606266;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.pager-btn:hover:not(:disabled) {
-  color: #409eff;
-  border-color: #409eff;
-}
-
-.pager-btn.active {
-  background: #409eff;
-  border-color: #409eff;
-  color: #fff;
-}
-
-.pager-btn:disabled {
-  cursor: not-allowed;
-  color: #c0c4cc;
-  border-color: #ebeef5;
-}
-
-.table-placeholder {
-  min-height: 220px;
-  border: 1px dashed #dcdfe6;
-  border-radius: 2px;
-  display: grid;
-  place-items: center;
-  text-align: center;
-  color: #909399;
-  padding: 24px;
-}
-
-.muted {
-  color: #909399;
-}
-
-.error {
-  color: #dc2626;
-  background: #fef0f0;
-  border: 1px solid #fde2e2;
-  border-radius: 4px;
-  padding: 10px 12px;
-  margin-bottom: 12px;
-}
-
-input,
-select {
-  height: 36px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  background: #fff;
-  color: #303133;
-  padding: 0 14px;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-}
-
-input:focus,
-select:focus {
-  outline: none;
-  border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.12);
-}
-
-.modal-mask {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.34);
-  display: grid;
-  place-items: center;
-  padding: 24px;
-  z-index: 1000;
-}
-
-.modal {
-  width: min(100%, 640px);
-  max-height: calc(100vh - 48px);
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  display: grid;
-  grid-template-rows: auto 1fr;
-  overflow: hidden;
-}
-
-.modal-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 18px 20px;
-}
-
-.modal-head h2 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #303133;
-}
-
-.modal-close {
-  border: none;
-  background: transparent;
-  color: #909399;
-  cursor: pointer;
-  font-size: 13px;
-}
-
-.modal-close:hover {
-  color: #409eff;
-}
-
-.modal-body {
-  padding: 8px 20px 20px;
-  overflow: auto;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px 20px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
-  align-items: center;
-  gap: 10px;
-}
-
-.form-row span {
-  color: #606266;
-  font-size: 13px;
-}
-
-.form-row input,
-.form-row select {
-  width: 100%;
-}
-
-/* 阵容选择器 */
-.lineup-selector {
-  margin-top: 18px;
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
-  padding: 14px;
-}
-
-.lineup-selector-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-}
-
-.lineup-selector-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #303133;
-}
-
-.lineup-selector-count {
-  font-size: 12px;
-  color: #409eff;
-}
-
-.lineup-loading,
-.lineup-empty {
-  text-align: center;
-  padding: 16px 0;
-  color: #909399;
-  font-size: 13px;
-}
-
-.lineup-list {
-  max-height: 240px;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.lineup-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-}
-
-.lineup-item:hover {
-  background: #f5f7fa;
-}
-
-.lineup-item.selected {
-  background: #ecf5ff;
-  border: 1px solid #b3d8ff;
-}
-
-.lineup-check {
-  width: 18px;
-  height: 18px;
-  border: 1px solid #dcdfe6;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  color: #409eff;
-  flex-shrink: 0;
-}
-
-.lineup-item.selected .lineup-check {
-  background: #409eff;
-  border-color: #409eff;
-  color: #fff;
-}
-
-.lineup-title {
-  font-size: 13px;
-  color: #303133;
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.lineup-meta {
-  font-size: 12px;
-  color: #909399;
-  flex-shrink: 0;
-}
-
-.preview-section {
-  margin-top: 18px;
-}
-
-.preview-label {
-  display: block;
-  font-size: 13px;
-  color: #606266;
-  margin-bottom: 8px;
-}
-
-.preview-large {
-  max-width: 100%;
-  max-height: 200px;
-  border-radius: 4px;
-  border: 1px solid #ebeef5;
-}
-
-.modal-footer {
-  margin-top: 20px;
-  padding-top: 4px;
-}
-
-@media (max-width: 960px) {
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-
-  .modal {
-    width: 100%;
-  }
-}
-</style>

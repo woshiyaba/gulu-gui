@@ -629,78 +629,78 @@ onMounted(async () => {
 
 <template>
   <div class="ops-page">
-    <section class="query-card">
-      <div class="query-row">
-        <label class="query-item">
-          <span class="query-label">阵容标题</span>
-          <input v-model="keyword" type="text" placeholder="请输入阵容标题" @keyup.enter="search" />
+    <section class="ops-card-padded">
+      <div class="ops-filter-bar" style="align-items:flex-end;flex-wrap:wrap;">
+        <label class="ops-form-item" style="min-width:200px;">
+          <span class="ops-filter-label">阵容标题</span>
+          <input v-model="keyword" class="ops-input" type="text" placeholder="请输入阵容标题" @keyup.enter="search" />
         </label>
-        <label class="query-item">
-          <span class="query-label">分类</span>
-          <select v-model="sourceTypeFilter">
+        <label class="ops-form-item" style="min-width:160px;">
+          <span class="ops-filter-label">分类</span>
+          <select v-model="sourceTypeFilter" class="ops-select">
             <option value="">全部</option>
             <option v-for="opt in lineupTypeOptions" :key="opt.id" :value="opt.code">{{ opt.label }}</option>
           </select>
         </label>
-        <label class="query-item">
-          <span class="query-label">状态</span>
-          <select v-model="isActiveFilter">
+        <label class="ops-form-item" style="min-width:160px;">
+          <span class="ops-filter-label">状态</span>
+          <select v-model="isActiveFilter" class="ops-select">
             <option value="">全部</option>
             <option value="true">启用</option>
             <option value="false">禁用</option>
           </select>
         </label>
-        <div class="query-actions">
-          <button type="button" class="btn-primary" @click="search">搜索</button>
-          <button type="button" class="btn-default" @click="resetFilters">重置</button>
+        <div class="ops-filter-actions">
+          <button type="button" class="ops-btn ops-btn-primary" @click="search">搜索</button>
+          <button type="button" class="ops-btn ops-btn-secondary" @click="resetFilters">重置</button>
         </div>
       </div>
     </section>
 
-    <section class="table-card">
-      <div class="toolbar">
-        <button type="button" class="btn-primary" @click="openCreateDrawer">新增</button>
-        <div class="toolbar-meta">共 {{ total }} 条</div>
+    <section class="ops-card-padded">
+      <div class="ops-toolbar">
+        <button type="button" class="ops-btn ops-btn-primary" @click="openCreateDrawer">新增</button>
+        <span class="ops-toolbar-meta">共 {{ total }} 条</span>
       </div>
 
-      <p v-if="error" class="error">{{ error }}</p>
+      <p v-if="error" class="ops-error">{{ error }}</p>
 
-      <div v-if="loading" class="table-placeholder muted">加载中...</div>
-      <div v-else-if="!items.length" class="table-placeholder">
+      <div v-if="loading" class="ops-loading">加载中...</div>
+      <div v-else-if="!items.length" class="ops-empty">
         <strong>暂无数据</strong>
         <span>请调整查询条件后重试，或新增阵容。</span>
       </div>
-      <div v-else class="table-wrap">
-        <table class="tbl">
+      <div v-else class="ops-table-wrap">
+        <table class="ops-table">
           <thead>
             <tr>
-              <th class="col-index">序号</th>
+              <th class="ops-col-index">序号</th>
               <th>标题</th>
               <th>分类</th>
               <th>共鸣魔法</th>
               <th>成员数</th>
-              <th>排序</th>
+              <th class="ops-col-sort">排序</th>
               <th>状态</th>
-              <th class="col-actions">操作</th>
+              <th class="ops-col-actions">操作</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="(item, index) in items" :key="item.id">
               <td>{{ pageStart + index }}</td>
-              <td class="label-cell">{{ item.title || '-' }}</td>
+              <td style="font-weight:500;color:var(--ops-text);">{{ item.title || '-' }}</td>
               <td>{{ sourceTypeLabel(item.source_type) }}</td>
               <td>{{ item.resonance_magic_name || '-' }}</td>
               <td>{{ item.member_count }}</td>
               <td>{{ item.sort_order }}</td>
               <td>
-                <span :class="item.is_active ? 'tag-active' : 'tag-inactive'">
+                <span class="ops-badge" :class="item.is_active ? 'ops-badge--success' : 'ops-badge--default'">
                   {{ item.is_active ? '启用' : '禁用' }}
                 </span>
               </td>
               <td>
-                <div class="action-group">
-                  <button type="button" class="text-btn" @click="editItem(item)">修改</button>
-                  <button v-if="isAdmin" type="button" class="text-btn danger" @click="removeItem(item)">删除</button>
+                <div class="ops-action-group">
+                  <button type="button" class="ops-btn ops-btn-text" @click="editItem(item)">修改</button>
+                  <button v-if="isAdmin" type="button" class="ops-btn ops-btn-text ops-btn--danger" @click="removeItem(item)">删除</button>
                 </div>
               </td>
             </tr>
@@ -708,118 +708,133 @@ onMounted(async () => {
         </table>
       </div>
 
-      <div v-if="total > 0" class="pagination">
-        <div class="pagination-summary">共 {{ total }} 条，当前显示 {{ pageStart }}-{{ pageEnd }} 条</div>
-        <div class="pagination-controls">
-          <button type="button" class="pager-btn" :disabled="currentPage === 1" @click="goToPage(1)">首页</button>
-          <button type="button" class="pager-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">上一页</button>
+      <div v-if="total > 0" class="ops-pagination">
+        <span class="ops-pagination-summary">共 {{ total }} 条，当前显示 {{ pageStart }}-{{ pageEnd }} 条</span>
+        <div class="ops-pagination-controls">
+          <button type="button" class="ops-page-btn" :disabled="currentPage === 1" @click="goToPage(1)">首页</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">上一页</button>
           <button
             v-for="page in visiblePages"
             :key="page"
             type="button"
-            class="pager-btn"
-            :class="{ active: page === currentPage }"
+            class="ops-page-btn"
+            :class="{ 'ops-page-btn--active': page === currentPage }"
             @click="goToPage(page)"
           >{{ page }}</button>
-          <button type="button" class="pager-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">下一页</button>
-          <button type="button" class="pager-btn" :disabled="currentPage === totalPages" @click="goToPage(totalPages)">末页</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">下一页</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === totalPages" @click="goToPage(totalPages)">末页</button>
         </div>
       </div>
     </section>
 
-    <div v-if="drawerVisible" class="modal-mask">
-      <section class="modal" @click.stop>
-        <div class="modal-head">
-          <h2>{{ editingId ? '编辑精灵阵容' : '新增精灵阵容' }}</h2>
-          <button type="button" class="modal-close" @click="closeDrawer">关闭</button>
+    <div v-if="drawerVisible" class="ops-modal-mask" @click="closeDrawer">
+      <section class="ops-modal" @click.stop>
+        <div class="ops-modal-header">
+          <h3>{{ editingId ? '编辑精灵阵容' : '新增精灵阵容' }}</h3>
+          <button type="button" class="ops-modal-close" @click="closeDrawer">✕</button>
         </div>
 
-        <form class="modal-body" @submit.prevent>
-          <div class="form-grid">
-            <label class="form-row">
+        <form class="ops-modal-body" @submit.prevent>
+          <div
+            style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 20px;"
+          >
+            <label class="ops-form-item" style="gap:6px;">
               <span>标题</span>
-              <input v-model="form.title" required type="text" maxlength="50" placeholder="请输入阵容标题" />
+              <input v-model="form.title" class="ops-input" required type="text" maxlength="50" placeholder="请输入阵容标题" />
             </label>
-            <label class="form-row">
+            <label class="ops-form-item" style="gap:6px;">
               <span>分类</span>
-              <select v-model="form.source_type" @change="onLineupSourceTypeChange">
+              <select v-model="form.source_type" class="ops-select" @change="onLineupSourceTypeChange">
                 <option value="">未设置</option>
                 <option v-for="opt in lineupTypeOptions" :key="opt.id" :value="opt.code">{{ opt.label }}</option>
               </select>
             </label>
-            <label class="form-row">
+            <label class="ops-form-item" style="gap:6px;">
               <span>排序</span>
-              <input v-model.number="form.sort_order" type="number" min="1" placeholder="默认 1" />
+              <input v-model.number="form.sort_order" class="ops-input" type="number" min="1" placeholder="默认 1" />
             </label>
-            <label class="form-row">
+            <label class="ops-form-item" style="gap:6px;">
               <span>共鸣</span>
-              <select v-model="form.resonance_magic_id">
+              <select v-model="form.resonance_magic_id" class="ops-select">
                 <option :value="null">未设置</option>
                 <option v-for="opt in resonanceMagicOptions" :key="opt.id" :value="opt.id">{{ opt.name }}</option>
               </select>
             </label>
-            <label class="form-row">
+            <label class="ops-form-item" style="gap:6px;">
               <span>状态</span>
-              <select v-model="form.is_active">
+              <select v-model="form.is_active" class="ops-select">
                 <option :value="true">启用</option>
                 <option :value="false">禁用</option>
               </select>
             </label>
           </div>
 
-          <div class="section-title">
-            <span>阵容成员</span>
-            <span v-if="requiresSixSlotsLineup" class="section-hint">闪耀大赛须固定 6 只精灵</span>
+          <div
+            style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;margin-bottom:12px;"
+          >
+            <span style="font-size:14px;font-weight:600;color:var(--ops-text);">阵容成员</span>
+            <span v-if="requiresSixSlotsLineup" style="flex:1;margin-left:12px;font-size:12px;font-weight:normal;color:var(--ops-muted);">闪耀大赛须固定 6 只精灵</span>
             <button
               v-if="!requiresSixSlotsLineup && form.members.length < 6"
               type="button"
-              class="btn-small"
+              class="ops-btn ops-btn-sm ops-btn-primary"
               @click="addMember"
             >+ 添加精灵</button>
           </div>
 
-          <div v-for="(member, mi) in form.members" :key="mi" class="pet-card">
-            <div class="pet-header">
-              <div class="pet-header-left">
-                <div class="pet-avatar">
-                  <img v-if="member.pokemon_image" :src="member.pokemon_image" alt="" />
+          <div
+            v-for="(member, mi) in form.members"
+            :key="mi"
+            style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);padding:14px 16px;margin-bottom:12px;background:var(--ops-bg);"
+          >
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:40px;height:40px;border-radius:4px;background:var(--ops-surface);border:1px solid var(--ops-border);display:grid;place-items:center;overflow:hidden;font-size:12px;color:var(--ops-muted);">
+                  <img v-if="member.pokemon_image" :src="member.pokemon_image" style="width:100%;height:100%;object-fit:contain;" alt="" />
                   <span v-else>#{{ mi + 1 }}</span>
                 </div>
-                <div class="pet-title">
-                  <strong>{{ member.pokemon_name || randomPkLabel(member) || `精灵 ${mi + 1}` }}</strong>
-                  <small>第 {{ mi + 1 }} 只</small>
+                <div style="display:grid;gap:2px;">
+                  <strong style="font-size:14px;color:var(--ops-text);">{{ member.pokemon_name || randomPkLabel(member) || `精灵 ${mi + 1}` }}</strong>
+                  <small style="font-size:12px;color:var(--ops-muted);">第 {{ mi + 1 }} 只</small>
                 </div>
               </div>
               <button
                 v-if="!requiresSixSlotsLineup && form.members.length > 1"
                 type="button"
-                class="text-btn danger"
+                class="ops-btn ops-btn-text ops-btn--danger"
                 @click="removeMember(mi)"
               >移除</button>
             </div>
 
-            <div class="pet-grid">
-              <div class="form-row search-field">
+            <div
+              style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 20px;margin-top:12px;"
+            >
+              <div class="ops-form-row" style="position:relative;grid-template-columns:1fr;gap:6px;">
                 <span>精灵</span>
-                <div v-if="member.pokemon_id || member.random_pk_dict_id !== null" class="selected-item">
-                  <img v-if="member.pokemon_image" :src="member.pokemon_image" class="selected-img" alt="" />
-                  <span>{{ member.pokemon_name || randomPkLabel(member) }}</span>
-                  <button type="button" class="clear-btn" @click="clearPokemon(mi)">&times;</button>
+                <div v-if="member.pokemon_id || member.random_pk_dict_id !== null" style="display:inline-flex;align-items:center;gap:8px;padding:4px 10px;background:var(--ops-accent-light);border:1px solid color-mix(in srgb, var(--ops-accent) 30%, transparent);border-radius:4px;font-size:13px;color:var(--ops-accent);max-width:100%;">
+                  <img v-if="member.pokemon_image" :src="member.pokemon_image" style="width:24px;height:24px;border-radius:4px;object-fit:contain;background:var(--ops-surface);" alt="" />
+                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ member.pokemon_name || randomPkLabel(member) }}</span>
+                  <button type="button" style="border:none;background:transparent;color:var(--ops-muted);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;" @click="clearPokemon(mi)">&times;</button>
                 </div>
-                <div v-else class="search-input-wrap">
+                <div v-else style="position:relative;">
                   <input
                     v-model="pokemonSearchKeyword[mi]"
+                    class="ops-input"
                     type="text"
                     placeholder="搜索精灵或选择随机项..."
+                    style="width:100%;height:32px;"
                     @input="onPokemonSearchInput(mi)"
                     @focus="openPokemonDropdown(mi)"
                     @blur="hidePokemonSearch(mi)"
                   />
-                  <div v-if="pokemonSearchVisible[mi]" class="dropdown">
+                  <div
+                    v-if="pokemonSearchVisible[mi]"
+                    style="position:absolute;top:100%;left:0;right:0;background:var(--ops-surface);border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);box-shadow:0 4px 12px rgba(0,0,0,0.1);max-height:220px;overflow:auto;z-index:10;"
+                  >
                     <div
                       v-for="opt in randomPkModesForInput(pokemonSearchKeyword[mi] || '')"
                       :key="`rand-${opt.id}`"
-                      class="dropdown-item dropdown-item-random"
+                      style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:#e6a23c;"
                       @mousedown.prevent="pickRandomPkOption(mi, opt)"
                     >
                       <span>{{ opt.label }}</span>
@@ -828,10 +843,11 @@ onMounted(async () => {
                       <div
                         v-for="opt in pokemonSearchResults[mi]"
                         :key="opt.id"
-                        class="dropdown-item"
+                        class="ops-dd-hover"
+                        style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--ops-text);"
                         @mousedown.prevent="selectPokemon(mi, opt)"
                       >
-                        <img v-if="opt.image" :src="opt.image" class="dropdown-img" alt="" />
+                        <img v-if="opt.image" :src="opt.image" style="width:28px;height:28px;border-radius:4px;object-fit:contain;background:var(--ops-surface);" alt="" />
                         <span>{{ opt.name }}</span>
                       </div>
                     </template>
@@ -841,7 +857,7 @@ onMounted(async () => {
                           && (!(pokemonSearchKeyword[mi] || '').trim()
                             || !(pokemonSearchResults[mi]?.length))
                       "
-                      class="dropdown-item dropdown-hint"
+                      style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:default;font-size:12px;color:var(--ops-muted);"
                     >
                       {{
                         !(pokemonSearchKeyword[mi] || '').trim()
@@ -852,16 +868,16 @@ onMounted(async () => {
                   </div>
                 </div>
               </div>
-              <label class="form-row">
+              <label class="ops-form-row" style="grid-template-columns:1fr;gap:6px;">
                 <span>血脉</span>
-                <select v-model="member.bloodline_dict_id">
+                <select v-model="member.bloodline_dict_id" class="ops-select">
                   <option :value="null">未设置</option>
                   <option v-for="opt in bloodlineOptions" :key="opt.id" :value="opt.id">{{ opt.label }}</option>
                 </select>
               </label>
-              <label class="form-row">
+              <label class="ops-form-row" style="grid-template-columns:1fr;gap:6px;">
                 <span>性格</span>
-                <select v-model="member.personality_id" class="personality-select">
+                <select v-model="member.personality_id" class="ops-select">
                   <option :value="null">未设置</option>
                   <option
                     v-for="opt in personalityOptions"
@@ -875,48 +891,55 @@ onMounted(async () => {
               </label>
             </div>
 
-            <div class="section-subtitle">三项资质</div>
-            <div class="quality-grid">
-              <select v-model="member.qual_1">
+            <div style="margin:14px 0 8px;font-size:13px;font-weight:600;color:var(--ops-text-secondary);">三项资质</div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;">
+              <select v-model="member.qual_1" class="ops-select">
                 <option value="">未设置</option>
                 <option v-for="opt in statOptions" :key="`q1-${opt.value}`" :value="opt.value">{{ opt.label }}</option>
               </select>
-              <select v-model="member.qual_2">
+              <select v-model="member.qual_2" class="ops-select">
                 <option value="">未设置</option>
                 <option v-for="opt in statOptions" :key="`q2-${opt.value}`" :value="opt.value">{{ opt.label }}</option>
               </select>
-              <select v-model="member.qual_3">
+              <select v-model="member.qual_3" class="ops-select">
                 <option value="">未设置</option>
                 <option v-for="opt in statOptions" :key="`q3-${opt.value}`" :value="opt.value">{{ opt.label }}</option>
               </select>
             </div>
-            <div class="section-subtitle">技能配置</div>
-            <div class="pet-skills">
-              <div v-for="si in 4" :key="si" class="form-row search-field skill-field">
+
+            <div style="margin:14px 0 8px;font-size:13px;font-weight:600;color:var(--ops-text-secondary);">技能配置</div>
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;">
+              <div v-for="si in 4" :key="si" class="ops-form-row" style="position:relative;grid-template-columns:1fr;gap:6px;margin-bottom:0;">
                 <span>技能{{ si }}</span>
-                <div v-if="member.skills[si - 1]?.id" class="selected-item">
-                  <img v-if="member.skills[si - 1]?.image" :src="member.skills[si - 1]?.image" class="selected-img" alt="" />
-                  <span>{{ member.skills[si - 1]!.name }}</span>
-                  <button type="button" class="clear-btn" @click="clearSkill(mi, si - 1)">&times;</button>
+                <div v-if="member.skills[si - 1]?.id" style="display:inline-flex;align-items:center;gap:8px;padding:4px 10px;background:var(--ops-accent-light);border:1px solid color-mix(in srgb, var(--ops-accent) 30%, transparent);border-radius:4px;font-size:13px;color:var(--ops-accent);max-width:100%;">
+                  <img v-if="member.skills[si - 1]?.image" :src="member.skills[si - 1]?.image" style="width:24px;height:24px;border-radius:4px;object-fit:contain;background:var(--ops-surface);" alt="" />
+                  <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ member.skills[si - 1]!.name }}</span>
+                  <button type="button" style="border:none;background:transparent;color:var(--ops-muted);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;" @click="clearSkill(mi, si - 1)">&times;</button>
                 </div>
-                <div v-else class="search-input-wrap">
+                <div v-else style="position:relative;">
                   <input
                     v-model="skillSearchKeyword[skillKey(mi, si - 1)]"
+                    class="ops-input"
                     type="text"
                     :placeholder="member.pokemon_id ? '搜索技能...' : '请先选择精灵'"
                     :disabled="!member.pokemon_id"
+                    style="width:100%;height:32px;"
                     @input="onSkillSearchInput(mi, si - 1)"
                     @focus="onSkillSearchInput(mi, si - 1)"
                     @blur="hideSkillSearch(mi, si - 1)"
                   />
-                  <div v-if="skillSearchVisible[skillKey(mi, si - 1)] && skillSearchResults[skillKey(mi, si - 1)]?.length" class="dropdown">
+                  <div
+                    v-if="skillSearchVisible[skillKey(mi, si - 1)] && skillSearchResults[skillKey(mi, si - 1)]?.length"
+                    style="position:absolute;top:100%;left:0;right:0;background:var(--ops-surface);border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);box-shadow:0 4px 12px rgba(0,0,0,0.1);max-height:220px;overflow:auto;z-index:10;"
+                  >
                     <div
                       v-for="opt in skillSearchResults[skillKey(mi, si - 1)]"
                       :key="opt.id"
-                      class="dropdown-item"
+                      class="ops-dd-hover"
+                      style="display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:13px;color:var(--ops-text);"
                       @mousedown.prevent="selectSkill(mi, si - 1, opt)"
                     >
-                      <img v-if="opt.image" :src="opt.image" class="dropdown-img" alt="" />
+                      <img v-if="opt.image" :src="opt.image" style="width:28px;height:28px;border-radius:4px;object-fit:contain;background:var(--ops-surface);" alt="" />
                       <span>{{ opt.name }}</span>
                     </div>
                   </div>
@@ -924,18 +947,32 @@ onMounted(async () => {
               </div>
             </div>
 
-            <div class="section-subtitle">成员说明</div>
-            <textarea v-model="member.member_desc" rows="3" class="desc-textarea" placeholder="请输入该精灵的补充说明..."></textarea>
+            <div style="margin:14px 0 8px;font-size:13px;font-weight:600;color:var(--ops-text-secondary);">成员说明</div>
+            <textarea
+              v-model="member.member_desc"
+              class="ops-input"
+              rows="3"
+              style="width:100%;height:auto;min-height:72px;padding:10px 14px;resize:vertical;"
+              placeholder="请输入该精灵的补充说明..."
+            ></textarea>
           </div>
 
-          <div class="section-title"><span>阵容说明</span></div>
-          <textarea v-model="form.lineup_desc" rows="5" class="desc-textarea" placeholder="请输入整体阵容说明..."></textarea>
+          <div
+            style="display:flex;align-items:center;justify-content:space-between;margin-top:24px;margin-bottom:8px;"
+          >
+            <span style="font-size:14px;font-weight:600;color:var(--ops-text);">阵容说明</span>
+          </div>
+          <textarea
+            v-model="form.lineup_desc"
+            class="ops-input"
+            rows="5"
+            style="width:100%;height:auto;min-height:100px;padding:10px 14px;resize:vertical;"
+            placeholder="请输入整体阵容说明..."
+          ></textarea>
 
-          <div class="modal-footer">
-            <div class="form-actions">
-              <button type="button" class="btn-primary" :disabled="saving" @click="submitForm">{{ saving ? '保存中...' : '保存' }}</button>
-              <button type="button" class="btn-secondary" @click="closeDrawer">取消</button>
-            </div>
+          <div class="ops-modal-footer" style="justify-content:center;margin-top:20px;">
+            <button type="button" class="ops-btn ops-btn-primary" :disabled="saving" @click="submitForm">{{ saving ? '保存中...' : '保存' }}</button>
+            <button type="button" class="ops-btn ops-btn-secondary" @click="closeDrawer">取消</button>
           </div>
         </form>
       </section>
@@ -944,298 +981,5 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.ops-page { display: grid; gap: 16px; }
-
-.query-card,
-.table-card {
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 2px;
-  padding: 16px 20px;
-}
-
-.query-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-}
-
-.query-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.query-label { font-size: 13px; color: #606266; white-space: nowrap; }
-.query-item input, .query-item select { min-width: 180px; }
-
-.query-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
-
-.toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-.toolbar-meta { font-size: 13px; color: #909399; }
-
-.form-actions { display: flex; align-items: center; justify-content: center; gap: 12px; }
-
-.btn-primary, .btn-secondary, .btn-default {
-  height: 36px; padding: 0 14px; border-radius: 2px;
-  cursor: pointer; font-size: 13px;
-  transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
-}
-.btn-primary { border: 1px solid #409eff; background: #409eff; color: #fff; }
-.btn-primary:hover { background: #66b1ff; border-color: #66b1ff; }
-.btn-secondary, .btn-default { border: 1px solid #dcdfe6; background: #fff; color: #606266; }
-.btn-secondary:hover, .btn-default:hover { color: #409eff; border-color: #c6e2ff; background: #ecf5ff; }
-
-.btn-small {
-  height: 28px; padding: 0 10px;
-  border: 1px solid #409eff; border-radius: 2px;
-  background: #ecf5ff; color: #409eff; cursor: pointer; font-size: 12px;
-}
-.btn-small:hover { background: #409eff; color: #fff; }
-
-.table-wrap { overflow: auto; border: 1px solid #ebeef5; border-radius: 2px; }
-
-.tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-.tbl th, .tbl td {
-  padding: 11px 14px; border-bottom: 1px solid #ebeef5; border-right: 1px solid #ebeef5;
-  text-align: center; vertical-align: middle;
-}
-.tbl th:last-child, .tbl td:last-child { border-right: none; }
-.tbl thead { background: #fafafa; }
-.tbl th { color: #909399; font-weight: 600; }
-.tbl tbody tr:hover { background: #f5f7fa; }
-.label-cell { text-align: left; color: #303133; }
-
-.col-index { width: 60px; }
-.col-actions { width: 140px; }
-.tag-active { color: #67c23a; font-size: 13px; }
-.tag-inactive { color: #909399; font-size: 13px; }
-
-.action-group { display: inline-flex; align-items: center; justify-content: center; gap: 16px; }
-.text-btn { padding: 0; border: none; background: transparent; color: #409eff; cursor: pointer; font-size: 13px; }
-.text-btn:hover { color: #66b1ff; }
-.text-btn.danger { color: #f56c6c; }
-.text-btn.danger:hover { color: #f78989; }
-
-.pagination {
-  margin-top: 16px; display: flex; align-items: center;
-  justify-content: space-between; gap: 12px;
-  padding-top: 16px; border-top: 1px solid #ebeef5; flex-wrap: wrap;
-}
-.pagination-summary { color: #606266; font-size: 13px; }
-.pagination-controls { display: flex; align-items: center; gap: 4px; }
-
-.pager-btn {
-  min-width: 36px; height: 32px; padding: 0 10px;
-  border: 1px solid #dcdfe6; border-radius: 2px;
-  background: #fff; color: #606266; cursor: pointer; font-size: 13px;
-}
-.pager-btn:hover:not(:disabled) { color: #409eff; border-color: #409eff; }
-.pager-btn.active { background: #409eff; border-color: #409eff; color: #fff; }
-.pager-btn:disabled { cursor: not-allowed; color: #c0c4cc; border-color: #ebeef5; }
-
-.table-placeholder {
-  min-height: 220px; border: 1px dashed #dcdfe6; border-radius: 2px;
-  display: grid; place-items: center; text-align: center; color: #909399; padding: 24px;
-}
-.muted { color: #909399; }
-.error {
-  color: #dc2626; background: #fef0f0; border: 1px solid #fde2e2;
-  border-radius: 4px; padding: 10px 12px; margin-bottom: 12px;
-}
-
-input, select, textarea {
-  border: 1px solid #dcdfe6; border-radius: 4px;
-  background: #fff; color: #303133; padding: 0 14px;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease;
-  font-size: 13px;
-}
-input, select { height: 36px; }
-textarea { padding: 10px 14px; }
-input:focus, select:focus, textarea:focus {
-  outline: none; border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.12);
-}
-input:disabled, select:disabled, textarea:disabled {
-  background: #f5f7fa; color: #c0c4cc; cursor: not-allowed;
-}
-
-.modal-mask {
-  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.34);
-  display: grid; place-items: center; padding: 24px; z-index: 1000;
-}
-
-.modal {
-  width: min(100%, 960px); max-height: calc(100vh - 48px);
-  background: #fff; border: 1px solid #ebeef5; border-radius: 4px;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
-  display: grid; grid-template-rows: auto 1fr; overflow: hidden;
-}
-
-.modal-head {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; padding: 18px 20px; border-bottom: 1px solid #ebeef5;
-}
-.modal-head h2 { font-size: 16px; font-weight: 600; color: #303133; }
-.modal-close { border: none; background: transparent; color: #909399; cursor: pointer; font-size: 13px; }
-.modal-close:hover { color: #409eff; }
-
-.modal-body { padding: 16px 20px 20px; overflow: auto; }
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px 20px;
-}
-.form-row {
-  display: grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  align-items: center;
-  gap: 6px;
-}
-.form-row > span { color: #606266; font-size: 13px; }
-.form-row input, .form-row select { width: 100%; }
-
-.section-title {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-top: 20px; margin-bottom: 12px;
-  padding-bottom: 8px; border-bottom: 1px solid #ebeef5;
-}
-.section-title span:first-child { font-size: 14px; font-weight: 600; color: #303133; }
-.section-hint {
-  flex: 1;
-  margin-left: 12px;
-  font-size: 12px;
-  font-weight: normal;
-  color: #909399;
-}
-
-.section-subtitle { margin: 14px 0 8px; font-size: 13px; font-weight: 600; color: #606266; }
-
-.pet-card {
-  border: 1px solid #ebeef5; border-radius: 4px;
-  padding: 14px 16px; margin-bottom: 12px; background: #fafafa;
-}
-
-.pet-header {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 12px; margin-bottom: 12px;
-}
-.pet-header-left { display: flex; align-items: center; gap: 10px; }
-.pet-avatar {
-  width: 40px; height: 40px; border-radius: 4px;
-  background: #fff; border: 1px solid #ebeef5;
-  display: grid; place-items: center; overflow: hidden;
-  font-size: 12px; color: #909399;
-}
-.pet-avatar img { width: 100%; height: 100%; object-fit: contain; }
-.pet-title { display: grid; gap: 2px; }
-.pet-title strong { font-size: 14px; color: #303133; }
-.pet-title small { font-size: 12px; color: #909399; }
-
-.pet-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px 20px;
-  margin-top: 12px;
-}
-
-.quality-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.pet-skills {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-
-.search-field { position: relative; }
-.skill-field { margin-bottom: 0; }
-
-.search-input-wrap { position: relative; }
-.search-input-wrap input { width: 100%; height: 32px; font-size: 13px; }
-
-.dropdown {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: #fff;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-height: 220px;
-  overflow: auto;
-  z-index: 10;
-}
-.dropdown-item {
-  display: flex; align-items: center; gap: 8px;
-  padding: 8px 12px; cursor: pointer;
-  font-size: 13px; color: #303133;
-}
-.dropdown-item:hover { background: #f5f7fa; }
-.dropdown-item-random { color: #e6a23c; }
-.dropdown-hint { color: #909399; cursor: default; font-size: 12px; }
-.dropdown-hint:hover { background: #fff; }
-.dropdown-img { width: 28px; height: 28px; border-radius: 4px; object-fit: contain; background: #fff; }
-
-.selected-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 10px;
-  background: #ecf5ff;
-  border: 1px solid #d9ecff;
-  border-radius: 4px;
-  font-size: 13px;
-  color: #409eff;
-  max-width: 100%;
-}
-.selected-item > span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.selected-img { width: 24px; height: 24px; border-radius: 4px; object-fit: contain; background: #fff; }
-
-.clear-btn {
-  border: none; background: transparent; color: #909399;
-  cursor: pointer; font-size: 16px; line-height: 1; padding: 0 2px;
-}
-.clear-btn:hover { color: #f56c6c; }
-
-.desc-textarea {
-  width: 100%; border: 1px solid #dcdfe6; border-radius: 4px;
-  padding: 10px 14px; font-size: 13px; color: #303133;
-  resize: vertical;
-}
-.desc-textarea:focus {
-  outline: none; border-color: #409eff;
-  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.12);
-}
-
-.modal-footer { margin-top: 20px; padding-top: 4px; }
-
-@media (max-width: 960px) {
-  .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .pet-grid { grid-template-columns: 1fr; }
-  .quality-grid { grid-template-columns: 1fr 1fr; }
-  .pet-skills { grid-template-columns: 1fr 1fr; }
-  .modal { width: 100%; }
-}
-
-@media (max-width: 640px) {
-  .form-grid, .quality-grid, .pet-skills { grid-template-columns: 1fr; }
-  .form-row { grid-template-columns: 1fr; gap: 6px; }
-  .query-actions { margin-left: 0; }
-}
+.ops-dd-hover:hover { background: var(--ops-bg); }
 </style>

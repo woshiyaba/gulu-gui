@@ -1,0 +1,422 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPS Design System — Modern Minimal</title>
+<style>
+:root {
+  --ops-bg: oklch(99% 0.002 240);
+  --ops-surface: oklch(100% 0 0);
+  --ops-text: oklch(18% 0.012 250);
+  --ops-text-secondary: oklch(45% 0.008 250);
+  --ops-muted: oklch(54% 0.012 250);
+  --ops-border: oklch(92% 0.005 250);
+  --ops-border-light: oklch(95% 0.003 250);
+  --ops-accent: oklch(58% 0.18 255);
+  --ops-accent-hover: oklch(52% 0.2 255);
+  --ops-accent-light: oklch(92% 0.04 255);
+  --ops-accent-ring: oklch(58% 0.18 255 / 0.2);
+  --ops-success: oklch(55% 0.18 145);
+  --ops-success-light: oklch(92% 0.06 145);
+  --ops-danger: oklch(55% 0.2 25);
+  --ops-danger-light: oklch(92% 0.08 25);
+  --ops-warning: oklch(65% 0.16 85);
+  --ops-warning-light: oklch(94% 0.08 85);
+  --ops-info: oklch(55% 0.06 250);
+  --ops-info-light: oklch(94% 0.02 250);
+  --ops-radius-sm: 6px;
+  --ops-radius-md: 8px;
+  --ops-radius-lg: 12px;
+  --ops-input-height: 36px;
+  --ops-btn-height: 36px;
+  --ops-font-size: 14px;
+  --ops-font-size-sm: 13px;
+  --ops-font-size-xs: 12px;
+  --ops-shadow-sm: 0 1px 3px oklch(0% 0 0 / 0.04);
+  --ops-shadow-md: 0 4px 12px oklch(0% 0 0 / 0.06);
+  --ops-shadow-lg: 0 12px 32px oklch(0% 0 0 / 0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--ops-bg); color: var(--ops-text); font-size: var(--ops-font-size);
+  line-height: 1.5; -webkit-font-smoothing: antialiased; padding: 32px;
+}
+.ops-title { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+.ops-section-title { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 12px; }
+.ops-card { background: var(--ops-surface); border: 1px solid var(--ops-border); border-radius: var(--ops-radius-md); }
+.ops-card-padded { background: var(--ops-surface); border: 1px solid var(--ops-border); border-radius: var(--ops-radius-md); padding: 20px; }
+.ops-card-section { border: 1px solid var(--ops-border); border-radius: var(--ops-radius-md); padding: 16px; background: var(--ops-surface); }
+.ops-card-section-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.ops-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  height: var(--ops-btn-height); padding: 0 16px; border: 1px solid transparent;
+  border-radius: var(--ops-radius-sm); font-size: var(--ops-font-size); font-weight: 500;
+  cursor: pointer; white-space: nowrap; transition: all 0.15s ease; text-decoration: none; line-height: 1;
+}
+.ops-btn:active { transform: scale(0.97); }
+.ops-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.ops-btn-primary { background: var(--ops-accent); color: #fff; border-color: var(--ops-accent); }
+.ops-btn-primary:hover:not(:disabled) { background: var(--ops-accent-hover); border-color: var(--ops-accent-hover); }
+.ops-btn-secondary { background: var(--ops-surface); color: var(--ops-text); border-color: var(--ops-border); }
+.ops-btn-secondary:hover:not(:disabled) { border-color: var(--ops-accent); color: var(--ops-accent); }
+.ops-btn-danger { background: var(--ops-danger); color: #fff; border-color: var(--ops-danger); }
+.ops-btn-danger:hover:not(:disabled) { background: oklch(48% 0.22 25); border-color: oklch(48% 0.22 25); }
+.ops-btn-text { background: transparent; color: var(--ops-accent); border-color: transparent; padding: 0 8px; height: auto; min-height: 28px; }
+.ops-btn-text:hover:not(:disabled) { background: var(--ops-accent-light); }
+.ops-btn-text.ops-btn--danger { color: var(--ops-danger); }
+.ops-btn-text.ops-btn--danger:hover:not(:disabled) { background: var(--ops-danger-light); }
+.ops-btn-sm { height: 30px; padding: 0 12px; font-size: var(--ops-font-size-sm); }
+.ops-input, .ops-select {
+  height: var(--ops-input-height); padding: 0 12px; border: 1px solid var(--ops-border);
+  border-radius: var(--ops-radius-sm); background: var(--ops-surface); color: var(--ops-text);
+  font-size: var(--ops-font-size); transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%; box-sizing: border-box;
+}
+.ops-input:focus, .ops-select:focus { outline: none; border-color: var(--ops-accent); box-shadow: 0 0 0 3px var(--ops-accent-ring); }
+.ops-input::placeholder { color: var(--ops-muted); }
+.ops-input:disabled, .ops-select:disabled { background: var(--ops-bg); color: var(--ops-muted); cursor: not-allowed; }
+.ops-input-sm { height: 30px; font-size: var(--ops-font-size-sm); }
+.ops-search-input { width: 240px; }
+.ops-input-row { display: flex; align-items: center; gap: 8px; }
+.ops-input-row label { font-size: var(--ops-font-size-sm); color: var(--ops-text-secondary); white-space: nowrap; min-width: 56px; }
+.ops-filter-bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ops-filter-item { display: flex; align-items: center; gap: 8px; }
+.ops-filter-item .ops-input, .ops-filter-item .ops-select { width: 180px; }
+.ops-filter-label { font-size: var(--ops-font-size-sm); color: var(--ops-text-secondary); white-space: nowrap; min-width: 56px; }
+.ops-filter-actions { display: flex; align-items: center; gap: 8px; }
+.ops-table-wrap { border-radius: var(--ops-radius-md); overflow: auto; }
+.ops-table { width: 100%; border-collapse: collapse; font-size: var(--ops-font-size-sm); }
+.ops-table thead { background: var(--ops-bg); }
+.ops-table th { padding: 11px 14px; text-align: center; font-weight: 600; color: var(--ops-text-secondary); border-bottom: 1px solid var(--ops-border); white-space: nowrap; }
+.ops-table td { padding: 11px 14px; text-align: center; color: var(--ops-text); border-bottom: 1px solid var(--ops-border-light); }
+.ops-table tbody tr:last-child td { border-bottom: none; }
+.ops-table tbody tr:hover { background: var(--ops-bg); }
+.ops-col-index { width: 72px; }
+.ops-col-actions { width: 140px; }
+.ops-col-sort { width: 80px; }
+.ops-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.ops-toolbar-meta { font-size: var(--ops-font-size-sm); color: var(--ops-muted); }
+.ops-pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; padding-top: 14px; flex-wrap: wrap; }
+.ops-pagination-summary { font-size: var(--ops-font-size-sm); color: var(--ops-text-secondary); }
+.ops-pagination-controls { display: flex; align-items: center; gap: 6px; }
+.ops-page-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 34px; height: 32px; padding: 0 9px;
+  border: 1px solid var(--ops-border); border-radius: var(--ops-radius-sm);
+  background: var(--ops-surface); color: var(--ops-text);
+  font-size: var(--ops-font-size-sm); cursor: pointer; transition: all 0.12s ease; user-select: none;
+}
+.ops-page-btn:hover:not(:disabled) { border-color: var(--ops-accent); color: var(--ops-accent); }
+.ops-page-btn.ops-page-btn--active { background: var(--ops-accent); border-color: var(--ops-accent); color: #fff; }
+.ops-page-btn:disabled { color: var(--ops-muted); border-color: var(--ops-border-light); cursor: not-allowed; }
+.ops-modal-mask { position: fixed; inset: 0; background: oklch(15% 0.02 250 / 0.4); display: grid; place-items: center; padding: 32px; z-index: 1000; backdrop-filter: blur(2px); }
+.ops-modal { width: min(100%, 700px); max-height: calc(100vh - 64px); overflow-y: auto; background: var(--ops-surface); border: 1px solid var(--ops-border); border-radius: var(--ops-radius-lg); box-shadow: var(--ops-shadow-lg); }
+.ops-modal-wide { width: min(100%, 980px); }
+.ops-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px 0; }
+.ops-modal-header h3 { font-size: 16px; font-weight: 600; }
+.ops-modal-close { border: none; background: transparent; color: var(--ops-muted); cursor: pointer; font-size: var(--ops-font-size); padding: 4px 8px; border-radius: 4px; }
+.ops-modal-close:hover { color: var(--ops-text); background: var(--ops-bg); }
+.ops-modal-body { padding: 20px 24px; }
+.ops-modal-footer { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 24px; }
+.ops-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; }
+.ops-form-grid-full { grid-column: 1 / -1; }
+.ops-form-item { display: grid; gap: 6px; }
+.ops-form-item label { font-size: var(--ops-font-size-sm); color: var(--ops-text-secondary); font-weight: 500; }
+.ops-form-row { display: grid; grid-template-columns: 72px minmax(0, 1fr); align-items: center; gap: 10px; }
+.ops-form-row > span { font-size: var(--ops-font-size-sm); color: var(--ops-text-secondary); white-space: nowrap; }
+.ops-empty { min-height: 160px; display: grid; place-items: center; text-align: center; color: var(--ops-muted); border: 1px dashed var(--ops-border); border-radius: var(--ops-radius-md); padding: 32px; font-size: var(--ops-font-size-sm); }
+.ops-empty strong { display: block; color: var(--ops-text-secondary); margin-bottom: 4px; }
+.ops-loading { min-height: 120px; display: grid; place-items: center; color: var(--ops-muted); font-size: var(--ops-font-size-sm); }
+.ops-error { color: var(--ops-danger); background: var(--ops-danger-light); border: 1px solid color-mix(in srgb, var(--ops-danger) 20%, transparent); border-radius: var(--ops-radius-sm); padding: 10px 14px; margin-bottom: 12px; font-size: var(--ops-font-size-sm); }
+.ops-alert { padding: 10px 14px; border-radius: var(--ops-radius-sm); font-size: var(--ops-font-size-sm); }
+.ops-alert--error { color: var(--ops-danger); background: var(--ops-danger-light); border: 1px solid color-mix(in srgb, var(--ops-danger) 20%, transparent); }
+.ops-alert--success { color: var(--ops-success); background: var(--ops-success-light); border: 1px solid color-mix(in srgb, var(--ops-success) 20%, transparent); }
+.ops-badge { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 999px; font-size: var(--ops-font-size-xs); font-weight: 600; white-space: nowrap; }
+.ops-badge--default { background: var(--ops-bg); color: var(--ops-text-secondary); border: 1px solid var(--ops-border); }
+.ops-badge--success { background: var(--ops-success-light); color: var(--ops-success); }
+.ops-badge--danger { background: var(--ops-danger-light); color: var(--ops-danger); }
+.ops-badge--warning { background: var(--ops-warning-light); color: var(--ops-warning); }
+.ops-badge--info { background: var(--ops-info-light); color: var(--ops-info); }
+.ops-badge--accent { background: var(--ops-accent-light); color: var(--ops-accent); }
+.ops-action-group { display: inline-flex; align-items: center; gap: 4px; }
+.ops-pill-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.ops-pill { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border: 1px solid var(--ops-border); border-radius: 999px; background: var(--ops-surface); color: var(--ops-text); font-size: var(--ops-font-size-xs); cursor: pointer; transition: all 0.12s ease; }
+.ops-pill:hover { border-color: var(--ops-accent); color: var(--ops-accent); }
+.ops-pill.ops-pill--active { border-color: var(--ops-accent); background: var(--ops-accent-light); color: var(--ops-accent); font-weight: 600; }
+.ops-page { display: grid; gap: 16px; }
+.ops-toast-stack { position: fixed; top: 20px; right: 20px; display: grid; gap: 10px; z-index: 1100; }
+.ops-toast { min-width: 240px; max-width: 380px; padding: 12px 16px; border-radius: var(--ops-radius-md); color: #fff; font-size: var(--ops-font-size-sm); box-shadow: var(--ops-shadow-lg); backdrop-filter: blur(8px); }
+.ops-toast--success { background: var(--ops-success); }
+.ops-toast--error { background: var(--ops-danger); }
+.ops-toast--info { background: var(--ops-accent); }
+.ops-selector-list { border: 1px solid var(--ops-border); border-radius: var(--ops-radius-md); max-height: 340px; overflow-y: auto; padding: 8px; display: grid; gap: 6px; }
+.ops-selector-item { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid var(--ops-border); border-radius: var(--ops-radius-sm); background: var(--ops-surface); color: var(--ops-text); cursor: pointer; text-align: left; transition: border-color 0.12s ease; }
+.ops-selector-item:hover { border-color: var(--ops-accent); color: var(--ops-accent); }
+.page-wrap { max-width: 1000px; margin: 0 auto; display: grid; gap: 24px; }
+.section { display: grid; gap: 16px; }
+.token-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.token-chip { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.token-chip swatch { width: 24px; height: 24px; border-radius: 4px; flex-shrink: 0; }
+.token-chip code { color: var(--ops-text-secondary); }
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.col2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+code { font-size: 12px; color: var(--ops-text-secondary); background: var(--ops-bg); padding: 1px 5px; border-radius: 3px; }
+@media (max-width: 720px) {
+  body { padding: 16px; }
+  .col2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Header -->
+  <div>
+    <h1 class="ops-title">OPS Design System</h1>
+    <p style="color: var(--ops-text-secondary); font-size: var(--ops-font-size-sm); margin-top: 4px;">方向：现代简洁 · 系统字体 · 极细边框 · 单色强调 · 无分割线弹窗</p>
+  </div>
+
+  <!-- Tokens -->
+  <section class="ops-card-padded section">
+    <h2 class="ops-section-title">设计 Token</h2>
+    <div class="token-grid">
+      <div class="token-chip"><swatch style="background:var(--ops-bg);border:1px solid var(--ops-border)"></swatch><code>--ops-bg</code></div>
+      <div class="token-chip"><swatch style="background:var(--ops-surface);border:1px solid var(--ops-border)"></swatch><code>--ops-surface</code></div>
+      <div class="token-chip"><swatch style="background:var(--ops-border)"></swatch><code>--ops-border</code></div>
+      <div class="token-chip"><swatch style="background:var(--ops-accent)"></swatch><code>--ops-accent</code></div>
+      <div class="token-chip"><swatch style="background:var(--ops-success)"></swatch><code>--ops-success</code></div>
+      <div class="token-chip"><swatch style="background:var(--ops-danger)"></swatch><code>--ops-danger</code></div>
+      <div class="token-chip"><swatch style="background:var(--ops-warning)"></swatch><code>--ops-warning</code></div>
+      <div class="token-chip"><swatch style="background:var(--ops-info)"></swatch><code>--ops-info</code></div>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--ops-text-secondary);border-top:1px solid var(--ops-border-light);padding-top:12px;margin-top:4px;">
+      <span>圆角: 6px / 8px / 12px</span>
+      <span>输入/按钮高度: 36px</span>
+      <span>字号: 14 / 13 / 12px</span>
+      <span>字体: system-ui</span>
+      <span>阴影: sm / md / lg</span>
+    </div>
+  </section>
+
+  <!-- Buttons -->
+  <section class="ops-card-padded section">
+    <h2 class="ops-section-title">按钮</h2>
+    <div class="row">
+      <button class="ops-btn ops-btn-primary">主按钮</button>
+      <button class="ops-btn ops-btn-secondary">次要按钮</button>
+      <button class="ops-btn ops-btn-danger">危险按钮</button>
+      <button class="ops-btn ops-btn-text">文字按钮</button>
+      <button class="ops-btn ops-btn-text ops-btn--danger">删除文字</button>
+      <button class="ops-btn ops-btn-primary ops-btn-sm">小号</button>
+      <button class="ops-btn ops-btn-secondary" disabled>禁用</button>
+    </div>
+  </section>
+
+  <!-- Badges -->
+  <section class="ops-card-padded section">
+    <h2 class="ops-section-title">徽标 / 状态标签</h2>
+    <div class="row">
+      <span class="ops-badge ops-badge--default">默认</span>
+      <span class="ops-badge ops-badge--accent">强调</span>
+      <span class="ops-badge ops-badge--success">已上线</span>
+      <span class="ops-badge ops-badge--warning">待审核</span>
+      <span class="ops-badge ops-badge--danger">已下线</span>
+      <span class="ops-badge ops-badge--info">信息</span>
+    </div>
+    <div style="margin-top:12px;">
+      <div class="ops-pill-group">
+        <span class="ops-pill ops-pill--active">普通</span>
+        <span class="ops-pill">金属</span>
+        <span class="ops-pill">草</span>
+        <span class="ops-pill">水</span>
+        <span class="ops-pill">火</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filter bar -->
+  <section class="ops-card-padded section">
+    <h2 class="ops-section-title">筛选栏</h2>
+    <div class="ops-card-section">
+      <div class="ops-filter-bar">
+        <div class="ops-filter-item">
+          <span class="ops-filter-label">名称</span>
+          <input class="ops-input" style="width:200px" placeholder="请输入名称">
+        </div>
+        <div class="ops-filter-item">
+          <span class="ops-filter-label">类型</span>
+          <select class="ops-select" style="width:130px"><option>全部</option><option>基础</option><option>进化</option></select>
+        </div>
+        <div class="ops-filter-actions">
+          <button class="ops-btn ops-btn-primary">搜索</button>
+          <button class="ops-btn ops-btn-secondary">重置</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Inputs -->
+  <section class="ops-card-padded section">
+    <h2 class="ops-section-title">输入框</h2>
+    <div class="col2">
+      <div style="display:grid;gap:10px">
+        <input class="ops-input" placeholder="默认输入框">
+        <input class="ops-input" placeholder="聚焦状态" style="border-color:var(--ops-accent);box-shadow:0 0 0 3px var(--ops-accent-ring)">
+        <input class="ops-input" disabled value="禁用状态">
+        <div class="ops-input-row"><label>标签</label><input class="ops-input" placeholder="行内标签布局"></div>
+      </div>
+      <div style="display:grid;gap:10px">
+        <select class="ops-select"><option>选择器</option><option>管理员</option><option>编辑</option></select>
+        <select class="ops-select" disabled><option>禁用选择器</option></select>
+        <input class="ops-input ops-input-sm" placeholder="小号输入框">
+        <input class="ops-input ops-search-input" placeholder="搜索...">
+      </div>
+    </div>
+  </section>
+
+  <!-- Table -->
+  <section class="ops-card-padded section">
+    <h2 class="ops-section-title">表格 + 分页</h2>
+    <div class="ops-toolbar">
+      <button class="ops-btn ops-btn-primary">新增精灵</button>
+      <span class="ops-toolbar-meta">共 128 条</span>
+    </div>
+    <div class="ops-table-wrap">
+      <table class="ops-table">
+        <thead><tr><th class="ops-col-index">序号</th><th>编号</th><th>名称</th><th>阶段</th><th>属性</th><th class="ops-col-sort">排序</th><th>状态</th><th class="ops-col-actions">操作</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><code>001</code></td><td style="font-weight:500">水蓝蓝</td><td>基础</td><td>水</td><td>1</td><td><span class="ops-badge ops-badge--success">已上线</span></td><td><div class="ops-action-group"><button class="ops-btn ops-btn-text">修改</button><button class="ops-btn ops-btn-text ops-btn--danger">删除</button></div></td></tr>
+          <tr><td>2</td><td><code>002</code></td><td style="font-weight:500">海闪闪</td><td>进化</td><td>水</td><td>2</td><td><span class="ops-badge ops-badge--success">已上线</span></td><td><div class="ops-action-group"><button class="ops-btn ops-btn-text">修改</button><button class="ops-btn ops-btn-text ops-btn--danger">删除</button></div></td></tr>
+          <tr><td>3</td><td><code>003</code></td><td style="font-weight:500">清水之灵</td><td>高级</td><td>水</td><td>3</td><td><span class="ops-badge ops-badge--warning">待审核</span></td><td><div class="ops-action-group"><button class="ops-btn ops-btn-text">修改</button><button class="ops-btn ops-btn-text ops-btn--danger">删除</button></div></td></tr>
+          <tr><td>4</td><td><code>004</code></td><td style="font-weight:500">火花</td><td>基础</td><td>火</td><td>4</td><td><span class="ops-badge ops-badge--danger">已下线</span></td><td><div class="ops-action-group"><button class="ops-btn ops-btn-text">修改</button><button class="ops-btn ops-btn-text ops-btn--danger">删除</button></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="ops-pagination">
+      <span class="ops-pagination-summary">共 128 条，当前显示 1-10 条</span>
+      <div class="ops-pagination-controls">
+        <button class="ops-page-btn" disabled>‹</button>
+        <button class="ops-page-btn ops-page-btn--active">1</button>
+        <button class="ops-page-btn">2</button>
+        <button class="ops-page-btn">3</button>
+        <button class="ops-page-btn">4</button>
+        <button class="ops-page-btn">›</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form -->
+  <section class="ops-card-padded section">
+    <h2 class="ops-section-title">表单布局</h2>
+    <div class="col2">
+      <div class="ops-card-section">
+        <div class="ops-card-section-title">Grid 布局（2 列）</div>
+        <div class="ops-form-grid">
+          <div class="ops-form-item"><label>精灵名称</label><input class="ops-input" placeholder="请输入名称"></div>
+          <div class="ops-form-item"><label>精灵编号</label><input class="ops-input" placeholder="请输入编号"></div>
+          <div class="ops-form-item"><label>阶段</label><select class="ops-select"><option>基础</option><option>进化</option></select></div>
+          <div class="ops-form-item"><label>属性</label><select class="ops-select"><option>水</option><option>火</option></select></div>
+          <div class="ops-form-item ops-form-grid-full"><label>描述</label><input class="ops-input" placeholder="占满整行"></div>
+        </div>
+      </div>
+      <div class="ops-card-section">
+        <div class="ops-card-section-title">行内标签布局</div>
+        <div style="display:grid;gap:10px">
+          <div class="ops-form-row"><span>账号</span><input class="ops-input" placeholder="请输入账号"></div>
+          <div class="ops-form-row"><span>密码</span><input class="ops-input" type="password" placeholder="请输入密码"></div>
+          <div class="ops-form-row"><span>角色</span><select class="ops-select"><option>admin</option><option>editor</option></select></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal -->
+  <section class="ops-card-padded section">
+    <h2 class="ops-section-title">弹窗（无分割线）</h2>
+    <div style="border:2px dashed var(--ops-border);border-radius:var(--ops-radius-lg);overflow:hidden">
+      <div class="ops-modal-mask" style="position:static;backdrop-filter:none;background:var(--ops-bg);padding:20px">
+        <div class="ops-modal" style="position:static">
+          <div class="ops-modal-header">
+            <h3>新增精灵</h3>
+            <button class="ops-modal-close">✕</button>
+          </div>
+          <div class="ops-modal-body">
+            <div class="ops-form-grid">
+              <div class="ops-form-item"><label>精灵名称</label><input class="ops-input" placeholder="请输入名称"></div>
+              <div class="ops-form-item"><label>精灵编号</label><input class="ops-input" placeholder="请输入编号"></div>
+              <div class="ops-form-item"><label>阶段</label><select class="ops-select"><option>基础</option><option>进化</option></select></div>
+              <div class="ops-form-item"><label>属性</label><select class="ops-select"><option>水</option><option>火</option></select></div>
+            </div>
+          </div>
+          <div class="ops-modal-footer">
+            <button class="ops-btn ops-btn-primary">保存</button>
+            <button class="ops-btn ops-btn-secondary">取消</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--ops-muted)">标题 / 内容 / 按钮之间全部靠间距分隔，无 <code>border-top</code> 分割线</p>
+  </section>
+
+  <!-- States -->
+  <section class="ops-card-padded section">
+    <h2 class="ops-section-title">状态组件</h2>
+    <div class="col2">
+      <div class="ops-empty"><strong>暂无数据</strong><span>请调整筛选条件后重试</span></div>
+      <div style="display:grid;gap:10px">
+        <div class="ops-loading">加载中...</div>
+        <div class="ops-error">数据加载失败，请重试</div>
+        <div class="ops-alert ops-alert--success">保存成功</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Toasts -->
+  <section class="ops-card-padded section">
+    <h2 class="ops-section-title">Toast 通知</h2>
+    <div class="row">
+      <div class="ops-toast ops-toast--success">操作成功</div>
+      <div class="ops-toast ops-toast--error">操作失败</div>
+      <div class="ops-toast ops-toast--info">信息提示</div>
+    </div>
+  </section>
+
+  <!-- Selector -->
+  <section class="ops-card-padded section">
+    <h2 class="ops-section-title">选择器列表</h2>
+    <div style="max-width:360px">
+      <div class="ops-selector-list" style="max-height:148px">
+        <div class="ops-selector-item">催眠唤醒</div>
+        <div class="ops-selector-item" style="border-color:var(--ops-accent);color:var(--ops-accent)">光合作用</div>
+        <div class="ops-selector-item">冰冻之风</div>
+        <div class="ops-selector-item">火焰漩涡</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Migration guide -->
+  <section class="ops-card-padded section" style="border-left:3px solid var(--ops-accent)">
+    <h2 class="ops-section-title">旧类 → 新类 映射</h2>
+    <p style="font-size:13px;color:var(--ops-text-secondary);margin-bottom:12px">在 Vue 页面中直接替换需迁移的 scoped 类</p>
+    <div class="col2" style="font-size:13px;grid-template-columns:1fr 1fr 1px 1fr">
+      <div style="display:grid;gap:3px">
+        <code style="font-size:13px;background:var(--ops-danger-light);padding:2px 8px;font-weight:600;color:var(--ops-danger)">旧（废弃）</code>
+        <code>.btn-primary</code><code>.btn-default / .btn-secondary</code><code>.txt-btn / .text-btn</code><code>.query-card / .table-card</code><code>.tbl / .dict-table / .user-table</code><code>.pager / .pagination</code><code>.pager-btn</code><code>.modal-mask / .modal</code><code>.query-row</code><code>.query-item</code>
+      </div>
+      <div style="display:grid;gap:3px">
+        <code style="font-size:13px;background:var(--ops-success-light);padding:2px 8px;font-weight:600;color:var(--ops-success)">新（全局）</code>
+        <code>.ops-btn.ops-btn-primary</code><code>.ops-btn.ops-btn-secondary</code><code>.ops-btn.ops-btn-text</code><code>.ops-card-padded / .ops-card-section</code><code>.ops-table (包装 .ops-table-wrap)</code><code>.ops-pagination</code><code>.ops-page-btn</code><code>.ops-modal-mask / .ops-modal</code><code>.ops-filter-bar</code><code>.ops-filter-item</code>
+      </div>
+      <div style="width:1px;background:var(--ops-border);height:100%"></div>
+      <div style="display:grid;gap:3px">
+        <code style="font-size:13px;padding:2px 8px;font-weight:600;color:var(--ops-text-secondary)">说明</code>
+        <code>需配对 .ops-btn</code><code>统一</code><code>统一</code><code>根据结构选择</code><code>统一</code><code>统一</code><code></code><code>统一弹窗结构</code><code></code><code></code>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

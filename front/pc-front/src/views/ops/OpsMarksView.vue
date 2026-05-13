@@ -156,335 +156,99 @@ onMounted(() => {
 
 <template>
   <div class="ops-page">
-    <section class="query-card">
-      <div class="query-row">
-        <label class="query-item">
-          <span class="query-label">关键字</span>
-          <input v-model="keyword" class="keyword-input" type="text" placeholder="英文标识 / 中文名"
-                 @keyup.enter="search"/>
-        </label>
-        <div class="query-actions">
-          <button type="button" class="btn-primary" @click="search">查询</button>
-          <button type="button" class="btn-secondary" @click="resetFilters">重置</button>
+    <section class="ops-card-padded">
+      <div class="ops-filter-bar" style="margin-bottom:16px;">
+        <div class="ops-filter-item">
+          <span class="ops-filter-label">关键字</span>
+          <input v-model="keyword" class="ops-input" style="width:240px" type="text" placeholder="英文标识 / 中文名" @keyup.enter="search" />
+        </div>
+        <div class="ops-filter-actions">
+          <button type="button" class="ops-btn ops-btn-primary" @click="search">查询</button>
+          <button type="button" class="ops-btn ops-btn-secondary" @click="resetFilters">重置</button>
         </div>
       </div>
-    </section>
-
-    <section class="table-card">
-      <div class="toolbar">
-        <button type="button" class="btn-primary" @click="openCreateModal">新增印记</button>
-        <div class="toolbar-meta">共 {{ total }} 条</div>
+      <div class="ops-toolbar">
+        <button type="button" class="ops-btn ops-btn-primary" @click="openCreateModal">新增印记</button>
+        <span class="ops-toolbar-meta">共 {{ total }} 条</span>
       </div>
 
-      <p v-if="error" class="error">{{ error }}</p>
-
-      <div v-if="loading" class="placeholder">加载中...</div>
-      <div v-else-if="!items.length" class="placeholder">暂无数据</div>
-      <div v-else class="table-wrap">
-        <table class="tbl">
+      <p v-if="error" class="ops-error">{{ error }}</p>
+      <div v-if="loading" class="ops-loading">加载中...</div>
+      <div v-else-if="!items.length" class="ops-empty"><strong>暂无数据</strong></div>
+      <div v-else class="ops-table-wrap">
+        <table class="ops-table">
           <thead>
-          <tr>
-            <th>序号</th>
-            <th>英文标识</th>
-            <th>中文名</th>
-            <th>说明</th>
-            <th>排序</th>
-            <th>操作</th>
-          </tr>
+            <tr>
+              <th>序号</th>
+              <th>英文标识</th>
+              <th>中文名</th>
+              <th>说明</th>
+              <th>排序</th>
+              <th>操作</th>
+            </tr>
           </thead>
           <tbody>
-          <tr v-for="(item, index) in items" :key="item.id">
-            <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
-            <td>{{ item.key }}</td>
-            <td>{{ item.zh_name }}</td>
-            <td class="desc-cell" :title="item.zh_description || ''">
-              <span class="desc-text">{{ item.zh_description || '—' }}</span>
-            </td>
-            <td>{{ item.sort_order }}</td>
-            <td>
-              <button type="button" class="txt-btn" @click="editItem(item)">修改</button>
-              <button v-if="isAdmin" type="button" class="txt-btn danger" @click="removeItem(item)">删除</button>
-            </td>
-          </tr>
+            <tr v-for="(item, index) in items" :key="item.id">
+              <td>{{ (currentPage - 1) * pageSize + index + 1 }}</td>
+              <td>{{ item.key }}</td>
+              <td>{{ item.zh_name }}</td>
+              <td style="max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" :title="item.zh_description || ''">{{ item.zh_description || '—' }}</td>
+              <td>{{ item.sort_order }}</td>
+              <td>
+                <div class="ops-action-group">
+                  <button type="button" class="ops-btn ops-btn-text" @click="editItem(item)">修改</button>
+                  <button v-if="isAdmin" type="button" class="ops-btn ops-btn-text ops-btn--danger" @click="removeItem(item)">删除</button>
+                </div>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
 
-      <div v-if="total > 0" class="pager">
-        <div class="pager-controls">
-          <button type="button" class="pager-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">
-            上一页
-          </button>
-          <button
-              v-for="p in visiblePages"
-              :key="p"
-              type="button"
-              class="pager-btn"
-              :class="{ active: p === currentPage }"
-              @click="goToPage(p)"
-          >
-            {{ p }}
-          </button>
-          <button type="button" class="pager-btn" :disabled="currentPage === totalPages"
-                  @click="goToPage(currentPage + 1)">下一页
-          </button>
+      <div v-if="total > 0" class="ops-pagination">
+        <div class="ops-pagination-controls">
+          <button type="button" class="ops-page-btn" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)">上一页</button>
+          <button v-for="p in visiblePages" :key="p" type="button" class="ops-page-btn" :class="{ 'ops-page-btn--active': p === currentPage }" @click="goToPage(p)">{{ p }}</button>
+          <button type="button" class="ops-page-btn" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)">下一页</button>
         </div>
       </div>
     </section>
 
-    <div v-if="modalVisible" class="modal-mask">
-      <section class="modal" @click.stop>
-        <div class="modal-head">
+    <div v-if="modalVisible" class="ops-modal-mask">
+      <section class="ops-modal" @click.stop>
+        <div class="ops-modal-header">
           <h3>{{ editingId ? '编辑印记' : '新增印记' }}</h3>
+          <button type="button" class="ops-modal-close" @click="closeModal">✕</button>
         </div>
-        <form class="modal-body" @submit.prevent="submit">
-          <label>
-            <span>英文标识</span>
-            <input v-model="form.key" required maxlength="50" placeholder="例如 Slow Mark"/>
-          </label>
-          <label>
-            <span>中文名</span>
-            <input v-model="form.zh_name" required maxlength="50" placeholder="例如 减速印记"/>
-          </label>
-          <label>
-            <span>排序</span>
-            <input v-model.number="form.sort_order" type="number"/>
-          </label>
-          <label>
-            <span>图片（可选）</span>
-            <input v-model="form.image" placeholder="图片路径"/>
-          </label>
-          <label>
-            <span>说明</span>
-            <textarea v-model="form.zh_description" rows="4" placeholder="请输入说明"/>
-          </label>
-
-          <div class="actions">
-            <button type="submit" class="btn-primary" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</button>
-            <button type="button" class="btn-secondary" @click="closeModal">取消</button>
+        <form class="ops-modal-body" @submit.prevent="submit">
+          <div style="display:grid;gap:12px;">
+            <div class="ops-form-item">
+              <label>英文标识</label>
+              <input v-model="form.key" class="ops-input" required maxlength="50" placeholder="例如 Slow Mark" />
+            </div>
+            <div class="ops-form-item">
+              <label>中文名</label>
+              <input v-model="form.zh_name" class="ops-input" required maxlength="50" placeholder="例如 减速印记" />
+            </div>
+            <div class="ops-form-item">
+              <label>排序</label>
+              <input v-model.number="form.sort_order" class="ops-input" type="number" />
+            </div>
+            <div class="ops-form-item">
+              <label>图片（可选）</label>
+              <input v-model="form.image" class="ops-input" placeholder="图片路径" />
+            </div>
+            <div class="ops-form-item">
+              <label>说明</label>
+              <textarea v-model="form.zh_description" class="ops-input" style="height:auto;min-height:72px;padding:8px 12px;resize:vertical;" rows="4" placeholder="请输入说明" />
+            </div>
+          </div>
+          <div class="ops-modal-footer">
+            <button type="submit" class="ops-btn ops-btn-primary" :disabled="saving">{{ saving ? '保存中...' : '保存' }}</button>
+            <button type="button" class="ops-btn ops-btn-secondary" @click="closeModal">取消</button>
           </div>
         </form>
       </section>
     </div>
   </div>
 </template>
-
-<style scoped>
-.ops-page {
-  display: grid;
-  gap: 16px;
-}
-
-.query-card, .table-card {
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 4px;
-  padding: 16px;
-}
-
-.query-row {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.query-item {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.query-label {
-  color: #606266;
-  font-size: 13px;
-}
-
-.keyword-input {
-  width: 240px;
-  height: 36px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 0 12px;
-}
-
-.query-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.toolbar-meta {
-  color: #909399;
-  font-size: 13px;
-}
-
-.table-wrap {
-  overflow: auto;
-  border: 1px solid #ebeef5;
-  border-radius: 2px;
-}
-
-.tbl {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.tbl th, .tbl td {
-  border: 1px solid #ebeef5;
-  padding: 10px;
-  text-align: center;
-}
-
-.desc-cell {
-  text-align: left;
-  width: 360px;
-  max-width: 360px;
-}
-
-.desc-text {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.placeholder {
-  min-height: 120px;
-  display: grid;
-  place-items: center;
-  color: #909399;
-  border: 1px dashed #dcdfe6;
-  border-radius: 2px;
-}
-
-.pager {
-  margin-top: 12px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.pager-controls {
-  display: flex;
-  gap: 8px;
-}
-
-.pager-btn {
-  min-width: 36px;
-  height: 32px;
-  border: 1px solid #dcdfe6;
-  background: #fff;
-  border-radius: 2px;
-  cursor: pointer;
-}
-
-.pager-btn.active {
-  background: #409eff;
-  color: #fff;
-  border-color: #409eff;
-}
-
-.pager-btn:disabled {
-  color: #c0c4cc;
-  border-color: #ebeef5;
-  cursor: not-allowed;
-}
-
-.txt-btn {
-  border: none;
-  background: transparent;
-  color: #409eff;
-  cursor: pointer;
-  margin: 0 4px;
-}
-
-.txt-btn.danger {
-  color: #f56c6c;
-}
-
-.btn-primary, .btn-secondary {
-  height: 36px;
-  border-radius: 4px;
-  padding: 0 14px;
-  cursor: pointer;
-}
-
-.btn-primary {
-  border: 1px solid #409eff;
-  background: #409eff;
-  color: #fff;
-}
-
-.btn-secondary {
-  border: 1px solid #dcdfe6;
-  background: #fff;
-  color: #606266;
-}
-
-.error {
-  color: #fff;
-  background: #f56c6c;
-  border: 1px solid #f56c6c;
-  border-radius: 4px;
-  padding: 10px 12px;
-  margin-bottom: 10px;
-}
-
-.modal-mask {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: rgba(15, 23, 42, 0.36);
-  padding: 24px;
-  z-index: 1000;
-}
-
-.modal {
-  width: min(100%, 680px);
-  background: #fff;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
-}
-
-.modal-head {
-  padding: 16px 20px;
-  border-bottom: 1px solid #ebeef5;
-}
-
-.modal-body {
-  display: grid;
-  gap: 10px;
-  padding: 16px 20px 20px;
-}
-
-.modal-body label {
-  display: grid;
-  gap: 6px;
-}
-
-.modal-body span {
-  color: #606266;
-  font-size: 13px;
-}
-
-.modal-body input, .modal-body textarea {
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 8px 10px;
-  font-size: 13px;
-}
-
-.actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 8px;
-}
-</style>
