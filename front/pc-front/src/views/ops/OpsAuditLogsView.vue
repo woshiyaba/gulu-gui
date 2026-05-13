@@ -23,7 +23,6 @@ const detailItem = ref<OpsAuditLogItem | null>(null)
 const filters = reactive({
   username: '',
   resource_type: '',
-  resource_id: '',
   action: '',
 })
 
@@ -146,6 +145,29 @@ function operatorName(item: OpsAuditLogItem) {
   return item.nickname || item.username || `用户 ${item.user_id}`
 }
 
+function extractChangeSummary(item: OpsAuditLogItem): string {
+  const src = item.after_json || item.before_json
+  if (src) {
+    if (typeof src.name === 'string' && src.name) return src.name
+    if (typeof src.nickname === 'string' && src.nickname) return src.nickname
+    if (typeof src.username === 'string' && src.username) return src.username
+    if (typeof src.title === 'string' && src.title) return src.title
+    if (typeof src.display_name === 'string' && src.display_name) return src.display_name
+    if (typeof src.key === 'string' && src.key) return src.key
+  }
+  const labels: Record<string, string> = {
+    pokemon: '精灵',
+    skill: '技能',
+    skill_stone: '技能石',
+    resonance_magic: '共鸣魔法',
+    ops_user: '运营账号',
+    sys_dict: '字典项',
+    banner: 'Banner',
+    evolution_chain: '进化链',
+  }
+  return labels[item.resource_type] || item.resource_type
+}
+
 function openDetail(item: OpsAuditLogItem) {
   detailItem.value = item
   detailVisible.value = true
@@ -163,7 +185,6 @@ async function loadData() {
     const result = await fetchOpsAuditLogs({
       username: filters.username.trim() || undefined,
       resource_type: filters.resource_type.trim() || undefined,
-      resource_id: filters.resource_id.trim() || undefined,
       action: filters.action || undefined,
       page: currentPage.value,
       page_size: pageSize,
@@ -190,7 +211,6 @@ async function search() {
 async function resetFilters() {
   filters.username = ''
   filters.resource_type = ''
-  filters.resource_id = ''
   filters.action = ''
   currentPage.value = 1
   await loadData()
@@ -219,11 +239,7 @@ onMounted(() => {
           <span class="ops-filter-label">资源类型</span>
           <input v-model="filters.resource_type" class="ops-input" type="text" placeholder="如 pokemon / skill" @keyup.enter="search" />
         </label>
-        <label class="ops-form-item" style="min-width:160px;">
-          <span class="ops-filter-label">资源 ID</span>
-          <input v-model="filters.resource_id" class="ops-input" type="text" placeholder="资源 ID" @keyup.enter="search" />
-        </label>
-        <label class="ops-form-item" style="min-width:150px;">
+<label class="ops-form-item" style="min-width:150px;">
           <span class="ops-filter-label">动作</span>
           <select v-model="filters.action" class="ops-select">
             <option v-for="option in actionOptions" :key="option.value" :value="option.value">
@@ -249,18 +265,18 @@ onMounted(() => {
         <table class="ops-table" style="min-width:920px;">
           <thead>
             <tr>
-              <th style="width:80px;">ID</th>
+              <th style="width:80px;">序号</th>
               <th>时间</th>
               <th>操作者</th>
               <th>资源类型</th>
-              <th>资源 ID</th>
+              <th>变更摘要</th>
               <th>动作</th>
               <th style="width:88px;">操作</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="item in items" :key="item.id">
-              <td>{{ item.id }}</td>
+              <td>{{ items.indexOf(item) + 1 }}</td>
               <td>{{ formatDate(item.created_at) }}</td>
               <td>
                 <div style="display:grid;gap:2px;">
@@ -269,7 +285,7 @@ onMounted(() => {
                 </div>
               </td>
               <td><span class="ops-badge ops-badge--default">{{ item.resource_type }}</span></td>
-              <td>{{ item.resource_id || '-' }}</td>
+              <td style="font-weight:500;">{{ extractChangeSummary(item) }}</td>
               <td><span class="ops-badge ops-badge--accent">{{ item.action }}</span></td>
               <td>
                 <button type="button" class="ops-btn ops-btn-text" @click="openDetail(item)">查看</button>
