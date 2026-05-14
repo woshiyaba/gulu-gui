@@ -535,7 +535,6 @@ def _lkgc_name_candidates(item: dict) -> set[str]:
 
 def _find_lkgc_pet_for_pokemon(pokemon: dict, max_pages: int = 120, page_size: int = 100) -> dict | None:
     pokemon_name = str(pokemon.get("name") or "").strip()
-    source_id = pokemon.get("source_id")
     best_by_name: dict | None = None
 
     for page in range(1, max_pages + 1):
@@ -553,10 +552,7 @@ def _find_lkgc_pet_for_pokemon(pokemon: dict, max_pages: int = 120, page_size: i
         for item in records:
             if not isinstance(item, dict):
                 continue
-            name_matched = pokemon_name in _lkgc_name_candidates(item)
-            if source_id and str(item.get("web_pet_id") or "") == str(source_id) and name_matched:
-                return item
-            if name_matched:
+            if pokemon_name in _lkgc_name_candidates(item):
                 best_by_name = item
 
     return best_by_name
