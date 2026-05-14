@@ -1,0 +1,576 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>洛克观测宠物基础信息同步设计文档</title>
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #64748b;
+      --line: #d9e1ec;
+      --primary: #2563eb;
+      --primary-soft: #e8f0ff;
+      --ok: #16a34a;
+      --warn: #d97706;
+      --danger: #dc2626;
+      --code-bg: #eef2f7;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: linear-gradient(180deg, #eef4ff 0, var(--bg) 260px);
+      font: 15px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+    }
+
+    .page {
+      width: min(1120px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 36px 0 64px;
+    }
+
+    .hero {
+      padding: 30px;
+      color: #fff;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.22), transparent 34%),
+        linear-gradient(135deg, #0f766e, #2563eb);
+      box-shadow: var(--shadow);
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: 30px;
+      line-height: 1.25;
+    }
+
+    .hero p {
+      max-width: 850px;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 16px;
+    }
+
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 22px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 11px;
+      border-radius: 999px;
+      color: #dbeafe;
+      background: rgba(255, 255, 255, 0.13);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      font-size: 13px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .card {
+      grid-column: span 12;
+      padding: 24px;
+      background: var(--card);
+      border: 1px solid rgba(217, 225, 236, 0.86);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+
+    .half { grid-column: span 6; }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 21px;
+      line-height: 1.35;
+    }
+
+    h3 {
+      margin: 22px 0 10px;
+      font-size: 17px;
+    }
+
+    p { margin: 0 0 12px; }
+    ul, ol { margin: 0; padding-left: 22px; }
+    li + li { margin-top: 6px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: #fff;
+    }
+
+    th, td {
+      padding: 11px 12px;
+      vertical-align: top;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    th {
+      color: #334155;
+      background: #f1f5f9;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    tr:last-child td { border-bottom: 0; }
+
+    code {
+      padding: 2px 6px;
+      color: #0f172a;
+      background: var(--code-bg);
+      border-radius: 6px;
+      font-family: Consolas, "SFMono-Regular", monospace;
+      font-size: 0.92em;
+    }
+
+    pre {
+      margin: 12px 0 0;
+      padding: 16px;
+      color: #dbeafe;
+      background: #0f172a;
+      border-radius: 14px;
+      overflow: auto;
+      line-height: 1.55;
+    }
+
+    pre code {
+      padding: 0;
+      color: inherit;
+      background: transparent;
+      border-radius: 0;
+    }
+
+    .note {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: var(--primary-soft);
+      border: 1px solid #bfd3ff;
+      color: #1e3a8a;
+    }
+
+    .warn {
+      background: #fff7ed;
+      border-color: #fed7aa;
+      color: #9a3412;
+    }
+
+    .ok {
+      background: #ecfdf5;
+      border-color: #bbf7d0;
+      color: #166534;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .tag.ok { color: var(--ok); background: #dcfce7; }
+    .tag.warn { color: var(--warn); background: #ffedd5; }
+    .tag.danger { color: var(--danger); background: #fee2e2; }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .step {
+      min-height: 120px;
+      padding: 14px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--primary);
+    }
+
+    @media (max-width: 900px) {
+      .half { grid-column: span 12; }
+      .flow { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <h1>洛克观测宠物基础信息同步设计文档</h1>
+      <p>
+        本文档描述通过 <code>fetch_pet_list</code> 分页拉取洛克观测宠物列表，
+        再按需调用 <code>get_pet_info</code> 获取详情，将本库缺失的宠物基础信息插入
+        PostgreSQL <code>pokemon</code> 及其关联表的设计。
+      </p>
+      <div class="meta">
+        <span class="pill">需求来源：docs/lkgc/feat.txt 第 1 项</span>
+        <span class="pill">列表示例：docs/lkgc/getList_exam.json</span>
+        <span class="pill">详情示例：docs/lkgc/getPetInfo_exam.json</span>
+        <span class="pill">目标表：pokemon / pokemon_attribute</span>
+        <span class="pill">已对比当前 PostgreSQL 数据</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card half">
+        <h2>目标</h2>
+        <ul>
+          <li>分页读取洛克观测宠物列表，逐条构造本库宠物名称并查重。</li>
+          <li>本库已存在同名宠物时不做任何更新，保证历史数据不被外部数据覆盖。</li>
+          <li>本库缺失时，上传 <code>main_url</code> 到 OSS，作为 <code>pokemon.image_lc</code> 写入。</li>
+          <li>读取宠物详情中的 <code>web_pet.catch_way</code>，写入 <code>pokemon.obtain_method</code>。</li>
+          <li>将洛克观测种族值字段按需求映射到本库 <code>pokemon</code>。</li>
+        </ul>
+      </article>
+
+      <article class="card half">
+        <h2>非目标</h2>
+        <ul>
+          <li>不更新已存在宠物的基础字段、立绘、种族值、获得方式或头像。</li>
+          <li>不在本流程同步技能，技能同步由第二项“同步技能”按钮负责。</li>
+          <li>不自动删除本库中不存在于洛克观测列表的宠物。</li>
+          <li>不把外部数据作为本库所有字段的唯一权威来源，必填缺省值需要明确规则。</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>数据库对比结论</h2>
+        <p>
+          以 <code>docs/lkgc/getList_exam.json</code> 的 12 条宠物为样本，已按名称规则对比当前
+          PostgreSQL 的 <code>pokemon</code> 与 <code>pokemon_attribute</code>。
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>检查项</th>
+              <th>结果</th>
+              <th>设计影响</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>列表样本数量</td>
+              <td>共 <code>12</code> 条。</td>
+              <td>可作为小样本验证，不代表全量覆盖。</td>
+            </tr>
+            <tr>
+              <td>按名称命中</td>
+              <td><code>10</code> 条命中：迪莫、喵喵、喵呜、魔力猫、火花、焰火、火神、水蓝蓝、波波拉、水灵。</td>
+              <td>查重应以 <code>pokemon.name</code> 为主，命中后直接跳过，不更新历史数据。</td>
+            </tr>
+            <tr>
+              <td>按 <code>source_id</code> 命中</td>
+              <td><code>0</code> 条命中。样本的 <code>web_pet_id</code> 与当前库 <code>pokemon.source_id</code> 不是同一套编号。</td>
+              <td><code>web_pet_id</code> 只能写入新增记录，不能用来判断已有记录是否相同。</td>
+            </tr>
+            <tr>
+              <td>未命中</td>
+              <td><code>2</code> 条未命中：鸭吉吉（蓬松的样子）、板板壳（本来的样子）。</td>
+              <td>这些会进入新增流程，适合验证插入、图片上传和属性映射。</td>
+            </tr>
+            <tr>
+              <td>种族值差异</td>
+              <td>已命中的 10 条，按 <code>sm/wg/mg/wf/mf/sd</code> 映射后与本库一致，差异数为 <code>0</code>。</td>
+              <td>字段映射方向可保留，但仍不更新已存在记录。</td>
+            </tr>
+            <tr>
+              <td>样本属性映射</td>
+              <td>从命中记录可反推 <code>4 -> 草</code>、<code>6 -> 光</code>、<code>9 -> 火</code>、<code>10 -> 水</code>。</td>
+              <td>全量实现仍需要完整 <code>type_list -> attribute.id</code> 映射表。</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note ok" style="margin-top:14px;">
+          结论：第一项应定位为“按名称补缺”，不是“按外部 source_id 对账更新”。已有数据即使外部编号不同，也不能被覆盖。
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>数据流程</h2>
+        <div class="flow">
+          <div class="step">
+            <strong>1. 分页拉列表</strong>
+            调用 <code>fetch_pet_list(page, page_size)</code>，直到返回空列表或达到最大页数。
+          </div>
+          <div class="step">
+            <strong>2. 生成名称</strong>
+            用 <code>name</code> 与 <code>form_name/from</code> 组合为 <code>name（form_name）</code>。
+          </div>
+          <div class="step">
+            <strong>3. 查重</strong>
+            按组合名查询 <code>pokemon.name</code>；存在则跳过，不更新历史记录。
+          </div>
+          <div class="step">
+            <strong>4. 拉详情和图片</strong>
+            调用 <code>get_pet_info(real_pet_id)</code> 获取详情；上传 <code>main_url</code> 到 OSS。
+          </div>
+          <div class="step">
+            <strong>5. 插入本库</strong>
+            写入 <code>pokemon</code>，再写 <code>pokemon_attribute</code> 等关联表。
+          </div>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>查重与命名</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>输入</th>
+              <th>规则</th>
+              <th>示例</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>name</code> + <code>form_name/from</code></td>
+              <td>有形态名时组合为中文全角括号格式。</td>
+              <td><code>板板壳（本来的样子）</code></td>
+            </tr>
+            <tr>
+              <td>只有 <code>name</code></td>
+              <td>形态名为空时直接使用基础名称。</td>
+              <td><code>迪莫</code></td>
+            </tr>
+            <tr>
+              <td>查重字段</td>
+              <td>只按 <code>pokemon.name</code> 精确查询；命中即跳过。<code>source_id</code> 不作为已有数据主查重字段。</td>
+              <td><span class="tag ok">只插入不更新</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="note warn" style="margin-top:14px;">
+          示例数据中的形态字段是 <code>form_name</code>；实现时可以兼容旧描述里的 <code>from</code>。
+          查重阶段可同时查 <code>name（form_name）</code> 和 <code>name(form_name)</code>，但最终新增名称建议统一写中文全角括号。
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>字段映射</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>洛克观测字段</th>
+              <th>本库字段</th>
+              <th>规则</th>
+              <th>备注</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>name</code> + <code>form_name/from</code></td>
+              <td><code>pokemon.name</code></td>
+              <td>组合为 <code>name（form_name）</code>；无形态名则写 <code>name</code>。</td>
+              <td>用于查重和新增。</td>
+            </tr>
+            <tr>
+              <td><code>real_pet_id</code> / <code>pet_id</code></td>
+              <td><code>pokemon.no</code></td>
+              <td>建议优先写 <code>real_pet_id</code>，为空时回退 <code>pet_id</code>。</td>
+              <td><code>pokemon.no</code> 是必填字段。</td>
+            </tr>
+            <tr>
+              <td><code>web_pet_id</code></td>
+              <td><code>pokemon.source_id</code></td>
+              <td>仅新增记录时写入外部来源 ID；查重和更新判断仍以名称为准。</td>
+              <td>当前样本证明 <code>web_pet_id</code> 与历史 <code>source_id</code> 不同源。</td>
+            </tr>
+            <tr>
+              <td><code>main_url</code></td>
+              <td><code>pokemon.image_lc</code></td>
+              <td>先上传 OSS，成功后写入 OSS URL。</td>
+              <td>上传失败时建议跳过该宠物并记录失败原因。</td>
+            </tr>
+            <tr>
+              <td><code>avatar_url</code></td>
+              <td><code>pokemon.avatar</code></td>
+              <td>有值则写入，无值则保持空字符串。</td>
+              <td>新增记录使用；不更新已有记录。</td>
+            </tr>
+            <tr>
+              <td><code>web_pet.catch_way</code></td>
+              <td><code>pokemon.obtain_method</code></td>
+              <td>从详情里的 <code>web_pet</code> 读取，空值写空字符串。</td>
+              <td>列表的 <code>position</code> 可作为兜底来源。</td>
+            </tr>
+            <tr>
+              <td><code>sm</code></td>
+              <td><code>pokemon.hp</code></td>
+              <td>转整数，空值写 0。</td>
+              <td>精力。</td>
+            </tr>
+            <tr>
+              <td><code>wg</code></td>
+              <td><code>pokemon.atk</code></td>
+              <td>转整数，空值写 0。</td>
+              <td>物攻。</td>
+            </tr>
+            <tr>
+              <td><code>mg</code></td>
+              <td><code>pokemon.matk</code></td>
+              <td>转整数，空值写 0。</td>
+              <td>魔攻。</td>
+            </tr>
+            <tr>
+              <td><code>wf</code></td>
+              <td><code>pokemon.def_val</code></td>
+              <td>转整数，空值写 0。</td>
+              <td>物防。</td>
+            </tr>
+            <tr>
+              <td><code>mf</code></td>
+              <td><code>pokemon.mdef</code></td>
+              <td>转整数，空值写 0。</td>
+              <td>魔防。</td>
+            </tr>
+            <tr>
+              <td><code>sd</code></td>
+              <td><code>pokemon.spd</code></td>
+              <td>转整数，空值写 0。</td>
+              <td>速度。</td>
+            </tr>
+            <tr>
+              <td>六项种族值</td>
+              <td><code>pokemon.total_race</code></td>
+              <td>按 <code>hp + atk + matk + def_val + mdef + spd</code> 计算。</td>
+              <td>不直接信任外部 total 字段。</td>
+            </tr>
+            <tr>
+              <td><code>type_list</code></td>
+              <td><code>pokemon_attribute</code></td>
+              <td>按维护好的 lkgc 属性 ID 到本库 <code>attribute.id</code> 映射写入。</td>
+              <td><span class="tag warn">需要配置映射</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+      <article class="card half">
+        <h2>本库必填字段处理</h2>
+        <ul>
+          <li><code>pokemon.trait_id</code> 是必填外键。建议预置一个“无/未知”特性，导入时作为默认值。</li>
+          <li><code>pokemon.type</code>、<code>type_name</code>、<code>form</code>、<code>form_name</code> 可按现有字典规则写默认阶段/形态；至少保证空字符串不破坏前端展示。</li>
+          <li><code>pokemon.egg_group</code> 和 <code>pokemon_egg_group</code> 可先留空，后续再根据 <code>egg_type_list</code> 设计映射。</li>
+          <li>属性映射缺失时，建议跳过该属性并记录告警；如果最终没有任何属性，可允许宠物先入库但在结果里标记待补属性。</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>属性映射现状</h2>
+        <p>本次样本只能覆盖 4 个洛克观测属性 ID，完整同步前仍需补全 18 个属性映射。</p>
+        <table>
+          <thead>
+            <tr>
+              <th>洛克观测 <code>type_list</code> ID</th>
+              <th>当前样本反推属性</th>
+              <th>本库 <code>attribute.id</code></th>
+              <th>来源样本</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>4</td><td>草</td><td>3</td><td>喵喵、喵呜、魔力猫</td></tr>
+            <tr><td>6</td><td>光</td><td>4</td><td>迪莫</td></tr>
+            <tr><td>9</td><td>火</td><td>1</td><td>火花、焰火、火神</td></tr>
+            <tr><td>10</td><td>水</td><td>2</td><td>水蓝蓝、波波拉、水灵</td></tr>
+          </tbody>
+        </table>
+        <div class="note warn" style="margin-top:14px;">
+          未覆盖的 <code>type_list</code> ID 不能靠猜测写库。实现时应使用显式映射表；
+          映射缺失时记录告警，并允许该宠物先入库或根据产品要求直接跳过。
+        </div>
+      </article>
+
+      <article class="card half">
+        <h2>幂等与事务</h2>
+        <ul>
+          <li>单只宠物以 <code>pokemon.name</code> 查重，存在即跳过，保证重复运行不会覆盖人工维护数据。</li>
+          <li>每只宠物独立事务：图片上传成功后再写库；数据库写入失败则回滚该宠物。</li>
+          <li>同步过程输出统计：扫描数、已存在跳过数、新增数、图片失败数、详情失败数、属性映射缺失数。</li>
+          <li>失败明细保留宠物名称、<code>real_pet_id</code>、失败阶段和错误消息，便于补跑。</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>推荐接口形态</h2>
+        <p>建议放在运营后台接口下，避免作为公开接口暴露：</p>
+        <pre><code>POST /api/ops/pokemon/sync-lkgc
+
+Request:
+{
+  "page_size": 100,
+  "max_pages": 120,
+  "dry_run": true
+}
+
+Response:
+{
+  "scanned": 1200,
+  "inserted": 83,
+  "skipped_existing": 1110,
+  "failed": 7,
+  "warnings": ["属性映射缺失: type_id=999"],
+  "items": [
+    {
+      "name": "石肤蜥（本来的样子）",
+      "real_pet_id": "127-1",
+      "status": "inserted",
+      "message": "已新增"
+    }
+  ]
+}</code></pre>
+      </article>
+
+      <article class="card">
+        <h2>推荐写入顺序</h2>
+        <ol>
+          <li>分页拉取列表，规范化响应为宠物数组。</li>
+          <li>根据 <code>name</code> 和 <code>form_name/from</code> 生成目标名称，并查 <code>pokemon.name</code>。</li>
+          <li>命中则记录 <code>skipped_existing</code>，不再调用详情、不上传图片。</li>
+          <li>未命中则调用 <code>get_pet_info(real_pet_id)</code> 获取 <code>catch_way</code> 等详情字段。</li>
+          <li>上传 <code>main_url</code> 到 OSS，得到 <code>image_lc</code>。</li>
+          <li>按字段映射组装 <code>pokemon</code> payload，插入主表。</li>
+          <li>按 <code>type_list</code> 映射写入 <code>pokemon_attribute</code>。</li>
+          <li>返回同步统计和逐条处理结果；如果是 <code>dry_run</code>，数据库事务回滚。</li>
+        </ol>
+      </article>
+
+      <article class="card">
+        <h2>待确认项</h2>
+        <div class="note warn">
+          <p><strong>1. 属性映射表。</strong> 当前样本仅反推出 <code>4->草</code>、<code>6->光</code>、<code>9->火</code>、<code>10->水</code>，仍需确认 lkgc <code>type_list</code> 到本库 <code>attribute.id</code> 的完整映射。</p>
+          <p><strong>2. 默认特性。</strong> 需要确定用于自动导入的默认 <code>pokemon_trait</code>，因为 <code>pokemon.trait_id</code> 不能为空。</p>
+          <p><strong>3. 编号格式。</strong> 需要确认新增宠物的 <code>pokemon.no</code> 使用 <code>real_pet_id</code>、<code>pet_id</code> 还是转换为现有 <code>NO.xxx</code> 风格。</p>
+          <p><strong>4. 前端入口。</strong> 可做成精灵维护页的批量同步按钮，也可先作为后端接口或脚本执行，待确认交互范围。</p>
+        </div>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
