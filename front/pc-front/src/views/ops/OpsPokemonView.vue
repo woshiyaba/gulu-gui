@@ -13,11 +13,13 @@ import {
   searchOpsPokemonEvolutionChain,
   showOpsToast,
   syncOpsPokemonLkgcSkills,
+  syncOpsPokemonFromLkgc,
   updateOpsPokemonEvolutionChain,
   updateOpsPokemon,
   uploadOpsFriendImage,
   uploadOpsYiseImage,
   type OpsEvolutionChainStep,
+  type OpsPokemonLkgcSyncResponse,
   type OpsPokemonLkgcSkillSyncResponse,
   type OpsPokemonDetail,
   type OpsPokemonItem,
@@ -51,6 +53,10 @@ const syncingSkills = ref(false)
 const syncSkillTarget = ref<OpsPokemonItem | null>(null)
 const syncSkillResult = ref<OpsPokemonLkgcSkillSyncResponse | null>(null)
 const syncSkillError = ref('')
+const syncPokemonModalVisible = ref(false)
+const syncingPokemon = ref(false)
+const syncPokemonResult = ref<OpsPokemonLkgcSyncResponse | null>(null)
+const syncPokemonError = ref('')
 
 const traits = ref<OpsPokemonOptionItem[]>([])
 const attributes = ref<OpsPokemonOptionItem[]>([])
@@ -819,6 +825,32 @@ function closeSyncSkillModal() {
   syncSkillError.value = ''
 }
 
+async function syncPokemonFromLkgc() {
+  syncPokemonModalVisible.value = true
+  syncingPokemon.value = true
+  syncPokemonResult.value = null
+  syncPokemonError.value = ''
+  try {
+    const result = await syncOpsPokemonFromLkgc()
+    syncPokemonResult.value = result
+    showOpsToast('精灵同步完成', 'success')
+    await loadOptions()
+    await loadList()
+  } catch (err: any) {
+    syncPokemonError.value = err?.response?.data?.detail || '同步失败'
+    showOpsToast(syncPokemonError.value, 'error')
+  } finally {
+    syncingPokemon.value = false
+  }
+}
+
+function closeSyncPokemonModal() {
+  if (syncingPokemon.value) return
+  syncPokemonModalVisible.value = false
+  syncPokemonResult.value = null
+  syncPokemonError.value = ''
+}
+
 function applyTypeLabel() {
   const matched = typeOptions.value.find((x) => x.code === form.type)
   form.type_name = matched?.label || ''
@@ -947,7 +979,10 @@ onBeforeUnmount(() => {
 
     <section class="ops-card-padded">
       <div class="ops-toolbar">
-        <button type="button" class="ops-btn ops-btn-primary" @click="openCreateModal">新增精灵</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <button type="button" class="ops-btn ops-btn-primary" @click="openCreateModal">新增精灵</button>
+          <button type="button" class="ops-btn ops-btn-secondary" :disabled="syncingPokemon" @click="syncPokemonFromLkgc">{{ syncingPokemon ? '同步中...' : '精灵同步' }}</button>
+        </div>
         <span class="ops-toolbar-meta">共 {{ total }} 条</span>
       </div>
       <p v-if="error" class="ops-error">{{ error }}</p>
@@ -1473,6 +1508,86 @@ onBeforeUnmount(() => {
         </div>
         <div style="display:flex;justify-content:center;align-items:center;gap:10px;padding:12px 20px 20px;">
           <button type="button" class="ops-btn ops-btn-secondary" :disabled="syncingSkills" @click="closeSyncSkillModal">关闭</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- 精灵同步结果 -->
+    <div v-if="syncPokemonModalVisible" class="ops-modal-mask">
+      <section
+        style="width:min(100%,760px);max-height:calc(100vh - 48px);overflow:auto;background:var(--ops-surface);border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);"
+        @click.stop
+      >
+        <div class="ops-modal-header">
+          <h3>精灵同步</h3>
+        </div>
+        <div style="padding:12px 20px 0;display:grid;gap:12px;">
+          <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);background:var(--ops-bg);padding:12px;display:grid;gap:6px;">
+            <div style="font-size:13px;color:var(--ops-text-secondary);">
+              从洛克观测拉取全部精灵列表，按 <code>名称_来源</code> 匹配数据库中现有精灵，未匹配到的自动插入。
+            </div>
+          </div>
+
+          <div v-if="syncingPokemon" class="ops-loading" style="min-height:100px;">同步中，请稍候...</div>
+
+          <p v-if="syncPokemonError" class="ops-error">{{ syncPokemonError }}</p>
+
+          <template v-if="syncPokemonResult">
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;">
+              <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);padding:10px;background:var(--ops-bg);">
+                <div style="font-size:12px;color:var(--ops-muted);">检查总数</div>
+                <strong style="font-size:18px;color:var(--ops-text);">{{ syncPokemonResult.total_checked }}</strong>
+              </div>
+              <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);padding:10px;background:var(--ops-bg);">
+                <div style="font-size:12px;color:var(--ops-muted);">新增</div>
+                <strong style="font-size:18px;color:var(--ops-accent);">{{ syncPokemonResult.total_inserted }}</strong>
+              </div>
+              <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);padding:10px;background:var(--ops-bg);">
+                <div style="font-size:12px;color:var(--ops-muted);">跳过</div>
+                <strong style="font-size:18px;color:var(--ops-text);">{{ syncPokemonResult.total_skipped }}</strong>
+              </div>
+              <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);padding:10px;background:var(--ops-bg);">
+                <div style="font-size:12px;color:var(--ops-muted);">错误</div>
+                <strong style="font-size:18px;color:#dc2626;">{{ syncPokemonResult.total_errors }}</strong>
+              </div>
+            </div>
+
+            <div v-if="syncPokemonResult.warnings.length" style="border:1px solid #fed7aa;border-radius:var(--ops-radius-sm);background:#fff7ed;color:#9a3412;padding:10px;display:grid;gap:4px;font-size:13px;">
+              <strong>提示</strong>
+              <div v-for="(msg, index) in syncPokemonResult.warnings" :key="index">{{ msg }}</div>
+            </div>
+
+            <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);overflow:hidden;">
+              <table class="ops-table">
+                <thead>
+                  <tr>
+                    <th>名称</th>
+                    <th>洛克观测名称</th>
+                    <th>状态</th>
+                    <th>精灵ID</th>
+                    <th>结果</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(item, index) in syncPokemonResult.items" :key="`${item.name}-${index}`">
+                    <td>{{ item.name || '-' }}</td>
+                    <td>{{ item.lkgc_name || '-' }}</td>
+                    <td>
+                      <span :style="{ color: item.status === 'inserted' ? 'var(--ops-accent)' : item.status === 'error' ? '#dc2626' : 'var(--ops-text-secondary)' }">
+                        {{ item.status }}
+                      </span>
+                    </td>
+                    <td>{{ item.pokemon_id ?? '-' }}</td>
+                    <td>{{ item.message }}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <div v-if="!syncPokemonResult.items.length" class="ops-empty" style="min-height:60px;">没有可同步的精灵</div>
+            </div>
+          </template>
+        </div>
+        <div style="display:flex;justify-content:center;align-items:center;gap:10px;padding:12px 20px 20px;">
+          <button type="button" class="ops-btn ops-btn-secondary" :disabled="syncingPokemon" @click="closeSyncPokemonModal">关闭</button>
         </div>
       </section>
     </div>

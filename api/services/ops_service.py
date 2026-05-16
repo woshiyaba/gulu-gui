@@ -591,6 +591,19 @@ def _infer_lkgc_skill_type(item: dict) -> str:
     return ""
 
 
+async def _resolve_lkgc_trait(detail: dict) -> int | None:
+    """从 getPetInfo 的 feature_list 中 upsert 特性，返回 trait_id。"""
+    feature_list = detail.get("feature_list") or []
+    if not isinstance(feature_list, list) or not feature_list:
+        return None
+    ft = feature_list[0]
+    name = str(ft.get("name") or "").strip()
+    desc = str(ft.get("desc") or "").strip()
+    if not name:
+        return None
+    return await ops_repository.upsert_trait(name, desc)
+
+
 def _upload_lkgc_skill_icon(icon_url: str, warnings: list[str], skill_name: str) -> str:
     icon_url = (icon_url or "").strip()
     if not icon_url:
@@ -601,6 +614,20 @@ def _upload_lkgc_skill_icon(icon_url: str, warnings: list[str], skill_name: str)
         return COSClient().upload_from_url(icon_url, prefix="skill/icon")
     except Exception as exc:
         warnings.append(f"技能 {skill_name} 图标上传失败：{exc}")
+        return ""
+
+
+def _upload_lkgc_pokemon_image(image_url: str, warnings: list[str], pokemon_name: str) -> str:
+    """下载 lkgc 精灵图片并上传到 COS，返回 COS 地址。失败时返回空字符串。"""
+    image_url = (image_url or "").strip()
+    if not image_url:
+        return ""
+    try:
+        from oss.oss import COSClient
+
+        return COSClient().upload_from_url(image_url, prefix="pokemon/lkgc")
+    except Exception as exc:
+        warnings.append(f"精灵 {pokemon_name} 图片上传失败：{exc}")
         return ""
 
 
@@ -695,6 +722,231 @@ async def sync_pokemon_lkgc_skills_for_ops(user: dict, pokemon_id: int) -> dict:
         after_json=response,
     )
     return response
+
+
+async def sync_pokemon_from_lkgc_for_ops(user: dict) -> dict:
+    """遍历 lkgc getList 全量数据，按 name 匹配本库 pokemon，未命中则新增。"""
+    ensure_role(user, {"editor", "admin"})
+
+    all_pets = await asyncio.to_thread(lkgc.fetch_all_pets, max_pages=120, page_size=100)
+    if not all_pets:
+        return {
+            "total_checked": 0,
+            "total_inserted": 0,
+            "total_skipped": 0,
+            "total_errors": 0,
+            "warnings": [],
+            "items": [],
+        }
+
+    egg_group_map = await ops_repository.list_all_lkgc_egg_groups()
+    warnings: list[str] = []
+    items: list[dict] = []
+    inserted = 0
+    skipped = 0
+    errors = 0
+
+    # Build candidate names for all pets at once
+    pet_info_list: list[tuple[dict, set[str]]] = []
+    all_candidates: list[str] = []
+    for pet in all_pets:
+        candidates = _lkgc_name_candidates(pet)
+        if not candidates:
+            continue
+        pet_info_list.append((pet, candidates))
+        all_candidates.extend(candidates)
+
+    existing_names = await ops_repository.check_pokemon_names_exist(all_candidates)
+
+    for pet, candidates in pet_info_list:
+        name = str(pet.get("name") or "").strip()
+        match = existing_names & candidates
+
+        if match:
+            skipped += 1
+            items.append({
+                "name": next(iter(match)),
+                "lkgc_name": name,
+                "status": "skipped",
+                "message": "已存在",
+                "pokemon_id": None,
+            })
+            continue
+
+        # New pokemon — fetch detail
+        pet_id = str(pet.get("real_pet_id") or pet.get("pet_id") or "").strip()
+        if not pet_id:
+            errors += 1
+            items.append({
+                "name": name,
+                "lkgc_name": name,
+                "status": "error",
+                "message": "缺少 real_pet_id",
+                "pokemon_id": None,
+            })
+            continue
+
+        raw = await asyncio.to_thread(lkgc.get_pet_info, pet_id)
+        detail = _normalize_lkgc_response(raw)
+        if isinstance(detail, list):
+            detail = detail[0] if detail else None
+        if not isinstance(detail, dict):
+            errors += 1
+            warnings.append(f"{name}: getPetInfo 返回为空，已跳过")
+            items.append({
+                "name": name,
+                "lkgc_name": name,
+                "status": "error",
+                "message": "getPetInfo 返回为空",
+                "pokemon_id": None,
+            })
+            continue
+
+        try:
+            payload = _build_lkgc_pokemon_payload(pet, detail, egg_group_map, warnings)
+            # 处理特性（trait）
+            trait_id = await _resolve_lkgc_trait(detail)
+            if trait_id:
+                payload["trait_id"] = trait_id
+            if not payload:
+                errors += 1
+                items.append({
+                    "name": name,
+                    "lkgc_name": name,
+                    "status": "error",
+                    "message": "构建 payload 失败",
+                    "pokemon_id": None,
+                })
+                continue
+
+            # 下载精灵图片到 COS，替换临时外链
+            cos_url = await asyncio.to_thread(_upload_lkgc_pokemon_image, payload.get("image", ""), warnings, name)
+            if cos_url:
+                payload["image"] = payload["detail_url"] = payload["image_lc"] = cos_url
+
+            # yise 图片（如果有）
+            yise_url = payload.get("image_yise", "") or ""
+            if yise_url:
+                cos_yise = await asyncio.to_thread(_upload_lkgc_pokemon_image, yise_url, warnings, f"{name}(异色)")
+                if cos_yise:
+                    payload["image_yise"] = cos_yise
+
+            pokemon_id = await ops_repository.insert_pokemon_from_lkgc(payload)
+            inserted += 1
+            items.append({
+                "name": payload["name"],
+                "lkgc_name": name,
+                "status": "inserted",
+                "message": "已新增",
+                "pokemon_id": pokemon_id,
+            })
+        except Exception as exc:
+            errors += 1
+            warnings.append(f"{name}: 写入失败 - {exc}")
+            items.append({
+                "name": name,
+                "lkgc_name": name,
+                "status": "error",
+                "message": str(exc),
+                "pokemon_id": None,
+            })
+
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="pokemon",
+        resource_id="batch",
+        action="sync_lkgc",
+        before_json=None,
+        after_json={"total_checked": len(all_pets), "total_inserted": inserted, "total_errors": errors},
+    )
+
+    return {
+        "total_checked": len(all_pets),
+        "total_inserted": inserted,
+        "total_skipped": skipped,
+        "total_errors": errors,
+        "warnings": warnings,
+        "items": items,
+    }
+
+
+def _build_lkgc_pokemon_payload(
+    pet: dict, detail: dict, egg_group_map: dict[int, str], warnings: list[str]
+) -> dict | None:
+    """将 lkgc 的 getList + getPetInfo 数据组装为 pokemon 行 payload。"""
+    name = str(pet.get("name") or "").strip()
+    if not name:
+        return None
+
+    # evolution stage → type / type_name
+    stage = pet.get("evolution_stage")
+    stage_map = {
+        0: ("final", "最终形态"),
+        1: ("stage1", "Ⅰ阶"),
+        2: ("stage2", "Ⅱ阶"),
+        3: ("final", "最终形态"),
+    }
+    pokemon_type, type_name = stage_map.get(stage, ("", ""))
+
+    # stats
+    hp = int(pet.get("sm") or 0)
+    atk = int(pet.get("wg") or 0)
+    matk = int(pet.get("mg") or 0)
+    def_val = int(pet.get("wf") or 0)
+    mdef = int(pet.get("mf") or 0)
+    spd = int(pet.get("sd") or 0)
+    total_race = hp + atk + matk + def_val + mdef + spd
+
+    # egg groups
+    egg_type_ids: list[int] = pet.get("egg_type_list") or []
+    egg_group_names = [egg_group_map.get(eid, f"未知({eid})") for eid in egg_type_ids if eid in egg_group_map]
+    for eid in egg_type_ids:
+        if eid not in egg_group_map:
+            warnings.append(f"{name}: egg_type_list 中的 {eid} 未在 lkgc_egg_group 中找到")
+
+    # trait（由调用方通过 _resolve_lkgc_trait 异步处理）
+    trait_id = 1
+
+    # type_list → attribute ids (lkgc type_id == our attribute.id 1:1)
+    type_list = detail.get("type_list") or pet.get("type_list") or []
+    attribute_ids = [int(t) for t in type_list if isinstance(t, (int, float))]
+
+    # name_en from icon_name
+    icon_name = str(pet.get("icon_name") or detail.get("icon_name") or "").strip()
+    name_en = icon_name.removeprefix("JL_") if icon_name else ""
+
+    # main image
+    main_url = str(pet.get("main_url") or "").strip()
+    form = str(pet.get("form") or "").strip() or "original"
+    form_name = str(pet.get("form_name") or "").strip() or "原始形态"
+
+    return {
+        "no": "",
+        "name": name,
+        "image": main_url,
+        "type": pokemon_type,
+        "type_name": type_name,
+        "form": form,
+        "form_name": form_name,
+        "egg_group": ",".join(egg_group_names),
+        "egg_groups": egg_group_names,
+        "trait_id": trait_id,
+        "detail_url": main_url,
+        "image_lc": main_url,
+        "image_yise": str(pet.get("yise_url") or detail.get("yise_url") or "").strip(),
+        "chain_id": None,
+        "hp": hp,
+        "atk": atk,
+        "matk": matk,
+        "def_val": def_val,
+        "mdef": mdef,
+        "spd": spd,
+        "total_race": total_race,
+        "obtain_method": str(pet.get("position") or "").strip(),
+        "name_en": name_en,
+        "source_id": pet.get("base_id") or pet.get("source_id") or detail.get("base_id"),
+        "attribute_ids": attribute_ids,
+    }
 
 
 async def get_pokemon_evolution_chain_for_ops(user: dict, pokemon_id: int) -> dict:

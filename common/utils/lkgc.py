@@ -149,7 +149,7 @@ def fetch_all_pets(
         data = fetch_pet_list(page=page, page_size=page_size)
         if not data:
             break
-        records = (data.get("data") or {}).get("list") or []
+        records = data if isinstance(data, list) else (data.get("data") or {}).get("list") or []
         if not records:
             break
         all_data.extend(records)

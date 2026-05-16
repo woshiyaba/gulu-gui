@@ -410,6 +410,31 @@ export function syncOpsPokemonLkgcSkills(id: number): Promise<OpsPokemonLkgcSkil
     .then((r) => r.data)
 }
 
+export interface OpsPokemonLkgcSyncItem {
+  name: string
+  lkgc_name: string
+  status: string
+  message: string
+  pokemon_id: number | null
+}
+
+export interface OpsPokemonLkgcSyncResponse {
+  total_checked: number
+  total_inserted: number
+  total_skipped: number
+  total_errors: number
+  warnings: string[]
+  items: OpsPokemonLkgcSyncItem[]
+}
+
+export function syncOpsPokemonFromLkgc(): Promise<OpsPokemonLkgcSyncResponse> {
+  return http
+    .post<OpsPokemonLkgcSyncResponse>('/api/ops/pokemon/sync-lkgc', undefined, {
+      timeout: 300000,
+    })
+    .then((r) => r.data)
+}
+
 export function fetchOpsPokemonEvolutionChain(id: number): Promise<OpsEvolutionChain> {
   return http.get<OpsEvolutionChain>(`/api/ops/pokemon/${id}/evolution-chain`).then((r) => r.data)
 }

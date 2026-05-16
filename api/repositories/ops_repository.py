@@ -1144,6 +1144,107 @@ async def get_pokemon_evolution_chain_for_ops(pokemon_id: int) -> dict | None:
             }
 
 
+async def check_pokemon_names_exist(names: list[str]) -> set[str]:
+    """Return the subset of names that already exist in pokemon table."""
+    if not names:
+        return set()
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT name FROM pokemon WHERE name = ANY(%s)", (names,))
+            return {row["name"] for row in await cur.fetchall()}
+
+
+async def upsert_trait(name: str, desc: str) -> int:
+    """Upsert a pokemon_trait by name, return its id."""
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT id FROM pokemon_trait WHERE name = %s", (name,))
+            row = await cur.fetchone()
+            if row:
+                return int(row["id"])
+            await cur.execute(
+                "INSERT INTO pokemon_trait (name, description) VALUES (%s, %s) RETURNING id",
+                (name, desc),
+            )
+            row = await cur.fetchone()
+            await conn.commit()
+            return int(row["id"])
+
+
+async def insert_pokemon_from_lkgc(payload: dict) -> int:
+    """Insert a pokemon row from lkgc synced data, return new id."""
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                INSERT INTO pokemon (
+                    no, name, image, type, type_name, form, form_name,
+                    egg_group, trait_id, detail_url, image_lc, image_yise,
+                    chain_id, hp, atk, matk, def_val, mdef, spd,
+                    total_race, obtain_method, name_en, source_id
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                        %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+                """,
+                (
+                    payload["no"],
+                    payload["name"],
+                    payload.get("image", ""),
+                    payload.get("type", ""),
+                    payload.get("type_name", ""),
+                    payload.get("form", ""),
+                    payload.get("form_name", ""),
+                    payload.get("egg_group", ""),
+                    payload["trait_id"],
+                    payload.get("detail_url", ""),
+                    payload.get("image_lc", ""),
+                    payload.get("image_yise", ""),
+                    payload.get("chain_id"),
+                    payload.get("hp", 0),
+                    payload.get("atk", 0),
+                    payload.get("matk", 0),
+                    payload.get("def_val", 0),
+                    payload.get("mdef", 0),
+                    payload.get("spd", 0),
+                    payload.get("total_race", 0),
+                    payload.get("obtain_method", ""),
+                    payload.get("name_en", ""),
+                    payload.get("source_id"),
+                ),
+            )
+            pokemon_id = (await cur.fetchone())["id"]
+
+            # egg groups
+            for group_name in payload.get("egg_groups", []):
+                await cur.execute(
+                    "INSERT INTO pokemon_egg_group (pokemon_id, group_name) VALUES (%s, %s)",
+                    (pokemon_id, group_name),
+                )
+
+            # attributes (type_list)
+            for attr_id in payload.get("attribute_ids", []):
+                await cur.execute(
+                    "INSERT INTO pokemon_attribute (pokemon_id, attr_id) VALUES (%s, %s) ON CONFLICT DO NOTHING",
+                    (pokemon_id, attr_id),
+                )
+
+            await conn.commit()
+            return pokemon_id
+
+
+async def list_all_lkgc_egg_groups() -> dict[int, str]:
+    """Return {lkgc_id: group_name} mapping from lkgc_egg_group."""
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT id, name FROM lkgc_egg_group")
+            return {int(row["id"]): row["name"] for row in await cur.fetchall()}
+
+
 async def save_pokemon_evolution_chain_for_ops(pokemon_id: int, steps: list[dict]) -> dict | None:
     pool = await get_pool()
     async with pool.connection() as conn:

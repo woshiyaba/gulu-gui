@@ -45,6 +45,7 @@ from api.schemas.ops import (
     OpsPokemonFilterOptionItem,
     OpsPokemonFilterOptionListResponse,
     OpsPokemonFilterOptionUpsertRequest,
+    OpsPokemonLkgcSyncResponse,
 )
 from api.schemas.banner import BannerItem, BannerListResponse, BannerUpsertRequest
 from api.schemas.personality import (
@@ -274,6 +275,13 @@ async def sync_ops_pokemon_lkgc_skills(
     current_user: dict = Depends(get_current_ops_user),
 ):
     return await ops_service.sync_pokemon_lkgc_skills_for_ops(current_user, pokemon_id)
+
+
+@router.post("/pokemon/sync-lkgc", response_model=OpsPokemonLkgcSyncResponse)
+async def sync_ops_pokemon_from_lkgc(
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.sync_pokemon_from_lkgc_for_ops(current_user)
 
 
 @router.get("/pokemon/evolution-chain/search", response_model=OpsEvolutionChainResponse)

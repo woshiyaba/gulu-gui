@@ -436,3 +436,20 @@ class OpsPokemonFilterOptionUpsertRequest(BaseModel):
     order_dir: str = ""
     sort_order: int = 0
     is_active: bool = True
+
+
+class OpsPokemonLkgcSyncItem(BaseModel):
+    name: str
+    lkgc_name: str = ""
+    status: str = ""  # inserted / skipped / error
+    message: str = ""
+    pokemon_id: int | None = None
+
+
+class OpsPokemonLkgcSyncResponse(BaseModel):
+    total_checked: int = 0
+    total_inserted: int = 0
+    total_skipped: int = 0
+    total_errors: int = 0
+    warnings: list[str] = Field(default_factory=list)
+    items: list[OpsPokemonLkgcSyncItem] = Field(default_factory=list)
