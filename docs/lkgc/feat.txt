@@ -5,8 +5,36 @@
   分页获取宠物列表 然后遍历宠物列表获取详情 获取宠物的详情  1.根据
   getListexam的 name和from 组合为 name（from_name）去数库pokemon.name 中查询   
   如果有则不做任何操作，本次操作只插入不更新历史数据 然后将main_url 上传到oss  
-  将作为pokemon.image_lc，mf->mdef,mg->matk,sd->spd,sm->hp,wf->def_val,wg->atk 这是种族值的对应关系，
-  catch_way->obtain_method avatar_url->avatar有的话则更新 没有的话则不更新 将数据插入到pokemon
+  docs/lkgc/属性对照文档.md文档中有属性和技能对照表
+  下面是字段对应，前者是我们库里的，后者是请求json的：
+  pokemon表：
+    id->自增
+    no->先不管
+    name->name
+    image->main_url
+    type->evolution_stage 0和3是final 1是Ⅰ阶 2是Ⅱ阶
+    form->默认为original
+    form_name->默认为原始形态
+    egg_group->egg_type_list 需要你对比数据找一下规律
+    trait_it->默认是在特性表新增特性
+    detail_url->main_url
+    image_lc->main_url
+    chain_id->先默认空
+    sm	pokemon.hp	转整数，空值写 0。	精力。
+    wg	pokemon.atk	转整数，空值写 0。	物攻。
+    mg	pokemon.matk	转整数，空值写 0。	魔攻。
+    wf	pokemon.def_val	转整数，空值写 0。	物防。
+    mf	pokemon.mdef	转整数，空值写 0。	魔防。
+    sd	pokemon.spd	转整数，空值写 0。	速度。
+    total_race为hp，atk，matk，def_val，mdef，spd的总和
+    obtain_method->position
+    name_en -> icon_name去掉JL_
+    image_yise->yise_url
+    avatar->默认空
+    source_id ->base_id
+
+    poekmon技能同步也做与下方的“同步技能”功能一样的。
+
 
  2. 在精灵维护列表的操作列增加“同步技能”功能，点击后弹出同步结果弹窗。后端根据当前 pokemon.name 匹配
  getList 返回的 name/from 组合名，再调用 getPetInfo 获取详情，读取 skill_list 中的 base、bloodline、stone 三类技能。

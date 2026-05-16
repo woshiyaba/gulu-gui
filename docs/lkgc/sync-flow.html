@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>同步功能流程</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'Segoe UI', sans-serif; background: #f5f6fa; padding: 32px; color: #2d3436; }
+  h1 { text-align: center; margin-bottom: 8px; font-size: 22px; }
+  .subtitle { text-align: center; color: #636e72; font-size: 13px; margin-bottom: 28px; }
+
+  .row { display: flex; gap: 24px; align-items: flex-start; max-width: 1400px; margin: 0 auto; }
+
+  /* ---- card style ---- */
+  .card { background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,.07); flex: 1; overflow: hidden; }
+  .card-header { padding: 14px 20px; font-weight: 600; font-size: 15px; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 8px; }
+  .card-header .badge { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
+  .card-body { padding: 20px; }
+
+  .badge-blue { background: #dfe6e9; color: #0984e3; }
+  .badge-green { background: #dfe6e9; color: #00b894; }
+  .badge-orange { background: #dfe6e9; color: #e17055; }
+
+  /* ---- flow boxes ---- */
+  .step { margin-bottom: 20px; }
+  .step:last-child { margin-bottom: 0; }
+  .step-label { font-size: 12px; color: #636e72; letter-spacing: .5px; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+  .step-label .arrow { color: #b2bec3; }
+  .step-box { background: #f8f9fd; border-radius: 8px; padding: 14px 16px; border-left: 3px solid #0984e3; }
+
+  /* sub sections inside a box */
+  .field-grid { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: 13px; margin-top: 8px; }
+  .field-grid .key { color: #636e72; white-space: nowrap; }
+  .field-grid .val { color: #2d3436; word-break: break-all; }
+  .field-grid .val em { font-style: normal; color: #0984e3; }
+  .field-grid .val .null { color: #b2bec3; font-style: italic; }
+
+  .note { font-size: 12px; color: #636e72; margin-top: 6px; padding: 6px 10px; background: #fff3cd; border-radius: 4px; display: inline-block; }
+  .note.info { background: #dff9fb; color: #0984e3; }
+  .note.warn { background: #ffeaa7; color: #d68910; }
+
+  .divider { height: 1px; background: #eee; margin: 16px 0; }
+
+  .tag { display: inline-block; font-size: 11px; padding: 1px 6px; border-radius: 3px; margin-right: 4px; }
+  .tag-green { background: #00b89422; color: #00b894; }
+  .tag-blue { background: #0984e322; color: #0984e3; }
+  .tag-orange { background: #e1705522; color: #e17055; }
+  .tag-purple { background: #6c5ce722; color: #6c5ce7; }
+
+  .field-row { display: flex; align-items: baseline; gap: 8px; font-size: 13px; padding: 2px 0; }
+  .field-row .fkey { color: #636e72; min-width: 70px; font-family: 'Consolas', monospace; font-size: 12px; }
+  .field-row .fval { color: #2d3436; }
+  .field-row .fval .src { color: #0984e3; }
+
+  .section-title { font-size: 13px; font-weight: 600; margin: 14px 0 8px; color: #2d3436; }
+  .section-title:first-child { margin-top: 0; }
+
+  .skill-grid { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+  .skill-type { font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 500; }
+  .skill-base { background: #0984e318; color: #0984e3; }
+  .skill-blood { background: #e1705518; color: #e17055; }
+  .skill-stone { background: #6c5ce718; color: #6c5ce7; }
+
+  hr { border: none; border-top: 1px solid #eee; margin: 14px 0; }
+</style>
+</head>
+<body>
+
+<h1>精灵图鉴同步功能</h1>
+<p class="subtitle">基于 lkgc 接口的宠物同步 + 技能同步流程设计</p>
+
+<div class="row">
+  <!-- ========= PET SYNC ========= -->
+  <div class="card">
+    <div class="card-header">
+      宠物同步 <span class="badge badge-blue">全量/增量</span>
+    </div>
+    <div class="card-body">
+
+      <div class="step">
+        <div class="step-label"><span>1</span> 请求</div>
+        <div class="step-box">
+          <div><code>fetch_pet_list()</code> → 获取 <code>getList</code> 数据</div>
+          <div style="margin-top:4px"><code>getPetInfo()</code> → 获取每个宠物的 <code>getPetInfo</code> 详情</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span>2</span> 匹配规则</div>
+        <div class="step-box">
+          <div class="field-row"><span class="fkey">name</span> <span class="fval">getList 的 name</span></div>
+          <div class="field-row"><span class="fkey">from</span> <span class="fval">getList 的 from</span></div>
+          <div class="field-row">
+            <span class="fkey">组合键</span>
+            <span class="fval"><strong><code>{name}_{from}</code></strong> → 对应 pokemon.name</span>
+          </div>
+          <div class="note info">命中 → 跳过（只插不更新）；未命中 → 新增</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span>3</span> 字段映射 <span style="font-weight:400;color:#636e72">getPetInfo → pokemon 表</span></div>
+        <div class="step-box">
+          <div class="field-grid">
+            <span class="key">name</span>           <span class="val"><em>getPetInfo</em> → name</span>
+            <span class="key">image</span>           <span class="val">main_url → image（同时上传 OSS）</span>
+            <span class="key">type</span>            <span class="val">evolution_stage: 0/3=final, 1=Ⅰ阶, 2=Ⅱ阶</span>
+            <span class="key">form</span>            <span class="val">默认 <span class="null">original</span></span>
+            <span class="key">form_name</span>       <span class="val">默认 <span class="null">原始形态</span></span>
+            <span class="key">egg_group</span>       <span class="val">egg_type_list → 中文蛋组名（见下方对照表）</span>
+            <span class="key">trait_it</span>        <span class="val">特性表新增特性</span>
+            <span class="key">detail_url</span>      <span class="val">main_url</span>
+            <span class="key">image_lc</span>        <span class="val">main_url</span>
+            <span class="key">chain_id</span>        <span class="val">默认空</span>
+            <span class="key">sm / hp</span>         <span class="val">hp → 整数，空值=0</span>
+            <span class="key">wg / atk</span>        <span class="val">atk → 整数，空值=0</span>
+            <span class="key">mg / matk</span>       <span class="val">matk → 整数，空值=0</span>
+            <span class="key">wf / def_val</span>    <span class="val">def_val → 整数，空值=0</span>
+            <span class="key">mf / mdef</span>       <span class="val">mdef → 整数，空值=0</span>
+            <span class="key">sd / spd</span>        <span class="val">spd → 整数，空值=0</span>
+            <span class="key">total_race</span>      <span class="val">hp+atk+matk+def_val+mdef+spd 之和</span>
+            <span class="key">obtain_method</span>   <span class="val">position</span>
+            <span class="key">name_en</span>         <span class="val">icon_name 去掉 <code>JL_</code> 前缀</span>
+            <span class="key">image_yise</span>      <span class="val">yise_url</span>
+            <span class="key">avatar</span>          <span class="val">默认空</span>
+            <span class="key">source_id</span>       <span class="val">base_id</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span>4</span> 额外处理</div>
+        <div class="step-box">
+          <div>main_url 上传到 OSS</div>
+          <div>特性在 trait 表新增</div>
+          <div>egg_type_list → 中文蛋组名 → 写入 <code>pokemon.egg_group</code> + <code>pokemon_egg_group</code></div>
+          <div style="margin-top:4px">技能同步 → 见右侧「技能同步」</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========= SKILL SYNC ========= -->
+  <div class="card">
+    <div class="card-header">
+      技能同步 <span class="badge badge-green">弹窗操作</span>
+    </div>
+    <div class="card-body">
+
+      <div class="step">
+        <div class="step-label"><span>1</span> 触发</div>
+        <div class="step-box">
+          在精灵维护列表的操作列点击「同步技能」按钮
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span>2</span> 匹配当前宠物</div>
+        <div class="step-box">
+          <div class="field-row"><span class="fkey">条件</span> <span class="fval">pokemon.name = getList 的 <code>{name}_{from}</code></span></div>
+          <div class="field-row"><span class="fkey">获取</span> <span class="fval">getPetInfo → skill_list</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span>3</span> 技能分类</div>
+        <div class="step-box">
+          <div class="skill-grid">
+            <span class="skill-type skill-base">base → type=原生技能</span>
+            <span class="skill-type skill-blood">bloodline → type=血脉技能</span>
+            <span class="skill-type skill-stone">stone → type=技能石技能</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span>4</span> 技能匹配（skill 表）</div>
+        <div class="step-box">
+          <div class="field-row"><span class="fkey">命中</span> <span class="fval">复用 skill.id，不更新 skill 属性</span></div>
+          <div class="field-row"><span class="fkey">未命中</span> <span class="fval">新增 skill 记录</span></div>
+          <hr>
+          <div class="section-title">新增 skill 字段映射</div>
+          <div class="field-grid">
+            <span class="key">take_energy</span>  <span class="val"><em>consume</em></span>
+            <span class="key">power</span>        <span class="val"><em>power</em></span>
+            <span class="key">desc</span>         <span class="val"><em>skill_desc</em></span>
+            <span class="key">icon_url</span>     <span class="val">上传 OSS 后写入</span>
+            <span class="key">attr_id</span>      <span class="val">先写 NULL（以本库维护为准）</span>
+          </div>
+          <hr>
+          <div class="section-title">技能类型推断（无本库值时）</div>
+          <div class="field-grid">
+            <span class="key">category_id=1 + damage_id=1</span>  <span class="val">物攻</span>
+            <span class="key">category_id=1 + damage_id=2</span>  <span class="val">魔攻</span>
+            <span class="key">category_id=2 + damage_id=-1</span> <span class="val">防御</span>
+            <span class="key">category_id=3 + damage_id=-1</span> <span class="val">状态</span>
+          </div>
+          <div class="note warn">tag_id 不作为类型映射依据</div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span>5</span> 关系写入 <span style="font-weight:400;color:#636e72">pokemon_skill 表</span></div>
+        <div class="step-box">
+          <div class="field-row"><span class="fkey">幂等键</span> <span class="fval">(pokemon_id, skill_id)</span></div>
+          <div class="field-row"><span class="fkey">重复时</span> <span class="fval">更新 type 和 sort_order</span></div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-label"><span>6</span> 结果弹窗</div>
+        <div class="step-box">
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13px">
+            <span style="color:#636e72">请求技能数</span><span>接口返回的总数</span>
+            <span style="color:#636e72">命中/新增技能数</span><span>skill 表匹配/创建数</span>
+            <span style="color:#636e72">新增/更新关系数</span><span>pokemon_skill 变更数</span>
+            <span style="color:#636e72">跳过数</span><span>无需处理的条数</span>
+            <span style="color:#636e72">告警信息</span><span>异常或无配置提示</span>
+            <span style="color:#636e72">逐条结果</span><span>每个技能的处理详情</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<br>
+<div style="max-width:1400px;margin:0 auto;display:flex;gap:24px">
+
+  <div class="card" style="flex:1">
+    <div class="card-header">
+      egg_type_list 数值 ↔ 蛋组名对照 <span class="badge badge-orange">已找出规律</span>
+    </div>
+    <div class="card-body" style="font-size:13px">
+      <p style="margin-bottom:10px;color:#00b894;font-size:12px">来源：lkgc 实时数据 + 洛克王国宠物蛋组.json 交叉验证，共 15 组</p>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <tr><th style="text-align:left;border-bottom:1px solid #eee;padding:4px 8px">lkgc_id</th><th style="text-align:left;border-bottom:1px solid #eee;padding:4px 8px">蛋组名</th><th style="text-align:left;border-bottom:1px solid #eee;padding:4px 8px">数据库 count</th></tr>
+        <tr><td style="padding:4px 8px">1</td><td style="padding:4px 8px">巨灵组</td><td style="padding:4px 8px;color:#636e72">64</td></tr>
+        <tr><td style="padding:4px 8px">2</td><td style="padding:4px 8px">两栖组</td><td style="padding:4px 8px;color:#636e72">55</td></tr>
+        <tr><td style="padding:4px 8px">3</td><td style="padding:4px 8px">昆虫组</td><td style="padding:4px 8px;color:#636e72">35</td></tr>
+        <tr><td style="padding:4px 8px">4</td><td style="padding:4px 8px">天空组</td><td style="padding:4px 8px;color:#636e72">71</td></tr>
+        <tr><td style="padding:4px 8px">5</td><td style="padding:4px 8px">动物组</td><td style="padding:4px 8px;color:#636e72">89</td></tr>
+        <tr><td style="padding:4px 8px">6</td><td style="padding:4px 8px">妖精组</td><td style="padding:4px 8px;color:#636e72">80</td></tr>
+        <tr><td style="padding:4px 8px">7</td><td style="padding:4px 8px">植物组</td><td style="padding:4px 8px;color:#636e72">46</td></tr>
+        <tr><td style="padding:4px 8px">8</td><td style="padding:4px 8px">拟人组</td><td style="padding:4px 8px;color:#636e72">46</td></tr>
+        <tr><td style="padding:4px 8px">9</td><td style="padding:4px 8px">软体组</td><td style="padding:4px 8px;color:#636e72">41</td></tr>
+        <tr><td style="padding:4px 8px">10</td><td style="padding:4px 8px">大地组</td><td style="padding:4px 8px;color:#636e72">33</td></tr>
+        <tr><td style="padding:4px 8px">11</td><td style="padding:4px 8px">魔力组</td><td style="padding:4px 8px;color:#636e72">41</td></tr>
+        <tr><td style="padding:4px 8px">12</td><td style="padding:4px 8px">海洋组</td><td style="padding:4px 8px;color:#636e72">31</td></tr>
+        <tr><td style="padding:4px 8px">13</td><td style="padding:4px 8px">龙组</td><td style="padding:4px 8px;color:#636e72">10</td></tr>
+        <tr><td style="padding:4px 8px">14</td><td style="padding:4px 8px">机械组</td><td style="padding:4px 8px;color:#636e72">19</td></tr>
+        <tr><td style="padding:4px 8px">999</td><td style="padding:4px 8px">无法孵蛋组</td><td style="padding:4px 8px;color:#636e72">13</td></tr>
+      </table>
+      <p style="margin-top:10px;color:#e17055;font-size:12px">注意：一只宠物的 egg_type_list 可能有多个值（数组），对应多蛋组</p>
+      <p style="color:#0984e3;font-size:12px">字典表：<code>lkgc_egg_group</code>（id + name），类似 <code>lkgc_skill_type</code> 的用法</p>
+    </div>
+  </div>
+
+  <div class="card" style="flex:1">
+    <div class="card-header">
+      存储策略
+    </div>
+    <div class="card-body" style="font-size:13px">
+      <div style="font-weight:600;margin-bottom:6px">egg_type_list → 2 个写入目标：</div>
+      <div style="margin-bottom:10px">
+        <div><code>pokemon.egg_group</code> <span style="color:#636e72">(VARCHAR)</span></div>
+        <div style="color:#636e72;margin-left:16px">逗号拼接所有蛋组名，如 <code>动物组,拟人组</code></div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div><code>pokemon_egg_group</code> <span style="color:#636e72">(多对多表)</span></div>
+        <div style="color:#636e72;margin-left:16px">每个蛋组名一条记录：(pokemon_id, group_name)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="flex:1">
+    <div class="card-header">
+      关键规则汇总
+    </div>
+    <div class="card-body" style="font-size:13px">
+      <div>只新增，不更新已有 pokemon 数据</div>
+      <div>同步技能时复用已有 skill，不覆盖属性</div>
+      <div>技能属性以本库维护为准（先写 NULL）</div>
+      <div>特性同步时在特性表新增</div>
+      <div>main_url / icon 上传 OSS</div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
