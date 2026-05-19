@@ -191,6 +191,16 @@ class COSClient:
         )
         with open(save_path, "wb") as f:
             f.write(response["Body"].get_raw_stream().read())
+
+
+_cos_client: Optional[COSClient] = None
+def get_client() -> COSClient:
+    global _cos_client
+    if _cos_client is None:
+        _cos_client = COSClient()
+    return _cos_client
+
+
 if __name__ == '__main__':
     cos = COSClient()
     url = cos.upload_from_url("https://heyboxbj.max-c.com/game/roco_kingdom/egg/icon/93000016.png")

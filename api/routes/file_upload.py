@@ -3,24 +3,17 @@ from typing import Optional
 import anyio
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 
-from oss.oss import COSClient
+from oss.oss import COSClient, get_client
 
 router = APIRouter(prefix="/api/file", tags=["file"])
 
 _cos_client: Optional[COSClient] = None
 
 
-def _get_client() -> COSClient:
-    global _cos_client
-    if _cos_client is None:
-        _cos_client = COSClient()
-    return _cos_client
-
-
 @router.post("/upload")
 async def upload_file(
-    file: UploadFile = File(..., description="要上传的文件"),
-    prefix: str = Form("", description="可选的对象存储路径前缀，如 images、avatars"),
+        file: UploadFile = File(..., description="要上传的文件"),
+        prefix: str = Form("", description="可选的对象存储路径前缀，如 images、avatars"),
 ) -> dict:
     """
     通用文件上传接口：接收前端文件，上传至腾讯云 COS，返回访问 URL。
@@ -35,7 +28,7 @@ async def upload_file(
     filename = file.filename or "file"
 
     try:
-        client = _get_client()
+        client = get_client()
         url = await anyio.to_thread.run_sync(
             lambda: client.upload_bytes(data, filename=filename, prefix=prefix)
         )

@@ -166,11 +166,11 @@ def ensure_role(user: dict, allowed_roles: set[str]) -> None:
 
 
 async def get_dicts(
-    dict_type: str = "",
-    code: str = "",
-    label: str = "",
-    page: int | None = 1,
-    page_size: int | None = 10,
+        dict_type: str = "",
+        code: str = "",
+        label: str = "",
+        page: int | None = 1,
+        page_size: int | None = 10,
 ) -> dict:
     # 仅按 dict_type 拉下拉时，允许不传分页，直接返回该类型全量字典。
     if page is None and page_size is None:
@@ -354,13 +354,13 @@ async def delete_user(user: dict, target_user_id: int) -> None:
 
 
 async def list_audit_logs_for_ops(
-    user: dict,
-    username: str = "",
-    resource_type: str = "",
-    resource_id: str = "",
-    action: str = "",
-    page: int = 1,
-    page_size: int = 10,
+        user: dict,
+        username: str = "",
+        resource_type: str = "",
+        resource_id: str = "",
+        action: str = "",
+        page: int = 1,
+        page_size: int = 10,
 ) -> dict:
     ensure_role(user, {"admin"})
     page = max(page, 1)
@@ -390,17 +390,17 @@ def _normalize_pokemon_payload(payload: dict) -> dict:
 
 
 async def list_pokemon_for_ops(
-    user: dict,
-    keyword: str = "",
-    no: str = "",
-    name: str = "",
-    attr_id: int | None = None,
-    egg_group: str = "",
-    type_code: str = "",
-    form_code: str = "",
-    trait_id: int | None = None,
-    page: int = 1,
-    page_size: int = 10,
+        user: dict,
+        keyword: str = "",
+        no: str = "",
+        name: str = "",
+        attr_id: int | None = None,
+        egg_group: str = "",
+        type_code: str = "",
+        form_code: str = "",
+        trait_id: int | None = None,
+        page: int = 1,
+        page_size: int = 10,
 ) -> dict:
     ensure_role(user, {"editor", "admin"})
     page = max(page, 1)
@@ -609,9 +609,9 @@ def _upload_lkgc_skill_icon(icon_url: str, warnings: list[str], skill_name: str)
     if not icon_url:
         return ""
     try:
-        from oss.oss import COSClient
-
-        return COSClient().upload_from_url(icon_url, prefix="skill/icon")
+        from oss.oss import get_client
+        cos = get_client()
+        return cos.upload_from_url(icon_url, prefix="skill/icon")
     except Exception as exc:
         warnings.append(f"技能 {skill_name} 图标上传失败：{exc}")
         return ""
@@ -623,9 +623,9 @@ def _upload_lkgc_pokemon_image(image_url: str, warnings: list[str], pokemon_name
     if not image_url:
         return ""
     try:
-        from oss.oss import COSClient
-
-        return COSClient().upload_from_url(image_url, prefix="pokemon/lkgc")
+        from oss.oss import get_client
+        cos = get_client()
+        return cos.upload_from_url(image_url, prefix="pokemon/lkgc")
     except Exception as exc:
         warnings.append(f"精灵 {pokemon_name} 图片上传失败：{exc}")
         return ""
@@ -643,6 +643,38 @@ async def sync_pokemon_lkgc_skills_for_ops(user: dict, pokemon_id: int) -> dict:
     if not detail:
         raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="洛克观测宠物详情为空")
 
+    if not isinstance(detail.get("skill_list") or {}, dict):
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="洛克观测 skill_list 格式异常")
+
+    warnings: list[str] = []
+    result = await _sync_lkgc_pokemon_skills(pokemon_id, detail, warnings)
+    response = {
+        "pokemon_id": pokemon_id,
+        "pokemon_name": pokemon.get("name") or "",
+        "lkgc_pet_id": str((detail or {}).get("real_pet_id") or pet.get("real_pet_id") or ""),
+        "lkgc_name": str((detail or {}).get("name") or pet.get("name") or ""),
+        "request_total": result["request_total"],
+        "matched_skill_count": result["matched_skill_count"],
+        "inserted_skill_count": result["inserted_skill_count"],
+        "inserted_relation_count": result["inserted_relation_count"],
+        "updated_relation_count": result["updated_relation_count"],
+        "skipped_count": result["skipped_count"],
+        "warnings": warnings,
+        "items": result["items"],
+    }
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="pokemon",
+        resource_id=str(pokemon_id),
+        action="sync_lkgc_skills",
+        before_json=None,
+        after_json=response,
+    )
+    return response
+
+
+async def _sync_lkgc_pokemon_skills(pokemon_id: int, detail: dict, warnings: list[str]) -> dict:
+    """把 lkgc detail.skill_list 同步为该精灵的技能/关系。warnings 直接追加，不抛异常。"""
     source_map = [
         ("base", "原生技能"),
         ("bloodline", "血脉技能"),
@@ -650,10 +682,9 @@ async def sync_pokemon_lkgc_skills_for_ops(user: dict, pokemon_id: int) -> dict:
     ]
     skill_list = detail.get("skill_list") or {}
     if not isinstance(skill_list, dict):
-        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="洛克观测 skill_list 格式异常")
+        warnings.append("洛克广场 skill_list 格式异常，已跳过技能同步")
+        skill_list = {}
 
-    warnings: list[str] = []
-    planned: list[dict] = []
     raw_skill_items: list[dict] = []
     for source_key, source_type in source_map:
         entries = skill_list.get(source_key) or []
@@ -676,6 +707,8 @@ async def sync_pokemon_lkgc_skills_for_ops(user: dict, pokemon_id: int) -> dict:
             })
 
     existing_skill_names = await ops_repository.list_existing_skill_names([item["name"] for item in raw_skill_items])
+    attribute_id_map = await ops_repository.list_lkgc_attribute_id_map()
+    planned: list[dict] = []
     for raw_item in raw_skill_items:
         item = raw_item["raw"]
         icon = ""
@@ -686,6 +719,18 @@ async def sync_pokemon_lkgc_skills_for_ops(user: dict, pokemon_id: int) -> dict:
                 warnings,
                 raw_item["name"],
             )
+
+        # type_id（lkgc 属性 id）→ attribute.id
+        attr_id: int | None = None
+        raw_type_id = item.get("type_id")
+        if isinstance(raw_type_id, (int, float)) and int(raw_type_id) > 0:
+            lkgc_type_id = int(raw_type_id)
+            attr_id = attribute_id_map.get(lkgc_type_id)
+            if attr_id is None:
+                warnings.append(
+                    f"技能 {raw_item['name']}: type_id={lkgc_type_id} 未在 attribute.lkgc_id 中找到"
+                )
+
         planned.append({
             "name": raw_item["name"],
             "source_type": raw_item["source_type"],
@@ -695,38 +740,18 @@ async def sync_pokemon_lkgc_skills_for_ops(user: dict, pokemon_id: int) -> dict:
             "skill_desc": _strip_lkgc_html(str(item.get("desc") or "")),
             "icon": icon,
             "type": _infer_lkgc_skill_type(item),
+            "attr_id": attr_id,
         })
 
     result = await ops_repository.sync_pokemon_lkgc_skill_links(pokemon_id, planned)
     warnings.extend(result.get("warnings") or [])
-    response = {
-        "pokemon_id": pokemon_id,
-        "pokemon_name": pokemon.get("name") or "",
-        "lkgc_pet_id": str((detail or {}).get("real_pet_id") or pet.get("real_pet_id") or ""),
-        "lkgc_name": str((detail or {}).get("name") or pet.get("name") or ""),
-        "request_total": len(planned),
-        "matched_skill_count": result["matched_skill_count"],
-        "inserted_skill_count": result["inserted_skill_count"],
-        "inserted_relation_count": result["inserted_relation_count"],
-        "updated_relation_count": result["updated_relation_count"],
-        "skipped_count": result["skipped_count"],
-        "warnings": warnings,
-        "items": result["items"],
-    }
-    await ops_repository.create_audit_log(
-        user_id=user["id"],
-        resource_type="pokemon",
-        resource_id=str(pokemon_id),
-        action="sync_lkgc_skills",
-        before_json=None,
-        after_json=response,
-    )
-    return response
+    result["request_total"] = len(planned)
+    return result
 
 
 async def sync_pokemon_from_lkgc_for_ops(user: dict) -> dict:
     """遍历 lkgc getList 全量数据，按 name 匹配本库 pokemon，未命中则新增。"""
-    ensure_role(user, {"editor", "admin"})
+    # ensure_role(user, {"editor", "admin"})
 
     all_pets = await asyncio.to_thread(lkgc.fetch_all_pets, max_pages=120, page_size=100)
     if not all_pets:
@@ -740,6 +765,7 @@ async def sync_pokemon_from_lkgc_for_ops(user: dict) -> dict:
         }
 
     egg_group_map = await ops_repository.list_all_lkgc_egg_groups()
+    attribute_id_map = await ops_repository.list_lkgc_attribute_id_map()
     warnings: list[str] = []
     items: list[dict] = []
     inserted = 0
@@ -803,7 +829,7 @@ async def sync_pokemon_from_lkgc_for_ops(user: dict) -> dict:
             continue
 
         try:
-            payload = _build_lkgc_pokemon_payload(pet, detail, egg_group_map, warnings)
+            payload = _build_lkgc_pokemon_payload(pet, detail, egg_group_map, attribute_id_map, warnings)
             # 处理特性（trait）
             trait_id = await _resolve_lkgc_trait(detail)
             if trait_id:
@@ -833,12 +859,40 @@ async def sync_pokemon_from_lkgc_for_ops(user: dict) -> dict:
 
             pokemon_id = await ops_repository.insert_pokemon_from_lkgc(payload)
             inserted += 1
+
+            # 同步该精灵对应技能（复用 _sync_lkgc_pokemon_skills，warnings 直接合并）
+            skill_summary: dict | None = None
+            try:
+                print(f"[lkgc-skill-sync] 开始同步精灵技能 pokemon_id={pokemon_id} name={payload['name']}")
+                skill_result = await _sync_lkgc_pokemon_skills(pokemon_id, detail, warnings)
+                skill_summary = {
+                    "request_total": skill_result["request_total"],
+                    "matched_skill_count": skill_result["matched_skill_count"],
+                    "inserted_skill_count": skill_result["inserted_skill_count"],
+                    "inserted_relation_count": skill_result["inserted_relation_count"],
+                    "updated_relation_count": skill_result["updated_relation_count"],
+                    "skipped_count": skill_result["skipped_count"],
+                }
+                print(
+                    f"[lkgc-skill-sync] 精灵技能同步完成 pokemon_id={pokemon_id} name={payload['name']} "
+                    f"request_total={skill_summary['request_total']} "
+                    f"matched={skill_summary['matched_skill_count']} "
+                    f"inserted_skill={skill_summary['inserted_skill_count']} "
+                    f"inserted_relation={skill_summary['inserted_relation_count']} "
+                    f"updated_relation={skill_summary['updated_relation_count']} "
+                    f"skipped={skill_summary['skipped_count']}"
+                )
+            except Exception as skill_exc:
+                warnings.append(f"{name}: 技能同步失败 - {skill_exc}")
+                print(f"[lkgc-skill-sync] 精灵技能同步失败 pokemon_id={pokemon_id} name={payload['name']} err={skill_exc}")
+
             items.append({
                 "name": payload["name"],
                 "lkgc_name": name,
                 "status": "inserted",
                 "message": "已新增",
                 "pokemon_id": pokemon_id,
+                "skills": skill_summary,
             })
         except Exception as exc:
             errors += 1
@@ -871,7 +925,8 @@ async def sync_pokemon_from_lkgc_for_ops(user: dict) -> dict:
 
 
 def _build_lkgc_pokemon_payload(
-    pet: dict, detail: dict, egg_group_map: dict[int, str], warnings: list[str]
+        pet: dict, detail: dict, egg_group_map: dict[int, str],
+        attribute_id_map: dict[int, int], warnings: list[str]
 ) -> dict | None:
     """将 lkgc 的 getList + getPetInfo 数据组装为 pokemon 行 payload。"""
     name = str(pet.get("name") or "").strip()
@@ -907,9 +962,18 @@ def _build_lkgc_pokemon_payload(
     # trait（由调用方通过 _resolve_lkgc_trait 异步处理）
     trait_id = 1
 
-    # type_list → attribute ids (lkgc type_id == our attribute.id 1:1)
+    # type_list → attribute ids（通过 attribute.lkgc_id 反查 attribute.id）
     type_list = detail.get("type_list") or pet.get("type_list") or []
-    attribute_ids = [int(t) for t in type_list if isinstance(t, (int, float))]
+    attribute_ids: list[int] = []
+    for t in type_list:
+        if not isinstance(t, (int, float)):
+            continue
+        lkgc_type_id = int(t)
+        attr_id = attribute_id_map.get(lkgc_type_id)
+        if attr_id is None:
+            warnings.append(f"{name}: type_list 中的 lkgc_id={lkgc_type_id} 未在 attribute.lkgc_id 中找到")
+            continue
+        attribute_ids.append(attr_id)
 
     # name_en from icon_name
     icon_name = str(pet.get("icon_name") or detail.get("icon_name") or "").strip()
@@ -1035,13 +1099,13 @@ def _friend_unique_dest(directory: Path, filename: str) -> Path:
 
 
 async def _save_image_upload(
-    upload: UploadFile,
-    *,
-    upload_dir: str,
-    base_url: str,
-    allowed_suffix: set[str],
-    max_bytes: int,
-    suffix_hint: str,
+        upload: UploadFile,
+        *,
+        upload_dir: str,
+        base_url: str,
+        allowed_suffix: set[str],
+        max_bytes: int,
+        suffix_hint: str,
 ) -> dict:
     if not upload.filename:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="请选择文件")
@@ -1180,12 +1244,12 @@ def _normalize_skill_payload(payload: dict) -> dict:
 
 
 async def list_skills_for_ops(
-    user: dict,
-    keyword: str = "",
-    attr: str = "",
-    type_: str = "",
-    page: int = 1,
-    page_size: int = 10,
+        user: dict,
+        keyword: str = "",
+        attr: str = "",
+        type_: str = "",
+        page: int = 1,
+        page_size: int = 10,
 ) -> dict:
     ensure_role(user, {"editor", "admin"})
     page = max(page, 1)
@@ -1306,13 +1370,13 @@ def _normalize_obtain_method(value: str | None) -> str:
 
 
 async def list_skill_stones_for_ops(
-    user: dict,
-    keyword: str = "",
-    attr: str = "",
-    type_: str = "",
-    obtain_keyword: str = "",
-    page: int = 1,
-    page_size: int = 10,
+        user: dict,
+        keyword: str = "",
+        attr: str = "",
+        type_: str = "",
+        obtain_keyword: str = "",
+        page: int = 1,
+        page_size: int = 10,
 ) -> dict:
     ensure_role(user, {"editor", "admin"})
     page = max(page, 1)
@@ -1435,10 +1499,10 @@ def _normalize_resonance_magic_payload(payload: dict) -> dict:
 
 
 async def list_resonance_magics_for_ops(
-    user: dict,
-    keyword: str = "",
-    page: int = 1,
-    page_size: int = 10,
+        user: dict,
+        keyword: str = "",
+        page: int = 1,
+        page_size: int = 10,
 ) -> dict:
     ensure_role(user, {"editor", "admin"})
     page = max(page, 1)
@@ -1554,10 +1618,10 @@ def _normalize_pokemon_mark_payload(payload: dict) -> dict:
 
 
 async def list_pokemon_marks_for_ops(
-    user: dict,
-    keyword: str = "",
-    page: int = 1,
-    page_size: int = 10,
+        user: dict,
+        keyword: str = "",
+        page: int = 1,
+        page_size: int = 10,
 ) -> dict:
     ensure_role(user, {"editor", "admin"})
     safe_page = max(page or 1, 1)
@@ -1659,10 +1723,10 @@ def _normalize_mark_payload(payload: dict) -> dict:
 
 
 async def list_marks_for_ops(
-    user: dict,
-    keyword: str = "",
-    page: int = 1,
-    page_size: int = 10,
+        user: dict,
+        keyword: str = "",
+        page: int = 1,
+        page_size: int = 10,
 ) -> dict:
     ensure_role(user, {"editor", "admin"})
     page = max(page, 1)
@@ -1807,10 +1871,10 @@ def _normalize_filter_option_payload(payload: dict) -> dict:
 
 
 async def list_pokemon_filter_options_for_ops(
-    user: dict,
-    keyword: str = "",
-    page: int = 1,
-    page_size: int = 10,
+        user: dict,
+        keyword: str = "",
+        page: int = 1,
+        page_size: int = 10,
 ) -> dict:
     ensure_role(user, {"editor", "admin"})
     safe_page = max(page or 1, 1)

@@ -26,11 +26,7 @@ URL = f"https://{ENV_ID}.api-hz.cloudbasefunction.cn/functions/invokeFunction"
 PATH = "/functions/invokeFunction"
 
 UNI_TOKEN = (
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-    "eyJ1aWQiOiI2OWQ1ZjVkZDM5OTMzMmIyYTQ1NGY1Y2YiLCJyb2xlIjpbXSwicGVybWlzc2lvbiI6W10"
-    "sInVuaUlkVmVyc2lvbiI6IjEuMC4xOCIsImlhdCI6MTc3ODQzMTEzMywiZXhwIjoxNzc5MDM1OTMzfQ."
-    "780kB4WtCheFqAsSqvkHknm4Aj7YwZPjmQDK8gcHaF0"
-)
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2OWQ1ZjVkZDM5OTMzMmIyYTQ1NGY1Y2YiLCJyb2xlIjpbXSwicGVybWlzc2lvbiI6W10sInVuaUlkVmVyc2lvbiI6IjEuMC4xOCIsImlhdCI6MTc3OTE3MjEzOSwiZXhwIjoxNzc5Nzc2OTM5fQ.3sPjYSdq3jks_P99wO3JwnFhivitQPIgvMy0maImPy8")
 
 CLIENT_INFO: Dict[str, Any] = {
     "PLATFORM": "mp-weixin",

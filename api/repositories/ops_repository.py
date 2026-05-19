@@ -879,16 +879,20 @@ async def sync_pokemon_lkgc_skill_links(pokemon_id: int, skills: list[dict]) -> 
                 status_text = "matched"
                 if skill_id:
                     stats["matched_skill_count"] += 1
+                    print(f"[lkgc-skill-sync] 技能已存在 skill_id={skill_id} name={name} source={source_type}")
                 else:
+                    raw_attr_id = item.get("attr_id")
+                    attr_id_value = int(raw_attr_id) if isinstance(raw_attr_id, (int, float)) and int(raw_attr_id) > 0 else None
                     await cur.execute(
                         """
                         INSERT INTO skill (name, attr_id, power, type, consume, skill_desc, icon)
-                        VALUES (%s, NULL, %s, %s, %s, %s, %s)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
                         ON CONFLICT (name) DO NOTHING
                         RETURNING id
                         """,
                         (
                             name,
+                            attr_id_value,
                             int(item.get("power") or 0),
                             item.get("type") or "",
                             int(item.get("consume") or 0),
@@ -902,6 +906,12 @@ async def sync_pokemon_lkgc_skill_links(pokemon_id: int, skills: list[dict]) -> 
                         skill_index[name] = skill_id
                         stats["inserted_skill_count"] += 1
                         status_text = "inserted"
+                        print(
+                            f"[lkgc-skill-sync] 新增技能 skill_id={skill_id} name={name} "
+                            f"attr_id={attr_id_value} power={int(item.get('power') or 0)} "
+                            f"type={item.get('type') or ''} consume={int(item.get('consume') or 0)} "
+                            f"source={source_type}"
+                        )
                     else:
                         await cur.execute("SELECT id FROM skill WHERE name = %s", (name,))
                         row = await cur.fetchone()
@@ -915,10 +925,12 @@ async def sync_pokemon_lkgc_skill_links(pokemon_id: int, skills: list[dict]) -> 
                                 "status": "skipped",
                                 "message": "技能插入失败，已跳过关系写入",
                             })
+                            print(f"[lkgc-skill-sync] 技能插入失败且复查未果，跳过关系写入 name={name} source={source_type}")
                             continue
                         skill_id = int(row["id"])
                         skill_index[name] = skill_id
                         stats["matched_skill_count"] += 1
+                        print(f"[lkgc-skill-sync] 技能并发命中（ON CONFLICT 后复查） skill_id={skill_id} name={name} source={source_type}")
 
                 if skill_id in planned_skill_ids:
                     stats["skipped_count"] += 1
@@ -953,8 +965,18 @@ async def sync_pokemon_lkgc_skill_links(pokemon_id: int, skills: list[dict]) -> 
                 relation_inserted = bool(row and row.get("inserted"))
                 if relation_inserted:
                     stats["inserted_relation_count"] += 1
+                    print(
+                        f"[lkgc-skill-sync] 新增精灵-技能关系 pokemon_id={pokemon_id} "
+                        f"skill_id={skill_id} name={name} source={source_type} "
+                        f"sort_order={int(item.get('sort_order') or 0)}"
+                    )
                 else:
                     stats["updated_relation_count"] += 1
+                    print(
+                        f"[lkgc-skill-sync] 更新精灵-技能关系 pokemon_id={pokemon_id} "
+                        f"skill_id={skill_id} name={name} source={source_type} "
+                        f"sort_order={int(item.get('sort_order') or 0)}"
+                    )
 
                 items.append({
                     "name": name,
@@ -1243,6 +1265,15 @@ async def list_all_lkgc_egg_groups() -> dict[int, str]:
         async with conn.cursor() as cur:
             await cur.execute("SELECT id, name FROM lkgc_egg_group")
             return {int(row["id"]): row["name"] for row in await cur.fetchall()}
+
+
+async def list_lkgc_attribute_id_map() -> dict[int, int]:
+    """Return {attribute.lkgc_id: attribute.id} mapping for type_list conversion."""
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("SELECT id, lkgc_id FROM attribute WHERE lkgc_id IS NOT NULL")
+            return {int(row["lkgc_id"]): int(row["id"]) for row in await cur.fetchall()}
 
 
 async def save_pokemon_evolution_chain_for_ops(pokemon_id: int, steps: list[dict]) -> dict | None:

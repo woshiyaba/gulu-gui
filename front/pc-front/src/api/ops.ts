@@ -405,7 +405,8 @@ export function deleteOpsPokemon(id: number): Promise<void> {
 export function syncOpsPokemonLkgcSkills(id: number): Promise<OpsPokemonLkgcSkillSyncResponse> {
   return http
     .post<OpsPokemonLkgcSkillSyncResponse>(`/api/ops/pokemon/${id}/sync-lkgc-skills`, undefined, {
-      timeout: 120000,
+      // 单只精灵的技能同步：要拉 detail、下载图标、写 skill + pokemon_skill，10 分钟兜底
+      timeout: 600000,
     })
     .then((r) => r.data)
 }
@@ -430,7 +431,9 @@ export interface OpsPokemonLkgcSyncResponse {
 export function syncOpsPokemonFromLkgc(): Promise<OpsPokemonLkgcSyncResponse> {
   return http
     .post<OpsPokemonLkgcSyncResponse>('/api/ops/pokemon/sync-lkgc', undefined, {
-      timeout: 300000,
+      // 全量精灵同步：遍历 lkgc 全部 pet、按只拉 detail、下载主图/异色图到 COS、再逐只同步技能，
+      // 在数据库为空、网络慢、图片多的极端情况下需要数十分钟，给到 30 分钟兜底。
+      timeout: 1800000,
     })
     .then((r) => r.data)
 }
