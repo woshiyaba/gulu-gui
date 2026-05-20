@@ -19,4 +19,5 @@ dependencies = [
     "langgraph>=1.1.2",
     "load-dotenv>=0.1.0",
     "cos-python-sdk-v5>=1.9.42",
+    "pillow>=12.2.0",
 ]
