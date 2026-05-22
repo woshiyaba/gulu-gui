@@ -18,6 +18,7 @@ from api.schemas.pokemon import (
     SkillListResponse,
     SkillStoneListResponse,
 )
+from api.schemas.announcement import AnnouncementLikeResponse
 from api.schemas.banner import BannerItem
 from api.schemas.personality import PersonalityItem
 from api.schemas.pokemon_lineup import (
@@ -49,7 +50,7 @@ from api.services.pokemon_service import (
     get_skills as get_skills_service,
     list_pokemon_filter_options as list_pokemon_filter_options_service,
 )
-from api.services import banner_service, personality_service
+from api.services import announcement_service, banner_service, personality_service
 
 router = APIRouter(prefix="/api")
 
@@ -69,6 +70,20 @@ async def battle_pk(payload: BattlePkRequest):
 @router.get("/banners", response_model=list[BannerItem])
 async def get_banners():
     return await banner_service.list_active_banners()
+
+
+@router.get("/announcement/likes", response_model=AnnouncementLikeResponse)
+async def get_announcement_likes():
+    """公告点赞总数（存于 sys_dict：dict_type=announcement, code=like_count）。"""
+    count = await announcement_service.get_announcement_like_count()
+    return {"like_count": count}
+
+
+@router.post("/announcement/likes", response_model=AnnouncementLikeResponse)
+async def like_announcement():
+    """公告点赞 +1。"""
+    count = await announcement_service.like_announcement()
+    return {"like_count": count}
 
 
 @router.get("/starlight-duel/latest", response_model=PokemonLineupDetail | None)

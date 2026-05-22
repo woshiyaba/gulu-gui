@@ -1,16 +1,53 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import {
   ANNOUNCEMENT_IMAGE_URL,
   ANNOUNCEMENT_TEXT,
   ANNOUNCEMENT_TITLE,
 } from '@/data/announcement'
+import {
+  fetchAnnouncementLikeCount,
+  hasLikedAnnouncementLocally,
+  likeAnnouncement,
+  markAnnouncementLikedLocally,
+} from '@/api/announcement'
 
 const startupModalVisible = ref(true)
+const likeCount = ref(0)
+const likedLocally = ref(hasLikedAnnouncementLocally())
+const liking = ref(false)
+const likeError = ref('')
 
 function closeStartupModal() {
   startupModalVisible.value = false
 }
+
+async function loadLikeCount() {
+  try {
+    likeCount.value = await fetchAnnouncementLikeCount()
+  } catch {
+    likeError.value = '点赞数加载失败'
+  }
+}
+
+async function handleLike() {
+  if (likedLocally.value || liking.value) return
+  liking.value = true
+  likeError.value = ''
+  try {
+    likeCount.value = await likeAnnouncement()
+    likedLocally.value = true
+    markAnnouncementLikedLocally()
+  } catch {
+    likeError.value = '点赞失败，请稍后重试'
+  } finally {
+    liking.value = false
+  }
+}
+
+onMounted(() => {
+  void loadLikeCount()
+})
 </script>
 
 <template>
@@ -47,6 +84,20 @@ function closeStartupModal() {
           />
         </div>
         <footer class="startup-modal-footer">
+          <div class="startup-modal-footer-left">
+            <button
+              type="button"
+              class="startup-like-btn"
+              :class="{ 'is-liked': likedLocally }"
+              :disabled="likedLocally || liking"
+              @click="handleLike"
+            >
+              <span class="startup-like-icon" aria-hidden="true">👍</span>
+              <span>{{ likedLocally ? '已点赞' : liking ? '点赞中…' : '点赞' }}</span>
+              <span class="startup-like-count">{{ likeCount }}</span>
+            </button>
+            <p v-if="likeError" class="startup-like-error">{{ likeError }}</p>
+          </div>
           <button type="button" class="startup-modal-btn" @click="closeStartupModal">知道了</button>
         </footer>
       </section>
@@ -139,12 +190,73 @@ function closeStartupModal() {
 
 .startup-modal-footer {
   display: flex;
-  justify-content: flex-end;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
   padding: 12px 18px 16px;
   border-top: 1px solid var(--color-border);
 }
 
+.startup-modal-footer-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+
+.startup-like-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--color-text);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.startup-like-btn:hover:not(:disabled) {
+  background: var(--color-hover);
+  border-color: var(--color-accent);
+}
+
+.startup-like-btn:disabled {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.startup-like-btn.is-liked {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: var(--color-tag-bg);
+}
+
+.startup-like-icon {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.startup-like-count {
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.startup-like-btn.is-liked .startup-like-count {
+  color: var(--color-accent);
+}
+
+.startup-like-error {
+  margin: 0;
+  font-size: 12px;
+  color: #dc2626;
+}
+
 .startup-modal-btn {
+  flex-shrink: 0;
   border: none;
   border-radius: 8px;
   padding: 8px 18px;
