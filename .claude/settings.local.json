@@ -32,7 +32,8 @@
       "PowerShell(Remove-Item *)",
       "Bash(Get-ChildItem -Directory \"E:/play/lkwg_gui/\")",
       "Bash(git *)",
-      "PowerShell(\\(Get-Content \"E:\\\\game\\\\洛克王国世界\\\\wikiroco\\\\gulu-gui\\\\docs\\\\lkgc\\\\guagua_info.json\" | Measure-Object -Line\\).Lines; \\(Get-Content \"E:\\\\game\\\\洛克王国世界\\\\wikiroco\\\\gulu-gui\\\\docs\\\\lkgc\\\\getPetInfo_exam.json\" | Measure-Object -Line\\).Lines)"
+      "PowerShell(\\(Get-Content \"E:\\\\game\\\\洛克王国世界\\\\wikiroco\\\\gulu-gui\\\\docs\\\\lkgc\\\\guagua_info.json\" | Measure-Object -Line\\).Lines; \\(Get-Content \"E:\\\\game\\\\洛克王国世界\\\\wikiroco\\\\gulu-gui\\\\docs\\\\lkgc\\\\getPetInfo_exam.json\" | Measure-Object -Line\\).Lines)",
+      "Bash(echo \"exit: $?\")"
     ]
   }
 }

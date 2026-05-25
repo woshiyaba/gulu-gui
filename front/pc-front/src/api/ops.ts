@@ -1060,3 +1060,90 @@ export function updateOpsPokemonFilterOption(
 export function deleteOpsPokemonFilterOption(id: number): Promise<void> {
   return http.delete(`/api/ops/pokemon-filter-options/${id}`).then(() => undefined)
 }
+
+// ── 孵化宠物（egg-hatch-pets） ──────────────────────────
+
+export interface OpsEggHatchPetItem {
+  id: number
+  pokemon_id: number
+  pokemon_no: string
+  pokemon_name: string
+  pokemon_image: string
+  is_leader_form: boolean
+  hatch_data: number
+  weight_low: number
+  weight_high: number
+  height_low: number
+  height_high: number
+}
+
+export interface OpsEggHatchPetListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsEggHatchPetItem[]
+}
+
+export interface OpsEggHatchPetCreatePayload {
+  pokemon_id: number
+  is_leader_form: boolean
+  hatch_data: number
+  weight_low: number
+  weight_high: number
+  height_low: number
+  height_high: number
+}
+
+export interface OpsEggHatchPetUpdatePayload {
+  is_leader_form: boolean
+  hatch_data: number
+  weight_low: number
+  weight_high: number
+  height_low: number
+  height_high: number
+}
+
+export interface OpsEggHatchPetAvailablePokemon {
+  id: number
+  no: string
+  name: string
+  image: string
+}
+
+export interface OpsEggHatchPetAvailableResponse {
+  items: OpsEggHatchPetAvailablePokemon[]
+}
+
+export function fetchOpsEggHatchPets(params: {
+  keyword?: string
+  is_leader_form?: boolean | null
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsEggHatchPetListResponse> {
+  return http.get<OpsEggHatchPetListResponse>('/api/ops/egg-hatch-pets', { params }).then((r) => r.data)
+}
+
+export function fetchOpsEggHatchPetDetail(id: number): Promise<OpsEggHatchPetItem> {
+  return http.get<OpsEggHatchPetItem>(`/api/ops/egg-hatch-pets/${id}`).then((r) => r.data)
+}
+
+export function fetchOpsEggHatchAvailablePokemon(params: {
+  keyword?: string
+  limit?: number
+} = {}): Promise<OpsEggHatchPetAvailableResponse> {
+  return http
+    .get<OpsEggHatchPetAvailableResponse>('/api/ops/egg-hatch-pets/available-pokemon', { params })
+    .then((r) => r.data)
+}
+
+export function createOpsEggHatchPet(payload: OpsEggHatchPetCreatePayload): Promise<OpsEggHatchPetItem> {
+  return http.post<OpsEggHatchPetItem>('/api/ops/egg-hatch-pets', payload).then((r) => r.data)
+}
+
+export function updateOpsEggHatchPet(id: number, payload: OpsEggHatchPetUpdatePayload): Promise<OpsEggHatchPetItem> {
+  return http.put<OpsEggHatchPetItem>(`/api/ops/egg-hatch-pets/${id}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsEggHatchPet(id: number): Promise<void> {
+  return http.delete(`/api/ops/egg-hatch-pets/${id}`).then(() => undefined)
+}

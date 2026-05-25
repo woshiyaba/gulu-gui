@@ -2082,6 +2082,204 @@ async def delete_mark_for_ops(mark_id: int) -> bool:
         return deleted
 
 
+_EGG_HATCH_PET_BASE_SELECT = """
+    SELECT e.id, e.pokemon_id, e.is_leader_form, e.hatch_data,
+           e.weight_low, e.weight_high, e.height_low, e.height_high,
+           p.no AS pokemon_no,
+           p.name AS pokemon_name,
+           COALESCE(NULLIF(p.image_lc, ''), p.image) AS pokemon_image
+    FROM egg_hatch_pet e
+    JOIN pokemon p ON p.id = e.pokemon_id
+"""
+
+
+def _egg_hatch_pet_row_to_item(row: dict) -> dict:
+    return {
+        "id": row["id"],
+        "pokemon_id": row["pokemon_id"],
+        "pokemon_no": row.get("pokemon_no") or "",
+        "pokemon_name": row.get("pokemon_name") or "",
+        "pokemon_image": (row.get("pokemon_image") or "").strip(),
+        "is_leader_form": bool(row.get("is_leader_form")),
+        "hatch_data": int(row.get("hatch_data") or 0),
+        "weight_low": int(row.get("weight_low") or 0),
+        "weight_high": int(row.get("weight_high") or 0),
+        "height_low": int(row.get("height_low") or 0),
+        "height_high": int(row.get("height_high") or 0),
+    }
+
+
+async def list_egg_hatch_pets_for_ops(
+    keyword: str = "",
+    is_leader_form: bool | None = None,
+    page: int = 1,
+    page_size: int = 10,
+) -> tuple[int, list[dict]]:
+    pool = await get_pool()
+    conditions: list[str] = []
+    params: list = []
+    if keyword:
+        conditions.append("(p.name LIKE %s OR p.no LIKE %s)")
+        params.extend([f"%{keyword}%", f"%{keyword}%"])
+    if is_leader_form is not None:
+        conditions.append("e.is_leader_form = %s")
+        params.append(is_leader_form)
+    where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    offset = (page - 1) * page_size
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT COUNT(*) AS cnt
+                FROM egg_hatch_pet e
+                JOIN pokemon p ON p.id = e.pokemon_id
+                {where_clause}
+                """,
+                params,
+            )
+            total_row = await cur.fetchone() or {}
+            total = int(total_row.get("cnt", 0))
+            await cur.execute(
+                f"""
+                {_EGG_HATCH_PET_BASE_SELECT}
+                {where_clause}
+                ORDER BY p.no, e.id
+                LIMIT %s OFFSET %s
+                """,
+                [*params, page_size, offset],
+            )
+            rows = await cur.fetchall()
+            return total, [_egg_hatch_pet_row_to_item(row) for row in rows]
+
+
+async def get_egg_hatch_pet_for_ops(pet_id: int) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"{_EGG_HATCH_PET_BASE_SELECT} WHERE e.id = %s",
+                (pet_id,),
+            )
+            row = await cur.fetchone()
+            return _egg_hatch_pet_row_to_item(row) if row else None
+
+
+async def get_egg_hatch_pet_by_pokemon_id(pokemon_id: int) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                "SELECT id, pokemon_id FROM egg_hatch_pet WHERE pokemon_id = %s",
+                (pokemon_id,),
+            )
+            return await cur.fetchone()
+
+
+async def create_egg_hatch_pet_for_ops(payload: dict) -> dict:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                INSERT INTO egg_hatch_pet
+                    (pokemon_id, is_leader_form, hatch_data,
+                     weight_low, weight_high, height_low, height_high)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING id
+                """,
+                (
+                    payload["pokemon_id"],
+                    bool(payload.get("is_leader_form")),
+                    int(payload.get("hatch_data") or 0),
+                    int(payload.get("weight_low") or 0),
+                    int(payload.get("weight_high") or 0),
+                    int(payload.get("height_low") or 0),
+                    int(payload.get("height_high") or 0),
+                ),
+            )
+            row = await cur.fetchone()
+            pet_id = int(row["id"])
+        await conn.commit()
+    detail = await get_egg_hatch_pet_for_ops(pet_id)
+    assert detail is not None
+    return detail
+
+
+async def update_egg_hatch_pet_for_ops(pet_id: int, payload: dict) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                UPDATE egg_hatch_pet
+                SET is_leader_form = %s,
+                    hatch_data = %s,
+                    weight_low = %s,
+                    weight_high = %s,
+                    height_low = %s,
+                    height_high = %s
+                WHERE id = %s
+                """,
+                (
+                    bool(payload.get("is_leader_form")),
+                    int(payload.get("hatch_data") or 0),
+                    int(payload.get("weight_low") or 0),
+                    int(payload.get("weight_high") or 0),
+                    int(payload.get("height_low") or 0),
+                    int(payload.get("height_high") or 0),
+                    pet_id,
+                ),
+            )
+            if cur.rowcount == 0:
+                return None
+        await conn.commit()
+    return await get_egg_hatch_pet_for_ops(pet_id)
+
+
+async def delete_egg_hatch_pet_for_ops(pet_id: int) -> bool:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute("DELETE FROM egg_hatch_pet WHERE id = %s", (pet_id,))
+            deleted = cur.rowcount > 0
+        await conn.commit()
+        return deleted
+
+
+async def list_available_pokemon_for_egg_hatch(keyword: str = "", limit: int = 30) -> list[dict]:
+    """返回尚未配置孵化数据的宠物候选。"""
+    pool = await get_pool()
+    conditions = ["NOT EXISTS (SELECT 1 FROM egg_hatch_pet e WHERE e.pokemon_id = p.id)"]
+    params: list = []
+    if keyword:
+        conditions.append("(p.name LIKE %s OR p.no LIKE %s)")
+        params.extend([f"%{keyword}%", f"%{keyword}%"])
+    where_clause = "WHERE " + " AND ".join(conditions)
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                f"""
+                SELECT p.id, p.no, p.name,
+                       COALESCE(NULLIF(p.image_lc, ''), p.image) AS image
+                FROM pokemon p
+                {where_clause}
+                ORDER BY p.no, p.id
+                LIMIT %s
+                """,
+                [*params, limit],
+            )
+            rows = await cur.fetchall()
+    return [
+        {
+            "id": row["id"],
+            "no": row.get("no") or "",
+            "name": row.get("name") or "",
+            "image": (row.get("image") or "").strip(),
+        }
+        for row in rows
+    ]
+
+
 async def _enrich_evolution_steps(conn: AsyncConnection, steps: list[dict]) -> list[dict]:
     names = sorted({(step.get("pokemon_name") or "").strip() for step in steps if (step.get("pokemon_name") or "").strip()})
     if not names:

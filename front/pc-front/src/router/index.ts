@@ -105,6 +105,10 @@ const router = createRouter({
           path: 'pokemon-filter-options',
           component: () => import('@/views/ops/OpsPokemonFilterOptionsView.vue'),
         },
+        {
+          path: 'egg-hatch-pets',
+          component: () => import('@/views/ops/OpsEggHatchPetsView.vue'),
+        },
       ],
     },
   ],

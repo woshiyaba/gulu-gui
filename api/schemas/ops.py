@@ -438,6 +438,57 @@ class OpsPokemonFilterOptionUpsertRequest(BaseModel):
     is_active: bool = True
 
 
+class OpsEggHatchPetItem(BaseModel):
+    id: int
+    pokemon_id: int
+    pokemon_no: str = ""
+    pokemon_name: str = ""
+    pokemon_image: str = ""
+    is_leader_form: bool = False
+    hatch_data: int = 0
+    weight_low: int = 0
+    weight_high: int = 0
+    height_low: int = 0
+    height_high: int = 0
+
+
+class OpsEggHatchPetListResponse(BaseModel):
+    total: int
+    page: int = 1
+    page_size: int = 10
+    items: list[OpsEggHatchPetItem] = Field(default_factory=list)
+
+
+class OpsEggHatchPetCreateRequest(BaseModel):
+    pokemon_id: int
+    is_leader_form: bool = False
+    hatch_data: int = 0
+    weight_low: int = 0
+    weight_high: int = 0
+    height_low: int = 0
+    height_high: int = 0
+
+
+class OpsEggHatchPetUpdateRequest(BaseModel):
+    is_leader_form: bool = False
+    hatch_data: int = 0
+    weight_low: int = 0
+    weight_high: int = 0
+    height_low: int = 0
+    height_high: int = 0
+
+
+class OpsEggHatchPetAvailablePokemon(BaseModel):
+    id: int
+    no: str = ""
+    name: str = ""
+    image: str = ""
+
+
+class OpsEggHatchPetAvailableResponse(BaseModel):
+    items: list[OpsEggHatchPetAvailablePokemon] = Field(default_factory=list)
+
+
 class OpsPokemonLkgcSyncItem(BaseModel):
     name: str
     lkgc_name: str = ""

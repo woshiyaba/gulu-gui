@@ -1944,3 +1944,135 @@ async def delete_pokemon_filter_option_for_ops(user: dict, option_id: int) -> No
         before_json=before,
         after_json=None,
     )
+
+
+# ---------- 孵化宠物（egg_hatch_pet）维护 ----------
+
+
+def _normalize_egg_hatch_pet_payload(payload: dict) -> dict:
+    def _non_negative_int(value, label: str) -> int:
+        try:
+            num = int(value or 0)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{label}必须是整数")
+        if num < 0:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"{label}不能为负数")
+        return num
+
+    weight_low = _non_negative_int(payload.get("weight_low"), "体重下限")
+    weight_high = _non_negative_int(payload.get("weight_high"), "体重上限")
+    height_low = _non_negative_int(payload.get("height_low"), "身高下限")
+    height_high = _non_negative_int(payload.get("height_high"), "身高上限")
+    if weight_high < weight_low:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="体重上限不能小于下限")
+    if height_high < height_low:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="身高上限不能小于下限")
+    return {
+        "is_leader_form": bool(payload.get("is_leader_form")),
+        "hatch_data": _non_negative_int(payload.get("hatch_data"), "孵化时间"),
+        "weight_low": weight_low,
+        "weight_high": weight_high,
+        "height_low": height_low,
+        "height_high": height_high,
+    }
+
+
+async def list_egg_hatch_pets_for_ops(
+        user: dict,
+        keyword: str = "",
+        is_leader_form: bool | None = None,
+        page: int = 1,
+        page_size: int = 10,
+) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    safe_page = max(page or 1, 1)
+    safe_page_size = max(1, min(page_size or 10, 100))
+    total, items = await ops_repository.list_egg_hatch_pets_for_ops(
+        keyword=keyword.strip(),
+        is_leader_form=is_leader_form,
+        page=safe_page,
+        page_size=safe_page_size,
+    )
+    return {"total": total, "page": safe_page, "page_size": safe_page_size, "items": items}
+
+
+async def get_egg_hatch_pet_detail_for_ops(user: dict, pet_id: int) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    detail = await ops_repository.get_egg_hatch_pet_for_ops(pet_id)
+    if not detail:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="孵化宠物配置不存在")
+    return detail
+
+
+async def create_egg_hatch_pet_for_ops(user: dict, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    try:
+        pokemon_id = int(payload.get("pokemon_id") or 0)
+    except (TypeError, ValueError):
+        pokemon_id = 0
+    if pokemon_id <= 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="请选择宠物")
+    if not await ops_repository.get_pokemon_detail_for_ops(pokemon_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="宠物不存在")
+    if await ops_repository.get_egg_hatch_pet_by_pokemon_id(pokemon_id):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="该宠物已配置孵化数据")
+    normalized = _normalize_egg_hatch_pet_payload(payload)
+    normalized["pokemon_id"] = pokemon_id
+    created = await ops_repository.create_egg_hatch_pet_for_ops(normalized)
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="egg_hatch_pet",
+        resource_id=str(created["id"]),
+        action="create",
+        before_json=None,
+        after_json=created,
+    )
+    return created
+
+
+async def update_egg_hatch_pet_for_ops(user: dict, pet_id: int, payload: dict) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_egg_hatch_pet_for_ops(pet_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="孵化宠物配置不存在")
+    normalized = _normalize_egg_hatch_pet_payload(payload)
+    updated = await ops_repository.update_egg_hatch_pet_for_ops(pet_id, normalized)
+    if not updated:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="孵化宠物配置不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="egg_hatch_pet",
+        resource_id=str(pet_id),
+        action="update",
+        before_json=before,
+        after_json=updated,
+    )
+    return updated
+
+
+async def delete_egg_hatch_pet_for_ops(user: dict, pet_id: int) -> None:
+    ensure_role(user, {"editor", "admin"})
+    before = await ops_repository.get_egg_hatch_pet_for_ops(pet_id)
+    if not before:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="孵化宠物配置不存在")
+    deleted = await ops_repository.delete_egg_hatch_pet_for_ops(pet_id)
+    if not deleted:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="孵化宠物配置不存在")
+    await ops_repository.create_audit_log(
+        user_id=user["id"],
+        resource_type="egg_hatch_pet",
+        resource_id=str(pet_id),
+        action="delete",
+        before_json=before,
+        after_json=None,
+    )
+
+
+async def list_available_pokemon_for_egg_hatch(user: dict, keyword: str = "", limit: int = 30) -> dict:
+    ensure_role(user, {"editor", "admin"})
+    safe_limit = max(1, min(limit or 30, 100))
+    items = await ops_repository.list_available_pokemon_for_egg_hatch(
+        keyword=keyword.strip(),
+        limit=safe_limit,
+    )
+    return {"items": items}

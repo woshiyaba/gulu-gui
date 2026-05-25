@@ -46,6 +46,11 @@ from api.schemas.ops import (
     OpsPokemonFilterOptionListResponse,
     OpsPokemonFilterOptionUpsertRequest,
     OpsPokemonLkgcSyncResponse,
+    OpsEggHatchPetItem,
+    OpsEggHatchPetListResponse,
+    OpsEggHatchPetCreateRequest,
+    OpsEggHatchPetUpdateRequest,
+    OpsEggHatchPetAvailableResponse,
 )
 from api.schemas.banner import BannerItem, BannerListResponse, BannerUpsertRequest
 from api.schemas.personality import (
@@ -823,4 +828,67 @@ async def delete_ops_pokemon_filter_option(
     current_user: dict = Depends(get_current_ops_user),
 ):
     await ops_service.delete_pokemon_filter_option_for_ops(current_user, option_id)
+    return Response(status_code=204)
+
+
+# ---------- 孵化宠物维护 ----------
+
+
+@router.get("/egg-hatch-pets", response_model=OpsEggHatchPetListResponse)
+async def list_ops_egg_hatch_pets(
+    keyword: str = Query(default=""),
+    is_leader_form: bool | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.list_egg_hatch_pets_for_ops(
+        current_user,
+        keyword=keyword,
+        is_leader_form=is_leader_form,
+        page=page,
+        page_size=page_size,
+    )
+
+
+@router.get("/egg-hatch-pets/available-pokemon", response_model=OpsEggHatchPetAvailableResponse)
+async def list_ops_egg_hatch_available_pokemon(
+    keyword: str = Query(default=""),
+    limit: int = Query(default=30, ge=1, le=100),
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.list_available_pokemon_for_egg_hatch(current_user, keyword=keyword, limit=limit)
+
+
+@router.post("/egg-hatch-pets", response_model=OpsEggHatchPetItem)
+async def create_ops_egg_hatch_pet(
+    payload: OpsEggHatchPetCreateRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.create_egg_hatch_pet_for_ops(current_user, payload.model_dump())
+
+
+@router.get("/egg-hatch-pets/{pet_id}", response_model=OpsEggHatchPetItem)
+async def get_ops_egg_hatch_pet(
+    pet_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.get_egg_hatch_pet_detail_for_ops(current_user, pet_id)
+
+
+@router.put("/egg-hatch-pets/{pet_id}", response_model=OpsEggHatchPetItem)
+async def update_ops_egg_hatch_pet(
+    pet_id: int,
+    payload: OpsEggHatchPetUpdateRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await ops_service.update_egg_hatch_pet_for_ops(current_user, pet_id, payload.model_dump())
+
+
+@router.delete("/egg-hatch-pets/{pet_id}", status_code=204)
+async def delete_ops_egg_hatch_pet(
+    pet_id: int,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    await ops_service.delete_egg_hatch_pet_for_ops(current_user, pet_id)
     return Response(status_code=204)
