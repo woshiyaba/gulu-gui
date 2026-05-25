@@ -47,3 +47,11 @@ async def update_announcement_for_ops(user: dict, payload: dict) -> dict:
         after_json=_for_audit(item),
     )
     return item
+
+
+async def get_announcement_like_count() -> int:
+    return await announcement_repository.get_announcement_like_count()
+
+
+async def like_announcement() -> int:
+    return await announcement_repository.increment_announcement_like_count()

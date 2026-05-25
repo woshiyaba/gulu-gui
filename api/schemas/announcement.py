@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class AnnouncementItem(BaseModel):
@@ -25,3 +25,7 @@ class AnnouncementUpdateRequest(BaseModel):
     title: str = ""
     content: str = ""
     is_active: bool = False
+
+
+class AnnouncementLikeResponse(BaseModel):
+    like_count: int = Field(ge=0, description="公告点赞总数")

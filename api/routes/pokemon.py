@@ -18,7 +18,7 @@ from api.schemas.pokemon import (
     SkillListResponse,
     SkillStoneListResponse,
 )
-from api.schemas.announcement import PublicAnnouncement
+from api.schemas.announcement import AnnouncementLikeResponse, PublicAnnouncement
 from api.schemas.banner import BannerItem
 from api.schemas.personality import PersonalityItem
 from api.schemas.pokemon_lineup import (
@@ -76,6 +76,20 @@ async def get_banners():
 async def get_announcement():
     """返回当前启用中的站点公告；未启用或内容为空时返回 null。"""
     return await announcement_service.get_active_announcement()
+
+
+@router.get("/announcement/likes", response_model=AnnouncementLikeResponse)
+async def get_announcement_likes():
+    """公告点赞总数（存于 sys_dict：dict_type=announcement, code=like_count）。"""
+    count = await announcement_service.get_announcement_like_count()
+    return {"like_count": count}
+
+
+@router.post("/announcement/likes", response_model=AnnouncementLikeResponse)
+async def like_announcement():
+    """公告点赞 +1。"""
+    count = await announcement_service.like_announcement()
+    return {"like_count": count}
 
 
 @router.get("/starlight-duel/latest", response_model=PokemonLineupDetail | None)
