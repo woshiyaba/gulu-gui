@@ -82,6 +82,10 @@ const router = createRouter({
           component: () => import('@/views/ops/OpsBannersView.vue'),
         },
         {
+          path: 'announcement',
+          component: () => import('@/views/ops/OpsAnnouncementView.vue'),
+        },
+        {
           path: 'personalities',
           component: () => import('@/views/ops/OpsPersonalitiesView.vue'),
         },

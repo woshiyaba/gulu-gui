@@ -10,6 +10,7 @@ from api.routes.pokemon import router as pokemon_router
 from api.routes.third import router as third_router
 from api.routes.wx import router as wx_router
 from api.routes.ws_route import router as ws_router
+from api.repositories.announcement_repository import ensure_announcement_table
 from api.repositories.pokemon_filter_repository import ensure_pokemon_filter_table
 from api.services.ai_pk_service import ensure_ai_pk_tables
 from api.services.ops_service import ensure_ops_bootstrap
@@ -25,6 +26,7 @@ async def lifespan(app: FastAPI):
     await ensure_wx_auth_tables()
     await ensure_ai_pk_tables()
     await ensure_pokemon_filter_table()
+    await ensure_announcement_table()
     yield
     await close_pool()
 

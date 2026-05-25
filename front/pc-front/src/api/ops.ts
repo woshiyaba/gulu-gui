@@ -660,6 +660,30 @@ export function deleteOpsBanner(id: number): Promise<void> {
   return http.delete(`/api/ops/banners/${id}`).then(() => undefined)
 }
 
+// ── 站点公告 ────────────────────────────────────────────
+
+export interface OpsAnnouncement {
+  id: number
+  title: string
+  content: string
+  is_active: boolean
+  updated_at: string | null
+}
+
+export interface OpsAnnouncementPayload {
+  title: string
+  content: string
+  is_active: boolean
+}
+
+export function fetchOpsAnnouncement(): Promise<OpsAnnouncement> {
+  return http.get<OpsAnnouncement>('/api/ops/announcement').then((r) => r.data)
+}
+
+export function updateOpsAnnouncement(payload: OpsAnnouncementPayload): Promise<OpsAnnouncement> {
+  return http.put<OpsAnnouncement>('/api/ops/announcement', payload).then((r) => r.data)
+}
+
 // ── 精灵性格 ────────────────────────────────────────────
 
 export type OpsPersonalityStat = 'hp' | 'phy_atk' | 'mag_atk' | 'phy_def' | 'mag_def' | 'spd'

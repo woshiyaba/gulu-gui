@@ -3,6 +3,13 @@ export interface Attribute {
   attr_image: string
 }
 
+/** 站点公告（前台展示用，接口在未启用时返回 null） */
+export interface Announcement {
+  title: string
+  content: string
+  updated_at: string | null
+}
+
 export interface Pokemon {
   no: string
   name: string

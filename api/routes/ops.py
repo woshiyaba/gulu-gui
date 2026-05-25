@@ -52,6 +52,7 @@ from api.schemas.ops import (
     OpsEggHatchPetUpdateRequest,
     OpsEggHatchPetAvailableResponse,
 )
+from api.schemas.announcement import AnnouncementItem, AnnouncementUpdateRequest
 from api.schemas.banner import BannerItem, BannerListResponse, BannerUpsertRequest
 from api.schemas.personality import (
     PersonalityItem,
@@ -65,7 +66,13 @@ from api.schemas.pokemon_lineup import (
     PokemonLineupSearchResponse,
     PokemonLineupUpsertRequest,
 )
-from api.services import ops_service, banner_service, personality_service, pokemon_lineup_service
+from api.services import (
+    ops_service,
+    announcement_service,
+    banner_service,
+    personality_service,
+    pokemon_lineup_service,
+)
 
 router = APIRouter(prefix="/api/ops", tags=["ops"])
 
@@ -359,6 +366,22 @@ async def delete_ops_banner(
 ):
     await banner_service.delete_banner_for_ops(current_user, banner_id)
     return Response(status_code=204)
+
+
+# ── 站点公告 ────────────────────────────────────────────
+
+
+@router.get("/announcement", response_model=AnnouncementItem)
+async def get_ops_announcement(current_user: dict = Depends(get_current_ops_user)):
+    return await announcement_service.get_announcement_for_ops(current_user)
+
+
+@router.put("/announcement", response_model=AnnouncementItem)
+async def update_ops_announcement(
+    payload: AnnouncementUpdateRequest,
+    current_user: dict = Depends(get_current_ops_user),
+):
+    return await announcement_service.update_announcement_for_ops(current_user, payload.model_dump())
 
 
 # ---------- 技能维护 ----------

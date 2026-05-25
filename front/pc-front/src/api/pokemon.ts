@@ -1,5 +1,6 @@
 import axios from 'axios'
 import type {
+  Announcement,
   Attribute,
   BattlePkRandomPokemonOption,
   BattlePkRequest,
@@ -64,6 +65,11 @@ export function fetchAttributes(): Promise<Attribute[]> {
 
 export function fetchEggGroups(): Promise<string[]> {
   return http.get<string[]>('/api/egg-groups').then((r) => r.data)
+}
+
+/** 获取当前启用中的站点公告，未启用/为空时返回 null。 */
+export function fetchAnnouncement(): Promise<Announcement | null> {
+  return http.get<Announcement | null>('/api/announcement').then((r) => r.data)
 }
 
 export function fetchPokemon(query: PokemonQuery = {}): Promise<PokemonListResponse> {

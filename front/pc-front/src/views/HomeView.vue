@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import AnnouncementModal from '@/components/AnnouncementModal.vue'
 import AttributeFilter from '@/components/AttributeFilter.vue'
 import EggGroupFilter from '@/components/EggGroupFilter.vue'
 import PokemonCard from '@/components/PokemonCard.vue'
@@ -178,6 +179,9 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="app">
+    <!-- 站点公告弹窗 -->
+    <AnnouncementModal />
+
     <!-- 顶部标题 -->
     <header class="app-header">
       <h1 class="app-title">洛克王国精灵图鉴</h1>
