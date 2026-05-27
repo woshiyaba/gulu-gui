@@ -6,6 +6,8 @@ import type {
   BattlePkResponse,
   BloodlineOption,
   Category,
+  ChronologyDetail,
+  ChronologyListItem,
   MapPoint,
   PersonalityOption,
   PokemonBodyMatchResponse,
@@ -126,6 +128,18 @@ export function fetchPokemonMarks() {
 export function fetchPokemonFilterOptions() {
   return request<PokemonFilterOption[]>({
     url: '/api/pokemon-filter-options',
+  })
+}
+
+export function fetchChronology() {
+  return request<ChronologyListItem[]>({
+    url: '/api/chronology',
+  })
+}
+
+export function fetchChronologyDetail(id: number) {
+  return request<ChronologyDetail>({
+    url: `/api/chronology/${id}`,
   })
 }
 

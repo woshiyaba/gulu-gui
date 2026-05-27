@@ -315,3 +315,18 @@ export interface PokemonFruitListResponse {
   page_size: number
   items: PokemonFruit[]
 }
+
+export interface ChronologyListItem {
+  id: number
+  event_date: string
+  title: string
+  cover_image: string
+}
+
+export interface ChronologyDetail {
+  id: number
+  event_date: string
+  title: string
+  content: string
+  images: string[]
+}

@@ -113,6 +113,10 @@ const router = createRouter({
           path: 'egg-hatch-pets',
           component: () => import('@/views/ops/OpsEggHatchPetsView.vue'),
         },
+        {
+          path: 'chronology',
+          component: () => import('@/views/ops/OpsChronologyView.vue'),
+        },
       ],
     },
   ],

@@ -37,6 +37,7 @@ const menus = [
   { to: '/ops/pokemon-marks', label: '名词解释' },
   { to: '/ops/pokemon-filter-options', label: '图鉴筛选项' },
   { to: '/ops/egg-hatch-pets', label: '孵化宠物' },
+  { to: '/ops/chronology', label: '洛克纪年' },
   { to: '/ops/map', label: '地图维护', disabled: true },
 
 ]

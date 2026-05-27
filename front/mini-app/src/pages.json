@@ -65,6 +65,18 @@
 			}
 		},
 		{
+			"path": "pages/more/chronology",
+			"style": {
+				"navigationBarTitleText": "洛克纪年"
+			}
+		},
+		{
+			"path": "pages/more/chronology-detail",
+			"style": {
+				"navigationBarTitleText": "大事记详情"
+			}
+		},
+		{
 			"path": "pages/lineup/list",
 			"style": {
 				"navigationBarTitleText": "阵容推荐"

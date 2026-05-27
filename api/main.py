@@ -6,7 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.routes.ai_pk import router as ai_pk_router
 from api.routes.file_upload import router as file_upload_router
 from api.routes.ops import router as ops_router
+from api.routes.ops_roco_chronology import router as ops_chronology_router
 from api.routes.pokemon import router as pokemon_router
+from api.routes.roco_chronology import router as chronology_router
 from api.routes.third import router as third_router
 from api.routes.wx import router as wx_router
 from api.routes.ws_route import router as ws_router
@@ -47,6 +49,8 @@ app.include_router(wx_router)
 app.include_router(third_router)
 app.include_router(ai_pk_router)
 app.include_router(file_upload_router)
+app.include_router(chronology_router)
+app.include_router(ops_chronology_router)
 app.include_router(ws_router)
 
 

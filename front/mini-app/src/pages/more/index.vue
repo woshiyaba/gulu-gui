@@ -37,6 +37,12 @@ const menuItems: MenuItem[] = [
     url: '/pages/more/pokemon-fruits',
     color: '#ff6b9c',
   },
+  {
+    title: '洛克纪年',
+    desc: '时间脉络回顾洛克王国大事记',
+    url: '/pages/more/chronology',
+    color: '#16b8a6',
+  },
 ]
 
 function goBattlePk() {

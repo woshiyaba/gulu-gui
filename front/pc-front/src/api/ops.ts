@@ -1171,3 +1171,61 @@ export function updateOpsEggHatchPet(id: number, payload: OpsEggHatchPetUpdatePa
 export function deleteOpsEggHatchPet(id: number): Promise<void> {
   return http.delete(`/api/ops/egg-hatch-pets/${id}`).then(() => undefined)
 }
+
+// ── 洛克纪年（大事记） ──────────────────────────────────
+
+export interface OpsChronologyItem {
+  id: number
+  event_date: string
+  title: string
+  content: string
+  images: string[]
+  sort_order: number
+  is_active: boolean
+  created_at: string | null
+  updated_at: string | null
+}
+
+export interface OpsChronologyListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsChronologyItem[]
+}
+
+export interface OpsChronologyPayload {
+  event_date: string
+  title: string
+  content: string
+  images: string[]
+  sort_order: number
+  is_active: boolean
+}
+
+export function fetchOpsChronology(params: {
+  keyword?: string
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsChronologyListResponse> {
+  return http.get<OpsChronologyListResponse>('/api/ops/chronology', { params }).then((r) => r.data)
+}
+
+export function fetchOpsChronologyDetail(id: number): Promise<OpsChronologyItem> {
+  return http.get<OpsChronologyItem>(`/api/ops/chronology/${id}`).then((r) => r.data)
+}
+
+export function createOpsChronology(payload: OpsChronologyPayload): Promise<OpsChronologyItem> {
+  return http.post<OpsChronologyItem>('/api/ops/chronology', payload).then((r) => r.data)
+}
+
+export function updateOpsChronology(id: number, payload: OpsChronologyPayload): Promise<OpsChronologyItem> {
+  return http.put<OpsChronologyItem>(`/api/ops/chronology/${id}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsChronology(id: number): Promise<void> {
+  return http.delete(`/api/ops/chronology/${id}`).then(() => undefined)
+}
+
+export function uploadOpsChronologyImage(file: File): Promise<OpsFileUploadResponse> {
+  return uploadOpsFile(file, 'images/chronology')
+}

@@ -34,7 +34,11 @@
       "Bash(git *)",
       "PowerShell(\\(Get-Content \"E:\\\\game\\\\洛克王国世界\\\\wikiroco\\\\gulu-gui\\\\docs\\\\lkgc\\\\guagua_info.json\" | Measure-Object -Line\\).Lines; \\(Get-Content \"E:\\\\game\\\\洛克王国世界\\\\wikiroco\\\\gulu-gui\\\\docs\\\\lkgc\\\\getPetInfo_exam.json\" | Measure-Object -Line\\).Lines)",
       "Bash(echo \"exit: $?\")",
-      "Bash(python -m py_compile scripts/seed_announcement.py)"
+      "Bash(python -m py_compile scripts/seed_announcement.py)",
+      "Bash(python -c \"import importlib.util as u; s=u.find_spec\\('api.routes.ops'\\); print\\('api.routes.ops ->', s.origin\\)\")",
+      "Bash(rm -rf api/routes/ops api/routes/roco_chronology.py.orig)",
+      "Bash(python -m compileall -q api/routes/roco_chronology.py api/routes/ops_roco_chronology.py api/services/roco_chronology_service.py api/repositories/roco_chronology_repository.py api/schemas/roco_chronology.py api/main.py)",
+      "Bash(python -c ' *)"
     ]
   }
 }
