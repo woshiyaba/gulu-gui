@@ -117,6 +117,10 @@ const router = createRouter({
           path: 'chronology',
           component: () => import('@/views/ops/OpsChronologyView.vue'),
         },
+        {
+          path: 'pet-prompt',
+          component: () => import('@/views/ops/OpsPetPromptView.vue'),
+        },
       ],
     },
   ],

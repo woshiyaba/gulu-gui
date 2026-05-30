@@ -93,6 +93,13 @@
 			"style": {
 				"navigationBarTitleText": "阵容 PK"
 			}
+		},
+		{
+			"path": "pages/chat/pet",
+			"style": {
+				"navigationBarTitleText": "宠物对话",
+				"navigationStyle": "custom"
+			}
 		}
 	],
 	"globalStyle": {

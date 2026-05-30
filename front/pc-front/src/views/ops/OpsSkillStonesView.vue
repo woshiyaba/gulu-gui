@@ -324,7 +324,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <div v-if="drawerVisible" class="ops-modal-mask" @click="closeDrawer">
+    <div v-if="drawerVisible" class="ops-modal-mask">
       <section class="ops-modal" @click.stop>
         <div class="ops-modal-header">
           <h3>{{ editingId ? '编辑技能石' : '新增技能石' }}</h3>

@@ -166,7 +166,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <div v-if="modalVisible" class="ops-modal-mask" @click="closeModal">
+    <div v-if="modalVisible" class="ops-modal-mask">
       <section class="ops-modal" @click.stop>
         <div class="ops-modal-header">
           <h3>{{ editingId ? '编辑用户' : '新增用户' }}</h3>

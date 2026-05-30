@@ -727,14 +727,14 @@ onMounted(async () => {
       </div>
     </section>
 
-    <div v-if="drawerVisible" class="ops-modal-mask" @click="closeDrawer">
+    <div v-if="drawerVisible" class="ops-modal-mask">
       <section class="ops-modal" @click.stop>
         <div class="ops-modal-header">
           <h3>{{ editingId ? '编辑精灵阵容' : '新增精灵阵容' }}</h3>
           <button type="button" class="ops-modal-close" @click="closeDrawer">✕</button>
         </div>
 
-        <form class="ops-modal-body" @submit.prevent>
+        <form class="ops-modal-body" @submit.prevent="submitForm">
           <div
             style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 20px;"
           >
@@ -823,6 +823,7 @@ onMounted(async () => {
                     type="text"
                     placeholder="搜索精灵或选择随机项..."
                     style="width:100%;height:32px;"
+                    @keydown.enter.prevent
                     @input="onPokemonSearchInput(mi)"
                     @focus="openPokemonDropdown(mi)"
                     @blur="hidePokemonSearch(mi)"
@@ -924,6 +925,7 @@ onMounted(async () => {
                     :placeholder="member.pokemon_id ? '搜索技能...' : '请先选择精灵'"
                     :disabled="!member.pokemon_id"
                     style="width:100%;height:32px;"
+                    @keydown.enter.prevent
                     @input="onSkillSearchInput(mi, si - 1)"
                     @focus="onSkillSearchInput(mi, si - 1)"
                     @blur="hideSkillSearch(mi, si - 1)"

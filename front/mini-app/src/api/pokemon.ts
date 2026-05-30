@@ -280,3 +280,25 @@ export function fetchMerchantInfo() {
     url: '/api/third/merchant',
   })
 }
+
+export interface PetAvatarResponse {
+  pet_id: number
+  avatar: string
+}
+
+export function fetchPetAvatar(petId: number) {
+  return request<PetAvatarResponse>({
+    url: `/api/chat/pets/${petId}/avatar`,
+  })
+}
+
+export interface PetChatEnabledResponse {
+  pet_id: number
+  enabled: boolean
+}
+
+export function fetchPetChatEnabled(petId: number) {
+  return request<PetChatEnabledResponse>({
+    url: `/api/chat/pets/${petId}/enabled`,
+  })
+}

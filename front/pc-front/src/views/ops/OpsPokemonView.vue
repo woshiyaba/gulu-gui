@@ -1654,7 +1654,7 @@ onBeforeUnmount(() => {
         <div class="ops-modal-header">
           <h3>编辑进化阶段</h3>
         </div>
-        <div style="padding:12px 20px 0;display:grid;gap:10px;">
+        <div style="padding:12px 20px 0;display:grid;gap:10px;" @keydown.enter.prevent="saveEvolutionStep">
           <label style="display:grid;gap:6px;">
             <span style="font-size:13px;color:var(--ops-text-secondary);">排序（相同排序表示同一阶段分支）</span>
             <input v-model.number="evolutionDraft.sort_order" class="ops-input" type="number" min="1" />

@@ -38,6 +38,7 @@ const menus = [
   { to: '/ops/pokemon-filter-options', label: '图鉴筛选项' },
   { to: '/ops/egg-hatch-pets', label: '孵化宠物' },
   { to: '/ops/chronology', label: '洛克纪年' },
+  { to: '/ops/pet-prompt', label: '宠物对话' },
   { to: '/ops/map', label: '地图维护', disabled: true },
 
 ]
@@ -272,7 +273,7 @@ onUnmounted(() => {
         <h3>个人信息</h3>
       </div>
 
-      <div class="profile-grid">
+      <div class="profile-grid" @keydown.enter.prevent="saveProfile">
         <label>
           <span>账号</span>
           <input :value="user.username" type="text" disabled />

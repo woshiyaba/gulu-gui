@@ -271,7 +271,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <div v-if="drawerVisible" class="ops-modal-mask" @click="closeDrawer">
+    <div v-if="drawerVisible" class="ops-modal-mask">
       <section class="ops-modal" @click.stop>
         <div class="ops-modal-header">
           <h3>{{ editingId ? '编辑字典项' : '新增字典项' }}</h3>

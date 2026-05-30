@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
-import { fetchPokemonDetail, fetchPokemonEvolutionChain } from '@/api/pokemon'
+import { fetchPokemonDetail, fetchPokemonEvolutionChain, fetchPetChatEnabled } from '@/api/pokemon'
 import type { EvolutionChainItem, PokemonDetail, PokemonEvolutionChain } from '@/types/pokemon'
 
 const pokemon = ref<PokemonDetail | null>(null)
@@ -9,6 +9,7 @@ const evolutionChain = ref<PokemonEvolutionChain | null>(null)
 const loading = ref(true)
 const error = ref('')
 const showYise = ref(false)
+const chatEnabled = ref(false)
 
 const activeSkillSource = ref('')
 
@@ -117,11 +118,19 @@ function previewImage(url: string) {
   })
 }
 
+function goChat() {
+  if (!pokemon.value) return
+  uni.navigateTo({
+    url: `/pages/chat/pet?pet_id=${pokemon.value.id}&name=${encodeURIComponent(pokemon.value.name)}`,
+  })
+}
+
 async function loadDetail(name: string) {
   loading.value = true
   error.value = ''
   showYise.value = false
   activeSkillSource.value = ''
+  chatEnabled.value = false
 
   try {
     const [detail, chain] = await Promise.all([
@@ -133,6 +142,15 @@ async function loadDetail(name: string) {
     uni.setNavigationBarTitle({
       title: detail.name,
     })
+
+    // 单独查询是否开启对话，失败不影响详情展示
+    fetchPetChatEnabled(detail.id)
+      .then((res) => {
+        chatEnabled.value = res.enabled
+      })
+      .catch(() => {
+        chatEnabled.value = false
+      })
   } catch (err) {
     error.value = err instanceof Error ? err.message : '宠物详情加载失败'
   } finally {
@@ -192,6 +210,10 @@ onLoad((options) => {
               :class="{ 'yise-btn--active': showYise }"
               @tap="showYise = !showYise"
             >{{ showYise ? '普通' : '异色' }}</text>
+            <button v-if="chatEnabled" class="chat-button" @tap="goChat">
+              <text class="chat-button-icon">💬</text>
+              <text>聊天</text>
+            </button>
           </view>
 
           <view class="badge-row">
@@ -563,6 +585,32 @@ onLoad((options) => {
   color: #b5c8e8;
 }
 
+.chat-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  margin: 0;
+  padding: 0 22rpx;
+  height: 52rpx;
+  line-height: 52rpx;
+  border-radius: 999rpx;
+  border: none;
+  background: linear-gradient(135deg, #2b74ff 0%, #5b9aff 100%);
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 600;
+  box-shadow: 0 6rpx 16rpx rgba(43, 116, 255, 0.24);
+}
+
+.chat-button::after {
+  border: none;
+}
+
+.chat-button-icon {
+  font-size: 24rpx;
+}
+
 .hero-info {
   display: flex;
   flex-direction: column;
@@ -578,6 +626,10 @@ onLoad((options) => {
   display: flex;
   align-items: center;
   gap: 14rpx;
+}
+
+.name-row .chat-button {
+  margin-left: auto;
 }
 
 .pokemon-name {

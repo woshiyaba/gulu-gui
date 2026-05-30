@@ -329,7 +329,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <div v-if="drawerVisible" class="ops-modal-mask" @click="closeDrawer">
+    <div v-if="drawerVisible" class="ops-modal-mask">
       <section class="ops-modal" @click.stop>
         <div class="ops-modal-header">
           <h3>{{ editingId ? '编辑孵化宠物' : '新增孵化宠物' }}</h3>

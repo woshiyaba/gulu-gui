@@ -1229,3 +1229,49 @@ export function deleteOpsChronology(id: number): Promise<void> {
 export function uploadOpsChronologyImage(file: File): Promise<OpsFileUploadResponse> {
   return uploadOpsFile(file, 'images/chronology')
 }
+
+// ── 宠物对话 prompt 维护 ────────────────────────────────
+
+export interface OpsPetPromptItem {
+  id: number
+  pet_id: number
+  pet_name: string
+  pet_image: string
+  prompt: string
+  enabled: boolean
+  created_at: string | null
+  updated_at: string | null
+}
+
+export interface OpsPetPromptListResponse {
+  total: number
+  page: number
+  page_size: number
+  items: OpsPetPromptItem[]
+}
+
+export interface OpsPetPromptPayload {
+  pet_id: number
+  prompt: string
+  enabled: boolean
+}
+
+export function fetchOpsPetPrompts(params: {
+  keyword?: string
+  page?: number
+  page_size?: number
+} = {}): Promise<OpsPetPromptListResponse> {
+  return http.get<OpsPetPromptListResponse>('/api/ops/pet-prompt', { params }).then((r) => r.data)
+}
+
+export function createOpsPetPrompt(payload: OpsPetPromptPayload): Promise<OpsPetPromptItem> {
+  return http.post<OpsPetPromptItem>('/api/ops/pet-prompt', payload).then((r) => r.data)
+}
+
+export function updateOpsPetPrompt(id: number, payload: OpsPetPromptPayload): Promise<OpsPetPromptItem> {
+  return http.put<OpsPetPromptItem>(`/api/ops/pet-prompt/${id}`, payload).then((r) => r.data)
+}
+
+export function deleteOpsPetPrompt(id: number): Promise<void> {
+  return http.delete(`/api/ops/pet-prompt/${id}`).then(() => undefined)
+}

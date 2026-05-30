@@ -106,3 +106,117 @@ export function connectPkStream(userId: string, handlers: PkStreamHandlers): PkS
     },
   }
 }
+
+// ── 宠物对话（双向）──────────────────────────────────────────
+
+export interface PetChatHistoryMessage {
+  role: 'user' | 'assistant' | string
+  content: string
+  created_at?: string | null
+}
+
+export interface PetChatEvent extends PkStreamEvent {
+  messages?: PetChatHistoryMessage[]
+}
+
+export interface PetChatHandlers {
+  /** 连接建立后后端回放的历史消息 */
+  onHistory?: (messages: PetChatHistoryMessage[]) => void
+  /** 宠物开始回复（新建一条空气泡） */
+  onStart?: () => void
+  /** 流式 token */
+  onChunk?: (chunk: string) => void
+  /** 宠物回复结束 */
+  onEnd?: () => void
+  onError?: (message: string, event?: PetChatEvent) => void
+  onOpen?: () => void
+  onClose?: () => void
+}
+
+export interface PetChatConnection {
+  task: UniApp.SocketTask
+  whenOpen: Promise<void>
+  /** 发送一条用户消息 */
+  send: (text: string) => void
+  close: () => void
+}
+
+export function connectPetChatStream(
+  userId: string,
+  petId: string | number,
+  handlers: PetChatHandlers,
+): PetChatConnection {
+  const url = `${WS_BASE_URL}/ws/pet-chat/${encodeURIComponent(userId)}/${encodeURIComponent(String(petId))}`
+
+  let resolveOpen: (() => void) | null = null
+  let rejectOpen: ((err: Error) => void) | null = null
+  let opened = false
+
+  const whenOpen = new Promise<void>((resolve, reject) => {
+    resolveOpen = resolve
+    rejectOpen = reject
+  })
+
+  const task = uni.connectSocket({
+    url,
+    complete: () => {},
+  }) as unknown as UniApp.SocketTask
+
+  task.onOpen(() => {
+    opened = true
+    handlers.onOpen?.()
+    resolveOpen?.()
+  })
+
+  task.onMessage((res) => {
+    let data: PetChatEvent
+    try {
+      data = typeof res.data === 'string' ? JSON.parse(res.data) : (res.data as any)
+    } catch {
+      return
+    }
+    switch (data.status) {
+      case 'history':
+        handlers.onHistory?.(data.messages || [])
+        break
+      case 'start':
+        handlers.onStart?.()
+        break
+      case 'streaming':
+        handlers.onChunk?.(data.chunk || '')
+        break
+      case 'end':
+        handlers.onEnd?.()
+        break
+      case 'error':
+        handlers.onError?.(data.message || '宠物暂时无法回复', data)
+        break
+    }
+  })
+
+  task.onError((err) => {
+    const msg = (err as { errMsg?: string }).errMsg || 'WebSocket 连接错误'
+    if (!opened) rejectOpen?.(new Error(msg))
+    handlers.onError?.(msg, { status: 'error', message: msg })
+  })
+
+  task.onClose(() => {
+    handlers.onClose?.()
+    if (!opened) rejectOpen?.(new Error('WebSocket 提前关闭'))
+  })
+
+  return {
+    task,
+    whenOpen,
+    send: (text: string) => {
+      task.send({ data: JSON.stringify({ content: text }) })
+    },
+    close: () => {
+      try {
+        task.close({})
+      } catch {
+        /* noop */
+      }
+    },
+  }
+}

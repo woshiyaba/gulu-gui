@@ -314,7 +314,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <div v-if="detailVisible && detailItem" class="ops-modal-mask" @click="closeDetail">
+    <div v-if="detailVisible && detailItem" class="ops-modal-mask">
       <section class="ops-modal ops-modal-wide" @click.stop>
         <div class="ops-modal-header">
           <div>

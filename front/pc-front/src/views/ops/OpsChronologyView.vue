@@ -285,8 +285,8 @@ onMounted(() => {
       </div>
     </section>
 
-    <div v-if="drawerVisible" class="ops-modal-mask" @click="closeDrawer">
-      <section class="ops-modal" @click.stop>
+    <div v-if="drawerVisible" class="ops-modal-mask">
+      <section class="ops-modal ops-modal-wide" @click.stop>
         <div class="ops-modal-header">
           <h3>{{ editingId ? '编辑大事记' : '新增大事记' }}</h3>
           <button type="button" class="ops-modal-close" @click="closeDrawer">✕</button>
@@ -317,7 +317,7 @@ onMounted(() => {
 
           <label class="ops-form-row" style="margin-top:14px;display:block;">
             <span style="display:block;margin-bottom:6px;">正文</span>
-            <textarea v-model="form.content" class="ops-input" rows="6" placeholder="事件正文内容" style="width:100%;resize:vertical;"></textarea>
+            <textarea v-model="form.content" class="ops-input" rows="12" placeholder="事件正文内容" style="width:100%;min-height:260px;resize:vertical;"></textarea>
           </label>
 
           <div style="margin-top:18px;border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);padding:14px;">

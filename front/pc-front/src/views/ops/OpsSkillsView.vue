@@ -377,7 +377,7 @@ onBeforeUnmount(() => {
       </div>
     </section>
 
-    <div v-if="drawerVisible" class="ops-modal-mask" @click="closeDrawer">
+    <div v-if="drawerVisible" class="ops-modal-mask">
       <section class="ops-modal" @click.stop>
         <div class="ops-modal-header">
           <h3>{{ editingId ? '编辑技能' : '新增技能' }}</h3>
@@ -446,7 +446,7 @@ onBeforeUnmount(() => {
       </section>
     </div>
 
-    <div v-if="usagesVisible" class="ops-modal-mask" @click="closeUsages">
+    <div v-if="usagesVisible" class="ops-modal-mask">
       <section class="ops-modal" @click.stop>
         <div class="ops-modal-header">
           <h3>技能占用 - {{ usagesTarget?.name }}</h3>
