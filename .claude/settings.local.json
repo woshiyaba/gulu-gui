@@ -38,7 +38,12 @@
       "Bash(python -c \"import importlib.util as u; s=u.find_spec\\('api.routes.ops'\\); print\\('api.routes.ops ->', s.origin\\)\")",
       "Bash(rm -rf api/routes/ops api/routes/roco_chronology.py.orig)",
       "Bash(python -m compileall -q api/routes/roco_chronology.py api/routes/ops_roco_chronology.py api/services/roco_chronology_service.py api/repositories/roco_chronology_repository.py api/schemas/roco_chronology.py api/main.py)",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "PowerShell(uv run *)",
+      "PowerShell($h=@{\"X-API-Key\"=$env:MERCHANT_API_KEY}; try { $r=Invoke-WebRequest -Uri \"https://wegame.shallow.ink/api/v1/games/rocom/merchant/info\" -Headers $h -TimeoutSec 10; \"STATUS: $\\($r.StatusCode\\)\"; $r.Content.Substring\\(0,[Math]::Min\\(500,$r.Content.Length\\)\\) } catch { \"ERROR: $\\($_.Exception.Message\\)\"; if\\($_.Exception.Response\\){ \"HTTP: $\\([int]$_.Exception.Response.StatusCode\\)\" } })",
+      "PowerShell(try { $r=Invoke-WebRequest -Uri \"https://wegame.shallow.ink/api/v1/games/rocom/merchant/info\" -TimeoutSec 10; \"STATUS: $\\($r.StatusCode\\)\"; $r.Content.Substring\\(0,[Math]::Min\\(400,$r.Content.Length\\)\\) } catch { \"ERROR: $\\($_.Exception.Message\\)\"; if\\($_.Exception.Response\\){ \"HTTP: $\\([int]$_.Exception.Response.StatusCode\\)\" } })",
+      "PowerShell(try { $r=Invoke-WebRequest -Uri \"https://ap.xiaopidd.com/api.AppletXCX/getXcxyxshangrenListByCate\" -TimeoutSec 10; \"STATUS: $\\($r.StatusCode\\)\"; $r.Content.Substring\\(0,[Math]::Min\\(300,$r.Content.Length\\)\\) } catch { \"ERROR: $\\($_.Exception.Message\\)\"; if\\($_.Exception.Response\\){ \"HTTP: $\\([int]$_.Exception.Response.StatusCode\\)\" } })",
+      "PowerShell($ProgressPreference='SilentlyContinue'; try { $r=Invoke-RestMethod -Uri \"https://ap.xiaopidd.com/api.AppletXCX/getXcxyxshangrenListByCate\" -TimeoutSec 10; \"code=$\\($r.code\\) msg=$\\($r.msg\\) count=$\\($r.data.data.Count\\)\" } catch { \"ERROR: $\\($_.Exception.Message\\)\" })"
     ]
   }
 }

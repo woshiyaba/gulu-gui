@@ -37,3 +37,8 @@ MERCHANT_API_URL = os.getenv(
     "https://wegame.shallow.ink/api/v1/games/rocom/merchant/info",
 ).strip()
 MERCHANT_API_KEY = os.getenv("MERCHANT_API_KEY", "").strip()
+# 远行商人备用接口（主接口无数据时回退）
+MERCHANT_API_URL_BACKUP = os.getenv(
+    "MERCHANT_API_URL_BACKUP",
+    "https://ap.xiaopidd.com/api.AppletXCX/getXcxyxshangrenListByCate",
+).strip()
