@@ -11,6 +11,12 @@ router = APIRouter(prefix="/api/third", tags=["third"])
 
 BEIJING_TZ = timezone(timedelta(hours=8))
 
+# 远行商人结果内存缓存：过期时间取「数据时间边界」与「最长 TTL」的较小值
+_CACHE_MAX_TTL_MS = 5 * 60 * 1000  # 最长缓存 5 分钟
+_CACHE_MIN_TTL_MS = 30 * 1000  # 最短缓存 30 秒，避免临界点频繁刷新
+_merchant_cache: dict[str, Any] = {"result": None, "expire_ms": 0}
+_merchant_cache_lock = anyio.Lock()
+
 
 def _format_ts(ts_ms: Any) -> str:
     if not ts_ms:
@@ -171,9 +177,27 @@ async def _try_backup_merchant() -> dict[str, Any]:
     return _process_backup_data(payload.get("data") or {})
 
 
-@router.get("/merchant")
-async def get_merchant_info() -> dict[str, Any]:
-    # 优先主接口，主接口异常 / 非 0 code / 无商品时回退到备用接口
+def _compute_expire_ms(result: dict[str, Any], now_ms: int) -> int:
+    """根据数据自身的时间边界计算缓存过期时间，并用最长/最短 TTL 收敛。"""
+    boundaries: list[int] = []
+    end = result.get("end_time")
+    if end:
+        boundaries.append(int(end))
+    for product in result.get("products", []):
+        for key in ("start_time", "end_time"):
+            ts = product.get(key)
+            if ts and int(ts) > now_ms:
+                boundaries.append(int(ts))
+
+    ttl_cap = now_ms + _CACHE_MAX_TTL_MS
+    future = [b for b in boundaries if b > now_ms]
+    expire = min(min(future), ttl_cap) if future else ttl_cap
+    # 距离边界过近时兜底一个最短 TTL，避免临界点反复回源
+    return max(expire, now_ms + _CACHE_MIN_TTL_MS)
+
+
+async def _resolve_merchant_info() -> dict[str, Any]:
+    """优先主接口，主接口异常 / 非 0 code / 无商品时回退到备用接口。"""
     result = await _try_primary_merchant()
     if result.get("products"):
         return result
@@ -182,8 +206,32 @@ async def get_merchant_info() -> dict[str, Any]:
     if backup_result.get("products"):
         return backup_result
 
-    # 两个接口都拿不到数据时才报错
-    raise HTTPException(
-        status_code=status.HTTP_502_BAD_GATEWAY,
-        detail="远行商人接口暂无数据",
-    )
+    return {}
+
+
+@router.get("/merchant")
+async def get_merchant_info() -> dict[str, Any]:
+    now_ms = int(datetime.now(tz=BEIJING_TZ).timestamp() * 1000)
+
+    cached = _merchant_cache["result"]
+    if cached is not None and now_ms < _merchant_cache["expire_ms"]:
+        return cached
+
+    async with _merchant_cache_lock:
+        # 等锁期间可能已被其他请求刷新，二次校验避免重复回源
+        now_ms = int(datetime.now(tz=BEIJING_TZ).timestamp() * 1000)
+        cached = _merchant_cache["result"]
+        if cached is not None and now_ms < _merchant_cache["expire_ms"]:
+            return cached
+
+        result = await _resolve_merchant_info()
+        if not result.get("products"):
+            # 两个接口都拿不到数据时不缓存，直接报错
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="远行商人接口暂无数据",
+            )
+
+        _merchant_cache["result"] = result
+        _merchant_cache["expire_ms"] = _compute_expire_ms(result, now_ms)
+        return result
