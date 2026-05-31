@@ -450,6 +450,10 @@ class OpsEggHatchPetItem(BaseModel):
     weight_high: int = 0
     height_low: int = 0
     height_high: int = 0
+    big_size_length_min: int = 0
+    big_size_weight_min: int = 0
+    small_size_length_max: int = 0
+    small_size_weight_max: int = 0
 
 
 class OpsEggHatchPetListResponse(BaseModel):
@@ -467,6 +471,10 @@ class OpsEggHatchPetCreateRequest(BaseModel):
     weight_high: int = 0
     height_low: int = 0
     height_high: int = 0
+    big_size_length_min: int = 0
+    big_size_weight_min: int = 0
+    small_size_length_max: int = 0
+    small_size_weight_max: int = 0
 
 
 class OpsEggHatchPetUpdateRequest(BaseModel):
@@ -476,6 +484,10 @@ class OpsEggHatchPetUpdateRequest(BaseModel):
     weight_high: int = 0
     height_low: int = 0
     height_high: int = 0
+    big_size_length_min: int = 0
+    big_size_weight_min: int = 0
+    small_size_length_max: int = 0
+    small_size_weight_max: int = 0
 
 
 class OpsEggHatchPetAvailablePokemon(BaseModel):

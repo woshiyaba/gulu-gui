@@ -44,7 +44,28 @@
       "PowerShell(try { $r=Invoke-WebRequest -Uri \"https://wegame.shallow.ink/api/v1/games/rocom/merchant/info\" -TimeoutSec 10; \"STATUS: $\\($r.StatusCode\\)\"; $r.Content.Substring\\(0,[Math]::Min\\(400,$r.Content.Length\\)\\) } catch { \"ERROR: $\\($_.Exception.Message\\)\"; if\\($_.Exception.Response\\){ \"HTTP: $\\([int]$_.Exception.Response.StatusCode\\)\" } })",
       "PowerShell(try { $r=Invoke-WebRequest -Uri \"https://ap.xiaopidd.com/api.AppletXCX/getXcxyxshangrenListByCate\" -TimeoutSec 10; \"STATUS: $\\($r.StatusCode\\)\"; $r.Content.Substring\\(0,[Math]::Min\\(300,$r.Content.Length\\)\\) } catch { \"ERROR: $\\($_.Exception.Message\\)\"; if\\($_.Exception.Response\\){ \"HTTP: $\\([int]$_.Exception.Response.StatusCode\\)\" } })",
       "PowerShell($ProgressPreference='SilentlyContinue'; try { $r=Invoke-RestMethod -Uri \"https://ap.xiaopidd.com/api.AppletXCX/getXcxyxshangrenListByCate\" -TimeoutSec 10; \"code=$\\($r.code\\) msg=$\\($r.msg\\) count=$\\($r.data.data.Count\\)\" } catch { \"ERROR: $\\($_.Exception.Message\\)\" })",
-      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\({...p.dependencies,...p.devDependencies},null,1\\)\\)\")"
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\({...p.dependencies,...p.devDependencies},null,1\\)\\)\")",
+      "Bash(python -c \"import py_compile; py_compile.compile\\(r'common/utils/eggExperimentalMatcher.py', doraise=True\\); print\\('OK compile'\\)\")",
+      "Bash(python -c \"print\\(1+1\\)\")",
+      "Bash(python -m py_compile common/utils/eggExperimentalMatcher.py)",
+      "PowerShell(cd \"E:/game/洛克王国世界/wikiroco/gulu-gui\"; \"=== pokemon.py 300-330 ===\"; Get-Content api/routes/pokemon.py | Select-Object -Skip 299 -First 32 | ForEach-Object {$i++; \"$\\($i+299\\): $_\"})",
+      "Bash(awk 'NR>=295 && NR<=345 {printf \"%d: %s\\\\n\", NR, $0}' api/services/pokemon_service.py)",
+      "Bash(awk 'NR>=45 && NR<=110 {printf \"%d: %s\\\\n\", NR, $0}' api/services/pokemon_service.py)",
+      "Bash(awk 'NR>=467 && NR<=540 {printf \"%d: %s\\\\n\", NR, $0}' api/repositories/pokemon_repository.py)",
+      "Bash(awk 'NR>=488 && NR<=515 {printf \"%d: %s\\\\n\", NR, $0}' api/repositories/pokemon_repository.py)",
+      "Bash(awk 'NR>=60 && NR<=130 {printf \"%d: %s\\\\n\", NR, $0}' api/schemas/pokemon.py)",
+      "Bash(python _apply_edits.py)",
+      "Bash(python -m py_compile api/services/pokemon_service.py api/schemas/pokemon.py api/repositories/pokemon_repository.py)",
+      "Bash(rm -f _apply_edits.py)",
+      "Bash(python _fix_dedupe.py)",
+      "Bash(python -m py_compile api/repositories/pokemon_repository.py)",
+      "Bash(rm -f _d.txt)",
+      "Bash(awk '/BodyMatch/{print NR\": \"$0}' src/types/pokemon.ts)",
+      "Bash(awk 'NR<=80{printf \"%d: %s\\\\n\", NR, $0}' api/utils/pokemon_mapper.py)",
+      "Bash(grep -n \"image\" api/utils/pokemon_mapper.py)",
+      "Bash(rm -f _m.txt)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(python -m py_compile api/schemas/pokemon.py)"
     ]
   }
 }

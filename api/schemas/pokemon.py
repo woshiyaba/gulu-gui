@@ -49,6 +49,9 @@ class SkillStoneListResponse(BaseModel):
 class PokemonBodyMatchItem(BaseModel):
     pet_name: str
     image_url: str
+    match_percent: float = 0  # 蛋实验匹配概率（百分比数值）
+    match_percent_text: str = "<1%"  # 匹配概率展示文本，如 "12.3%" / "<1%"
+    tag: str = ""  # 体型标签："大块头" / "小不点" / ""
 
 
 class PokemonBodyMatchResponse(BaseModel):

@@ -1,5 +1,8 @@
+import re
 from decimal import Decimal
 from fractions import Fraction
+
+from common.utils.eggExperimentalMatcher import match_spirit_by_egg_experiment
 
 from api.repositories import (
     attribute_matchup_repository,
@@ -318,6 +321,42 @@ def _normalize_multi_filter(values: list[str] | None) -> list[str]:
     return result
 
 
+def _parse_pokemon_no(raw) -> int | None:
+    """从形如 'NO.375' 的编号中提取数字，剪掉 'NO.' 前缀。"""
+    if raw is None:
+        return None
+    match = re.search(r"\d+", str(raw))
+    return int(match.group()) if match else None
+
+
+def _to_number(value) -> float:
+    """把 DB 数值安全转成 float，None / 非数转 0。"""
+    try:
+        return float(value) if value is not None else 0.0
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _compute_size_tag(row: dict, height_cm: int, weight_g: int) -> str:
+    """按蛋孵化的大小阈值判定体型标签（阈值单位与 height_cm/weight_g 一致）。
+
+    - 大块头：身高、体重均 >= 大体型下限（且两个下限都不为 0）
+    - 小不点：身高、体重均 <= 小体型上限（且两个上限都不为 0）
+    其余返回空字符串。
+    """
+    big_len_min = _to_number(row.get("big_size_length_min"))
+    big_wt_min = _to_number(row.get("big_size_weight_min"))
+    if big_len_min and big_wt_min and height_cm >= big_len_min and weight_g >= big_wt_min:
+        return "大块头"
+
+    small_len_max = _to_number(row.get("small_size_length_max"))
+    small_wt_max = _to_number(row.get("small_size_weight_max"))
+    if small_len_max and small_wt_max and height_cm <= small_len_max and weight_g <= small_wt_max:
+        return "小不点"
+
+    return ""
+
+
 async def get_pokemon_by_body_metrics(height_m: float, weight_kg: float) -> dict:
     # 单位换算统一放在后端，避免前端和后端口径不一致。
     height_cm = round(height_m * 100)
@@ -326,19 +365,62 @@ async def get_pokemon_by_body_metrics(height_m: float, weight_kg: float) -> dict
         height_cm=height_cm,
         weight_g=weight_g,
     )
+
+    # 套用蛋实验匹配规律：长度用米、重量用千克；no 取 pokemon.no 去掉 "NO." 前缀
+    base_spirits = [
+        {
+            "id": r["id"],
+            "no": _parse_pokemon_no(r.get("no")),
+            "lengthMin": float(r.get("height_low") or 0) / 100,
+            "lengthMax": float(r.get("height_high") or 0) / 100,
+            "weightMin": float(r.get("weight_low") or 0) / 1000,
+            "weightMax": float(r.get("weight_high") or 0) / 1000,
+        }
+        for r in rows
+    ]
+    match_result = match_spirit_by_egg_experiment(height_m, weight_kg, base_spirits)
+
+    row_by_id = {r["id"]: r for r in rows}
+    items: list[dict] = []
+    seen_ids: set = set()
+
+    # 按匹配概率降序（匹配器已排序）输出，并写入百分比字段；全部返回，不过滤低概率
+    for m in match_result["experimentMatches"]:
+        r = row_by_id.get(m["id"])
+        if r is None:
+            continue
+        items.append(
+            {
+                "pet_name": r["pokemon_name"],
+                "image_url": r.get("image") or "",
+                "match_percent": m.get("experimentScore", 0),
+                "match_percent_text": m.get("experimentScoreText", "<1%"),
+                "tag": _compute_size_tag(r, height_cm, weight_g),
+            }
+        )
+        seen_ids.add(m["id"])
+
+    # 兜底：匹配器未覆盖的行（理论上不会出现）也一并返回，概率置 0
+    for r in rows:
+        if r["id"] in seen_ids:
+            continue
+        items.append(
+            {
+                "pet_name": r["pokemon_name"],
+                "image_url": r.get("image") or "",
+                "match_percent": 0,
+                "match_percent_text": "<1%",
+                "tag": _compute_size_tag(r, height_cm, weight_g),
+            }
+        )
+
     return {
         "height_m": height_m,
         "weight_kg": weight_kg,
         "height_cm": height_cm,
         "weight_g": weight_g,
-        "total": len(rows),
-        "items": [
-            {
-                "pet_name": r["pokemon_name"],
-                "image_url": r.get("image") or "",
-            }
-            for r in rows
-        ],
+        "total": len(items),
+        "items": items,
     }
 
 

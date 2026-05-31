@@ -147,6 +147,10 @@ CREATE TABLE egg_hatch_pet (
     weight_high    INT     NOT NULL DEFAULT 0,       -- 体重上限（g）
     height_low     INT     NOT NULL DEFAULT 0,       -- 身高下限（cm）
     height_high    INT     NOT NULL DEFAULT 0,       -- 身高上限（cm）
+    big_size_length_min   INT NOT NULL DEFAULT 0,    -- 大体型身长下限（cm）
+    big_size_weight_min   INT NOT NULL DEFAULT 0,    -- 大体型体重下限（g）
+    small_size_length_max INT NOT NULL DEFAULT 0,    -- 小体型身长上限（cm）
+    small_size_weight_max INT NOT NULL DEFAULT 0,    -- 小体型体重上限（g）
     CONSTRAINT uk_ehp_pokemon UNIQUE (pokemon_id),
     CONSTRAINT fk_ehp_pokemon FOREIGN KEY (pokemon_id)
         REFERENCES pokemon (id) ON DELETE CASCADE

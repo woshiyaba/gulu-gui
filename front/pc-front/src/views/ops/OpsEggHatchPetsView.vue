@@ -34,6 +34,10 @@ const form = reactive({
   weight_high: 0,
   height_low: 0,
   height_high: 0,
+  big_size_length_min: 0,
+  big_size_weight_min: 0,
+  small_size_length_max: 0,
+  small_size_weight_max: 0,
 })
 
 const selectedPokemon = ref<OpsEggHatchPetAvailablePokemon | null>(null)
@@ -62,6 +66,10 @@ function resetForm() {
   form.weight_high = 0
   form.height_low = 0
   form.height_high = 0
+  form.big_size_length_min = 0
+  form.big_size_weight_min = 0
+  form.small_size_length_max = 0
+  form.small_size_weight_max = 0
   selectedPokemon.value = null
   availableSearch.value = ''
   availablePokemon.value = []
@@ -88,6 +96,10 @@ async function editItem(item: OpsEggHatchPetItem) {
     form.weight_high = detail.weight_high
     form.height_low = detail.height_low
     form.height_high = detail.height_high
+    form.big_size_length_min = detail.big_size_length_min
+    form.big_size_weight_min = detail.big_size_weight_min
+    form.small_size_length_max = detail.small_size_length_max
+    form.small_size_weight_max = detail.small_size_weight_max
     selectedPokemon.value = {
       id: detail.pokemon_id,
       no: detail.pokemon_no,
@@ -198,6 +210,10 @@ async function submitForm() {
       weight_high: Number(form.weight_high) || 0,
       height_low: Number(form.height_low) || 0,
       height_high: Number(form.height_high) || 0,
+      big_size_length_min: Number(form.big_size_length_min) || 0,
+      big_size_weight_min: Number(form.big_size_weight_min) || 0,
+      small_size_length_max: Number(form.small_size_length_max) || 0,
+      small_size_weight_max: Number(form.small_size_weight_max) || 0,
     }
     if (editingId.value) {
       await updateOpsEggHatchPet(editingId.value, payload)
@@ -279,6 +295,8 @@ onMounted(() => {
               <th style="width:110px;">孵化时间(秒)</th>
               <th style="width:150px;">体重区间(g)</th>
               <th style="width:150px;">身高区间(cm)</th>
+              <th style="width:150px;">大体型(身长/体重)</th>
+              <th style="width:150px;">小体型(身长/体重)</th>
               <th style="width:160px;">操作</th>
             </tr>
           </thead>
@@ -297,6 +315,8 @@ onMounted(() => {
               <td>{{ item.hatch_data }}</td>
               <td>{{ item.weight_low }} ~ {{ item.weight_high }}</td>
               <td>{{ item.height_low }} ~ {{ item.height_high }}</td>
+              <td>≥{{ item.big_size_length_min }} / ≥{{ item.big_size_weight_min }}</td>
+              <td>≤{{ item.small_size_length_max }} / ≤{{ item.small_size_weight_max }}</td>
               <td>
                 <div class="ops-action-group">
                   <button type="button" class="ops-btn ops-btn-text" @click="editItem(item)">修改</button>
@@ -406,6 +426,24 @@ onMounted(() => {
             <div class="ops-form-item">
               <label>身高上限(cm)</label>
               <input v-model.number="form.height_high" class="ops-input" type="number" min="0" />
+            </div>
+
+            <div class="ops-form-item">
+              <label>大体型身长下限(cm)</label>
+              <input v-model.number="form.big_size_length_min" class="ops-input" type="number" min="0" />
+            </div>
+            <div class="ops-form-item">
+              <label>大体型体重下限(g)</label>
+              <input v-model.number="form.big_size_weight_min" class="ops-input" type="number" min="0" />
+            </div>
+
+            <div class="ops-form-item">
+              <label>小体型身长上限(cm)</label>
+              <input v-model.number="form.small_size_length_max" class="ops-input" type="number" min="0" />
+            </div>
+            <div class="ops-form-item">
+              <label>小体型体重上限(g)</label>
+              <input v-model.number="form.small_size_weight_max" class="ops-input" type="number" min="0" />
             </div>
           </div>
           <div class="ops-modal-footer">

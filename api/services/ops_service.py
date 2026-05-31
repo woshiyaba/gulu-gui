@@ -1974,6 +1974,10 @@ def _normalize_egg_hatch_pet_payload(payload: dict) -> dict:
         "weight_high": weight_high,
         "height_low": height_low,
         "height_high": height_high,
+        "big_size_length_min": _non_negative_int(payload.get("big_size_length_min"), "大体型身长下限"),
+        "big_size_weight_min": _non_negative_int(payload.get("big_size_weight_min"), "大体型体重下限"),
+        "small_size_length_max": _non_negative_int(payload.get("small_size_length_max"), "小体型身长上限"),
+        "small_size_weight_max": _non_negative_int(payload.get("small_size_weight_max"), "小体型体重上限"),
     }
 
 

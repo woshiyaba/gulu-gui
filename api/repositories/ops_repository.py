@@ -2085,6 +2085,8 @@ async def delete_mark_for_ops(mark_id: int) -> bool:
 _EGG_HATCH_PET_BASE_SELECT = """
     SELECT e.id, e.pokemon_id, e.is_leader_form, e.hatch_data,
            e.weight_low, e.weight_high, e.height_low, e.height_high,
+           e.big_size_length_min, e.big_size_weight_min,
+           e.small_size_length_max, e.small_size_weight_max,
            p.no AS pokemon_no,
            p.name AS pokemon_name,
            COALESCE(NULLIF(p.image_lc, ''), p.image) AS pokemon_image
@@ -2106,6 +2108,10 @@ def _egg_hatch_pet_row_to_item(row: dict) -> dict:
         "weight_high": int(row.get("weight_high") or 0),
         "height_low": int(row.get("height_low") or 0),
         "height_high": int(row.get("height_high") or 0),
+        "big_size_length_min": int(row.get("big_size_length_min") or 0),
+        "big_size_weight_min": int(row.get("big_size_weight_min") or 0),
+        "small_size_length_max": int(row.get("small_size_length_max") or 0),
+        "small_size_weight_max": int(row.get("small_size_weight_max") or 0),
     }
 
 
@@ -2183,8 +2189,10 @@ async def create_egg_hatch_pet_for_ops(payload: dict) -> dict:
                 """
                 INSERT INTO egg_hatch_pet
                     (pokemon_id, is_leader_form, hatch_data,
-                     weight_low, weight_high, height_low, height_high)
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                     weight_low, weight_high, height_low, height_high,
+                     big_size_length_min, big_size_weight_min,
+                     small_size_length_max, small_size_weight_max)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
                 (
@@ -2195,6 +2203,10 @@ async def create_egg_hatch_pet_for_ops(payload: dict) -> dict:
                     int(payload.get("weight_high") or 0),
                     int(payload.get("height_low") or 0),
                     int(payload.get("height_high") or 0),
+                    int(payload.get("big_size_length_min") or 0),
+                    int(payload.get("big_size_weight_min") or 0),
+                    int(payload.get("small_size_length_max") or 0),
+                    int(payload.get("small_size_weight_max") or 0),
                 ),
             )
             row = await cur.fetchone()
@@ -2217,7 +2229,11 @@ async def update_egg_hatch_pet_for_ops(pet_id: int, payload: dict) -> dict | Non
                     weight_low = %s,
                     weight_high = %s,
                     height_low = %s,
-                    height_high = %s
+                    height_high = %s,
+                    big_size_length_min = %s,
+                    big_size_weight_min = %s,
+                    small_size_length_max = %s,
+                    small_size_weight_max = %s
                 WHERE id = %s
                 """,
                 (
@@ -2227,6 +2243,10 @@ async def update_egg_hatch_pet_for_ops(pet_id: int, payload: dict) -> dict | Non
                     int(payload.get("weight_high") or 0),
                     int(payload.get("height_low") or 0),
                     int(payload.get("height_high") or 0),
+                    int(payload.get("big_size_length_min") or 0),
+                    int(payload.get("big_size_weight_min") or 0),
+                    int(payload.get("small_size_length_max") or 0),
+                    int(payload.get("small_size_weight_max") or 0),
                     pet_id,
                 ),
             )

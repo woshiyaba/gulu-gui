@@ -128,8 +128,32 @@ async function onSubmit() {
           class="result-item"
           @tap="openDetail(item)"
         >
-          <text class="result-name">{{ item.pet_name }}</text>
-          <text class="result-link">查看详情</text>
+          <image
+            v-if="item.image_url"
+            class="result-image"
+            :src="item.image_url"
+            mode="aspectFit"
+          />
+          <view v-else class="result-image result-image--placeholder">
+            <text class="placeholder-text">暂无图</text>
+          </view>
+
+          <view class="result-main">
+            <view class="result-name-row">
+              <text class="result-name">{{ item.pet_name }}</text>
+              <text
+                v-if="item.tag"
+                class="result-tag"
+                :class="item.tag === '大块头' ? 'result-tag--big' : 'result-tag--small'"
+              >{{ item.tag }}</text>
+            </view>
+            <text class="result-link">查看详情</text>
+          </view>
+
+          <view class="result-score">
+            <text class="result-score-value">{{ item.match_percent_text }}</text>
+            <text class="result-score-label">匹配度</text>
+          </view>
         </view>
       </view>
     </view>
@@ -269,11 +293,43 @@ async function onSubmit() {
 .result-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16rpx;
-  padding: 24rpx;
+  gap: 20rpx;
+  padding: 20rpx 24rpx;
   border-radius: 24rpx;
   background: #f8fbff;
+}
+
+.result-image {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 18rpx;
+  background: #eef4ff;
+  flex-shrink: 0;
+}
+
+.result-image--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-text {
+  font-size: 20rpx;
+  color: #9fb2cf;
+}
+
+.result-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  flex: 1;
+  min-width: 0;
+}
+
+.result-name-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
 }
 
 .result-name {
@@ -282,9 +338,53 @@ async function onSubmit() {
   color: #1f3760;
 }
 
+.result-tag {
+  flex-shrink: 0;
+  padding: 2rpx 14rpx;
+  border-radius: 999rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.result-tag--big {
+  background: #fff1e6;
+  color: #d9731a;
+}
+
+.result-tag--small {
+  background: #e8f5ee;
+  color: #1f9d57;
+}
+
 .result-link {
   font-size: 22rpx;
   color: #2b74ff;
+}
+
+.result-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 110rpx;
+  padding: 10rpx 16rpx;
+  border-radius: 18rpx;
+  background: linear-gradient(135deg, #2b74ff 0%, #53a0ff 100%);
+  flex-shrink: 0;
+}
+
+.result-score-value {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+.result-score-label {
+  margin-top: 4rpx;
+  font-size: 18rpx;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .empty-wrap {

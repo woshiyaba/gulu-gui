@@ -35,6 +35,13 @@ export interface PokemonFilterOption {
 
 export interface PokemonBodyMatchItem {
   pet_name: string
+  image_url: string
+  /** 蛋实验匹配概率（百分比数值） */
+  match_percent: number
+  /** 匹配概率展示文本，如 "12.3%" / "<1%" */
+  match_percent_text: string
+  /** 体型标签："大块头" / "小不点" / "" */
+  tag: string
 }
 
 export interface PokemonBodyMatchResponse {

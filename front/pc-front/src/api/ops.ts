@@ -1099,6 +1099,10 @@ export interface OpsEggHatchPetItem {
   weight_high: number
   height_low: number
   height_high: number
+  big_size_length_min: number
+  big_size_weight_min: number
+  small_size_length_max: number
+  small_size_weight_max: number
 }
 
 export interface OpsEggHatchPetListResponse {
@@ -1116,6 +1120,10 @@ export interface OpsEggHatchPetCreatePayload {
   weight_high: number
   height_low: number
   height_high: number
+  big_size_length_min: number
+  big_size_weight_min: number
+  small_size_length_max: number
+  small_size_weight_max: number
 }
 
 export interface OpsEggHatchPetUpdatePayload {
@@ -1125,6 +1133,10 @@ export interface OpsEggHatchPetUpdatePayload {
   weight_high: number
   height_low: number
   height_high: number
+  big_size_length_min: number
+  big_size_weight_min: number
+  small_size_length_max: number
+  small_size_weight_max: number
 }
 
 export interface OpsEggHatchPetAvailablePokemon {

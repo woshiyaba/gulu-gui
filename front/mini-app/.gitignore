@@ -3,3 +3,8 @@ unpackage/
 dist/
 .hbuilderx/
 .DS_Store
+
+# local env files
+.env
+.env.*
+!.env.example

@@ -44,6 +44,16 @@ def _dedupe_body_metric_rows(rows: list[dict]) -> list[dict]:
         deduped_rows.append({
             "pokemon_name": chosen_row["pokemon_name"],
             "image": chosen_row.get("image", ""),
+            "id": chosen_row.get("id"),
+            "no": chosen_row.get("no"),
+            "height_low": chosen_row.get("height_low"),
+            "height_high": chosen_row.get("height_high"),
+            "weight_low": chosen_row.get("weight_low"),
+            "weight_high": chosen_row.get("weight_high"),
+            "big_size_length_min": chosen_row.get("big_size_length_min"),
+            "big_size_weight_min": chosen_row.get("big_size_weight_min"),
+            "small_size_length_max": chosen_row.get("small_size_length_max"),
+            "small_size_weight_max": chosen_row.get("small_size_weight_max"),
         })
 
     return deduped_rows
@@ -313,11 +323,19 @@ async def list_pokemon_by_body_metrics(height_cm: int, weight_g: int) -> list[di
                 """
                 SELECT
                     p.name AS pokemon_name,
-                    p.image,
+                    p.image_lc as image,
                     p.no,
                     p.form,
                     p.form_name,
-                    p.id
+                    p.id,
+                    e.height_low,
+                    e.height_high,
+                    e.weight_low,
+                    e.weight_high,
+                    e.big_size_length_min,
+                    e.big_size_weight_min,
+                    e.small_size_length_max,
+                    e.small_size_weight_max
                 FROM egg_hatch_pet e
                 JOIN pokemon p ON p.id = e.pokemon_id
                 WHERE e.is_leader_form = FALSE

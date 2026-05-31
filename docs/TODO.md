@@ -11,3 +11,4 @@
 - [ ] 精灵对话
 - [ ] 精灵相册
 - [ ] 孵蛋配置
+- [ ] 官方url https://rocom.qq.com/cp/rocom_game_manager_json/prod/sprite/base_info/3010.json
