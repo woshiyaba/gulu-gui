@@ -4,10 +4,18 @@ from __future__ import annotations
 
 import logging
 
+from fastapi import HTTPException, status
+
 from agents.chat_agent import compose_pet_system_prompt
-from api.repositories import pet_chat_repository
+from api.repositories import ops_repository, pet_chat_repository
+from api.services import personality_service
 
 logger = logging.getLogger(__name__)
+
+# pet_prompt_extra 字典里被特殊处理的 code
+EXTRA_DICT_TYPE = "pet_prompt_extra"
+NICKNAME_CODE = "nickname"      # 写入 pet_prompt_extra.nickname 列
+CHARACTER_CODE = "character"    # 性格，下拉项，选项来自 personalities，存性格 name
 
 
 def _to_int(value: object) -> int | None:
@@ -111,3 +119,95 @@ async def save_pet_history(
     if user_id_int is None or pet_id_int is None or not messages:
         return 0
     return await pet_chat_repository.save_pet_messages(user_id_int, pet_id_int, messages)
+
+
+# ── 用户自定义宠物信息（pet_prompt_extra）────────────────────
+
+
+async def get_pet_prompt_extra_form(user_id: object, pet_id: object) -> dict:
+    """返回用户可编辑的字段定义 + 当前已保存的值。
+
+    字段定义来自 sys_dict（dict_type=pet_prompt_extra）；性格（code=character）
+    是下拉项，选项为全部性格名称；昵称（code=nickname）的当前值取自
+    pet_prompt_extra.nickname 列，其余字段取自 attributes（key 为中文 label）。
+    """
+    pet_id_int = _to_int(pet_id)
+    user_id_int = _to_int(user_id)
+    if pet_id_int is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="缺少宠物 id")
+
+    rows = await ops_repository.list_dicts_all(dict_type=EXTRA_DICT_TYPE)
+
+    extra_row = None
+    if user_id_int is not None:
+        extra_row = await pet_chat_repository.get_pet_extra(user_id_int, pet_id_int)
+    nickname = (extra_row.get("nickname") if extra_row else "") or ""
+    attributes = (extra_row.get("attributes") if extra_row else None) or {}
+    if not isinstance(attributes, dict):
+        attributes = {}
+
+    has_character = any(r.get("code") == CHARACTER_CODE for r in rows)
+    character_options: list[str] = []
+    if has_character:
+        personalities = await personality_service.list_personalities_public()
+        character_options = [p["name"] for p in personalities if p and p.get("name")]
+
+    fields: list[dict] = []
+    for r in rows:
+        code = r.get("code") or ""
+        label = r.get("label") or ""
+        is_character = code == CHARACTER_CODE
+        if code == NICKNAME_CODE:
+            value = nickname
+        else:
+            value = attributes.get(label, "")
+        fields.append({
+            "code": code,
+            "label": label,
+            "type": "select" if is_character else "text",
+            "options": character_options if is_character else [],
+            "value": value or "",
+        })
+
+    return {"pet_id": pet_id_int, "fields": fields}
+
+
+async def save_pet_prompt_extra(
+    user_id: object,
+    pet_id: object,
+    values: dict[str, str],
+) -> dict:
+    """保存用户填写的 DIY 属性。
+
+    values 为 {code: value}；code=nickname 写入 nickname 列，其余按字典 label
+    作为 key 写入 attributes（JSONB）。
+    """
+    user_id_int = _to_int(user_id)
+    pet_id_int = _to_int(pet_id)
+    if user_id_int is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="缺少用户 id")
+    if pet_id_int is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="缺少宠物 id")
+
+    values = values or {}
+    rows = await ops_repository.list_dicts_all(dict_type=EXTRA_DICT_TYPE)
+    code_to_label = {r.get("code"): (r.get("label") or "") for r in rows}
+
+    nickname = (values.get(NICKNAME_CODE) or "").strip()
+    attributes: dict[str, str] = {}
+    for code, raw in values.items():
+        if code == NICKNAME_CODE or code not in code_to_label:
+            continue
+        text = (raw or "").strip()
+        if not text:
+            continue
+        attributes[code_to_label[code]] = text
+
+    row = await pet_chat_repository.upsert_pet_extra(
+        user_id_int, pet_id_int, nickname, attributes,
+    )
+    return {
+        "pet_id": pet_id_int,
+        "nickname": row.get("nickname") or "",
+        "attributes": row.get("attributes") or {},
+    }

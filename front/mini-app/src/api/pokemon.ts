@@ -302,3 +302,41 @@ export function fetchPetChatEnabled(petId: number) {
     url: `/api/chat/pets/${petId}/enabled`,
   })
 }
+
+export interface PetPromptExtraField {
+  code: string
+  label: string
+  type: 'select' | 'text'
+  options: string[]
+  value: string
+}
+
+export interface PetPromptExtraForm {
+  pet_id: number
+  fields: PetPromptExtraField[]
+}
+
+export interface PetPromptExtraUpdateResponse {
+  pet_id: number
+  nickname: string
+  attributes: Record<string, string>
+}
+
+export function fetchPetPromptExtra(petId: number, userId: string) {
+  return request<PetPromptExtraForm>({
+    url: '/api/chat/pet-prompt-extra',
+    data: { pet_id: petId, user_id: userId },
+  })
+}
+
+export function savePetPromptExtra(payload: {
+  user_id: string
+  pet_id: number
+  values: Record<string, string>
+}) {
+  return request<PetPromptExtraUpdateResponse>({
+    url: '/api/chat/pet-prompt-extra-update',
+    method: 'POST',
+    data: payload,
+  })
+}

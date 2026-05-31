@@ -35,6 +35,13 @@ function goBack() {
   uni.reLaunch({ url: '/pages/index/index' })
 }
 
+function goEdit() {
+  if (!petId.value) return
+  uni.navigateTo({
+    url: `/pages/chat/pet-edit?pet_id=${petId.value}&name=${encodeURIComponent(petName.value)}`,
+  })
+}
+
 function scrollToBottom() {
   nextTick(() => {
     // 在两个足够大的值之间切换，保证 scroll-top 每次都变化以触发滚动
@@ -189,7 +196,7 @@ onUnload(() => {
           :class="msg.role === 'user' ? 'msg-row--user' : 'msg-row--pet'"
         >
           <template v-if="msg.role === 'assistant'">
-            <view class="msg-avatar">
+            <view class="msg-avatar" @tap="goEdit">
               <image
                 v-if="avatar"
                 class="msg-avatar-img"

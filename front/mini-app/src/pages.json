@@ -100,6 +100,12 @@
 				"navigationBarTitleText": "宠物对话",
 				"navigationStyle": "custom"
 			}
+		},
+		{
+			"path": "pages/chat/pet-edit",
+			"style": {
+				"navigationBarTitleText": "编辑自定义精灵"
+			}
 		}
 	],
 	"globalStyle": {
