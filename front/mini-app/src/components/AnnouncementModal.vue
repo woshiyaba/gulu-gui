@@ -133,7 +133,9 @@ onMounted(load)
 }
 
 .announce-body {
-  flex: 1;
+  flex: 1 1 auto;
+  min-height: 0;
+  box-sizing: border-box;
   padding: 28rpx 32rpx;
 }
 
