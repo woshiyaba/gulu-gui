@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { onLoad, onPullDownRefresh, onReachBottom, onUnload } from '@dcloudio/uni-app'
 import PokemonCard from '@/components/PokemonCard.vue'
+import AnnouncementModal from '@/components/AnnouncementModal.vue'
 import {
   fetchAttributes,
   fetchBanners,
@@ -289,6 +290,8 @@ onUnload(() => {
 
 <template>
   <view class="page">
+    <AnnouncementModal />
+
     <view class="hero-card">
       <swiper
         v-if="banners.length > 0"

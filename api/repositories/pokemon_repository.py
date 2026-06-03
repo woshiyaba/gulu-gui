@@ -494,7 +494,7 @@ async def get_pokemon_detail(name: str) -> dict:
             await cur.execute(
                 """
                 SELECT p.hp, p.atk, p.matk, p.def_val, p.mdef, p.spd,
-                       p.obtain_method,
+                       p.obtain_method, p."desc",
                        pt.name AS trait_name, pt.description AS trait_desc
                 FROM pokemon p
                 JOIN pokemon_trait pt ON pt.id = p.trait_id

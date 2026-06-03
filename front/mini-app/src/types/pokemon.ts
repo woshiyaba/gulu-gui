@@ -160,6 +160,7 @@ export interface DefensiveTypeChart {
 
 export interface PokemonDetail extends Pokemon {
   obtain_method: string
+  desc: string
   stats: Stats
   trait: Trait
   restrain: Restrain

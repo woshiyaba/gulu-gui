@@ -49,6 +49,11 @@ async def update_announcement_for_ops(user: dict, payload: dict) -> dict:
     return item
 
 
+async def get_about_texts() -> list[str]:
+    """供前台"关于"卡片调用：返回 sys_dict 中 dict_type=about 的话语列表。"""
+    return await announcement_repository.get_about_texts()
+
+
 async def get_announcement_like_count() -> int:
     return await announcement_repository.get_announcement_like_count()
 

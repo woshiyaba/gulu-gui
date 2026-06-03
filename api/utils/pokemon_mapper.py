@@ -66,6 +66,7 @@ def to_pokemon_detail(base: dict, detail: dict, skills_raw: list[dict]) -> dict:
         "attributes": build_attributes(base.get("attr_names"), base.get("attr_images")),
         "egg_groups": parse_egg_groups(base.get("egg_group_names")),
         "obtain_method": detail.get("obtain_method", ""),
+        "desc": detail.get("desc") or "",
         "stats": {
             "hp": detail.get("hp", 0),
             "atk": detail.get("atk", 0),

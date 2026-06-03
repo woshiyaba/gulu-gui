@@ -231,6 +231,16 @@
   font-size: var(--ops-font-size-sm);
 }
 
+/* Multi-line input: overrides the fixed height so newlines are visible/editable */
+.ops-textarea {
+  height: auto;
+  min-height: var(--ops-input-height);
+  padding: 8px 12px;
+  line-height: 1.6;
+  resize: vertical;
+  font-family: inherit;
+}
+
 /* Search input with icon */
 .ops-search-input {
   width: 240px;

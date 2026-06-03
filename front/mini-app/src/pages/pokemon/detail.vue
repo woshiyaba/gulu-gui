@@ -237,6 +237,10 @@ onLoad((options) => {
             </view>
           </view>
 
+          <view v-if="pokemon.desc" class="obtain-card">
+            <text class="obtain-value">{{ pokemon.desc }}</text>
+          </view>
+
           <view class="obtain-card">
             <text class="obtain-label">获取方式</text>
             <text class="obtain-value">{{ pokemon.obtain_method || '暂无数据' }}</text>

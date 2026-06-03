@@ -291,7 +291,13 @@ onMounted(() => {
               </div>
               <div class="ops-form-item">
                 <label>字典名称</label>
-                <input v-model="form.label" required type="text" placeholder="请输入字典名称" class="ops-input" />
+                <textarea
+                  v-model="form.label"
+                  required
+                  rows="3"
+                  placeholder="请输入字典名称（按回车换行，将作为真实换行符保存）"
+                  class="ops-input ops-textarea"
+                />
               </div>
               <div class="ops-form-item">
                 <label>扩展信息</label>

@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes.ai_pk import router as ai_pk_router
+from api.routes.announcement import router as announcement_router
 from api.routes.chat import router as chat_router
 from api.routes.damage_cal import router as damage_cal_router
 from api.routes.file_upload import router as file_upload_router
@@ -47,6 +48,7 @@ app.add_middleware(
 )
 
 app.include_router(pokemon_router)
+app.include_router(announcement_router)
 app.include_router(ops_router)
 app.include_router(wx_router)
 app.include_router(third_router)

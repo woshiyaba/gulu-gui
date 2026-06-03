@@ -1,10 +1,32 @@
 <script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
+import { fetchAbout } from '@/api/pokemon'
+
 interface MenuItem {
   title: string
   desc: string
   url: string
   color: string
 }
+
+const DEFAULT_ABOUT = ['洛克王国精灵图鉴小程序', '数据来源于游戏攻略站，仅供参考。']
+
+const aboutTexts = ref<string[]>([])
+
+// 后端 label 可能用 \n 表示换行，逐条拆分成多行展示。
+const aboutLines = computed(() => {
+  const source = aboutTexts.value.length ? aboutTexts.value : DEFAULT_ABOUT
+  return source.flatMap((text) => text.split('\n')).filter((line) => line.trim())
+})
+
+onMounted(async () => {
+  try {
+    const res = await fetchAbout()
+    aboutTexts.value = res?.texts ?? []
+  } catch {
+    aboutTexts.value = []
+  }
+})
 
 const menuItems: MenuItem[] = [
   {
@@ -93,8 +115,7 @@ function navigateTo(url: string) {
 
     <view class="about-card">
       <text class="about-title">关于</text>
-      <text class="about-text">洛克王国精灵图鉴小程序</text>
-      <text class="about-text">数据来源于游戏攻略站，仅供参考。</text>
+      <text v-for="(line, idx) in aboutLines" :key="idx" class="about-text">{{ line }}</text>
     </view>
   </view>
 </template>

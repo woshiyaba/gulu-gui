@@ -163,6 +163,7 @@ class PokemonFilterOption(BaseModel):
 
 class PokemonDetailResponse(PokemonListItem):
     obtain_method: str = ""
+    desc: str = ""
     stats: PokemonStats = Field(default_factory=PokemonStats)
     trait: PokemonTrait = Field(default_factory=PokemonTrait)
     restrain: PokemonRestrain = Field(default_factory=PokemonRestrain)

@@ -8,6 +8,7 @@ from db.connection import get_pool
 
 ANNOUNCEMENT_DICT_TYPE = "announcement"
 ANNOUNCEMENT_LIKE_CODE = "like_count"
+ABOUT_DICT_TYPE = "about"
 
 
 ANNOUNCEMENT_TABLE_SQL = """
@@ -101,6 +102,27 @@ async def update_announcement(payload: dict) -> dict | None:
             row = await cur.fetchone()
         await conn.commit()
         return row
+
+
+async def get_about_texts() -> list[str]:
+    """读取"关于我们"话语：sys_dict 中 dict_type=about 的所有 label。
+
+    每条 label 可能含 \\n（换行），原样返回，由前端按需拆分渲染。
+    """
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT label
+                FROM sys_dict
+                WHERE dict_type = %s
+                ORDER BY sort_order, id
+                """,
+                (ABOUT_DICT_TYPE,),
+            )
+            rows = await cur.fetchall()
+    return [row["label"] for row in rows if (row.get("label") or "").strip()]
 
 
 async def ensure_announcement_like_dict() -> None:

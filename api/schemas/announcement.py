@@ -29,3 +29,9 @@ class AnnouncementUpdateRequest(BaseModel):
 
 class AnnouncementLikeResponse(BaseModel):
     like_count: int = Field(ge=0, description="公告点赞总数")
+
+
+class AboutResponse(BaseModel):
+    """"关于"卡片话语；每条 text 可含 \\n 换行，由前端拆分渲染。"""
+
+    texts: list[str] = Field(default_factory=list, description="关于我们的话语列表")

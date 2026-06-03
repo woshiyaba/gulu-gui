@@ -6,9 +6,9 @@
 - [x] 精灵的多线进化方式、需要额外展示
 - [x] 进化链补充，进化链优化
 - [x] 宠物蛋获取
-- [ ] 伤害计算
-- [ ] 洛克大事记
+- [x] 伤害计算
+- [x] 洛克大事记
 - [ ] 精灵对话
 - [ ] 精灵相册
-- [ ] 孵蛋配置
+- [x] 孵蛋配置
 - [ ] 官方url https://rocom.qq.com/cp/rocom_game_manager_json/prod/sprite/base_info/3010.json

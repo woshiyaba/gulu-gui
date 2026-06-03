@@ -170,10 +170,23 @@ export function fetchPokemonFruits(query: PokemonFruitQuery = {}) {
 }
 
 import type { Banner, Lineup } from '@/types/banner'
+import type { Announcement } from '@/types/announcement'
 
 export function fetchBanners() {
   return request<Banner[]>({
     url: '/api/banners',
+  })
+}
+
+export function fetchAnnouncement() {
+  return request<Announcement | null>({
+    url: '/api/announcement',
+  })
+}
+
+export function fetchAbout() {
+  return request<{ texts: string[] }>({
+    url: '/api/announcement/about',
   })
 }
 
