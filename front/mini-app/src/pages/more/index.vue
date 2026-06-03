@@ -20,6 +20,12 @@ const menuItems: MenuItem[] = [
     color: '#18a874',
   },
   {
+    title: '伤害计算',
+    desc: '估算技能 PVP 伤害，支持克制与各类加成',
+    url: '/pages/more/damage-calc',
+    color: '#f5564a',
+  },
+  {
     title: '名词解释',
     desc: '印记、状态、环境等战斗术语说明',
     url: '/pages/more/pokemon-marks',

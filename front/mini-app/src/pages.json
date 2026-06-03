@@ -51,6 +51,12 @@
 			}
 		},
 		{
+			"path": "pages/more/damage-calc",
+			"style": {
+				"navigationBarTitleText": "伤害计算"
+			}
+		},
+		{
 			"path": "pages/more/pokemon-eggs",
 			"style": {
 				"navigationBarTitleText": "精灵蛋查询",

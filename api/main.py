@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.routes.ai_pk import router as ai_pk_router
 from api.routes.chat import router as chat_router
+from api.routes.damage_cal import router as damage_cal_router
 from api.routes.file_upload import router as file_upload_router
 from api.routes.ops import router as ops_router
 from api.routes.ops_chat import router as ops_pet_prompt_router
@@ -55,6 +56,7 @@ app.include_router(chronology_router)
 app.include_router(ops_chronology_router)
 app.include_router(ops_pet_prompt_router)
 app.include_router(chat_router)
+app.include_router(damage_cal_router)
 app.include_router(ws_router)
 
 

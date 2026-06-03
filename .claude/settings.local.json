@@ -67,7 +67,10 @@
       "Bash(echo \"exit=$?\")",
       "Bash(python -m py_compile api/schemas/pokemon.py)",
       "Bash(python *)",
-      "PowerShell($OutputEncoding = [Console]::OutputEncoding = [Text.Encoding]::UTF8; $env:PYTHONIOENCODING=\"utf-8\"; python scripts/import_skills_traits.py --dry-run 2>&1 | Select-String -Pattern 'summary|^\\\\s+\\(特性|技能|其它\\)|info' | ForEach-Object { $_.Line })"
+      "PowerShell($OutputEncoding = [Console]::OutputEncoding = [Text.Encoding]::UTF8; $env:PYTHONIOENCODING=\"utf-8\"; python scripts/import_skills_traits.py --dry-run 2>&1 | Select-String -Pattern 'summary|^\\\\s+\\(特性|技能|其它\\)|info' | ForEach-Object { $_.Line })",
+      "Bash(ls api *)",
+      "Bash(ls store *)",
+      "Bash(ls utils *)"
     ]
   }
 }
