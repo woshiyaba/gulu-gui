@@ -129,8 +129,8 @@
 			{
 				"pagePath": "pages/index/index",
 				"text": "图鉴",
-				"iconPath": "static/tab/tab-pokedex.png",
-				"selectedIconPath": "static/tab/tab-pokedex-active.png"
+				"iconPath": "static/roco-ui/icon/poke-ball-icon.png",
+				"selectedIconPath": "static/roco-ui/icon/poke-ball-icon-active.png"
 			},
 			{
 				"pagePath": "pages/skill/list",
