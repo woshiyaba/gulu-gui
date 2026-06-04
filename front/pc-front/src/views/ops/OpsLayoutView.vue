@@ -25,6 +25,7 @@ const menus = [
   { to: '/ops/dicts', label: '字典维护' },
   { to: '/ops/users', label: '用户管理' },
   { to: '/ops/audit-logs', label: '操作日志' },
+  { to: '/ops/feedback', label: '用户反馈' },
   { to: '/ops/pokemon', label: '精灵维护' },
   { to: '/ops/banners', label: 'Banner管理' },
   { to: '/ops/announcement', label: '公告设置' },

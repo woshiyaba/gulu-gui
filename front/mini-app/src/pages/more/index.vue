@@ -71,6 +71,12 @@ const menuItems: MenuItem[] = [
     url: '/pages/more/chronology',
     color: '#16b8a6',
   },
+  {
+    title: '意见反馈',
+    desc: '提交使用建议或问题，帮助我们改进',
+    url: '/pages/more/feedback',
+    color: '#2b74ff',
+  },
 ]
 
 function goBattlePk() {

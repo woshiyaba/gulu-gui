@@ -33,6 +33,12 @@
 			}
 		},
 		{
+			"path": "pages/pokemon/album",
+			"style": {
+				"navigationBarTitleText": "精灵相册"
+			}
+		},
+		{
 			"path": "pages/pokemon/body-match",
 			"style": {
 				"navigationBarTitleText": "孵蛋查询"
@@ -74,6 +80,12 @@
 			"path": "pages/more/chronology",
 			"style": {
 				"navigationBarTitleText": "洛克纪年"
+			}
+		},
+		{
+			"path": "pages/more/feedback",
+			"style": {
+				"navigationBarTitleText": "意见反馈"
 			}
 		},
 		{

@@ -70,6 +70,10 @@ const router = createRouter({
           component: () => import('@/views/ops/OpsAuditLogsView.vue'),
         },
         {
+          path: 'feedback',
+          component: () => import('@/views/ops/OpsFeedbackView.vue'),
+        },
+        {
           path: 'skills',
           component: () => import('@/views/ops/OpsSkillsView.vue'),
         },

@@ -67,9 +67,9 @@ LIST_QUERY = {
     "x_os_type": "iOS",
     "x_client_version": "1.3.386",
     "version": "999.0.4",
-    "hkey": "7TY0D94",
-    "_time": "1777607783",
-    "nonce": "09BC9AE8AAE114CEF58E32B9A88FBE8D",
+    "hkey": "YWSVW00",
+    "_time": "1780588557",
+    "nonce": "F790AE55E4B411F305E134875C8335BF",
 }
 
 DETAIL_QUERY = {
@@ -81,9 +81,9 @@ DETAIL_QUERY = {
     "x_os_type": "iOS",
     "x_client_version": "1.3.386",
     "version": "999.0.4",
-    "hkey": "TU2SY18",
-    "_time": "1777607876",
-    "nonce": "F97001435E948742E80B8DAE2A10ADAC",
+    "hkey": "YWSVW00",
+    "_time": "1780588557",
+    "nonce": "F790AE55E4B411F305E134875C8335BF",
 }
 
 COMMON_HEADERS = {
@@ -98,7 +98,7 @@ COMMON_HEADERS = {
 }
 
 COOKIE_HEADER = (
-    "x_xhh_tokenid=BEeRPQ4eUCIJkbsOEwF9hUtGWhuuMfF3I2jXmwc9kcnl4q+DfEeVyO/bzhOLGT20A34m3d/8l9vjB3cGRTQHadw==;"
+    "x_xhh_tokenid=Bu9QSJ123BTj+dIbUkTouRbcCjBMH5h//p7Ao8oMaAn7kIhLJ5nu+ry2TyFRziBu/RcWNSHYzYisjc51JZC3qcg==;"
     " user_heybox_id=90642164;"
     " user_pkey=MTc2MzUzMjQxNi40N185MDY0MjE2NHZjeWVpc3hzaHdqY2lxaWw__;"
     " x_heybox_id=90642164;"

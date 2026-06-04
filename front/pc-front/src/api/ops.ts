@@ -76,6 +76,22 @@ export interface OpsAuditLogListResponse {
   items: OpsAuditLogItem[]
 }
 
+export interface OpsFeedbackItem {
+  id: number
+  user_id: number | null
+  content: string
+  contact: string | null
+  feedback_type: string | null
+  status: string
+  created_at: string | null
+  updated_at: string | null
+}
+
+export interface OpsFeedbackListResponse {
+  total: number
+  items: OpsFeedbackItem[]
+}
+
 export interface OpsUserCreatePayload {
   username: string
   nickname: string
@@ -350,6 +366,18 @@ export function fetchOpsAuditLogs(params: {
   page_size?: number
 } = {}): Promise<OpsAuditLogListResponse> {
   return http.get<OpsAuditLogListResponse>('/api/ops/audit-logs', { params }).then((r) => r.data)
+}
+
+export function fetchOpsFeedback(params: {
+  status?: string
+  limit?: number
+  offset?: number
+} = {}): Promise<OpsFeedbackListResponse> {
+  return http.get<OpsFeedbackListResponse>('/api/feedback', { params }).then((r) => r.data)
+}
+
+export function updateOpsFeedbackStatus(id: number, status: string): Promise<OpsFeedbackItem> {
+  return http.patch<OpsFeedbackItem>(`/api/feedback/${id}/status`, { status }).then((r) => r.data)
 }
 
 export function fetchOpsPokemon(params: {

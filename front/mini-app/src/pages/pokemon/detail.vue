@@ -125,6 +125,14 @@ function goChat() {
   })
 }
 
+// 跳转到独立的精灵相册页面
+function goAlbum() {
+  if (!pokemon.value) return
+  uni.navigateTo({
+    url: `/pages/pokemon/album?pet_id=${pokemon.value.id}&name=${encodeURIComponent(pokemon.value.name)}`,
+  })
+}
+
 async function loadDetail(name: string) {
   loading.value = true
   error.value = ''
@@ -178,6 +186,10 @@ onLoad((options) => {
   <view class="page">
     <view class="top-actions">
       <button class="back-button" @tap="goBack">返回图鉴</button>
+      <button v-if="pokemon" class="album-entry" @tap="goAlbum">
+        <text class="album-entry-icon">🖼️</text>
+        <text>精灵相册</text>
+      </button>
     </view>
 
     <view v-if="loading" class="state-card">
@@ -510,7 +522,35 @@ onLoad((options) => {
 }
 
 .top-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
   margin-bottom: 20rpx;
+}
+
+.album-entry {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  margin: 0 0 0 auto;
+  padding: 0 26rpx;
+  height: 66rpx;
+  line-height: 66rpx;
+  border: none;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #4d8eff 0%, #7bb0ff 100%);
+  color: #ffffff;
+  font-size: 24rpx;
+  box-shadow: 0 6rpx 16rpx rgba(77, 142, 255, 0.24);
+}
+
+.album-entry::after {
+  border: none;
+}
+
+.album-entry-icon {
+  font-size: 26rpx;
 }
 
 .back-button {
