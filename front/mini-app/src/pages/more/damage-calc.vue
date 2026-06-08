@@ -21,6 +21,20 @@ const attacker = ref<SideData | null>(null)
 const defender = ref<SideData | null>(null)
 const personalities = ref<PersonalityOption[]>([])
 
+// 两列组件引用，用于一键交换攻防方
+const attackerCol = ref<InstanceType<typeof DamagePokemonColumn> | null>(null)
+const defenderCol = ref<InstanceType<typeof DamagePokemonColumn> | null>(null)
+
+function swapSides() {
+  const ac = attackerCol.value
+  const dc = defenderCol.value
+  if (!ac || !dc) return
+  const a = ac.getState()
+  const d = dc.getState()
+  ac.applyState(d)
+  dc.applyState(a)
+}
+
 onLoad(() => {
   void loadPersonalities()
 })
@@ -233,13 +247,24 @@ watch(
     <!-- 两列：进攻方 / 防御方 -->
     <view class="columns">
       <DamagePokemonColumn
+        ref="attackerCol"
         title="进攻方"
         accent="#f56c6c"
         :level="level"
         :personalities="personalities"
         @change="onAttackerChange"
       />
+
+      <!-- 一键交换攻防方 -->
+      <view class="swap-row">
+        <view class="swap-btn" @tap="swapSides">
+          <text class="swap-icon">⇅</text>
+          <text class="swap-text">交换攻防方</text>
+        </view>
+      </view>
+
       <DamagePokemonColumn
+        ref="defenderCol"
         title="防御方"
         accent="#2b74ff"
         :level="level"
@@ -530,6 +555,39 @@ watch(
   flex-direction: column;
   gap: 16rpx;
   margin-bottom: 24rpx;
+}
+
+.swap-row {
+  display: flex;
+  justify-content: center;
+  margin: -4rpx 0;
+}
+
+.swap-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 12rpx 28rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #f56c6c 0%, #2b74ff 100%);
+  box-shadow: 0 8rpx 20rpx rgba(43, 116, 255, 0.22);
+}
+
+.swap-btn:active {
+  opacity: 0.85;
+}
+
+.swap-icon {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.swap-text {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #ffffff;
 }
 
 .card-title {

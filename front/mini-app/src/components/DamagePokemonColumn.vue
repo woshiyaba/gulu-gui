@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import { fetchPokemon, fetchPokemonDetail } from '@/api/pokemon'
 import { calcPokemonStats } from '@/api/damage'
 import BottomSheet from '@/components/BottomSheet.vue'
@@ -54,6 +54,8 @@ const loadingDetail = ref(false)
 const error = ref('')
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null
+// 交换攻防时临时抑制重新计算（属性已随状态一并搬运，无需再请求一次）
+let suppressRecalc = false
 
 const statList = computed<DamageStatItem[]>(() => {
   if (!stats.value) return []
@@ -128,6 +130,7 @@ watch(keyword, (val) => {
 watch(
   () => [props.level, selectedPersonalityId.value, ivStats.value],
   () => {
+    if (suppressRecalc) return
     if (detail.value) void loadStats(detail.value)
   },
 )
@@ -201,6 +204,41 @@ function selectPersonality(p: PersonalityOption) {
   selectedPersonalityId.value = p.id
   personaOpen.value = false
 }
+
+// ── 对外暴露：用于一键交换攻击/防御方，整组配置随状态搬运 ──
+type ColumnState = {
+  detail: PokemonDetail | null
+  stats: DamageStatResponse | null
+  personalityId: number | null
+  ivStats: string[]
+  error: string
+}
+
+function getState(): ColumnState {
+  return {
+    detail: detail.value,
+    stats: stats.value,
+    personalityId: selectedPersonalityId.value,
+    ivStats: [...ivStats.value],
+    error: error.value,
+  }
+}
+
+function applyState(s: ColumnState) {
+  suppressRecalc = true
+  detail.value = s.detail
+  stats.value = s.stats
+  selectedPersonalityId.value = s.personalityId
+  ivStats.value = [...s.ivStats]
+  error.value = s.error
+  emit('change', s.detail && s.stats ? { detail: s.detail, stats: s.stats } : null)
+  // 等本轮响应式更新刷新后再恢复自动计算，避免误触发一次请求
+  void nextTick(() => {
+    suppressRecalc = false
+  })
+}
+
+defineExpose({ getState, applyState })
 </script>
 
 <template>
