@@ -70,6 +70,12 @@ const skillPage = ref(1)
 const skillPageSize = 8
 const skillKeyword = ref('')
 const skillSelectorVisible = ref(false)
+// 模板选择：从已有精灵中挑一只，以其为基础填充新增表单
+const templateSelectorVisible = ref(false)
+const templateKeyword = ref('')
+const templateCandidates = ref<OpsPokemonItem[]>([])
+const templateSearching = ref(false)
+const templateSourceName = ref('')
 const skillSelectorKeyword = ref('')
 const skillSelectorPage = ref(1)
 const skillSelectorPageSize = 8
@@ -334,6 +340,7 @@ function resetForm() {
   form.egg_groups = []
   form.skills = []
   skillKeyword.value = ''
+  templateSourceName.value = ''
   evolutionSteps.value = []
   evolutionChainId.value = null
   evolutionSearchKeyword.value = ''
@@ -346,6 +353,73 @@ function openCreateModal() {
   resetForm()
   skillPage.value = 1
   modalVisible.value = true
+}
+
+function openTemplateSelector() {
+  templateKeyword.value = ''
+  templateCandidates.value = []
+  templateSelectorVisible.value = true
+}
+
+function closeTemplateSelector() {
+  templateSelectorVisible.value = false
+}
+
+async function searchTemplate() {
+  const kw = templateKeyword.value.trim()
+  if (!kw) {
+    showOpsToast('请输入精灵编号或名称后再搜索', 'error')
+    return
+  }
+  templateSearching.value = true
+  try {
+    const data = await fetchOpsPokemon({ keyword: kw, page: 1, page_size: 20 })
+    templateCandidates.value = data.items
+    if (!data.items.length) {
+      showOpsToast('未找到匹配精灵', 'info')
+    }
+  } catch (err: any) {
+    showOpsToast(err?.response?.data?.detail || '搜索精灵失败', 'error')
+  } finally {
+    templateSearching.value = false
+  }
+}
+
+async function applyTemplate(item: OpsPokemonItem) {
+  try {
+    const detail = await fetchOpsPokemonDetail(item.id)
+    // 以模板为基础填充，但清空唯一标识（编号、图片、进化链），保持「新增」模式
+    Object.assign(form, detail, {
+      id: 0,
+      no: '',
+      detail_url: '',
+      image: '',
+      image_lc: '',
+      image_yise: '',
+      chain_id: null,
+      attribute_ids: [...(detail.attribute_ids || [])],
+      egg_groups: [...(detail.egg_groups || [])],
+      skills: (detail.skills || []).map((s) => ({
+        skill_id: s.skill_id,
+        type: s.type,
+        sort_order: s.sort_order,
+      })),
+    })
+    editingId.value = null
+    resetPendingFriend()
+    resetPendingYise()
+    normalizePokemonSkillTypes()
+    // 进化链与具体精灵强相关，不随模板复制
+    evolutionSteps.value = []
+    evolutionChainId.value = null
+    skillKeyword.value = ''
+    skillPage.value = 1
+    templateSourceName.value = `${item.no} ${item.name}`.trim()
+    closeTemplateSelector()
+    showOpsToast(`已套用模板「${item.name}」，请填写新的编号、名称并按需修改`, 'success')
+  } catch (err: any) {
+    showOpsToast(err?.response?.data?.detail || '加载模板失败', 'error')
+  }
 }
 
 async function openEditModal(id: number) {
@@ -529,6 +603,7 @@ function saveEvolutionStep() {
 function closeModal() {
   modalVisible.value = false
   skillSelectorVisible.value = false
+  templateSelectorVisible.value = false
   evolutionEditorVisible.value = false
   resetPendingFriend()
   resetPendingYise()
@@ -1047,8 +1122,22 @@ onBeforeUnmount(() => {
 
     <div v-if="modalVisible" class="ops-modal-mask">
       <section class="ops-modal" @click.stop>
-        <div class="ops-modal-header">
-          <h3>{{ editingId ? '编辑精灵' : '新增精灵' }}</h3>
+        <div class="ops-modal-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+          <h3 style="margin:0;">{{ editingId ? '编辑精灵' : '新增精灵' }}</h3>
+          <button
+            v-if="!editingId"
+            type="button"
+            class="ops-btn ops-btn-secondary ops-btn-sm"
+            @click="openTemplateSelector"
+          >
+            选择模板填充
+          </button>
+        </div>
+        <div
+          v-if="!editingId && templateSourceName"
+          style="margin:0 20px;padding:8px 12px;border:1px solid var(--ops-accent);background:var(--ops-accent-light);color:var(--ops-accent);border-radius:var(--ops-radius-sm);font-size:13px;display:flex;align-items:center;gap:6px;"
+        >
+          <span>已套用模板：<strong>{{ templateSourceName }}</strong>，请填写新的编号 / 名称并按需修改</span>
         </div>
         <form
           style="display:grid;grid-template-columns:1fr;gap:12px;padding:12px 20px 20px;"
@@ -1641,6 +1730,55 @@ onBeforeUnmount(() => {
         </div>
         <div style="display:flex;justify-content:center;align-items:center;gap:10px;padding:12px 20px 20px;">
           <button type="button" class="ops-btn ops-btn-secondary" @click="closeSkillSelector">关闭</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- 模板选择器 -->
+    <div v-if="templateSelectorVisible" class="ops-modal-mask">
+      <section
+        style="width:min(100%,700px);max-height:calc(100vh - 48px);overflow:auto;background:var(--ops-surface);border:1px solid var(--ops-border);border-radius:var(--ops-radius-md);"
+        @click.stop
+      >
+        <div class="ops-modal-header">
+          <h3>选择精灵模板</h3>
+        </div>
+        <div style="padding:12px 20px 0;display:grid;gap:10px;">
+          <div style="font-size:13px;color:var(--ops-text-secondary);">
+            选择一只已有精灵作为模板，将复制其阶段、形态、特性、属性、蛋组、种族值与技能；编号、名称、图片与进化链不会复制，需自行填写。
+          </div>
+          <div style="display:flex;gap:8px;">
+            <input
+              v-model="templateKeyword"
+              class="ops-input"
+              type="text"
+              placeholder="输入精灵编号或名称搜索"
+              style="flex:1;"
+              @keyup.enter="searchTemplate"
+            />
+            <button type="button" class="ops-btn ops-btn-primary" :disabled="templateSearching" @click="searchTemplate">
+              {{ templateSearching ? '搜索中...' : '搜索' }}
+            </button>
+          </div>
+          <div style="border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);max-height:360px;overflow:auto;padding:8px;display:grid;gap:8px;">
+            <button
+              v-for="item in templateCandidates"
+              :key="item.id"
+              type="button"
+              class="ops-hover-accent"
+              style="min-height:44px;border:1px solid var(--ops-border);border-radius:var(--ops-radius-sm);background:var(--ops-surface);color:var(--ops-text);display:flex;align-items:center;gap:10px;padding:6px 12px;cursor:pointer;text-align:left;font-size:13px;"
+              @click="applyTemplate(item)"
+            >
+              <span style="color:var(--ops-muted);font-size:12px;min-width:48px;">{{ item.no }}</span>
+              <strong style="min-width:80px;">{{ item.name }}</strong>
+              <span style="color:var(--ops-text-secondary);font-size:12px;">{{ item.type_name || '—' }} / {{ item.form_name || '—' }}</span>
+              <span style="color:var(--ops-muted);font-size:12px;margin-left:auto;">{{ item.attributes.join(' / ') || '无属性' }}</span>
+            </button>
+            <div v-if="!templateCandidates.length" class="ops-empty" style="min-height:60px;">输入关键字搜索精灵</div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:center;align-items:center;gap:10px;padding:12px 20px 20px;">
+          <button type="button" class="ops-btn ops-btn-secondary" @click="closeTemplateSelector">关闭</button>
         </div>
       </section>
     </div>
