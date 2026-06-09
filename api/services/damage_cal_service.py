@@ -1,3 +1,4 @@
+import math
 import time
 from fractions import Fraction
 
@@ -224,7 +225,8 @@ async def calc_damage(payload: DamageCalcRequest) -> DamageCalcResponse:
 
     power, type_coef, stab = await _resolve_power(payload)
 
-    per_hit = int(round_half_up(power * attack * DAMAGE_FACTOR / defense))
+    numerator = round_half_up(power * attack * DAMAGE_FACTOR)
+    per_hit = math.floor(numerator / defense)
     damage = per_hit * payload.combo_count
 
     return DamageCalcResponse(
