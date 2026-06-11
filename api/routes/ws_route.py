@@ -8,6 +8,8 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from ws.ws_manager import manager
 from ws.handlers.qq_agent_handler import handle_qq_message
 from ws.handlers.pet_chat_handler import PET_CHAT_NODE, PetChatSession
+from ws.handlers.message_handler import handle_user_ws_message
+from api.services import message_service
 
 logger = logging.getLogger(__name__)
 
@@ -34,12 +36,19 @@ async def websocket_endpoint(websocket: WebSocket):
 async def websocket_user_endpoint(websocket: WebSocket, user_id: str):
     """前端用户 WebSocket：以 user_id 为键注册连接，接收后端流式事件。
 
-    前端目前只读不写；保持 receive 循环以维护连接，收到的内容暂时忽略。
+    连接建立时补发离线期间积压的消息；之后既接收后端流式事件，也支持用户
+    发送私聊帧 {"type":"chat","to":<id>,"content":".."}。
     """
     await manager.connect(user_id=user_id, websocket=websocket)
     try:
+        await message_service.flush_undelivered(int(user_id))
+    except (TypeError, ValueError):
+        # user_id 非数字时跳过补发（仍保持连接用于接收事件）
+        pass
+    try:
         while True:
-            await websocket.receive_text()
+            message = await websocket.receive_text()
+            await handle_user_ws_message(user_id, message)
     except WebSocketDisconnect:
         manager.disconnect(user_id, websocket)
 

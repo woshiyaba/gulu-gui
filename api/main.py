@@ -13,14 +13,19 @@ from api.routes.file_upload import router as file_upload_router
 from api.routes.ops import router as ops_router
 from api.routes.ops_chat import router as ops_pet_prompt_router
 from api.routes.ops_roco_chronology import router as ops_chronology_router
+from api.routes.change_eggs import router as change_eggs_router
+from api.routes.message import router as message_router
 from api.routes.pokemon import router as pokemon_router
 from api.routes.roco_chronology import router as chronology_router
 from api.routes.third import router as third_router
 from api.routes.wx import router as wx_router
 from api.routes.ws_route import router as ws_router
 from api.repositories.announcement_repository import ensure_announcement_table
+from api.repositories.change_egg_repository import ensure_change_egg_tables
+from api.repositories.message_repository import ensure_message_tables
 from api.repositories.pokemon_filter_repository import ensure_pokemon_filter_table
 from api.services.ai_pk_service import ensure_ai_pk_tables
+from api.services.change_egg_scheduler import start_scheduler, stop_scheduler
 from api.services.ops_service import ensure_ops_bootstrap
 from api.services.wx_service import ensure_wx_auth_tables
 from db.connection import close_pool, get_pool
@@ -35,7 +40,11 @@ async def lifespan(app: FastAPI):
     await ensure_ai_pk_tables()
     await ensure_pokemon_filter_table()
     await ensure_announcement_table()
+    await ensure_change_egg_tables()
+    await ensure_message_tables()
+    start_scheduler()
     yield
+    stop_scheduler()
     await close_pool()
 
 
@@ -63,6 +72,8 @@ app.include_router(chat_router)
 app.include_router(damage_cal_router)
 app.include_router(album_router)
 app.include_router(feedback_router)
+app.include_router(change_eggs_router)
+app.include_router(message_router)
 app.include_router(ws_router)
 
 

@@ -124,6 +124,24 @@
 			"style": {
 				"navigationBarTitleText": "编辑自定义精灵"
 			}
+		},
+		{
+			"path": "pages/change-egg/index",
+			"style": {
+				"navigationBarTitleText": "匹配换蛋"
+			}
+		},
+		{
+			"path": "pages/change-egg/publish",
+			"style": {
+				"navigationBarTitleText": "发布换蛋"
+			}
+		},
+		{
+			"path": "pages/change-egg/messages",
+			"style": {
+				"navigationBarTitleText": "消息通知"
+			}
 		}
 	],
 	"globalStyle": {

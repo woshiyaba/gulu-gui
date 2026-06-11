@@ -103,3 +103,4 @@ LangChain/LangGraph-based agent (`agents/main_agent.py`) answers game questions 
 - Commit messages follow Conventional Commits (`feat:`, `fix:`, etc.) — see recent `git log` for examples.
 - Python: 4-space indentation, `snake_case`, small layered modules.
 - Vue/TS: `PascalCase.vue` components, `camelCase.ts` utilities/composables.
+- **前端动态列表 / 弹窗容器必须固定边框**：凡是项数会变化的区域（搜索结果、分页、弹窗 panel 等），容器必须用**固定高度 + 内部滚动**来承载，让内容在固定框架内向下滚动（瀑布流 / 纵向滚动列表）。**禁止**让容器尺寸随内容数量增减而上下浮动跳动（如 `max-height` + `align-items: flex-end` 会导致顶边随内容抖动）。固定框架做法：panel 设 `height`（非 `max-height`）+ `display:flex; flex-direction:column`，头部/搜索框 `flex-shrink:0`，滚动区 `flex:1; min-height:0`。参考 `pages/more/pokemon-eggs.vue`（瀑布流）、`pages/change-egg/publish.vue`（选择精灵弹窗）。

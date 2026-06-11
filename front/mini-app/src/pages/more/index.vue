@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 import { fetchAbout } from '@/api/pokemon'
+import { refreshMoreTabRedDot } from '@/api/message'
 
 interface MenuItem {
   title: string
@@ -83,22 +85,34 @@ function goBattlePk() {
   uni.navigateTo({ url: '/pages/battle-pk/index' })
 }
 
+function goChangeEgg() {
+  uni.navigateTo({ url: '/pages/change-egg/index' })
+}
+
 function navigateTo(url: string) {
   uni.navigateTo({ url })
 }
+
+// 每次进入「更多」页时刷新底部红点（有未读换蛋通知 / 私聊时提醒）
+onShow(() => {
+  void refreshMoreTabRedDot()
+})
 </script>
 
 <template>
   <view class="page">
-    <view class="hero-card">
-      <text class="hero-title">更多工具</text>
-      <text class="hero-subtitle">快捷入口，查询更多游戏数据。</text>
-    </view>
-
     <view class="pk-card" @tap="goBattlePk">
       <view class="pk-content">
         <text class="pk-title">阵容 PK · 模拟对战</text>
         <text class="pk-desc">配置两套队伍，按经典回合制规则推演胜率与回合节奏</text>
+      </view>
+      <text class="pk-arrow">›</text>
+    </view>
+
+    <view class="egg-card" @tap="goChangeEgg">
+      <view class="pk-content">
+        <text class="pk-title">匹配换蛋 · 蛋组互换</text>
+        <text class="pk-desc">发布拥有 / 想要的蛋组，系统自动匹配互换对象并消息提醒</text>
       </view>
       <text class="pk-arrow">›</text>
     </view>
@@ -133,28 +147,6 @@ function navigateTo(url: string) {
   background: linear-gradient(180deg, #f3f8ff 0%, #f9fbff 100%);
 }
 
-.hero-card {
-  margin-bottom: 24rpx;
-  padding: 36rpx 28rpx;
-  border-radius: 28rpx;
-  background: linear-gradient(135deg, #2b74ff 0%, #53a0ff 100%);
-  box-shadow: 0 12rpx 32rpx rgba(43, 116, 255, 0.2);
-}
-
-.hero-title {
-  display: block;
-  font-size: 40rpx;
-  font-weight: 700;
-  color: #ffffff;
-}
-
-.hero-subtitle {
-  display: block;
-  margin-top: 10rpx;
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.8);
-}
-
 .pk-card {
   display: flex;
   align-items: center;
@@ -164,6 +156,17 @@ function navigateTo(url: string) {
   border-radius: 24rpx;
   background: linear-gradient(135deg, #2b74ff 0%, #f56c6c 100%);
   box-shadow: 0 12rpx 28rpx rgba(43, 116, 255, 0.22);
+}
+
+.egg-card {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #9c5bff 0%, #53a0ff 100%);
+  box-shadow: 0 12rpx 28rpx rgba(108, 99, 255, 0.22);
 }
 
 .pk-content { flex: 1; min-width: 0; }

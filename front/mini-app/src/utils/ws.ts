@@ -141,6 +141,100 @@ export interface PetChatConnection {
   close: () => void
 }
 
+// ── 用户私聊 / 通知（/ws/{user_id}）────────────────────────
+
+export interface UserMessageEvent {
+  node: string
+  type: string
+  id: number
+  from_user_id: number
+  to_user_id: number
+  content: string
+  payload?: Record<string, any> | null
+  created_at?: string | null
+}
+
+export interface UserMessageHandlers {
+  /** 收到一条新消息 / 通知（含上线时后端补发的离线消息） */
+  onMessage?: (event: UserMessageEvent) => void
+  onOpen?: () => void
+  onClose?: () => void
+  onError?: (message: string) => void
+}
+
+export interface UserMessageConnection {
+  task: UniApp.SocketTask
+  whenOpen: Promise<void>
+  /** 发送一条私聊消息给指定用户 */
+  send: (toUserId: number | string, content: string) => void
+  close: () => void
+}
+
+export function connectUserMessageStream(
+  userId: string,
+  handlers: UserMessageHandlers,
+): UserMessageConnection {
+  const url = `${WS_BASE_URL}/ws/${encodeURIComponent(userId)}`
+
+  let resolveOpen: (() => void) | null = null
+  let rejectOpen: ((err: Error) => void) | null = null
+  let opened = false
+
+  const whenOpen = new Promise<void>((resolve, reject) => {
+    resolveOpen = resolve
+    rejectOpen = reject
+  })
+
+  const task = uni.connectSocket({
+    url,
+    complete: () => {},
+  }) as unknown as UniApp.SocketTask
+
+  task.onOpen(() => {
+    opened = true
+    handlers.onOpen?.()
+    resolveOpen?.()
+  })
+
+  task.onMessage((res) => {
+    let data: UserMessageEvent
+    try {
+      data = typeof res.data === 'string' ? JSON.parse(res.data) : (res.data as any)
+    } catch {
+      return
+    }
+    if (data && data.node === 'message') {
+      handlers.onMessage?.(data)
+    }
+  })
+
+  task.onError((err) => {
+    const msg = (err as { errMsg?: string }).errMsg || 'WebSocket 连接错误'
+    if (!opened) rejectOpen?.(new Error(msg))
+    handlers.onError?.(msg)
+  })
+
+  task.onClose(() => {
+    handlers.onClose?.()
+    if (!opened) rejectOpen?.(new Error('WebSocket 提前关闭'))
+  })
+
+  return {
+    task,
+    whenOpen,
+    send: (toUserId: number | string, content: string) => {
+      task.send({ data: JSON.stringify({ type: 'chat', to: Number(toUserId), content }) })
+    },
+    close: () => {
+      try {
+        task.close({})
+      } catch {
+        /* noop */
+      }
+    },
+  }
+}
+
 export function connectPetChatStream(
   userId: string,
   petId: string | number,
