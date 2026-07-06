@@ -316,6 +316,25 @@ export interface ResonanceMagicOption {
   max_usage_count: number
 }
 
+export interface EggHatchInfo {
+  /** 身高下限（cm） */
+  height_low: number
+  /** 身高上限（cm） */
+  height_high: number
+  /** 体重下限（g） */
+  weight_low: number
+  /** 体重上限（g） */
+  weight_high: number
+  /** 大块头身长下限（cm） */
+  big_size_length: number
+  /** 大块头体重下限（g） */
+  big_size_weight: number
+  /** 小不点身长上限（cm） */
+  small_size_length: number
+  /** 小不点体重上限（g） */
+  small_size_weight: number
+}
+
 export interface PokemonDetail extends Pokemon {
   obtain_method: string
   stats: Stats
@@ -323,4 +342,5 @@ export interface PokemonDetail extends Pokemon {
   restrain: Restrain
   skills: Skill[]
   defensive_type_chart?: DefensiveTypeChart | null
+  egg_hatch_info?: EggHatchInfo | null
 }

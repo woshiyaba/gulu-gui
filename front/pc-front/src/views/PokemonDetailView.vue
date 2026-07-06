@@ -220,6 +220,44 @@ watch(() => route.params.name, (n) => n && load(n as string))
         </div>
       </section>
 
+      <!-- ②½ 孵蛋信息 -->
+      <section v-if="pokemon.egg_hatch_info" class="card">
+        <h2 class="section-title">孵蛋信息</h2>
+        <div class="hatch-row">
+          <div class="hatch-range-item">
+            <span class="hatch-label">身高范围</span>
+            <span class="hatch-value">{{ pokemon.egg_hatch_info.height_low }}cm ~ {{ pokemon.egg_hatch_info.height_high }}cm</span>
+          </div>
+          <div class="hatch-range-item">
+            <span class="hatch-label">体重范围</span>
+            <span class="hatch-value">{{ pokemon.egg_hatch_info.weight_low }}g ~ {{ pokemon.egg_hatch_info.weight_high }}g</span>
+          </div>
+        </div>
+        <div class="hatch-divider" />
+        <div class="hatch-tags">
+          <div
+            v-if="pokemon.egg_hatch_info.big_size_length && pokemon.egg_hatch_info.big_size_weight"
+            class="hatch-tag hatch-tag--big"
+          >
+            <span class="hatch-tag-title">大块头</span>
+            <span class="hatch-tag-text">身高 ≥ {{ pokemon.egg_hatch_info.big_size_length }}cm 且 体重 ≥ {{ pokemon.egg_hatch_info.big_size_weight }}g</span>
+          </div>
+          <div
+            v-if="pokemon.egg_hatch_info.small_size_length && pokemon.egg_hatch_info.small_size_weight"
+            class="hatch-tag hatch-tag--small"
+          >
+            <span class="hatch-tag-title">小不点</span>
+            <span class="hatch-tag-text">身高 ≤ {{ pokemon.egg_hatch_info.small_size_length }}cm 且 体重 ≤ {{ pokemon.egg_hatch_info.small_size_weight }}g</span>
+          </div>
+          <div
+            v-if="(!pokemon.egg_hatch_info.big_size_length || !pokemon.egg_hatch_info.big_size_weight) && (!pokemon.egg_hatch_info.small_size_length || !pokemon.egg_hatch_info.small_size_weight)"
+            class="hatch-tag hatch-tag--none"
+          >
+            <span class="hatch-tag-text hatch-tag-text--muted">暂无大块头/小不点判定阈值</span>
+          </div>
+        </div>
+      </section>
+
       <!-- ③ 特性 -->
       <section v-if="pokemon.trait.name" class="card">
         <h2 class="section-title">特性</h2>
@@ -1139,6 +1177,87 @@ watch(() => route.params.name, (n) => n && load(n as string))
   font-weight: 600;
   color: var(--color-text);
   text-align: right;
+}
+
+/* ②½ 孵蛋信息 */
+.hatch-row {
+  display: flex;
+  gap: 32px;
+}
+
+.hatch-range-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hatch-label {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.hatch-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.hatch-divider {
+  height: 1px;
+  margin: 14px 0;
+  background: var(--color-border);
+}
+
+.hatch-tags {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hatch-tag {
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+.hatch-tag--big {
+  background: #fff4ea;
+  border: 1px solid #fdd6b0;
+}
+
+.hatch-tag--small {
+  background: #eafaf1;
+  border: 1px solid #b7e4c8;
+}
+
+.hatch-tag--none {
+  background: var(--color-bg);
+}
+
+.hatch-tag-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hatch-tag--big .hatch-tag-title {
+  color: #d9731a;
+}
+
+.hatch-tag--small .hatch-tag-title {
+  color: #1f9d57;
+}
+
+.hatch-tag-text {
+  display: block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+.hatch-tag-text--muted {
+  color: var(--color-muted);
+  opacity: 0.7;
 }
 
 /* ③ 特性 */

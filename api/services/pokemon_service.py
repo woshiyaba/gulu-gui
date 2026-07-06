@@ -504,7 +504,8 @@ async def get_pokemon_detail(name: str) -> dict:
 
     detail = await pokemon_repository.get_pokemon_detail(name)
     skills = await pokemon_repository.get_pokemon_skills(name)
-    payload = to_pokemon_detail(base=base, detail=detail, skills_raw=skills)
+    egg_hatch = await pokemon_repository.get_egg_hatch_info(name)
+    payload = to_pokemon_detail(base=base, detail=detail, skills_raw=skills, egg_hatch=egg_hatch)
 
     axis = await attribute_matchup_repository.list_attr_axis_order()
     defender_names = [a["attr_name"] for a in payload.get("attributes") or []]

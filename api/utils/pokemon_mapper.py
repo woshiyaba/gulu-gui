@@ -51,7 +51,30 @@ def to_skill_item(row: dict) -> dict:
     }
 
 
-def to_pokemon_detail(base: dict, detail: dict, skills_raw: list[dict]) -> dict:
+def _to_egg_hatch_info(row: dict | None) -> dict | None:
+    """把 egg_hatch_pet 行转成前端可消费的 dict。"""
+    if not row:
+        return None
+    height_low = row.get("height_low", 0) or 0
+    height_high = row.get("height_high", 0) or 0
+    weight_low = row.get("weight_low", 0) or 0
+    weight_high = row.get("weight_high", 0) or 0
+    # 没有任何有效的体型区间数据，当作无孵蛋信息处理
+    if not (height_low or height_high or weight_low or weight_high):
+        return None
+    return {
+        "height_low": height_low,
+        "height_high": height_high,
+        "weight_low": weight_low,
+        "weight_high": weight_high,
+        "big_size_length": row.get("big_size_length_min", 0) or 0,
+        "big_size_weight": row.get("big_size_weight_min", 0) or 0,
+        "small_size_length": row.get("small_size_length_max", 0) or 0,
+        "small_size_weight": row.get("small_size_weight_max", 0) or 0,
+    }
+
+
+def to_pokemon_detail(base: dict, detail: dict, skills_raw: list[dict], egg_hatch: dict | None = None) -> dict:
     """把基础信息、详情、技能拼成详情接口响应。"""
     return {
         "id": base["id"],
@@ -86,4 +109,5 @@ def to_pokemon_detail(base: dict, detail: dict, skills_raw: list[dict]) -> dict:
             "resisted": [],
         },
         "skills": [to_skill_item(skill) for skill in skills_raw],
+        "egg_hatch_info": _to_egg_hatch_info(egg_hatch),
     }
