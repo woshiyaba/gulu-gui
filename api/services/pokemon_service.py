@@ -524,7 +524,8 @@ async def get_pokemon_detail(name: str) -> dict:
         pokemon_id=base["id"],
         chain_id=base.get("chain_id"),
     )
-    payload = to_pokemon_detail(base=base, detail=detail, skills_raw=skills)
+    egg_hatch = await pokemon_repository.get_egg_hatch_info(name)
+    payload = to_pokemon_detail(base=base, detail=detail, skills_raw=skills, egg_hatch=egg_hatch)
     payload["egg_hatch_size"] = _to_pokemon_egg_hatch_size(
         row=egg_hatch_size,
         current_pokemon_id=base["id"],

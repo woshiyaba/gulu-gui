@@ -574,6 +574,28 @@ async def get_pokemon_detail(name: str) -> dict:
             return await cur.fetchone() or {}
 
 
+async def get_egg_hatch_info(pokemon_name: str) -> dict | None:
+    """查询精灵的孵蛋体型信息（身高/体重区间及大块头/小不点阈值）。
+
+    注意 egg_hatch_pet 通过 pokemon_id 关联，大部分精灵可能没有记录。
+    """
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                SELECT e.height_low, e.height_high, e.weight_low, e.weight_high,
+                       e.big_size_length_min, e.big_size_weight_min,
+                       e.small_size_length_max, e.small_size_weight_max
+                FROM egg_hatch_pet e
+                JOIN pokemon p ON p.id = e.pokemon_id
+                WHERE p.name = %s AND e.is_leader_form = FALSE
+                """,
+                (pokemon_name,),
+            )
+            return await cur.fetchone()
+
+
 async def get_pokemon_chain_id(name: str) -> int | None:
     """查询某个具体形态所属的进化链编号。"""
     pool = await get_pool()

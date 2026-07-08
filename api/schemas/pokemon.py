@@ -152,6 +152,18 @@ class PokemonEggHatchSize(BaseModel):
     small_size_weight_max: int = 0
 
 
+class EggHatchInfo(BaseModel):
+    """孵蛋体型信息：身高/体重区间及大块头/小不点阈值。"""
+    height_low: int = 0
+    height_high: int = 0
+    weight_low: int = 0
+    weight_high: int = 0
+    big_size_length: int = 0
+    big_size_weight: int = 0
+    small_size_length: int = 0
+    small_size_weight: int = 0
+
+
 class PokemonMarkItem(BaseModel):
     id: int
     key: str
@@ -180,6 +192,7 @@ class PokemonDetailResponse(PokemonListItem):
     skills: list[PokemonSkill] = Field(default_factory=list)
     defensive_type_chart: DefensiveTypeChart | None = None
     egg_hatch_size: PokemonEggHatchSize | None = None
+    egg_hatch_info: EggHatchInfo | None = None
 
 
 class PokemonEggItem(BaseModel):
