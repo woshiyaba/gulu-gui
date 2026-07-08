@@ -471,6 +471,7 @@ async def get_pokemon_base(name: str) -> dict | None:
             await cur.execute(
                 """
                 SELECT p.id, p.no, p.name, p.image, p.image_lc, p.image_yise, p.type, p.type_name, p.form, p.form_name,
+                       p.chain_id,
                        string_agg(a.name, ',' ORDER BY pa.id) AS attr_names,
                        string_agg(a.image, '|||' ORDER BY pa.id) AS attr_images,
                        (SELECT string_agg(peg.group_name, ',' ORDER BY peg.id)
@@ -479,11 +480,79 @@ async def get_pokemon_base(name: str) -> dict | None:
                 LEFT JOIN pokemon_attribute pa ON pa.pokemon_id = p.id
                 LEFT JOIN attribute a ON a.id = pa.attr_id
                 WHERE p.name = %s
-                GROUP BY p.id, p.no, p.name, p.image, p.image_lc, p.image_yise, p.type, p.type_name, p.form, p.form_name
+                GROUP BY p.id, p.no, p.name, p.image, p.image_lc, p.image_yise, p.type, p.type_name, p.form, p.form_name,
+                         p.chain_id
                 """,
                 (name,),
             )
             return await cur.fetchone()
+
+
+async def _get_egg_hatch_size_by_pokemon_id(cur, pokemon_id: int) -> dict | None:
+    await cur.execute(
+        """
+        SELECT
+            p.id AS source_pokemon_id,
+            p.name AS source_pokemon_name,
+            e.big_size_length_min,
+            e.big_size_weight_min,
+            e.small_size_length_max,
+            e.small_size_weight_max
+        FROM pokemon p
+        JOIN egg_hatch_pet e ON e.pokemon_id = p.id
+        WHERE p.id = %s
+        """,
+        (pokemon_id,),
+    )
+    return await cur.fetchone()
+
+
+async def _get_egg_hatch_size_by_pokemon_name(cur, pokemon_name: str) -> dict | None:
+    await cur.execute(
+        """
+        SELECT
+            p.id AS source_pokemon_id,
+            p.name AS source_pokemon_name,
+            e.big_size_length_min,
+            e.big_size_weight_min,
+            e.small_size_length_max,
+            e.small_size_weight_max
+        FROM pokemon p
+        JOIN egg_hatch_pet e ON e.pokemon_id = p.id
+        WHERE p.name = %s
+        ORDER BY p.id
+        LIMIT 1
+        """,
+        (pokemon_name,),
+    )
+    return await cur.fetchone()
+
+
+async def get_detail_egg_hatch_size_source(pokemon_id: int, chain_id: int | None) -> dict | None:
+    """查询详情页应使用的蛋孵化尺寸阈值；有进化链时复用链首精灵数据。"""
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            if chain_id is None:
+                return await _get_egg_hatch_size_by_pokemon_id(cur, pokemon_id)
+
+            await cur.execute(
+                """
+                SELECT pokemon_name
+                FROM evolution_chain
+                WHERE chain_id = %s
+                ORDER BY sort_order ASC
+                LIMIT 1
+                """,
+                (chain_id,),
+            )
+            first_member = await cur.fetchone()
+            first_member_name = (first_member or {}).get("pokemon_name")
+
+            if not first_member_name:
+                return await _get_egg_hatch_size_by_pokemon_id(cur, pokemon_id)
+
+            return await _get_egg_hatch_size_by_pokemon_name(cur, first_member_name)
 
 
 async def get_pokemon_detail(name: str) -> dict:

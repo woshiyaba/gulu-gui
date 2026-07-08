@@ -67,9 +67,9 @@ LIST_QUERY = {
     "x_os_type": "iOS",
     "x_client_version": "1.3.386",
     "version": "999.0.4",
-    "hkey": "YWSVW00",
-    "_time": "1780588557",
-    "nonce": "F790AE55E4B411F305E134875C8335BF",
+    "hkey": "20TWP17",
+    "_time": "1783528176",
+    "nonce": "99EC8566F62057B65BDBE95CBE9323EB",
 }
 
 DETAIL_QUERY = {
@@ -81,9 +81,9 @@ DETAIL_QUERY = {
     "x_os_type": "iOS",
     "x_client_version": "1.3.386",
     "version": "999.0.4",
-    "hkey": "YWSVW00",
-    "_time": "1780588557",
-    "nonce": "F790AE55E4B411F305E134875C8335BF",
+    "hkey": "20TWP17",
+    "_time": "1783528176",
+    "nonce": "99EC8566F62057B65BDBE95CBE9323EB",
 }
 
 COMMON_HEADERS = {

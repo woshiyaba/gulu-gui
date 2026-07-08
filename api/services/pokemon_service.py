@@ -357,6 +357,22 @@ def _compute_size_tag(row: dict, height_cm: int, weight_g: int) -> str:
     return ""
 
 
+def _to_pokemon_egg_hatch_size(row: dict | None, current_pokemon_id: int) -> dict | None:
+    """把蛋孵化尺寸阈值行转成详情接口字段。"""
+    if not row:
+        return None
+    source_pokemon_id = row["source_pokemon_id"]
+    return {
+        "source_pokemon_id": source_pokemon_id,
+        "source_pokemon_name": row.get("source_pokemon_name") or "",
+        "is_chain_reused": source_pokemon_id != current_pokemon_id,
+        "big_size_length_min": row.get("big_size_length_min") or 0,
+        "big_size_weight_min": row.get("big_size_weight_min") or 0,
+        "small_size_length_max": row.get("small_size_length_max") or 0,
+        "small_size_weight_max": row.get("small_size_weight_max") or 0,
+    }
+
+
 async def get_pokemon_by_body_metrics(height_m: float, weight_kg: float) -> dict:
     # 单位换算统一放在后端，避免前端和后端口径不一致。
     height_cm = round(height_m * 100)
@@ -504,7 +520,15 @@ async def get_pokemon_detail(name: str) -> dict:
 
     detail = await pokemon_repository.get_pokemon_detail(name)
     skills = await pokemon_repository.get_pokemon_skills(name)
+    egg_hatch_size = await pokemon_repository.get_detail_egg_hatch_size_source(
+        pokemon_id=base["id"],
+        chain_id=base.get("chain_id"),
+    )
     payload = to_pokemon_detail(base=base, detail=detail, skills_raw=skills)
+    payload["egg_hatch_size"] = _to_pokemon_egg_hatch_size(
+        row=egg_hatch_size,
+        current_pokemon_id=base["id"],
+    )
 
     axis = await attribute_matchup_repository.list_attr_axis_order()
     defender_names = [a["attr_name"] for a in payload.get("attributes") or []]

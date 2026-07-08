@@ -14,10 +14,14 @@
       合计       → total_race
 
 不传 --update（或 --update false）时只插入/更新 desc 字段。
+传 --mode insert 时，按指定 source_id 或小黑盒宠物列表中的全部 source_id
+拉取 base_info，并把不存在的宠物插入 pokemon。
 
 用法：
     uv run python scripts/import_pokemon_desc.py
     uv run python scripts/import_pokemon_desc.py --update true
+    uv run python scripts/import_pokemon_desc.py --mode insert --only-ids 3010,3004
+    uv run python scripts/import_pokemon_desc.py --mode insert --dry-run
     uv run python scripts/import_pokemon_desc.py --dry-run
     uv run python scripts/import_pokemon_desc.py --only-ids 3010,3004
     uv run python scripts/import_pokemon_desc.py --sleep 0.5
@@ -79,6 +83,10 @@ def _warn_list(title: str, items: list[str], limit: int = 30) -> None:
 
 def _to_bool(value: str) -> bool:
     return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
+def _clean_str(value: Any) -> str:
+    return value.strip() if isinstance(value, str) else ""
 
 
 def _to_int(value: Any) -> int:
@@ -144,6 +152,38 @@ def load_pokemon_rows(cur, only_ids: set[int]) -> list[dict[str, Any]]:
     return list(cur.fetchall())
 
 
+def load_insert_source_rows(
+    only_ids: set[int], max_pets: int | None
+) -> list[dict[str, Any]]:
+    """加载 insert 模式的 source_id 列表。"""
+    if only_ids:
+        return [{"source_id": source_id} for source_id in sorted(only_ids)]
+
+    from scripts.sync_xiaoheihe_pets import (
+        _build_session as build_xiaoheihe_session,
+        fetch_pet_list,
+    )
+
+    pets = fetch_pet_list(build_xiaoheihe_session(), max_pets=max_pets)
+    rows: list[dict[str, Any]] = []
+    seen: set[int] = set()
+    for pet in pets:
+        source_id = _to_int(pet.get("id"))
+        if source_id <= 0 or source_id in seen:
+            continue
+        seen.add(source_id)
+        rows.append(
+            {
+                "source_id": source_id,
+                "name": _clean_str(pet.get("name")),
+                "avatar": _clean_str(pet.get("icon")),
+                "form_name": _clean_str(pet.get("form")),
+                "no": _to_int(pet.get("pictorial_book_id")),
+            }
+        )
+    return rows
+
+
 def build_race_values(info: dict[str, Any]) -> dict[str, int]:
     hp = _to_int(info.get("hp"))
     atk = _to_int(info.get("adAttack"))
@@ -162,11 +202,90 @@ def build_race_values(info: dict[str, Any]) -> dict[str, int]:
     }
 
 
+def pokemon_exists_by_source_id(cur, source_id: int) -> int | None:
+    cur.execute("SELECT id FROM pokemon WHERE source_id = %s LIMIT 1", (source_id,))
+    row = cur.fetchone()
+    return int(row["id"]) if row else None
+
+
+def upsert_feature_trait(cur, info: dict[str, Any]) -> int:
+    feature = _clean_str(info.get("feature"))
+    name = f"特性{feature}" if feature else "未知特性"
+    desc = _clean_str(info.get("featureDesc"))
+    cur.execute(
+        """
+        INSERT INTO pokemon_trait (name, description)
+        VALUES (%s, %s)
+        ON CONFLICT (name) DO UPDATE
+          SET description = CASE
+                WHEN EXCLUDED.description <> '' THEN EXCLUDED.description
+                ELSE pokemon_trait.description
+              END
+        RETURNING id
+        """,
+        (name, desc),
+    )
+    return int(cur.fetchone()["id"])
+
+
+def insert_pokemon_from_base_info(
+    cur,
+    source_id: int,
+    info: dict[str, Any],
+    hint: dict[str, Any],
+) -> int | None:
+    name = _clean_str(info.get("name")) or _clean_str(hint.get("name"))
+    if not name:
+        return None
+
+    race = build_race_values(info)
+    trait_id = upsert_feature_trait(cur, info)
+    no_value = _to_int(hint.get("no")) or _to_int(info.get("id")) or source_id
+    desc = _clean_str(info.get("desc"))
+    obtain_method = _clean_str(info.get("launchType")) or _clean_str(info.get("publicAt"))
+
+    cur.execute(
+        """
+        INSERT INTO pokemon (
+            no, name, avatar, form_name, trait_id,
+            hp, atk, matk, def_val, mdef, spd, total_race,
+            obtain_method, source_id, "desc"
+        )
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        RETURNING id
+        """,
+        (
+            f"NO.{no_value}",
+            name,
+            _clean_str(hint.get("avatar")),
+            _clean_str(hint.get("form_name")),
+            trait_id,
+            race["hp"],
+            race["atk"],
+            race["matk"],
+            race["def_val"],
+            race["mdef"],
+            race["spd"],
+            race["total_race"],
+            obtain_method,
+            source_id,
+            desc,
+        ),
+    )
+    return int(cur.fetchone()["id"])
+
+
 def main() -> None:
     _ensure_utf8_stdout()
 
     parser = argparse.ArgumentParser(description="拉取官方 base_info 写入 pokemon.desc")
     parser.add_argument("--dry-run", action="store_true", help="执行后回滚，不真正写库")
+    parser.add_argument(
+        "--mode",
+        choices=("update", "insert"),
+        default="update",
+        help="update=更新已有 pokemon；insert=插入不存在的 source_id",
+    )
     parser.add_argument(
         "--update",
         nargs="?",
@@ -181,8 +300,15 @@ def main() -> None:
         help="只处理指定 source_id，多个用逗号分隔",
     )
     parser.add_argument("--sleep", type=float, default=0.3, help="每次请求间的休眠秒数")
+    parser.add_argument(
+        "--max-pets",
+        type=int,
+        default=None,
+        help="insert 全部时最多从小黑盒列表读取多少只宠物（联调用）",
+    )
     args = parser.parse_args()
 
+    mode = args.mode
     update_race = _to_bool(args.update)
     only_ids = parse_ids(args.only_ids) if args.only_ids else set()
 
@@ -190,8 +316,8 @@ def main() -> None:
     print("=" * 60)
     print("  拉取官方 base_info → pokemon.desc")
     print(
-        f"  dry_run={args.dry_run} update_race={update_race} "
-        f"only_ids={len(only_ids) or '全部'}"
+        f"  mode={mode} dry_run={args.dry_run} update_race={update_race} "
+        f"only_ids={len(only_ids) or '全部'} max_pets={args.max_pets or '不限'}"
     )
     print("=" * 60)
 
@@ -204,6 +330,9 @@ def main() -> None:
         "fetched": 0,
         "desc_updated": 0,
         "race_updated": 0,
+        "inserted": 0,
+        "skipped_existing": 0,
+        "skipped_empty_name": 0,
         "not_found": 0,
         "fetch_failed": 0,
         "empty_desc": 0,
@@ -212,34 +341,40 @@ def main() -> None:
         "not_found": [],
         "fetch_failed": [],
         "empty_desc": [],
+        "skipped_existing": [],
+        "skipped_empty_name": [],
     }
 
     try:
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-        t = _step("加载待处理 pokemon（source_id 非空）")
-        rows = load_pokemon_rows(cur, only_ids)
+        if mode == "insert":
+            t = _step("加载待插入 source_id")
+            rows = load_insert_source_rows(only_ids, args.max_pets)
+        else:
+            t = _step("加载待处理 pokemon（source_id 非空）")
+            rows = load_pokemon_rows(cur, only_ids)
         stats["total"] = len(rows)
         _done(f"待处理 {len(rows)} 条 ({time.time() - t:.2f}s)")
 
         if not rows:
-            print("[error] 没有可处理的 pokemon（source_id 为空？）终止。", flush=True)
+            print("[error] 没有可处理的数据，终止。", flush=True)
             conn.rollback()
             sys.exit(1)
 
         _step("逐条拉取并写库")
         total = len(rows)
         for idx, row in enumerate(rows, start=1):
-            pokemon_id = int(row["id"])
             source_id = int(row["source_id"])
-            name = row["name"]
+            pokemon_id = int(row["id"]) if mode == "update" else 0
+            name = row.get("name") or ""
 
             try:
                 info = fetch_base_info(session, source_id)
             except Exception as exc:
                 stats["fetch_failed"] += 1
                 warnings["fetch_failed"].append(
-                    f"id={pokemon_id} source_id={source_id} {name} err={exc}"
+                    f"id={pokemon_id or '-'} source_id={source_id} {name} err={exc}"
                 )
                 time.sleep(args.sleep)
                 continue
@@ -247,20 +382,47 @@ def main() -> None:
             if info is None:
                 stats["not_found"] += 1
                 warnings["not_found"].append(
-                    f"id={pokemon_id} source_id={source_id} {name}"
+                    f"id={pokemon_id or '-'} source_id={source_id} {name}"
                 )
                 time.sleep(args.sleep)
                 continue
 
             stats["fetched"] += 1
-            desc = (info.get("desc") or "").strip()
+            desc = _clean_str(info.get("desc"))
             if not desc:
                 stats["empty_desc"] += 1
                 warnings["empty_desc"].append(
-                    f"id={pokemon_id} source_id={source_id} {name}"
+                    f"id={pokemon_id or '-'} source_id={source_id} {name}"
                 )
 
-            if update_race:
+            if mode == "insert":
+                existing_id = pokemon_exists_by_source_id(cur, source_id)
+                if existing_id is not None:
+                    stats["skipped_existing"] += 1
+                    warnings["skipped_existing"].append(
+                        f"id={existing_id} source_id={source_id} {name}"
+                    )
+                    print(
+                        f"    [{idx}/{total}] source_id={source_id} {name} 已存在 id={existing_id}，跳过",
+                        flush=True,
+                    )
+                    time.sleep(args.sleep)
+                    continue
+
+                inserted_id = insert_pokemon_from_base_info(cur, source_id, info, row)
+                if inserted_id is None:
+                    stats["skipped_empty_name"] += 1
+                    warnings["skipped_empty_name"].append(f"source_id={source_id}")
+                    time.sleep(args.sleep)
+                    continue
+
+                stats["inserted"] += 1
+                print(
+                    f"    [{idx}/{total}] inserted id={inserted_id} source_id={source_id} "
+                    f"{_clean_str(info.get('name')) or name} desc_len={len(desc)}",
+                    flush=True,
+                )
+            elif update_race:
                 race = build_race_values(info)
                 cur.execute(
                     """
@@ -288,18 +450,24 @@ def main() -> None:
                     ),
                 )
                 stats["race_updated"] += 1
+                stats["desc_updated"] += 1
+                print(
+                    f"    [{idx}/{total}] id={pokemon_id} source_id={source_id} {name} "
+                    f"desc_len={len(desc)} +race",
+                    flush=True,
+                )
             else:
                 cur.execute(
                     'UPDATE pokemon SET "desc" = %s WHERE id = %s',
                     (desc, pokemon_id),
                 )
-            stats["desc_updated"] += 1
+                stats["desc_updated"] += 1
+                print(
+                    f"    [{idx}/{total}] id={pokemon_id} source_id={source_id} {name} "
+                    f"desc_len={len(desc)}",
+                    flush=True,
+                )
 
-            print(
-                f"    [{idx}/{total}] id={pokemon_id} source_id={source_id} {name} "
-                f"desc_len={len(desc)}{' +race' if update_race else ''}",
-                flush=True,
-            )
             time.sleep(args.sleep)
 
         if args.dry_run:
@@ -317,10 +485,14 @@ def main() -> None:
     _warn_list("接口 404 未找到（已跳过）", warnings["not_found"])
     _warn_list("接口请求失败（已跳过）", warnings["fetch_failed"])
     _warn_list("desc 为空（仍已写入空串）", warnings["empty_desc"])
+    _warn_list("source_id 已存在（insert 模式已跳过）", warnings["skipped_existing"])
+    _warn_list("name 为空（insert 模式已跳过）", warnings["skipped_empty_name"])
 
     print(
         f"\n[summary] total={stats['total']} fetched={stats['fetched']} "
         f"desc_updated={stats['desc_updated']} race_updated={stats['race_updated']} "
+        f"inserted={stats['inserted']} skipped_existing={stats['skipped_existing']} "
+        f"skipped_empty_name={stats['skipped_empty_name']} "
         f"not_found={stats['not_found']} fetch_failed={stats['fetch_failed']} "
         f"empty_desc={stats['empty_desc']} elapsed={time.time() - total_start:.2f}s",
         flush=True,

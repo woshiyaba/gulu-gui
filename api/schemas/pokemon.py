@@ -142,6 +142,16 @@ class DefensiveTypeChart(BaseModel):
     cells: list[DefensiveTypeChartCell] = Field(default_factory=list)
 
 
+class PokemonEggHatchSize(BaseModel):
+    source_pokemon_id: int
+    source_pokemon_name: str = ""
+    is_chain_reused: bool = False
+    big_size_length_min: int = 0
+    big_size_weight_min: int = 0
+    small_size_length_max: int = 0
+    small_size_weight_max: int = 0
+
+
 class PokemonMarkItem(BaseModel):
     id: int
     key: str
@@ -169,6 +179,7 @@ class PokemonDetailResponse(PokemonListItem):
     restrain: PokemonRestrain = Field(default_factory=PokemonRestrain)
     skills: list[PokemonSkill] = Field(default_factory=list)
     defensive_type_chart: DefensiveTypeChart | None = None
+    egg_hatch_size: PokemonEggHatchSize | None = None
 
 
 class PokemonEggItem(BaseModel):

@@ -158,6 +158,16 @@ export interface DefensiveTypeChart {
   cells: DefensiveTypeChartCell[]
 }
 
+export interface PokemonEggHatchSize {
+  source_pokemon_id: number
+  source_pokemon_name: string
+  is_chain_reused: boolean
+  big_size_length_min: number
+  big_size_weight_min: number
+  small_size_length_max: number
+  small_size_weight_max: number
+}
+
 export interface PokemonDetail extends Pokemon {
   obtain_method: string
   desc: string
@@ -166,6 +176,7 @@ export interface PokemonDetail extends Pokemon {
   restrain: Restrain
   skills: Skill[]
   defensive_type_chart?: DefensiveTypeChart | null
+  egg_hatch_size?: PokemonEggHatchSize | null
 }
 
 // ── 用户 PK 对战 ──────────────────────────────────────────

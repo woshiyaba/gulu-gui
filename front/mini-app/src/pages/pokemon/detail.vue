@@ -41,6 +41,14 @@ function statPercent(value: number) {
   return `${Math.min(100, Math.round((value / 500) * 100))}%`
 }
 
+function formatMeters(cm: number): string {
+  return `${(Number(cm || 0) / 100).toFixed(3)}m`
+}
+
+function formatKilograms(g: number): string {
+  return `${(Number(g || 0) / 1000).toFixed(3)}kg`
+}
+
 function goBack() {
   if (getCurrentPages().length > 1) {
     uni.navigateBack()
@@ -246,6 +254,19 @@ onLoad((options) => {
                 mode="aspectFit"
               />
               <text class="attr-text">{{ attr.attr_name }}</text>
+            </view>
+          </view>
+
+          <view v-if="pokemon.egg_hatch_size" class="egg-size-lines">
+            <view class="egg-size-line">
+              <text class="egg-size-label big-size-label">大块头</text>
+              <text class="egg-size-text">身高 ≥ {{ formatMeters(pokemon.egg_hatch_size.big_size_length_min) }}</text>
+              <text class="egg-size-text">体重 ≥ {{ formatKilograms(pokemon.egg_hatch_size.big_size_weight_min) }}</text>
+            </view>
+            <view class="egg-size-line">
+              <text class="egg-size-label small-size-label">小不点</text>
+              <text class="egg-size-text">身高 ≤ {{ formatMeters(pokemon.egg_hatch_size.small_size_length_max) }}</text>
+              <text class="egg-size-text">体重 ≤ {{ formatKilograms(pokemon.egg_hatch_size.small_size_weight_max) }}</text>
             </view>
           </view>
 
@@ -738,6 +759,48 @@ onLoad((options) => {
 .attr-text {
   font-size: 22rpx;
   color: #45638e;
+}
+
+.egg-size-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.egg-size-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8rpx 12rpx;
+  min-width: 0;
+  line-height: 1.45;
+}
+
+.egg-size-label {
+  flex-shrink: 0;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.big-size-label {
+  color: #e45656;
+  background: rgba(245, 108, 108, 0.12);
+}
+
+.small-size-label {
+  color: #2b74ff;
+  background: rgba(43, 116, 255, 0.12);
+}
+
+.egg-size-text {
+  max-width: 100%;
+  font-size: 22rpx;
+  line-height: 1.45;
+  color: #587397;
+  word-break: break-all;
 }
 
 .obtain-card {
