@@ -81,6 +81,20 @@ async def ensure_ops_tables() -> None:
         await conn.commit()
 
 
+async def ensure_feature_switch_dicts() -> None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor() as cur:
+            await cur.execute(
+                """
+                INSERT INTO sys_dict (dict_type, code, label, extra, sort_order)
+                VALUES ('feature_switch', 'change_egg_entry', '关闭', '匹配换蛋入口', 0)
+                ON CONFLICT (dict_type, code) DO NOTHING
+                """
+            )
+        await conn.commit()
+
+
 async def get_user_by_username(username: str) -> dict | None:
     pool = await get_pool()
     async with pool.connection() as conn:

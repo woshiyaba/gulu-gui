@@ -22,6 +22,10 @@ OPS_INIT_USERNAME = os.getenv("OPS_INIT_USERNAME", "admin")
 OPS_INIT_PASSWORD = os.getenv("OPS_INIT_PASSWORD", "admin123456")
 OPS_INIT_NICKNAME = os.getenv("OPS_INIT_NICKNAME", "默认管理员")
 
+FEATURE_SWITCH_DICT_TYPE = "feature_switch"
+CHANGE_EGG_ENTRY_SWITCH_CODE = "change_egg_entry"
+_ENABLED_SWITCH_VALUES = {"1", "true", "yes", "on", "enable", "enabled", "开启", "启用", "显示"}
+
 _ALLOWED_FRIEND_IMAGE_SUFFIX = {".webp", ".png", ".jpg", ".jpeg", ".gif"}
 _MAX_FRIEND_IMAGE_BYTES = 5 * 1024 * 1024
 _ALLOWED_SKILL_ICON_SUFFIX = {".webp", ".png", ".jpg", ".jpeg", ".gif"}
@@ -54,6 +58,10 @@ def verify_password(password: str, password_hash: str) -> bool:
     return hmac.compare_digest(actual, expected)
 
 
+def _is_enabled_switch_value(value: object) -> bool:
+    return str(value or "").strip().lower() in _ENABLED_SWITCH_VALUES
+
+
 def create_access_token(user: dict) -> str:
     payload = {
         "sub": str(user["id"]),
@@ -84,6 +92,7 @@ def decode_access_token(token: str) -> dict:
 
 async def ensure_ops_bootstrap() -> None:
     await ops_repository.ensure_ops_tables()
+    await ops_repository.ensure_feature_switch_dicts()
     if await ops_repository.count_ops_users() == 0:
         await ops_repository.create_ops_user(
             username=OPS_INIT_USERNAME,
@@ -163,6 +172,17 @@ async def get_current_user_from_token(token: str) -> dict:
 def ensure_role(user: dict, allowed_roles: set[str]) -> None:
     if user["role"] not in allowed_roles:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="没有操作权限")
+
+
+async def get_change_egg_entry_switch() -> dict:
+    rows = await ops_repository.list_dicts_all(
+        dict_type=FEATURE_SWITCH_DICT_TYPE,
+        code=CHANGE_EGG_ENTRY_SWITCH_CODE,
+    )
+    item = next((row for row in rows if row.get("code") == CHANGE_EGG_ENTRY_SWITCH_CODE), None)
+    if not item:
+        return {"enabled": False}
+    return {"enabled": _is_enabled_switch_value(item.get("label")) or _is_enabled_switch_value(item.get("extra"))}
 
 
 async def get_dicts(

@@ -6,7 +6,6 @@ const TYPE_OPTIONS = ['功能建议', '问题反馈', '数据纠错', '其他']
 const MAX_LEN = 2000
 
 const content = ref('')
-const contact = ref('')
 const feedbackType = ref('')
 const submitting = ref(false)
 
@@ -28,12 +27,10 @@ async function handleSubmit() {
   try {
     await submitFeedback({
       content: text,
-      contact: contact.value.trim() || undefined,
       feedback_type: feedbackType.value || undefined,
     })
     uni.showToast({ title: '提交成功，感谢反馈！', icon: 'success' })
     content.value = ''
-    contact.value = ''
     feedbackType.value = ''
     setTimeout(() => uni.navigateBack(), 1200)
   } catch (error) {
@@ -75,14 +72,6 @@ async function handleSubmit() {
         auto-height
       />
       <text class="counter">{{ remaining }}</text>
-
-      <text class="label">联系方式（选填）</text>
-      <input
-        v-model="contact"
-        class="contact-input"
-        placeholder="微信 / 邮箱 / QQ，方便我们回复你"
-        :maxlength="128"
-      />
     </view>
 
     <button class="submit-btn" :disabled="!canSubmit" :loading="submitting" @tap="handleSubmit">
@@ -181,17 +170,6 @@ async function handleSubmit() {
   text-align: right;
   font-size: 22rpx;
   color: #b5c8e8;
-}
-
-.contact-input {
-  width: 100%;
-  height: 80rpx;
-  padding: 0 20rpx;
-  box-sizing: border-box;
-  border-radius: 16rpx;
-  background: #f7faff;
-  font-size: 28rpx;
-  color: #1f3760;
 }
 
 .submit-btn {

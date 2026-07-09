@@ -190,6 +190,12 @@ export function fetchAbout() {
   })
 }
 
+export function fetchChangeEggEntrySwitch() {
+  return request<{ enabled: boolean }>({
+    url: '/api/ops/feature-switches/change-egg-entry',
+  })
+}
+
 export function fetchLineupDetail(id: number) {
   return request<Lineup>({
     url: `/api/pokemon-lineups/${id}`,

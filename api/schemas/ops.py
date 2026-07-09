@@ -45,6 +45,10 @@ class OpsDictUpsertRequest(BaseModel):
     sort_order: int = 0
 
 
+class OpsFeatureSwitchResponse(BaseModel):
+    enabled: bool = False
+
+
 class OpsProfileUpdateRequest(BaseModel):
     nickname: str = ""
     current_password: str = ""

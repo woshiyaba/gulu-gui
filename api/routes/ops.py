@@ -4,6 +4,7 @@ from api.schemas.ops import (
     OpsDictItem,
     OpsDictListResponse,
     OpsDictUpsertRequest,
+    OpsFeatureSwitchResponse,
     OpsLoginRequest,
     OpsLoginResponse,
     OpsProfileUpdateRequest,
@@ -100,6 +101,11 @@ async def update_ops_me(
     current_user: dict = Depends(get_current_ops_user),
 ):
     return await ops_service.update_profile(current_user, payload.model_dump())
+
+
+@router.get("/feature-switches/change-egg-entry", response_model=OpsFeatureSwitchResponse)
+async def get_change_egg_entry_switch():
+    return await ops_service.get_change_egg_entry_switch()
 
 
 @router.get("/dicts", response_model=OpsDictListResponse)

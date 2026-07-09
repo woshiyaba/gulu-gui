@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { onShow } from '@dcloudio/uni-app'
-import { fetchAbout } from '@/api/pokemon'
+import { fetchAbout, fetchChangeEggEntrySwitch } from '@/api/pokemon'
 import { refreshMoreTabRedDot } from '@/api/message'
 
 interface MenuItem {
@@ -14,6 +14,7 @@ interface MenuItem {
 const DEFAULT_ABOUT = ['洛克王国精灵图鉴小程序', '数据来源于游戏攻略站，仅供参考。']
 
 const aboutTexts = ref<string[]>([])
+const isChangeEggEntryVisible = ref(false)
 
 // 后端 label 可能用 \n 表示换行，逐条拆分成多行展示。
 const aboutLines = computed(() => {
@@ -21,13 +22,26 @@ const aboutLines = computed(() => {
   return source.flatMap((text) => text.split('\n')).filter((line) => line.trim())
 })
 
-onMounted(async () => {
+async function loadAbout() {
   try {
     const res = await fetchAbout()
     aboutTexts.value = res?.texts ?? []
   } catch {
     aboutTexts.value = []
   }
+}
+
+async function loadChangeEggEntrySwitch() {
+  try {
+    const res = await fetchChangeEggEntrySwitch()
+    isChangeEggEntryVisible.value = res?.enabled === true
+  } catch {
+    isChangeEggEntryVisible.value = false
+  }
+}
+
+onMounted(async () => {
+  await Promise.all([loadAbout(), loadChangeEggEntrySwitch()])
 })
 
 const menuItems: MenuItem[] = [
@@ -96,6 +110,7 @@ function navigateTo(url: string) {
 // 每次进入「更多」页时刷新底部红点（有未读换蛋通知 / 私聊时提醒）
 onShow(() => {
   void refreshMoreTabRedDot()
+  void loadChangeEggEntrySwitch()
 })
 </script>
 
@@ -109,7 +124,7 @@ onShow(() => {
       <text class="pk-arrow">›</text>
     </view>
 
-    <view class="egg-card" @tap="goChangeEgg">
+    <view v-if="isChangeEggEntryVisible" class="egg-card" @tap="goChangeEgg">
       <view class="pk-content">
         <text class="pk-title">匹配换蛋 · 蛋组互换</text>
         <text class="pk-desc">发布拥有 / 想要的蛋组，系统自动匹配互换对象并消息提醒</text>
